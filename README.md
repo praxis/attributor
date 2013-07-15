@@ -83,8 +83,11 @@ While many of the options allowed for each attribute are type-specific, there ar
 * :default => "the default value to use when not specified (and not required)". Value must be expressed in the native type of the attribute.
 * :values => an array of the only possible values allowed for the attribute. Each value in the array must be of the native type of the attribute. 
 * :required => true|false
-* :required_if => A conditional requirement based on existence or values of other attributes, or even custom made functions.
-
+* :required_if => A conditional requirement based on existence or values of other attributes, or even custom made functions. Currently supported definitions:
+    * :required_if => 'security.use_authentication'  : required if the 'use_authentication' sub-attribute under 'security' has been passed in.
+    * :required_if => { 'repository.cvs_type' => 'git' }  : required if the 'cvs_type' sub-attribute under 'repository' is exactly equal to "git".
+    * :required_if => { 'repository.cvs_type' => /git/ }  : required if the 'cvs_type' sub-attribute under 'repository' matches the regular expression /git/ .
+    * :required_if => { 'repository.cvs_type' => lambda{|val| !x.nil? } }: required if passing the value of 'cvs_type' sub-attribute under 'repository' into the defined function returns true. 
 
 
 Contributing to attributor
