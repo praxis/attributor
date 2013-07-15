@@ -7,13 +7,13 @@ While initially designed to be the backbone for parameter handling in REST servi
 With Attributor you can:
 * Express complex and type-rich attribute structures using an elegant ruby DSL
 * Process incoming values against those designs: 
-** By verifying they follow constraints and available options specified in your design
-** By coercing values into the specified types when there's a type impedance mismatch
-** By checking presence requirements and conditional dependencies
-** and all with a powerful error reporting system that describes with great detail what errors were encountered
+    * By verifying they follow constraints and available options specified in your design
+    * By coercing values into the specified types when there's a type impedance mismatch
+    * By checking presence requirements and conditional dependencies
+    * and all with a powerful error reporting system that describes with great detail what errors were encountered
 * Export structured information (in JSON) about your attribute definitions which allows you to:
-** easily consume it to generate human consumable documentation about parameter expectations
-** easily aggregate it across different systems.
+    * easily consume it to generate human consumable documentation about parameter expectations
+    * easily aggregate it across different systems.
 
 How does it work?
 -------------------
