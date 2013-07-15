@@ -98,6 +98,7 @@
         loaded_tuple = load(value,nil)      
         dependency_errors = check_dependencies(loaded_tuple[:object],loaded_tuple[:object])
         dependency_errors.each {|error| loaded_tuple[:errors] << error }
+        loaded_tuple[:object] = nil unless loaded_tuple[:errors].empty?
         loaded_tuple
       end
             

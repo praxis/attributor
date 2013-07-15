@@ -267,8 +267,13 @@ describe Attributor::Attribute do
           dupped_errors = loaded[:errors].dup          
           subject.parse( incoming_value )[:errors].should == ( dupped_errors + dependency_errors)
         end
+        it 'should return a nil object if there are any errors' do
+          subject.should_receive(:load).with( incoming_value, nil ).and_return(loaded)
+          tuple = subject.parse( incoming_value )
+          tuple[:errors].should == loaded[:errors]
+          tuple[:object].should be_nil
+        end
       end
-      
       context 'without any dependency requirements' do
         it 'should return the same as load' do
           subject.should_receive(:load).with( incoming_value, nil ).and_return(loaded)

@@ -138,8 +138,8 @@
         @sub_definition.each_pair do |sub_name, sub_attr|    
           sub_context = generate_subcontext(context,sub_name)      
           res = sub_attr.load( decoded_value[sub_name] , sub_context )
-          # Skip saving an empty value key if the incoming decoded value didn't even have it
-          tuple[:object][sub_name] = res[:object] unless ( !res[:object] && ! decoded_value.has_key?(sub_name) )
+          # Skip saving an empty value key if the incoming decoded value didn't even have it (and it had no default for it)
+          tuple[:object][sub_name] = res[:object] unless ( !res[:object] && ! decoded_value.has_key?(sub_name) && !sub_attr.options.has_key?(:default) )
           tuple[:errors] += res[:errors] if res[:errors] && res[:errors].size >0              
         end
         return tuple

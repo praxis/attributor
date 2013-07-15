@@ -58,7 +58,7 @@
         @options.each_pair do |option, definition|
           case option
           when :max_size
-            errors << "Array #{context} contains more elements than the allowed max_count (#{definition})" unless value.size <= definition
+            errors << "Array #{context} contains more elements than the allowed max_size (#{definition})" unless value.size <= definition
           when :element_type
             correct_type = value.all? {|element| element.is_a?(@options[:element_type].native_type)}
             errors << "Array #{context} contains one or more more elements that are not of the specified type (#{definition})" unless correct_type

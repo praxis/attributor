@@ -23,7 +23,7 @@ You first design the attribute structure you desire into an attributor object.
 An attribute can be a simple as a single element type. For example, defining a simple Integer that can range from 0 to 100:
 
 ```ruby
-Integer.new "percentage", :min=>0, :max=>100
+Attributor::Integer.new "percentage", :min=>0, :max=>100
 ```
 
 or a complex hierarchical structure which tells much more about types, restrictions, descriptions, etc.
@@ -37,19 +37,19 @@ Attributor::Hash.new("person") do
   # An address parameter with 3 typed sub-parameters
   attribute 'address', Hash do
     attribute 'street',  String
-    attribute 'city',    String,
+    attribute 'city',    String
 	attribute 'zipcode', Integer
   end
   # A Boolean parameter indicating it the person is an admin, false by default
   attribute 'is_admin?', Boolean, :default => false
   # An array of tags represented as strings, allowing a maximum of 10 within the array
-  attribute 'tags',  Array, :element_type => String, :max_count => 10
+  attribute 'tags',  Array, :element_type => String, :max_size => 10
 end
 ```
 With those defintion in place you can then start processing objects against them. From a simple Integer:
 
 ```ruby
-percentage = Integer.new "percentage", :min=>0, :max=>100
+percentage = Attributor::Integer.new "percentage", :min=>0, :max=>100
 percentage.parse(50)
 => [:object => 50, :errors => [] ]
 
@@ -98,7 +98,8 @@ Contributing to attributor
 * Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.
 * Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.
 
-== Copyright
+Copyright
+---------
 
 Copyright (c) 2013 RightScale. See LICENSE.txt for
 further details.

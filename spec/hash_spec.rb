@@ -141,6 +141,7 @@ describe Attributor::Hash do
         attribute 'email', String, :regexp => /@/, :description => "The address"
         attribute 'priority', String, :default => "normal", :description => "Priority"
         attribute 'primary?', Boolean, :description => "is it?"
+        attribute 'deceased?', Boolean, :default => false
       end
     }
     let(:decoded_value) { {"age"=>18,"email"=>"hello@mail.com"} }
@@ -162,34 +163,44 @@ describe Attributor::Hash do
     
     context 'when all attributes are explicitly passed in' do
       context 'with "existing" values' do
-        let(:decoded_value) { {"age"=>18,"email"=>"hello@mail.com","priority"=>"high","primary?"=>true} }
+        let(:decoded_value) { {"age"=>18,"email"=>"hello@mail.com","priority"=>"high","primary?"=>true,"deceased?"=>true} }
         it "always includes one key for each of them" do
           subdef_result[:errors].should be_empty
-          subdef_result[:object].keys.should =~ ["age","email","priority","primary?"]
+          subdef_result[:object].keys.should =~ ["age","email","priority","primary?","deceased?"]
         end
       end
       context 'with "false" values' do
-        let(:decoded_value) { {"age"=>18,"email"=>"hello@mail.com","priority"=>"high","primary?"=>false} }
+        let(:decoded_value) { {"age"=>18,"email"=>"hello@mail.com","priority"=>"high","primary?"=>false,"deceased?"=>true} }
         it "always includes one key for each of them" do
           subdef_result[:errors].should be_empty
-          subdef_result[:object].keys.should =~ ["age","email","priority","primary?"]
+          subdef_result[:object].keys.should =~ ["age","email","priority","primary?","deceased?"]
         end  
       end
       context 'with "nil" values' do
-        let(:decoded_value) { {"age"=>18,"email"=>"hello@mail.com","priority"=>"high","primary?"=>nil} }
+        let(:decoded_value) { {"age"=>18,"email"=>"hello@mail.com","priority"=>"high","primary?"=>nil,"deceased?"=>true} }
         it "always includes one key for each of them" do
           subdef_result[:errors].should be_empty
-          subdef_result[:object].keys.should =~ ["age","email","priority","primary?"]
+          subdef_result[:object].keys.should =~ ["age","email","priority","primary?","deceased?"]
         end  
       end
     end
 
-    context 'when some of the attributes with defaults are not passed in' do
-      let(:decoded_value) { {"age"=>18,"email"=>"hello@mail.com","primary?"=>true} }
-      it 'still includes them with their defaults' do
-        subdef_result[:errors].should be_empty
-        subdef_result[:object].keys.should =~ ["age","email","priority","primary?"]
-        subdef_result[:object]["priority"].should == "normal"
+    context 'when some of the attributes are not passed in' do
+      context 'with "non-empty" default values' do
+        let(:decoded_value) { {"age"=>18,"email"=>"hello@mail.com"} }
+        it 'still includes them with their defaults' do
+          subdef_result[:errors].should be_empty
+          subdef_result[:object].keys.should =~ ["age","email","priority","deceased?"]
+          subdef_result[:object]["priority"].should == "normal"
+        end
+      end
+      context 'with "empty" defaults (value=false)' do
+        let(:decoded_value) { {"age"=>18,"email"=>"hello@mail.com"} }
+        it 'still includes them with their defaults' do
+          subdef_result[:errors].should be_empty
+          subdef_result[:object].keys.should =~ ["age","email","priority","deceased?"]
+          subdef_result[:object]["deceased?"].should == false
+        end
       end
     end
     
