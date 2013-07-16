@@ -96,7 +96,7 @@
       
       # Loads the incoming value as a Hash
       # It supports native hash objects, as well as JSON encoded
-      def decode(value, context)     
+      def decode(value, context) 
         error = []  
         if( value.is_a? ::String )
           begin
@@ -110,7 +110,9 @@
         else
           error << "Encoded Hashes for this type is not SUPPORTED! (got: #{value.class.name})"
         end
-        { :errors => error, :loaded_value=>decoded }
+        puts "ERR: #{error.inspect}"
+        
+        [ decoded, error ]
       end
       
      def self.native_type
@@ -133,16 +135,17 @@
 #########################NEW FOR HASH!!!
 
       def decode_substructure( decoded_value , context )
-        tuple = {:errors => [], :object => {} }
+        errors = []
+        object = {}
         # Validate the individual hash attributes for each defined attribute
         @sub_definition.each_pair do |sub_name, sub_attr|    
           sub_context = generate_subcontext(context,sub_name)      
-          res = sub_attr.load( decoded_value[sub_name] , sub_context )
+          load_object, load_errors = sub_attr.load( decoded_value[sub_name] , sub_context )
           # Skip saving an empty value key if the incoming decoded value didn't even have it (and it had no default for it)
-          tuple[:object][sub_name] = res[:object] unless ( !res[:object] && ! decoded_value.has_key?(sub_name) && !sub_attr.options.has_key?(:default) )
-          tuple[:errors] += res[:errors] if res[:errors] && res[:errors].size >0              
+          object[sub_name] = load_object unless ( !load_object && ! decoded_value.has_key?(sub_name) && !sub_attr.options.has_key?(:default) )
+          errors += load_errors unless load_errors.empty?
         end
-        return tuple
+        [ object, errors ]
       end  
         
       def check_dependencies_substructure(myself,root)

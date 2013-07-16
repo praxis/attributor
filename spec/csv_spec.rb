@@ -54,18 +54,18 @@ describe Attributor::CSV do
     let(:opts) { {:empty_csv_string => "none" } }
     context 'when passing a String value matching the defined empty csv' do
       it 'decodes to an empty array' do
-        subject.decode("none","context").should == {:loaded_value => [], :errors => [] }
+        subject.decode("none","context").should == [ [], [] ]
       end
     end
     context 'when passing a String value that does not match defined empty csv' do
       it 'decodes to an array with the elements split by commas' do
-        subject.decode("a,b,c","context").should == {:loaded_value => ["a","b","c"], :errors => [] }
+        subject.decode("a,b,c","context").should == [ ["a","b","c"], [] ]
       end
     end
 
     context 'when passing an Array already' do
       it 'decodes to the exact same argument and context' do
-        subject.decode([1,2],"context").should == {:loaded_value => [1,2], :errors => [] }
+        subject.decode([1,2],"context").should == [ [1,2], [] ]
       end
     end
   end

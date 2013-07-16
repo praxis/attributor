@@ -88,38 +88,38 @@ describe Attributor::Hash do
   context 'decode' do
     it 'supports loading a value from an already constructed hash object' do
       val={'a'=>1,'b'=>2 }
-      subject.decode(val,'context').should == {:errors=>[], :loaded_value => val}
+      subject.decode(val,'context').should == [ val, [] ]
     end
 
     context 'supports JSON encoded values' do
       it 'if decoded JSON is a hash' do
         val = {'a'=>1,'b'=>2 }
         json_val=JSON.dump(val)
-        subject.decode(json_val,'context').should == {:errors=>[], :loaded_value => val}
+        subject.decode(json_val,'context').should ==  [ val, [] ]
       end
       
       it 'but not if the decoded value is not a hash' do
         val = [1,2,3]
         json_val=JSON.dump(val)        
         
-        tuple = subject.decode(json_val,'context')
-        tuple[:errors].should_not be_empty
-        tuple[:errors].first =~ /JSON-encoded value doesn't appear to be a hash/ 
+        object, errors = subject.decode(json_val,'context')
+        errors.should_not be_empty
+        errors.first =~ /JSON-encoded value doesn't appear to be a hash/ 
       end
     end
 
     it 'complains when trying to decode a string that it is not JSON' do
       val = "NON JSON STRING"
-      tuple = subject.decode(val,'context')
-      tuple[:errors].should_not be_empty
-      tuple[:errors].first =~ /Could not decode the incoming string as a Hash. Is it not JSON?/ 
+      object, errors = subject.decode(val,'context')
+      errors.should_not be_empty
+      errors.first =~ /Could not decode the incoming string as a Hash. Is it not JSON?/ 
     end
 
     context 'it does not support decoding hashes from other types' do
         after(:each){
-          tuple =  subject.decode(@val,'context')
-          tuple[:errors].should_not be_empty
-          tuple[:errors].first =~ /Encoded Hashes for this type is not SUPPORTED/  
+          object, errors =  subject.decode(@val,'context')
+          errors.should_not be_empty
+          errors.first =~ /Encoded Hashes for this type is not SUPPORTED/  
         }
         it 'does not support decoding a hash from Integers' do
           @val=0
@@ -147,17 +147,17 @@ describe Attributor::Hash do
     let(:decoded_value) { {"age"=>18,"email"=>"hello@mail.com"} }
     let(:subdef_result) { subject.decode_substructure( decoded_value , 'context' ) }
 
-    it 'returns a hash with errors and object keys' do
-      subdef_result.should have_key(:errors)
-      subdef_result.should have_key(:object)
+    it 'returns an array with an object and an array of errors' do
+      subdef_result.should be_a( Array )
+      subdef_result.size.should == 2
     end
 
     
     context 'when required attributes are defined but not passed in' do
       let(:decoded_value) { {"email"=>"hello@mail.com"} }
       it 'returns errors when not all are present in the value' do
-        subdef_result[:errors].should_not be_empty
-        subdef_result[:errors].first.should =~ /context.age is required/
+        subdef_result[1].should_not be_empty
+        subdef_result[1].first.should =~ /context.age is required/
       end
     end
     
@@ -165,22 +165,22 @@ describe Attributor::Hash do
       context 'with "existing" values' do
         let(:decoded_value) { {"age"=>18,"email"=>"hello@mail.com","priority"=>"high","primary?"=>true,"deceased?"=>true} }
         it "always includes one key for each of them" do
-          subdef_result[:errors].should be_empty
-          subdef_result[:object].keys.should =~ ["age","email","priority","primary?","deceased?"]
+          subdef_result[1].should be_empty
+          subdef_result[0].keys.should =~ ["age","email","priority","primary?","deceased?"]
         end
       end
       context 'with "false" values' do
         let(:decoded_value) { {"age"=>18,"email"=>"hello@mail.com","priority"=>"high","primary?"=>false,"deceased?"=>true} }
         it "always includes one key for each of them" do
-          subdef_result[:errors].should be_empty
-          subdef_result[:object].keys.should =~ ["age","email","priority","primary?","deceased?"]
+          subdef_result[1].should be_empty
+          subdef_result[0].keys.should =~ ["age","email","priority","primary?","deceased?"]
         end  
       end
       context 'with "nil" values' do
         let(:decoded_value) { {"age"=>18,"email"=>"hello@mail.com","priority"=>"high","primary?"=>nil,"deceased?"=>true} }
         it "always includes one key for each of them" do
-          subdef_result[:errors].should be_empty
-          subdef_result[:object].keys.should =~ ["age","email","priority","primary?","deceased?"]
+          subdef_result[1].should be_empty
+          subdef_result[0].keys.should =~ ["age","email","priority","primary?","deceased?"]
         end  
       end
     end
@@ -189,17 +189,17 @@ describe Attributor::Hash do
       context 'with "non-empty" default values' do
         let(:decoded_value) { {"age"=>18,"email"=>"hello@mail.com"} }
         it 'still includes them with their defaults' do
-          subdef_result[:errors].should be_empty
-          subdef_result[:object].keys.should =~ ["age","email","priority","deceased?"]
-          subdef_result[:object]["priority"].should == "normal"
+          subdef_result[1].should be_empty
+          subdef_result[0].keys.should =~ ["age","email","priority","deceased?"]
+          subdef_result[0]["priority"].should == "normal"
         end
       end
       context 'with "empty" defaults (value=false)' do
         let(:decoded_value) { {"age"=>18,"email"=>"hello@mail.com"} }
         it 'still includes them with their defaults' do
-          subdef_result[:errors].should be_empty
-          subdef_result[:object].keys.should =~ ["age","email","priority","deceased?"]
-          subdef_result[:object]["deceased?"].should == false
+          subdef_result[1].should be_empty
+          subdef_result[0].keys.should =~ ["age","email","priority","deceased?"]
+          subdef_result[0]["deceased?"].should == false
         end
       end
     end

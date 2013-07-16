@@ -89,26 +89,26 @@ describe Attributor::Integer do
     context 'for incoming integer values' do
       it 'suceeds by simply using the incoming object' do
         val=1
-        subject.decode(val,'context').should == {:errors=>[], :loaded_value => val}
+        subject.decode(val,'context').should == [ val, [] ]
       end
     end
     context 'for incoming string values' do
       it 'decodes it if the string represents an integer' do
         val="1024"
-        subject.decode(val,'context').should == {:errors=>[], :loaded_value => val.to_i}
+        subject.decode(val,'context').should == [ val.to_i, [] ]
       end
       context 'returns errors if the string' do
         it 'contains simple alphanumeric text' do
           val="not an integer"
-          tuple = subject.decode(val,'context')
-          tuple[:errors].first.should =~ /Could not decode an integer from this String./
-          tuple[:loaded_value].should be_nil
+          object, errors = subject.decode(val,'context')
+          errors.first.should =~ /Could not decode an integer from this String./
+          object.should be_nil
         end
         it 'contains a floating point value' do
           val="98.76"
-          tuple = subject.decode(val,'context')
-          tuple[:errors].first.should =~ /Could not decode an integer from this String./
-          tuple[:loaded_value].should be_nil
+          object, errors = subject.decode(val,'context')
+          errors.first.should =~ /Could not decode an integer from this String./
+          object.should be_nil
         end
       end
     end
@@ -116,9 +116,9 @@ describe Attributor::Integer do
     context 'for incoming values of non-supported types' do
       it 'always returns errors complaining about the unknown type' do
         val={'this'=>'is', 'a'=>'hash' }
-        tuple = subject.decode(val,'context')
-        tuple[:errors].first.should =~ /Do not know how to load an integer from/
-        tuple[:loaded_value].should be_nil
+        object, errors = subject.decode(val,'context')
+        errors.first.should =~ /Do not know how to load an integer from/
+        object.should be_nil
       end
     end
   end

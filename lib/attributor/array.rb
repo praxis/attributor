@@ -90,7 +90,7 @@
         else
           error << "Do not know how to decode an array from a #{value.class.name}"
         end
-        { :errors => error, :loaded_value=>the_array }
+        [ the_array , error ]
       end
       
       # The incoming value should be an array here, so the only decoding that we need to do 
@@ -98,32 +98,32 @@
       def decode( value, context )
         
         #If the value is not an array, decode it first
-        tuple = Array.decode_array_proper( value )
-        return tuple if sub_definition == nil || tuple[:loaded_value] == nil
+        loaded_value, loaded_errors = Array.decode_array_proper( value )
+        return [loaded_value, loaded_errors] if sub_definition == nil || loaded_value == nil
         
         element_index = 0
-        tuple[:loaded_value] = tuple[:loaded_value].map do |element|
-          result = sub_definition.decode( element, Array.generate_subcontext( context, element_index ) )
-          
-          tuple[:errors] << result[:errors] unless result[:errors].empty?
+        loaded_value = loaded_value.map do |element|
+          sub_object, sub_errors = sub_definition.decode( element, Array.generate_subcontext( context, element_index ) )
+          loaded_errors << sub_errors unless sub_errors.empty?
           element_index += 1
-          result[:loaded_value]
+          sub_object
         end
-        return tuple
+        [ loaded_value, loaded_errors ]
       end
 
       def decode_substructure( decoded_value , context )
-        tuple = {:errors => [], :object => [] }
+        errors = []
+        object = []
         element_index=0
         decoded_value.each do |item|
           sub_context = Array.generate_subcontext(context,element_index)
-          res =  sub_definition.load( item, sub_context )    
-          tuple[:object] << res[:object]
-          tuple[:errors] += res[:errors] if res[:errors] && res[:errors].size >0   
+          loaded_object, load_errors =  sub_definition.load( item, sub_context )    
+          object << loaded_object
+          errors += load_errors unless load_errors.empty?
           element_index +=1                
         end
       
-        return tuple
+        [ object, errors ]
       end
       
       

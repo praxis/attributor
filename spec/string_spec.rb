@@ -69,16 +69,16 @@ describe Attributor::String do
     context 'for incoming string values' do
       it 'suceeds by simply using the incoming object' do
         val="this is a string"
-        subject.decode(val,'context').should == {:errors=>[], :loaded_value => val}
+        subject.decode(val,'context').should == [ val, [] ]
       end
     end
     
     context 'for incoming values of non-supported types (anything not a string)' do
       it 'always returns errors complaining about the unknown type' do
         val={'this'=>'is', 'a'=>'hash' }
-        tuple = subject.decode(val,'context')
-        tuple[:errors].first.should =~ /Do not know how to load a string from/
-        tuple[:loaded_value].should be_nil
+        object, errors = subject.decode(val,'context')
+        errors.first.should =~ /Do not know how to load a string from/
+        object.should be_nil
       end
     end
   end

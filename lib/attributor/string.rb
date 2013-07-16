@@ -28,7 +28,7 @@
         else
           errors << "Do not know how to load a string from #{value.class.name}"
         end
-        {:errors => errors, :loaded_value => decoded }
+        [ decoded, errors ]
       end
 
       def self.native_type

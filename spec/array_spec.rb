@@ -217,37 +217,37 @@ describe Attributor::Array do
     context 'if it is an array object' do
       let(:the_value) { ['a','b','c']}
       it 'successfully decodes(returns) the same exact value' do
-        subject.should be_a( Hash )
-        subject[:errors].should be_empty
-        subject[:loaded_value].should == the_value
+        subject.should be_a( Array )
+        subject[1].should be_empty
+        subject[0].should == the_value
       end
     end
     context 'if it is a string object' do
       after(:each) do
-         subject.should be_a( Hash ) 
-         subject.keys.should == [:errors,:loaded_value]
+         subject.should be_a( Array ) 
+         subject.size.should == 2
        end
       context 'non JSON encoded' do
         let(:the_value) { "this is not, a JSON, string"}      
         it 'returns errors if string cannot be JSON decoded' do
-          subject[:errors].first.should =~ /Could not decode the incoming string as an Array/
-          subject[:loaded_value].should be_nil
+          subject[1].first.should =~ /Could not decode the incoming string as an Array/
+          subject[0].should be_nil
         end
       end
       context 'encoded in JSON' do
         context 'but not as an array' do
           let(:the_value) { JSON.dump({'this'=>'is','a'=>'hash'})}    
           it 'returns an error about the type mismatch' do
-            subject[:errors].first.should =~ /JSON-encoded value doesn't appear to be an array/
-            subject[:loaded_value].should be_nil
+            subject[1].first.should =~ /JSON-encoded value doesn't appear to be an array/
+            subject[0].should be_nil
           end
           
         end
         context 'as an array' do
           let(:the_value) { JSON.dump(['a','b','c'])}    
           it 'successfully returns the value if JSON decoding yields an array object' do
-            subject[:errors].should be_empty
-            subject[:loaded_value].should == ['a','b','c']
+            subject[1].should be_empty
+            subject[0].should == ['a','b','c']
           end
         end
       end
@@ -256,8 +256,8 @@ describe Attributor::Array do
     context 'if it is non-supported type of object' do
       let(:the_value) { 123 }
       it 'returns errors complaining about the unknown type' do
-        subject[:errors].first.should =~ /Do not know how to decode an array from a #{the_value.class.name}/
-        subject[:loaded_value].should be_nil
+        subject[1].first.should =~ /Do not know how to decode an array from a #{the_value.class.name}/
+        subject[0].should be_nil
       end
     end
 
@@ -267,23 +267,23 @@ describe Attributor::Array do
       let(:opts) { {} }
       it 'supports loading a value from an already constructed hash object' do
         val=['a','b']
-        subject.decode(val,'context').should == {:errors=>[], :loaded_value => val}
+        subject.decode(val,'context').should == [val, [] ]
       end
       
       context 'supports loading a value JSON encoded arrays' do
         it 'if decoded JSON is an array' do
           val = ['a','b']
           json_val=JSON.dump(val)
-          subject.decode(json_val,'context').should == {:errors=>[], :loaded_value => val}
+          subject.decode(json_val,'context').should == [val, [] ]
         end
       
         it 'but not if the decoded value is not an array' do
           val = {'a'=>1,'b'=>2 }
           json_val=JSON.dump(val)        
         
-          tuple = subject.decode(json_val,'context')
-          tuple[:errors].should_not be_empty
-          tuple[:errors].first =~ /JSON-encoded value doesn't appear to be an array/ 
+          object, errors = subject.decode(json_val,'context')
+          errors.should_not be_empty
+          errors.first =~ /JSON-encoded value doesn't appear to be an array/ 
         end
       end
   end
@@ -296,7 +296,7 @@ describe Attributor::Array do
       let(:sub_proc) { nil }
       it 'does not do any additional processing of elements' do
         val=['a','b']
-        subject.decode(val,'context').should == {:errors=>[], :loaded_value => val}
+        subject.decode(val,'context').should == [ val, [] ]
       end
     end
     context 'when element_type is not defined (but defined by a block)' do
@@ -310,11 +310,11 @@ describe Attributor::Array do
         val=[ element1 , element2 ]
         Attributor::Hash.any_instance.should_receive(:decode)
                                       .with( element1,'context[0]').once
-                                      .and_return( {:errors=>[], :loaded_value=>element1} )
+                                      .and_return( [ element1, [] ] )
         Attributor::Hash.any_instance.should_receive(:decode)
                                      .with( element2,'context[1]').once
-                                     .and_return( {:errors=>[], :loaded_value=>element2} )
-        subject.decode(val,'context').should == {:errors=>[], :loaded_value => val}
+                                     .and_return(  [ element2, [] ] )
+        subject.decode(val,'context').should == [ val, [] ]
       end
     end
     context 'when element_type is a hash (and defined by a block)' do
@@ -328,11 +328,11 @@ describe Attributor::Array do
         val=[ element1 , element2 ]
         Attributor::Hash.any_instance.should_receive(:decode)
                                       .with( element1,'context[0]').once
-                                      .and_return( {:errors=>[], :loaded_value=>element1} )
+                                      .and_return(  [ element1, [] ] )
         Attributor::Hash.any_instance.should_receive(:decode)
                                      .with( element2,'context[1]').once
-                                     .and_return( {:errors=>[], :loaded_value=>element2} )
-        subject.decode(val,'context').should == {:errors=>[], :loaded_value => val}
+                                     .and_return(  [ element2, [] ] )
+        subject.decode(val,'context').should == [ val, [] ]
       end
     end
     context 'when element_type is another supported AttributeType' do
@@ -344,11 +344,11 @@ describe Attributor::Array do
         val=[ element1 , element2 ]
         Attributor::Integer.any_instance.should_receive(:decode)
                                       .with( element1,'context[0]').once
-                                      .and_return( {:errors=>[], :loaded_value=>element1} )
+                                      .and_return(  [ element1, [] ] )
         Attributor::Integer.any_instance.should_receive(:decode)
                                      .with( element2,'context[1]').once
-                                     .and_return( {:errors=>[], :loaded_value=>element2} )
-        subject.decode(val,'context').should == {:errors=>[], :loaded_value => val}
+                                     .and_return(  [ element2, [] ])
+        subject.decode(val,'context').should == [ val, [] ]
       end
     end
     context 'when element_type is supported but requires coercion' do
@@ -360,11 +360,11 @@ describe Attributor::Array do
         val=[ element1 , element2 ]
         Attributor::Integer.any_instance.should_receive(:decode)
                                       .with( element1,'context[0]').once
-                                      .and_return( {:errors=>[], :loaded_value=>element1.to_i} )
+                                      .and_return( [ element1.to_i, [] ] )
         Attributor::Integer.any_instance.should_receive(:decode)
                                      .with( element2,'context[1]').once
-                                     .and_return( {:errors=>[], :loaded_value=>element2.to_i} )
-        subject.decode(val,'context').should == {:errors=>[], :loaded_value => [element1.to_i, element2.to_i]}
+                                     .and_return( [ element2.to_i, [] ] )
+        subject.decode(val,'context').should == [ [element1.to_i, element2.to_i], [] ]
       end
     end
       
@@ -377,40 +377,40 @@ describe Attributor::Array do
     let(:subdef_result) { subject.decode_substructure( decoded_value , 'context' ) }
 
     it 'returns a hash with errors and object keys' do
-      subdef_result.should have_key(:errors)
-      subdef_result.should have_key(:object)
+      subdef_result.should be_a(Array)
+      subdef_result.size.should == 2
     end
     
     it 'calls load with the right value and context for each element of the array and returns the values in the array' do
       #returns the result of a "load" for each element of the array' do
-      subject.sub_definition.should_receive(:load).with(1,'context[0]').and_return({:object=>1,:errors=>[]})
-      subject.sub_definition.should_receive(:load).with(2,'context[1]').and_return({:object=>2,:errors=>[]})
+      subject.sub_definition.should_receive(:load).with(1,'context[0]').and_return([ 1,[] ])
+      subject.sub_definition.should_receive(:load).with(2,'context[1]').and_return([ 2,[] ])
       subdef_result
     end
     
     context 'collecting values' do
       context 'when all elements have "existing" values' do 
         it 'returns an object with a value for each incoming element' do
-          subject.sub_definition.should_receive(:load).with(1,'context[0]').and_return({:object=>1,:errors=>[]})
-          subject.sub_definition.should_receive(:load).with(2,'context[1]').and_return({:object=>2,:errors=>[]})
-          subdef_result[:object].should == [1,2]
+          subject.sub_definition.should_receive(:load).with(1,'context[0]').and_return([ 1,[] ])
+          subject.sub_definition.should_receive(:load).with(2,'context[1]').and_return([ 2,[] ])
+          subdef_result[0].should == [1,2]
         end
       end
       context 'when some elements have "false" values' do 
         let(:opts) { {:element_type => Boolean} }
         let(:decoded_value) { [1,false] }
         it 'still returns them in the result' do
-          subject.sub_definition.should_receive(:load).with(1,'context[0]').and_return({:object=>1,:errors=>[]})
-          subject.sub_definition.should_receive(:load).with(false,'context[1]').and_return({:object=>false,:errors=>[]})
-          subdef_result[:object].should == [1,false]
+          subject.sub_definition.should_receive(:load).with(1,'context[0]').and_return( [ 1, [] ] )
+          subject.sub_definition.should_receive(:load).with(false,'context[1]').and_return([ false, [] ])
+          subdef_result[0].should == [1,false]
         end
       end
       context 'when some elements have "nil" values' do 
         let(:decoded_value) { [1,nil] }
         it 'still returns them in the result' do
-          subject.sub_definition.should_receive(:load).with(1,'context[0]').and_return({:object=>1,:errors=>[]})
-          subject.sub_definition.should_receive(:load).with(nil,'context[1]').and_return({:object=>nil,:errors=>[]})
-          subdef_result[:object].should == [1,nil]
+          subject.sub_definition.should_receive(:load).with(1,'context[0]').and_return([ 1,[] ])
+          subject.sub_definition.should_receive(:load).with(nil,'context[1]').and_return( [ nil, [] ])
+          subdef_result[0].should == [1,nil]
         end
       end
 
@@ -419,10 +419,10 @@ describe Attributor::Array do
     context 'collecting errors' do    
       let(:decoded_value) { [1,2,3] }
       it 'aggregates all the errors from the individual element loads' do
-        subject.sub_definition.should_receive(:load).with(1,'context[0]').and_return({:object=>1,:errors=>['error1']})
-        subject.sub_definition.should_receive(:load).with(2,'context[1]').and_return({:object=>2,:errors=>['error2.1','error2.2']})
-        subject.sub_definition.should_receive(:load).with(3,'context[2]').and_return({:object=>2,:errors=>[]})  
-        subdef_result[:errors].should == ['error1','error2.1','error2.2']
+        subject.sub_definition.should_receive(:load).with(1,'context[0]').and_return([ 1, ['error1'] ])
+        subject.sub_definition.should_receive(:load).with(2,'context[1]').and_return([ 2, ['error2.1','error2.2'] ])
+        subject.sub_definition.should_receive(:load).with(3,'context[2]').and_return([ 2, [] ])  
+        subdef_result[1].should == ['error1','error2.1','error2.2']
       end
     end
     

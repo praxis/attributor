@@ -141,14 +141,13 @@ describe Attributor::Attribute do
       let(:tuple) { subject.decode("val","context") }
       
       it 'returns a hash tuple with errors and loaded value' do
-        tuple.should be_a(Hash)
-        tuple.should include(:errors)
-        tuple.should include(:loaded_value)        
+        tuple.should be_a(Array)
+        tuple.size.should == 2        
       end
       
       it 'implements a basic noop method that returns the value "as is" by default with no errors' do
-        tuple[:errors].should == []
-        tuple[:loaded_value].should == "val"
+        tuple[0].should == "val"
+        tuple[1].should == []
       end
     end
   
@@ -185,9 +184,9 @@ describe Attributor::Attribute do
       context 'loading a value that it is required' do
         let(:opts) { {:required => true} }
         it 'returns the error when nil (and a nil loaded value result)' do
-          result = subject.load( nil, context )
-          result[:errors].first.should =~ /is required/
-          result[:object].should be_nil
+          object, errors = subject.load( nil, context )
+          errors.first.should =~ /is required/
+          object.should be_nil
         end
         it 'does not call any of the loading or validation functions' do
           subject.should_not_receive(:decode)
@@ -202,14 +201,14 @@ describe Attributor::Attribute do
       let(:opts) { {:values => ['one','two']} }      
       context 'when loading a value that it is allowed' do
         it 'returns no errors' do
-          result = subject.load( 'two', context )
-          result[:errors].should == []
+          object, errors = subject.load( 'two', context )
+          errors.should == []
         end
       end    
       context 'when loading a value that it is NOT allowed' do
         it 'returns an error indicating the violation' do
-          result = subject.load( 'three', context )
-          result[:errors].first.should =~ /value three is not within the allowed values/
+          object, errors = subject.load( 'three', context )
+          errors.first.should =~ /value three is not within the allowed values/
         end
       end    
 
@@ -218,7 +217,7 @@ describe Attributor::Attribute do
       let(:type_errors) { ["some type error"] }
       let(:value_errors) { ["some value error"] }
       let(:loaded_value){ 'some value' }
-      let(:loaded) { {:errors => [], :loaded_value=> loaded_value } }
+      let(:loaded) { [ loaded_value, [] ] }
       let(:context) { "context" }
 
       context 'with a :default option defined' do
@@ -227,10 +226,10 @@ describe Attributor::Attribute do
         let(:opts) { {:default => default_value} }
         it 'it loads the default object instead' do
           subject.should_receive(:decode).with( default_value, context ).and_return(loaded)
-          subject.should_receive(:validate_type).with( loaded[:loaded_value], context ).and_return(type_errors)
-          subject.should_receive(:validate).with( loaded[:loaded_value], context ).and_return(value_errors)
+          subject.should_receive(:validate_type).with( loaded_value, context ).and_return(type_errors)
+          subject.should_receive(:validate).with( loaded_value, context ).and_return(value_errors)
           
-          result = {:errors =>type_errors+value_errors,:object => loaded[:loaded_value]}
+          result = [ loaded_value, type_errors+value_errors ]
           subject.load( nil, context ).should == result
         end
       end
@@ -238,7 +237,7 @@ describe Attributor::Attribute do
         let(:opts) { {} }
         it 'it skips decoding and everything else' do
           subject.should_not_receive(:decode)          
-          subject.load( nil, context ).should == {:errors=>[],:object=>nil}
+          subject.load( nil, context ).should == [ nil, [] ] 
         end
       end
     end
@@ -248,7 +247,7 @@ describe Attributor::Attribute do
       let(:value_errors) { ["some value error"] }
       let(:loaded_value) { "foobar" }
       let(:loaded_errors) { ['something went wrong'] }
-      let(:loaded) { {:errors => loaded_errors, :object=> loaded_value} }
+      let(:loaded) { [loaded_value, loaded_errors ] }
       let(:incoming_value) { 'foobar' }
       context 'always' do
         it 'should call load (with no context) and check dependencies' do
@@ -258,23 +257,24 @@ describe Attributor::Attribute do
         end
         it 'should return all the errors from load' do
           subject.should_receive(:load).with( incoming_value, nil ).and_return(loaded)
-          subject.parse( incoming_value )[:errors].should == loaded[:errors]
+          subject.parse( incoming_value )[1].should == loaded_errors
         end
         it 'should add any errors from check dependencies to the errors array' do
           subject.should_receive(:load).with( incoming_value, nil ).and_return(loaded)
           dependency_errors = ['dependency error']
           subject.should_receive(:check_dependencies).with( loaded_value, loaded_value ).and_return(dependency_errors)
-          dupped_errors = loaded[:errors].dup          
-          subject.parse( incoming_value )[:errors].should == ( dupped_errors + dependency_errors)
+          dupped_errors = loaded_errors.dup          
+          subject.parse( incoming_value )[1].should == ( dupped_errors + dependency_errors)
         end
         it 'should return a nil object if there are any errors' do
           subject.should_receive(:load).with( incoming_value, nil ).and_return(loaded)
-          tuple = subject.parse( incoming_value )
-          tuple[:errors].should == loaded[:errors]
-          tuple[:object].should be_nil
+          object, errors = subject.parse( incoming_value )
+          errors.should == loaded_errors
+          object.should be_nil
         end
       end
-      context 'without any dependency requirements' do
+      context 'without any dependency requirements (or errors)' do
+        let(:loaded_errors) { [] }
         it 'should return the same as load' do
           subject.should_receive(:load).with( incoming_value, nil ).and_return(loaded)
           subject.should_receive(:check_dependencies).with( loaded_value, loaded_value ).and_return([])
@@ -286,18 +286,18 @@ describe Attributor::Attribute do
     context 'loading values' do
       let(:type_errors) { ["some type error"] }
       let(:value_errors) { ["some value error"] }
-      let(:loaded) { {:errors => [], :loaded_value=> "foobar"} }
+      let(:loaded_value) { "foobar" }
+      let(:loaded) { [ loaded_value, [] ] }
       let(:context) { "context" }
 
       context 'with a type not defining validate' do
         it 'should not call validate value and therefore not carry errors for it' do
           subject.should_receive(:decode).with( 'something', context ).and_return(loaded)
-          subject.should_receive(:validate_type).with( loaded[:loaded_value], context ).and_return(type_errors)
+          subject.should_receive(:validate_type).with( loaded_value, context ).and_return(type_errors)
           subject.should_receive(:respond_to?).with(:validate).once.and_return(false) #One for the constructor, one here
           subject.should_not_receive(:validate)
           
-          result = {:errors =>type_errors,:object => loaded[:loaded_value]}
-          subject.load( 'something', context ).should == result
+          subject.load( 'something', context ).should == [ loaded_value, type_errors ]
           
         end
       end
@@ -305,15 +305,14 @@ describe Attributor::Attribute do
       context 'with a type defining validate' do
         before(:each) do
           subject.should_receive(:decode).with( 'something', context ).and_return(loaded)
-          subject.should_receive(:validate_type).with( loaded[:loaded_value], context ).and_return(type_errors)
-          subject.should_receive(:validate).with( loaded[:loaded_value], context ).and_return(value_errors)
+          subject.should_receive(:validate_type).with( loaded_value, context ).and_return(type_errors)
+          subject.should_receive(:validate).with( loaded_value, context ).and_return(value_errors)
         end      
         
         context 'without subdefinition' do
           it 'calls decode,validate_type and validate and return the correct errors and object hash' do
             subject.should_not_receive(:decode_substructure)
-            result = {:errors =>type_errors+value_errors,:object => loaded[:loaded_value]}
-            subject.load( 'something', context ).should == result
+            subject.load( 'something', context ).should == [ loaded_value, type_errors+value_errors ]
           end
         end
         
@@ -329,10 +328,9 @@ describe Attributor::Attribute do
             a
             }
           it 'also calls decode_substructure and accumulates any errors to the result' do
-            sub_errors={:errors => ["some subdef error"], :object=>"my sub-object"}
-            subject.should_receive(:decode_substructure).with(loaded[:loaded_value],context).and_return(sub_errors)
-            result = {:errors =>type_errors+value_errors+sub_errors[:errors],:object => sub_errors[:object]}
-            subject.load('something',context).should == result
+            sub_result= [ "my sub-object", ["some subdef error"] ] 
+            subject.should_receive(:decode_substructure).with(loaded_value,context).and_return(sub_result)
+            subject.load('something',context).should == [  "my sub-object", type_errors+value_errors+["some subdef error"] ]
           end
         end
       end

@@ -41,7 +41,7 @@
         else
           errors << "Do not know how to load an integer from (#{value})"
         end
-        {:errors => errors, :loaded_value => decoded }
+        [ decoded, errors ]
       end
     end
 

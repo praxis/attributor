@@ -95,25 +95,27 @@
             
       # Top-level loading of the attribute. It loads it and then checks for requirement dependencies      
       def parse(value)
-        loaded_tuple = load(value,nil)      
-        dependency_errors = check_dependencies(loaded_tuple[:object],loaded_tuple[:object])
-        dependency_errors.each {|error| loaded_tuple[:errors] << error }
-        loaded_tuple[:object] = nil unless loaded_tuple[:errors].empty?
-        loaded_tuple
+        object, errors = load(value,nil)      
+        dependency_errors = check_dependencies(object,object)
+        dependency_errors.each {|error| errors << error }
+        object = nil unless errors.empty?
+        [ object, errors ]
       end
             
       # Generic load, coercion and validation of the attribute
       # Explicit attribute types need to implement the "decode", "validate_type", "validate" and "decode_substructure" 
       def load(value,context)
   
-        return {:errors =>["Attribute #{context} is required"],:object => nil} if( value.nil? && options[:required] )       
+        return [ nil, ["Attribute #{context} is required"] ] if( value.nil? && options[:required] )       
         value = options[:default] if ( value.nil? && options.has_key?(:default) )
         
-        return {:errors=>[],:object=>nil}  if value.nil? #Nothing to decode further if nil
-        loaded_tuple = decode(value,context)
-        if loaded_tuple[:errors].empty?
-          loaded_value = loaded_tuple[:loaded_value]
-          errors = validate_type(loaded_value,context) 
+        return [ nil , [] ]  if value.nil? #Nothing to decode further if nil
+        loaded_value, errors = decode(value,context)
+        puts "LOADERR: #{errors.inspect}"          
+        puts "LOADVAL: #{loaded_value.inspect}"          
+        
+        if errors.empty?
+          errors += validate_type(loaded_value,context) 
           if options[:values] && !options[:values].include?(loaded_value) 
             errors << "value #{value} is not within the allowed values=#{options[:values].join(',')} "
           end
@@ -121,15 +123,13 @@
           if @sub_definition.nil?
             object = loaded_value
           else
-            tuple_result = decode_substructure( loaded_value, context )
-            errors += tuple_result[:errors]
-            object = tuple_result[:object]            
+            object, sub_errors = decode_substructure( loaded_value, context )
+            errors += sub_errors
           end
         else
-          errors = loaded_tuple[:errors]
           object = nil
         end
-        {:errors =>errors,:object => object}
+        [ object, errors ]
       end
       
       def check_dependencies(myself, root)
@@ -190,7 +190,7 @@
       # Attribute types that are more complex, might want to get the incoming value and decode it into the proper object before processing
       # TODO: Need to build error handling/reporting with this function...should return error msg
       def decode( value, context )
-        {:errors=>[], :loaded_value => value}
+        [ value, [] ]
       end
       
       # Base type validation which simply compares the type of the passed value to the native type of the attribute
