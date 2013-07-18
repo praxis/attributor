@@ -406,6 +406,22 @@ describe Attributor::Attribute do
           end
         end
       end
+
+      context 'when :required_if is combined with :require' do
+        context 'and :required is true' do
+          let(:opts) {{  :required => true , :required_if => 'foobar' }}
+          it 'fails since they cannot be used at the same time' do
+            expect{ subject.validate_universal_options }.to raise_error(Exception,/Required_if cannot be specified together with :required/)
+          end
+        end
+        context 'and :required is false' do
+          let(:opts) {{  :required => true , :required_if => 'foobar' }}
+          it 'still fails since it would be weird to allow you to explicitly do so' do
+            expect{ subject.validate_universal_options }.to raise_error(Exception,/Required_if cannot be specified together with :required/)
+          end
+        end
+      end
+
       
       context 'fails validations for universal keys with incorrect types' do  
 

@@ -78,7 +78,8 @@
               raise "Required must be a boolean" unless !!definition == definition # Boolean check
               raise "Required cannot be enabled in combination with :default" if definition == true && @options.has_key?(:default) 
             when :required_if
-              raise "Required if must be a String, a Hash definition or a Proc" unless definition.is_a?(::String) || definition.is_a?(::Hash) || definition.is_a?(::Proc)
+              raise "Required_if must be a String, a Hash definition or a Proc" unless definition.is_a?(::String) || definition.is_a?(::Hash) || definition.is_a?(::Proc)
+              raise "Required_if cannot be specified together with :required" if options[:required]
             end
           end
         end
@@ -244,8 +245,6 @@
         # Make sure we don't leak skeletor types (and convert it to the native one) if there's an element_type defined
         type = @options[:element_type]
         hash[:options][:element_type] = type.native_type if type
-        
-        
         if @sub_definition && @sub_definition.keys.size > 0
           hash[:definition] = {}
           @sub_definition.each do |k,v|
