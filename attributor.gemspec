@@ -9,12 +9,12 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["RightScale"]
-  s.date = "2013-07-13"
+  s.date = "2013-07-18"
   s.description = "longer description of your gem"
   s.email = "blanquer@rightscale.com"
   s.extra_rdoc_files = [
     "LICENSE.txt",
-    "README.rdoc"
+    "README.md"
   ]
   s.files = [
     ".document",
@@ -22,9 +22,10 @@ Gem::Specification.new do |s|
     "Gemfile",
     "Gemfile.lock",
     "LICENSE.txt",
-    "README.rdoc",
+    "README.md",
     "Rakefile",
     "VERSION",
+    "attributor.gemspec",
     "lib/attributor.rb",
     "lib/attributor/array.rb",
     "lib/attributor/attribute.rb",
@@ -49,7 +50,7 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/blanquer/attributor"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = "1.8.24"
+  s.rubygems_version = "1.8.25"
   s.summary = "one-line summary of your gem"
 
   if s.respond_to? :specification_version then
