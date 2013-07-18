@@ -2,16 +2,18 @@ require_relative 'spec_helper'
       
 describe Attributor::Attribute do
     
-  class MyType < Attributor::Attribute
-    def self.native_type
-      ::String
+  module Attributor
+    class MyType < Attribute
+      def self.native_type
+        ::String
+      end
     end
   end
   
   let(:name) { 'foobar' }
   let(:media_type_object) { double("mt",{:nothing=>true}) }
   let(:opts) { {} }
-  let(:attribute) { MyType.new(name, opts)  }
+  let(:attribute) { Attributor::MyType.new(name, opts)  }
   
   subject { attribute }
   context 'for simple type attribute superclasses' do
@@ -36,18 +38,18 @@ describe Attributor::Attribute do
         context 'using valid options' do
           let(:opts) { {:description=>"FOO", :required => true} }
           it 'calls validate_universal_options without raising' do
-            MyType.any_instance.should_receive(:validate_universal_options).and_return([:description,:required])      
+            Attributor::MyType.any_instance.should_receive(:validate_universal_options).and_return([:description,:required])      
             expect {
-              MyType.new(name, opts)
+              Attributor::MyType.new(name, opts)
             }.to_not raise_error
           end
 
           context 'with a common one' do
             let(:opts) { {:description=>"FOO", :required => true, :min=>"option"} }
             it 'calls validate_options of the instance with remaining options' do
-              MyType.any_instance.should_receive(:validate_universal_options).and_return([:description,:required])      
-              MyType.any_instance.should_receive(:validate_options).with({:min=>"option"})
-              obj = MyType.new(name, opts)
+              Attributor::MyType.any_instance.should_receive(:validate_universal_options).and_return([:description,:required])      
+              Attributor::MyType.any_instance.should_receive(:validate_options).with({:min=>"option"})
+              obj = Attributor::MyType.new(name, opts)
               obj.options.should == opts
             end
           end
@@ -56,10 +58,10 @@ describe Attributor::Attribute do
         context 'using invalid options since the base class does not implement any specific handling' do
           let(:opts) { {:description=>"FOO", :required => true, :class_specific=>"option"} }
           it 'calls validate_universal_options' do
-            MyType.should_receive(:native_type).and_return(::String)
-            MyType.any_instance.should_receive(:validate_universal_options).and_return([:description,:required])  
+            Attributor::MyType.should_receive(:native_type).and_return(::String)
+            Attributor::MyType.any_instance.should_receive(:validate_universal_options).and_return([:description,:required])  
             expect {
-              MyType.new(name, opts)
+              Attributor::MyType.new(name, opts)
             }.to raise_error(Exception,/ERROR, unknown option/)    
           end
         end
@@ -70,7 +72,7 @@ describe Attributor::Attribute do
         context 'for simple type attribute superclasses' do
           it 'raises an exception' do
               expect { 
-                MyType.new('somename', {}) do
+                Attributor::MyType.new('somename', {}) do
                   attribute :sub1, Integer 
                 end 
               }.to raise_error(Exception, /does not implement attribute sub-definition parsing/ )        
@@ -79,8 +81,8 @@ describe Attributor::Attribute do
         context 'for complex type attribute superclasses' do
           it 'calls parse_block ' do
             random_info = {:fake_stuff=>true}
-            MyType.any_instance.should_receive(:parse_block)
-            attr_object = MyType.new(name, opts) do 
+            Attributor::MyType.any_instance.should_receive(:parse_block)
+            attr_object = Attributor::MyType.new(name, opts) do 
                     @mystuff = random_info #we don't eval this in MyType...
                   end 
           end
@@ -92,11 +94,12 @@ describe Attributor::Attribute do
  
     context 'managing attribute classes' do
       
-      class NonDerivingAttribute; end
-      
+      module Attributor
+        class NonDerivingAttribute; end
+      end
       context 'finding attribute class' do
         it 'returns a class if the named constant exists, and derives from Attributor::Attribute' do
-          Attributor.find_class("MyType").should == MyType
+          Attributor.find_class("MyType").should == Attributor::MyType
         end
         it 'raises and exception if the named constant exists, but it does not derive from Attributor::Attribute' do
           expect { 
@@ -120,11 +123,11 @@ describe Attributor::Attribute do
           end
         end
         it 'returns the passed type if it derives from Attributor::Attribute' do        
-          Attributor.determine_class(MyType).should == ::MyType      
+          Attributor.determine_class(Attributor::MyType).should == Attributor::MyType      
         end
         it 'returns the classif it does not derives from Attributor::Attribute' do
-          Attributor.should_receive(:find_class).with("MyType").and_return(MyType)
-          Attributor.determine_class(Foo::Bar::MyType).should == MyType      
+          Attributor.should_receive(:find_class).with("MyType").and_return(Attributor::MyType)
+          Attributor.determine_class(Foo::Bar::MyType).should == Attributor::MyType      
         end
       end
     end
@@ -156,8 +159,8 @@ describe Attributor::Attribute do
       it 'calls validate_options of the instance with remaining options' do
         supported = [:min,:max,:regexp]
         # Need to expect it twice (one for the subject initialization and one for our explicit validate_options call)
-        MyType.any_instance.should_receive(:supported_options_for_type).twice.and_return(supported)
-        MyType.any_instance.should_receive(:common_options_validator_helper).with(supported,opts).twice.and_return(opts.keys)
+        Attributor::MyType.any_instance.should_receive(:supported_options_for_type).twice.and_return(supported)
+        Attributor::MyType.any_instance.should_receive(:common_options_validator_helper).with(supported,opts).twice.and_return(opts.keys)
         expect{       
           subject.validate_options(opts) 
         }.to_not raise_exception(Exception)
@@ -170,7 +173,7 @@ describe Attributor::Attribute do
       end
       
       it 'returns errors when the compared object does not match with the native type of the class' do
-        MyType.stub(:native_type).and_return(::Integer)        
+        Attributor::MyType.stub(:native_type).and_return(::Integer)        
         errors = subject.validate_type("val","context")
         errors.should_not be_empty 
         errors.first.should  =~ /has the wrong type/
@@ -318,10 +321,10 @@ describe Attributor::Attribute do
         
         context 'that have a sub definition that is not empty' do
           before(:all) {
-            MyType.any_instance.stub(:parse_block).and_return(nil)
+            Attributor::MyType.any_instance.stub(:parse_block).and_return(nil)
           }
           let(:attribute) { 
-            a=MyType.new(name, opts) do 
+            a=Attributor::MyType.new(name, opts) do 
                  hello= true
                end
             a.instance_variable_set(:@sub_definition, {'something'=>'not-empty'} )
