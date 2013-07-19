@@ -164,6 +164,19 @@
         end 
         out
       end
+      
+      def describe_attribute_specific_options
+        out = {}
+        out[:max_size] = options[:max_size] if options.has_key?(:max_size)
+        out
+      end
+      
+      def describe_sub_definition
+        out = {}
+        sub_definition.map{|k,v| out[k] = v.describe }
+        out
+      end
+      
     end
   end
 

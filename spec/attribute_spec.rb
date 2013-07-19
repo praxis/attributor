@@ -650,9 +650,9 @@ describe Attributor::Attribute do
       end
 
     end
-
-#    context 'to_doc_hash' do
-#      it 'does some stuff generating hashes for documentation'
-#    end
+  end
+  
+  context 'documentation' do
+    pending 'describe'
   end
 end

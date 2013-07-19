@@ -452,4 +452,8 @@ describe Attributor::Array do
       end
     end
   end
+  
+  context 'documentation' do
+    pending 'describe'
+  end
 end

@@ -239,30 +239,19 @@
       end
       # Object representation of the attribute for doc generation purposes
       # Note: if we don't want to duplicate the name inside the hash, we can simply 
-      # not include it (it would be in the parent key)
-      def to_doc_hash
-        hash = {:name => @name, :type => @type_class_name, :required=> !!@options[:required] , :options => @options.dup}
-        # Make sure we don't leak skeletor types (and convert it to the native one) if there's an element_type defined
-        type = @options[:element_type]
-        hash[:options][:element_type] = type.native_type if type
-        if @sub_definition && @sub_definition.keys.size > 0
-          hash[:definition] = {}
-          @sub_definition.each do |k,v|
-            hash[:definition][k] = v.to_doc_hash
-          end
-        end
+      # not include it (it would be in the parent key)      
+      def describe
+        universal_options = [:required,:default,:values,:description,:required_if]
+        
+        hash = {:name => @name, :type => self.class.name.split('::').last }
+        hash[:required] = true if (options.has_key?(:required) && options[:required]) # Report only if they are required
+        hash[:default] = options[:default] if options.has_key? :default
+        hash[:values] = options[:values] if options.has_key? :values 
+        hash[:description] = options[:description] if options.has_key? :description        
+        hash.merge!(describe_attribute_specific_options) if self.respond_to?(:describe_attribute_specific_options)
+        hash[:sub_definition] = describe_sub_definition if( sub_definition && self.respond_to?( :describe_sub_definition ) )
         hash
       end
-      def to_debug_hash
-        hash = {:name => @name, :type => self.class.name.split('::').last , :options => @options.dup}
-        # Make sure we don't leak skeletor types (and convert it to the native one) if there's an element_type defined
-        type = @options[:element_type]
-        hash[:options][:element_type] = type.native_type if type
-                
-        hash[:definition] = to_debug_subdefinition_hash if sub_definition
-        hash
-      end
-
-      
+            
     end
   end

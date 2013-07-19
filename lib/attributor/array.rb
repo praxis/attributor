@@ -142,6 +142,18 @@
         return ::Array
       end
 
+      def describe_attribute_specific_options
+        out = {}
+        out[:max_size] = options[:max_size] if options.has_key?(:max_size)
+        out[:element_type] = options[:element_type] if options.has_key?(:element_type)
+        out
+      end
+      def describe_sub_definition
+        out = sub_definition.describe
+        out.delete(:name) #Strip name out, since it doesn't have any meaning for an array subdefinition
+        out
+      end
+        
       def to_debug_subdefinition_hash
         sub_definition.to_debug_hash
       end

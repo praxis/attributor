@@ -415,5 +415,9 @@ describe Attributor::Hash do
     end
 
   end
+  
+  context 'documentation' do
+    pending 'describe'
+  end
 end
   
