@@ -5,7 +5,7 @@
     class Hash < Attribute
   
       def supported_options_for_type
-        [:max_size]
+        [:max_size,:id]
       end
       
       def parse_block(&block)
@@ -41,10 +41,23 @@
         @sub_definition[name] = klass.new(name, opts, &block)
       end
       alias_method :param, :attribute
-      
-      # WARNING!!!! aliased id is only for DEBUGGING!
-      alias_method :id, :attribute
 
+      def validate_options( options_hash )
+        supported_opts = [:max_size]
+        validated = common_options_validator_helper(supported_opts, options_hash )
+        
+        remaining = options_hash.reject{|k,_| validated.include? k }
+        remaining.each_pair do|opt,definition|
+          case opt
+          when :id
+            unless ( definition.is_a?(::String) || definition.is_a?(::Symbol))
+              raise "Type #{definition} not supported for :id defintion on a Hash" 
+            end
+          else
+            raise "ERROR, unknown option/s (#{opt}) for #{native_type} attribute type"
+          end
+        end
+      end
 
       def [](name)
         raise "Symbols are not allowed for attribute names, use strings please." if name.is_a? Symbol
@@ -168,6 +181,7 @@
       def describe_attribute_specific_options
         out = {}
         out[:max_size] = options[:max_size] if options.has_key?(:max_size)
+        out[:id] = options[:id] if options.has_key?(:id)
         out
       end
       

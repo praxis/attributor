@@ -19,7 +19,7 @@ describe Attributor::Hash do
   end
   
   its(:native_type) { should == ::Hash }
-  its(:supported_options_for_type) { should == [:max_size] }
+  its(:supported_options_for_type) { should == [:max_size,:id] }
   
   context 'parse_block' do
     context 'initializing subdefinition' do
@@ -69,6 +69,57 @@ describe Attributor::Hash do
     
   end
   
+    
+  context 'validate options' do
+    
+    it 'will use the common validator for the accepted options' do
+      common_options = [:max_size]
+      subject.should_receive(:common_options_validator_helper).with(common_options,subject.options).and_return(common_options)
+      subject.validate_options(subject.options)
+    end
+    it 'will raise an exception if the common validator raises it' do
+      expect{
+        subject.should_receive(:common_options_validator_helper).and_raise("Bad stuff!")
+        subject.validate_options(subject.options)        
+      }.to raise_error(Exception,/Bad stuff!/)
+    end
+    context 'with an unknown option name' do 
+      let(:opts) { {:invalid => "option"} }
+      it 'will raise an exception' do
+        expect{
+          subject.validate_options(subject.options)
+        }.to raise_error(Exception,/ERROR, unknown option/)
+      end
+    end
+    context 'for "id"' do
+      context 'with a string' do 
+        let(:opts) { {:id => 'id'} }
+        it 'will succeed' do
+          expect{
+            subject.validate_options(subject.options)        
+          }.to_not raise_error
+        end
+      end
+      context 'with a symbol' do 
+        let(:opts) { {:id => :id} }
+        it 'will succeed' do
+          expect{
+            subject.validate_options(subject.options)        
+          }.to_not raise_error
+        end
+      end
+      context 'with a something else' do 
+        let(:opts) { {:id => Hash.new } }
+        it 'will fail with the appropriate error' do
+          expect{
+            subject.validate_options(subject.options)        
+          }.to raise_error(Exception,/not supported for :id defintion on a Hash/)
+        end
+      end
+
+    end
+  end
+  
   context 'validating values' do
     context 'max_size option: checks that the hash has a maximum number of elements' do
       let(:opts) { {:max_size => 2 } }
@@ -82,7 +133,7 @@ describe Attributor::Hash do
         subject.validate(val,'context').first.should =~ /has more attributes than the maximum allowed/
       end
 
-    end
+    end    
   end
   
   context 'decode' do
