@@ -191,6 +191,21 @@
         out
       end
       
+      def example
+        return options[:example] if options.has_key? :example
+        return super if options.has_key?(:default) || options.has_key?(:value)
+        
+        result = {}
+        count =  options[:max_size] || -1
+        sub_definition.each do |k,v|
+          result[k] = v.example
+          break if count == 0 # Do not generate more keys than the max size allowed
+          count -= 1
+        end
+        result
+      end      
+      
+      
     end
   end
 

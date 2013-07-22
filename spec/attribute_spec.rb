@@ -390,6 +390,24 @@ describe Attributor::Attribute do
             expect{ subject.validate_universal_options }.to_not raise_error
           end
         end
+        
+        context 'for :example option' do
+          let(:attribute) { Attributor::Integer.new(name, opts)  }
+          context 'of the same native type' do
+            let(:opts) { { :example => 12345 } }
+            it 'suceeds' do
+              expect{ subject.validate_universal_options }.to_not raise_error
+            end
+          end
+          context 'of a compatible type (only Regexp is compatible with String right now)' do
+            let(:attribute) { Attributor::String.new(name, opts)  }
+            let(:opts) { {  :example => /foobar/ } }
+            it 'suceeds' do
+              expect{ subject.validate_universal_options }.to_not raise_error
+            end
+          end
+          
+        end
       end
 
       context 'when :require is combined with :default' do
@@ -452,6 +470,14 @@ describe Attributor::Attribute do
             expect{ subject.validate_universal_options }.to raise_error(Exception,/Default value doesn't have the correct type/)
           end
         end
+        
+        context 'for :example option' do
+          let(:opts) { { :example => 123 } }
+          it 'fails when it not the same type of the attribute' do
+            expect{ subject.validate_universal_options }.to raise_error(Exception,/Invalid example type/)
+          end
+        end
+        
       end
       
     end
@@ -650,6 +676,47 @@ describe Attributor::Attribute do
       end
 
     end
+  end
+  
+  context 'example value (default, overridable function)' do
+
+    
+   context 'when the attribute has an example option' do
+     let(:opts){ {:example => "example_string"} }
+     it 'uses the returned value directly' do
+       subject.example.should == "example_string"
+     end
+   end
+  
+    context 'when the attribute does not have an example value ' do
+      
+      context 'but it has a :default option' do
+        let(:opts){ { :default => "foo" } }
+        it 'returns the default value as the example' do
+          subject.example.should == "foo"
+        end
+      end
+      
+      context 'or it has a :values option' do
+        let(:opts){ { :values => ["bar","foo"] } }
+        it 'returns one of the values as the example' do
+          ["bar","foo"].should include(subject.example)
+        end
+        context 'but with a :default option too' do
+          let(:opts){ { :values => ["bar","foo"] , :default=>"foo" } }
+          it 'gives the :default higher priority than the :values' do
+            subject.example.should == "foo"
+          end
+        end
+      end
+      
+      context 'and it has no :default or :values options' do
+        it 'returns nil as the example' do
+          subject.example.should be_nil
+        end
+      end
+    end
+
   end
   
   context 'documentation' do

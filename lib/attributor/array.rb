@@ -142,6 +142,25 @@
         return ::Array
       end
 
+      def example
+        return options[:example] if options.has_key? :example
+        return super if options.has_key?(:default) || options.has_key?(:value)
+    
+        num_elements = rand( options[:max_size] || 3 ) + 1
+        result = []
+        
+        num_elements.times do |number| 
+          if sub_definition 
+            val = sub_definition.example
+            result << val if(val)
+          else
+            result << "Placeholder example for #{options[:element_type]||'unknown type'}"
+          end
+        end
+
+        result
+      end      
+
       def describe_attribute_specific_options
         out = {}
         out[:max_size] = options[:max_size] if options.has_key?(:max_size)

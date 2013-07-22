@@ -42,6 +42,7 @@ GEM
       rack (~> 1.2)
     rack (1.5.2)
     rake (10.1.0)
+    randexp (0.1.7)
     rdoc (3.12.2)
       json (~> 1.4)
     rspec (2.14.1)
@@ -60,6 +61,7 @@ PLATFORMS
 DEPENDENCIES
   bundler
   jeweler (~> 1.8.4)
+  randexp
   rdoc (~> 3.12)
   rspec
   yard (~> 0.7)

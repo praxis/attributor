@@ -43,7 +43,23 @@
         end
         [ decoded, errors ]
       end
-    end
 
+      def example
+        if value = options[:example]
+          if value.kind_of? Regexp
+            return value.gen.to_i
+          else
+            return value
+          end
+        end
+        
+        return super if options.has_key?(:default) || options.has_key?(:value)
+        
+        min = options[:min] || 0
+        max = options[:max] || 1000
+        rand(max-min) + min
+      end   
+
+    end    
   end
 

@@ -123,5 +123,45 @@ describe Attributor::Integer do
     end
   end
 
+  context 'example value' do
+  
+    context 'when an :example option is available' do
+      context 'defined as an integer' do
+        let(:opts) { {:example=>123 } }
+        it 'returns it as is' do
+          subject.example.should == 123
+        end
+      end
+      context 'defined as a regexp' do
+        let(:opts) { {:example=>/\d{1,4}/ } }
+        it 'returns an integer value of the generated regexp' do
+          subject.example.to_s.should =~ /\d{1,4}/
+        end
+      end
+    end
+    context 'when no :example is passed' do
+      context 'and a :min option exists' do
+        let(:opts) { {:min=>100 } }
+        it 'will return an int >= :min' do
+          subject.example.should >= 100
+        end
+      end
+      context 'and a :max option exists' do
+        let(:opts) { {:max=>500 } }
+        it 'will return an int <= :max' do
+          subject.example.should <= 500
+        end
+      end
+      context 'and both :min and :max options' do
+        let(:opts) { {:min=>100 , :max=>500} }        
+        it 'will return an int within those ranges' do
+          val = subject.example
+          val.should >= 100
+          val.should <= 500
+        end
+      end
+    end
+  end
+
 end
 

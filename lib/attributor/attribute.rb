@@ -58,10 +58,9 @@
         unsupported_opts =  options_hash.keys - common_options_validator_helper(supported_options_for_type, options_hash )
         raise "ERROR, unknown option/s (#{unsupported_opts.join(',')}) for #{native_type} attribute type" unless (unsupported_opts).empty?
       end
-      
-      
+            
       def validate_universal_options
-        universal_options = [:required,:default,:values,:description,:required_if]
+        universal_options = [:required,:default,:values,:description,:required_if,:example]
         validated = []
         universal_options.each do|opt|
           if ( @options.has_key?(opt) ) # Validate the option if it exists
@@ -80,6 +79,10 @@
             when :required_if
               raise "Required_if must be a String, a Hash definition or a Proc" unless definition.is_a?(::String) || definition.is_a?(::Hash) || definition.is_a?(::Proc)
               raise "Required_if cannot be specified together with :required" if options[:required]
+            when :example
+              unless definition.is_a?(native_type) || definition.is_a?(Regexp) 
+                raise "Invalid example type (got: #{definition.class.name}) for type (#{native_type.inspect}). It must always match the type of the attribute (except if passing Regex that is allowed for some types)" 
+              end
             end
           end
         end
@@ -237,6 +240,19 @@
         return subname if context.nil? || context == ""
         "#{context}#{Attributor::Attribute::SEPARATOR}#{subname}"
       end
+      
+      # Default, overridable example function
+      def example
+        return options[:example] if options.has_key? :example
+        
+        return options[:default] if options.has_key? :default
+        if options.has_key? :values
+          vals = options[:values]
+          return vals[rand(vals.size)] 
+        end
+        return  nil 
+      end      
+      
       # Object representation of the attribute for doc generation purposes
       # Note: if we don't want to duplicate the name inside the hash, we can simply 
       # not include it (it would be in the parent key)      

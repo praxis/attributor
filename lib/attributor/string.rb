@@ -35,7 +35,19 @@
         return ::String
       end
       
-
+      def example
+        
+        if options.has_key? :example
+          value = options[:example]
+          if value.kind_of? Regexp
+            return value.gen
+          end
+          return value
+        end
+        return super if options.has_key?(:default) || options.has_key?(:value)
+        return nil
+      end
+      
     end
 
   end

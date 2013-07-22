@@ -74,4 +74,20 @@ describe Attributor::Boolean do
     end
     
   end
+  
+  context 'example value' do
+
+    context 'when a :default option is set' do
+      let(:opts){ {:default => true } }
+      it 'returns true (cause it calls super)' do
+        subject.example.should be_true
+      end
+    end
+    context 'when a :default option is not set' do
+      let(:opts){ {} }
+      it 'returns true/false randomly' do
+        [true,false].should include( subject.example ) 
+      end
+    end
+  end
 end

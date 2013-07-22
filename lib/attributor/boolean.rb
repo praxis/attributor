@@ -46,6 +46,15 @@ class FalseClass; include ::Boolean; end
         end
         [ decoded, errors ]
       end
+      
+      def example
+        unless options.has_key?(:default)
+          (rand(2) == 0) ? true : false
+        else
+          super
+        end
+      end   
+      
     end
 
   end

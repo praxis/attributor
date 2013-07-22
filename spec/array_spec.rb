@@ -453,6 +453,57 @@ describe Attributor::Array do
     end
   end
   
+  context 'example value' do
+    
+    context 'when no example value given' do
+      context 'when no other options given' do
+        let(:opts){ {} }
+        it 'generates an array of at least one placeholder (for the default element_type)' do
+          subject.example.first.should =~ /Placeholder example for/ 
+        end
+      end
+      context 'when element_type given as a param' do
+        let(:opts){ {:element_type=>Integer, :max_size => 2} }
+        it 'generates an array of examples for the type' do
+          my_integer_example = rand(100)
+          Attributor::Integer.any_instance.should_receive(:example).at_most(2).times.and_return(rand(100))
+          subject.example.first.should be_kind_of ::Integer
+        end
+      end
+      context 'when element_type given as a block' do
+        let(:opts){ {:max_size => 2} }
+        let(:sub_proc) { Proc.new do
+            attribute 'length', String, :example => /\d{2}/
+            attribute 'units', String, :example => "cm"
+            attribute 'more', String
+          end
+        }
+        it 'generates an array of examples from the explicit block type (nil value if no options)' do
+          my_hash_example = {'a'=>1, 'b' => 2 }
+          Attributor::Hash.any_instance.should_receive(:example).at_most(2).times.and_return(my_hash_example)
+          first_elem = subject.example.first.should == my_hash_example
+        end
+      end
+      context 'when max_size option is given' do
+        let(:opts){ {:max_size=>2, :element_type => Integer } }
+        it 'generates an example with a limited number of elements' do
+          my_integer_example = rand(100)
+          Attributor::Integer.any_instance.should_receive(:example).at_most(2).times.and_return(rand(100))
+          subject.example.size.should <= 2
+        end
+      end
+    end
+    
+    context "with an explicit example value" do
+      let(:example_value) { [1,2,3] }
+      let(:opts){ {:example => example_value } }
+      it 'returns that value as is' do
+        subject.example.should == example_value
+      end
+    end
+
+  end
+  
   context 'documentation' do
     pending 'describe'
   end

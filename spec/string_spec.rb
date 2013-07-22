@@ -83,5 +83,28 @@ describe Attributor::String do
     end
   end
 
+  context 'example value' do
+    context 'when an :example option is available' do
+      context 'defined as a string' do
+        let(:opts) { {:example=>"Example string" } }
+        it 'returns it as is' do
+          subject.example.should == "Example string"
+        end
+      end
+      context 'defined as a Regex' do
+        let(:opts) { {:example=>/\w{10}/ } }
+        it 'generate a string from it' do
+          subject.example.should =~ /\w{10}/
+        end
+      end
+    end
+    context 'when no :example is passed' do
+      let(:opts) { {} }
+      it 'will return nil (nothing particular to be done)' do
+        subject.example.should == nil
+      end
+    end
+  end
+  
 end
 

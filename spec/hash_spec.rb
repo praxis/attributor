@@ -467,6 +467,39 @@ describe Attributor::Hash do
 
   end
   
+  context 'example value' do
+    
+    context 'when no example value given' do
+
+      context 'when no other options given' do
+        let(:opts){ {} }
+        
+        it 'generates a hash with examples from the definitions' do
+          val = subject.example
+          val.should be_kind_of ::Hash
+          val.should have_key'age'
+          val.should have_key 'email'
+        end
+      end
+
+      context 'when max_size option is given' do
+        let(:opts){ {:max_size=>2 } }
+        it 'generates an example with a limited number of keys' do
+          subject.example.keys.size.should <= 2
+        end
+      end
+    end
+    
+    context "with an explicit example value" do
+      let(:example_value) { {'a'=>1,'b'=>2} }
+      let(:opts){ {:example => example_value } }
+      it 'returns that value as is' do
+        subject.example.should == example_value
+      end
+    end
+
+  end
+  
   context 'documentation' do
     pending 'describe'
   end
