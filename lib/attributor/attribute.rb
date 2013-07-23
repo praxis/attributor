@@ -115,8 +115,6 @@
         
         return [ nil , [] ]  if value.nil? #Nothing to decode further if nil
         loaded_value, errors = decode(value,context)
-        puts "LOADERR: #{errors.inspect}"          
-        puts "LOADVAL: #{loaded_value.inspect}"          
         
         if errors.empty?
           errors += validate_type(loaded_value,context) 

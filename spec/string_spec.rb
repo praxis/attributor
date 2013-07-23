@@ -99,9 +99,17 @@ describe Attributor::String do
       end
     end
     context 'when no :example is passed' do
-      let(:opts) { {} }
-      it 'will return nil (nothing particular to be done)' do
-        subject.example.should == nil
+      context 'but the attribute has a regexp defined' do
+        let(:opts) { {:regexp=>/Boom/} }
+        it 'will return a string matching the regexp of the attribute' do
+          subject.example.should =~ /Boom/
+        end
+      end
+      context 'and no other option exists' do
+        let(:opts) { {} }
+        it 'will return nil (nothing particular to be done)' do
+          subject.example.should == nil
+        end
       end
     end
   end

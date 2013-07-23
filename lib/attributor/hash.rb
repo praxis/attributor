@@ -123,7 +123,6 @@
         else
           error << "Encoded Hashes for this type is not SUPPORTED! (got: #{value.class.name})"
         end
-        puts "ERR: #{error.inspect}"
         
         [ decoded, error ]
       end

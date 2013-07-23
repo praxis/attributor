@@ -44,6 +44,8 @@
           end
           return value
         end
+    
+        return options[:regexp].gen if options[:regexp]          
         return super if options.has_key?(:default) || options.has_key?(:value)
         return nil
       end
