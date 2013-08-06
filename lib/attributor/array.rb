@@ -5,6 +5,10 @@
 
     class Array < Attribute
       
+      def supports_sub_definition?
+        true
+      end
+      
       # Invoked at the end of the attribute initializatino
       # We will create and store a skeletor attribute based on the element_type class (defaulting to Hash)
       # If a block is passed, we will pass it along when we instantiate the attribute

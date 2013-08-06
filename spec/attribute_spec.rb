@@ -7,6 +7,17 @@ describe Attributor::Attribute do
       def self.native_type
         ::String
       end
+      def supports_sub_definition?
+        true
+      end
+    end
+  end
+  
+  module Attributor
+    class MySimpleType < Attribute
+      def self.native_type
+        ::String
+      end
     end
   end
   
@@ -22,7 +33,8 @@ describe Attributor::Attribute do
       its(:name) {should == name }
       its(:options) {should == opts }
       its(:sub_definition) {should be_nil }
-   
+      its(:supports_sub_definition?) { should be(true) }
+      
       context 'when inheriting' do
         let(:opts) { {:description=>"FOO", :inherit_from => media_type_object} }
         it 'extracts inherit_from option into a different instance variable' do     
@@ -72,21 +84,26 @@ describe Attributor::Attribute do
         context 'for simple type attribute superclasses' do
           it 'raises an exception' do
               expect { 
-                Attributor::MyType.new('somename', {}) do
+                Attributor::MySimpleType.new('somename', {}) do
                   attribute :sub1, Integer 
-                end 
+                end.sub_definition
               }.to raise_error(Exception, /does not implement attribute sub-definition parsing/ )        
             end
         end
         context 'for complex type attribute superclasses' do
-          it 'calls parse_block ' do
-            random_info = {:fake_stuff=>true}
-            Attributor::MyType.any_instance.should_receive(:parse_block)
-            attr_object = Attributor::MyType.new(name, opts) do 
-                    @mystuff = random_info #we don't eval this in MyType...
-                  end 
+          subject do 
+            Attributor::MyType.new(name, opts) do 
+                @mystuff =  {:fake_stuff=>true}
+            end 
+          end
+          it 'does not call parse_block until accessing sub_definition' do
+            subject.should_not_receive(:parse_block)
           end
   
+          it 'calls parse_block lazily' do
+            subject.should_receive(:parse_block)
+            subject.sub_definition
+          end
         end  
       end
     end

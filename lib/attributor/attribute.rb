@@ -22,8 +22,18 @@
       # hierarchical separator string for composing human readable attributes 
       SEPARATOR = '.'
       
-      attr_reader :name, :options, :inherit_from, :sub_definition
+      attr_reader :name, :options, :inherit_from
       
+      def sub_definition
+        unless @sub_definition
+          parse_block! 
+        end
+        return @sub_definition
+      end
+      
+      def parse_block! #no need to pass the arg...
+        parse_block(&@saved_block)
+      end
       # @name: name of the attribute
       # @options: metadata about the attribute (available options are attribute type specific)
       # @block: code definition about the sub-structure of the attribute (nil if a leaf attribute)
@@ -44,9 +54,27 @@
         validate_options( remaining ) if self.respond_to? :validate_options
 #        if block_given? # Construct the full attribute definition (which might include parsing the block further for sub-objects)
 #          @sub_definition = {} #For attributes that can accept a block with further structure
-          parse_block(&block) #if block_given?
+        if block_given?
+          @saved_block = block
+          @has_sub_definition = true
+        else
+          @has_sub_definition = false
+        end
+        
+        if block_given? && !supports_sub_definition? 
+          raise "This attribute class (#{self.class.name}) does not implement attribute sub-definition parsing. Please implement 'parse_block' for that type"
+        end 
+#          parse_block(&block) #if block_given?
 #        end
       end
+      
+      def supports_sub_definition?
+        false
+      end
+      
+      def has_sub_definition?
+        @has_sub_definition
+      end   
       
       def supported_options_for_type
         return []
@@ -94,7 +122,6 @@
       end
       
       def parse_block(&block)
-        raise "This attribute class (#{self.class.name}) does not implement attribute sub-definition parsing. Please implement 'parse_block' for that type" if block_given?
       end
             
       # Top-level loading of the attribute. It loads it and then checks for requirement dependencies      
@@ -105,24 +132,23 @@
         object = nil unless errors.empty?
         [ object, errors ]
       end
-            
+
       # Generic load, coercion and validation of the attribute
       # Explicit attribute types need to implement the "decode", "validate_type", "validate" and "decode_substructure" 
       def load(value,context)
-  
         return [ nil, ["Attribute #{context} is required"] ] if( value.nil? && options[:required] )       
         value = options[:default] if ( value.nil? && options.has_key?(:default) )
         
         return [ nil , [] ]  if value.nil? #Nothing to decode further if nil
         loaded_value, errors = decode(value,context)
-        
+
         if errors.empty?
           errors += validate_type(loaded_value,context) 
           if options[:values] && !options[:values].include?(loaded_value) 
             errors << "value #{value} is not within the allowed values=#{options[:values].join(',')} "
           end
           errors += validate(loaded_value,context) if self.respond_to? :validate
-          if @sub_definition.nil?
+          if !has_sub_definition?
             object = loaded_value
           else
             object, sub_errors = decode_substructure( loaded_value, context )

@@ -7,6 +7,10 @@
       def supported_options_for_type
         [:max_size,:id]
       end
+
+      def supports_sub_definition?
+        true
+      end
       
       def parse_block(&block)
         @sub_definition={}
@@ -18,7 +22,7 @@
       # Each attribute will create an attribute and save it on the "definition" piece.
       def attribute(name, incoming_type=nil, incoming_opts={}, &block)
 
-        raise "Attribute #{name} already defined" if @sub_definition.has_key? name        
+        raise "Attribute #{name} already defined" if sub_definition.has_key? name        
         args = private_decode_args_for_attribute( incoming_type, incoming_opts)
         opts = args[:opts]        
         
@@ -61,14 +65,14 @@
 
       def [](name)
         raise "Symbols are not allowed for attribute names, use strings please." if name.is_a? Symbol
-        raise "This attribute does not have a sub definition, therefore a named attribute cannot be accessed" unless @sub_definition
-        @sub_definition[name]
+        raise "This attribute does not have a sub definition, therefore a named attribute cannot be accessed" unless sub_definition
+        sub_definition[name]
       end
       
       def has_key?(name)
         raise "Symbols are not allowed for attribute names, use strings please." if name.is_a? Symbol
-        raise "This attribute does not have a sub definition, therefore a named attribute cannot be accessed" unless @sub_definition
-        @sub_definition.has_key? name
+        raise "This attribute does not have a sub definition, therefore a named attribute cannot be accessed" unless sub_definition 
+        sub_definition.has_key? name
       end   
       
       def private_decode_args_for_attribute( incoming_type, incoming_opts)
@@ -150,7 +154,7 @@
         errors = []
         object = {}
         # Validate the individual hash attributes for each defined attribute
-        @sub_definition.each_pair do |sub_name, sub_attr|    
+        sub_definition.each_pair do |sub_name, sub_attr|    
           sub_context = generate_subcontext(context,sub_name)      
           load_object, load_errors = sub_attr.load( decoded_value[sub_name] , sub_context )
           # Skip saving an empty value key if the incoming decoded value didn't even have it (and it had no default for it)
@@ -163,7 +167,7 @@
       def check_dependencies_substructure(myself,root)
         return [] unless myself
         errors = []
-        @sub_definition.each_pair do |sub_name, sub_attr|    
+        sub_definition.each_pair do |sub_name, sub_attr|    
           errors += sub_attr.check_dependencies(myself[sub_name],root)
         end
         return errors      
