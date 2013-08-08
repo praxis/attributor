@@ -1,27 +1,27 @@
 
 
-  module Attributor
-
-
-    class String < Attribute
+module Attributor
+  class String 
+    include Base 
+    class << self
 
       def supported_options_for_type
         [:regexp]
       end
       
-      def validate(value,context)
+      def validate(value,context,definition)
         errors = []  
-        @options.each do |opt, definition|
+        definition.options.each do |opt, opt_value|
           case opt
           when :regexp
-            match = definition =~ value
+            match = opt_value =~ value
             errors << "#{context} value does not match regexp" unless match 
           end
         end
         errors
       end
 
-      def decode( value, context )
+      def decode( value, context , definition)
         errors = []
         if( value.is_a? ::String)
           decoded = value
@@ -31,7 +31,7 @@
         [ decoded, errors ]
       end
 
-      def self.native_type
+      def native_type
         return ::String
       end
       
@@ -53,4 +53,4 @@
     end
 
   end
-
+end

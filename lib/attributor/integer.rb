@@ -2,9 +2,10 @@
 
   module Attributor
 
-    class Integer < Attribute
-
-      def supported_options_for_type
+    class Integer
+      include Base
+      
+      def self.supported_options_for_type
         [:min,:max]
       end
       
@@ -12,20 +13,20 @@
         return ::Integer
       end
       
-      def validate(value,context)
+      def self.validate(value,context,definition)
         errors = []
-        @options.each_pair do |option, definition|
+        definition.options.each_pair do |option, opt_definition|
           case option
           when :max 
-            errors << "#{context} value is larger than the allowed max (#{definition})" unless value <= definition 
+            errors << "#{context} value is larger than the allowed max (#{opt_definition})" unless value <= opt_definition 
           when :min 
-            errors << "#{context} value is smaller than the allowed min (#{definition})" unless value >= definition 
+            errors << "#{context} value is smaller than the allowed min (#{opt_definition})" unless value >= opt_definition 
           end
         end
         errors
       end
 
-      def decode( value, context )
+      def self.decode( value, context , definition)
         errors = []
         # We assume that if the value is already in the right type, we've decoded it already
         if( value.is_a?(self.native_type) )
@@ -44,7 +45,7 @@
         [ decoded, errors ]
       end
 
-      def example
+      def self.example
         if value = options[:example]
           if value.kind_of? Regexp
             return value.gen.to_i

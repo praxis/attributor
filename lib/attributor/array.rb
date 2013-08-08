@@ -112,7 +112,9 @@
           element_index += 1
           sub_object
         end
-        [ loaded_value, loaded_errors ]
+        
+        loaded_value , sub_errors = decode_substructure( loaded_value, context )
+        [ loaded_value, loaded_errors + sub_errors ]
       end
 
       def decode_substructure( decoded_value , context )
