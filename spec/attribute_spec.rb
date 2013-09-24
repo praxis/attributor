@@ -140,6 +140,25 @@ describe Attributor::Attribute do
 
     end
 
+    context 'deterministic examples' do
+      let(:example) { /\w+/ }
+      it 'can take a context to pre-seed the random number generator' do
+        example_1 = subject.example('context')
+        example_2 = subject.example('context')
+
+        example_1.should eq example_2
+      end
+
+      it 'can take a context to pre-seed the random number generator' do
+        example_1 = subject.example('context')
+        example_2 = subject.example('different context')
+
+        example_1.should_not eq example_2
+      end
+
+   end
+
+
 
   end
 
@@ -339,6 +358,14 @@ describe Attributor::Attribute do
         attribute.attributes.each do |name, attr|
           describe[:attributes].should have_key(name)
         end
+
+      end
+
+      it 'supports deterministic examples' do
+        example_1 = attribute.example("Chicken context")
+        example_2 = attribute.example("Chicken context")
+
+        example_1.attributes.should eq(example_2.attributes)
       end
 
       context '#validate' do

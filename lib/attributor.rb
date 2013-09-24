@@ -3,6 +3,7 @@ require 'randexp'
 
 require 'hashie'
 
+require 'digest/sha1'
 
 module Attributor
   

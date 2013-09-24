@@ -66,21 +66,28 @@ module Attributor
     end
 
 
-    def example
+    def example(context=nil)
+      if context
+        seed, _ = Digest::SHA1.digest(context).unpack("QQ")
+        Random.srand(seed) 
+      end
+
       val = self.options[:example]
 
       case val
       when ::String
+        # FIXME: spec this properly to use self.native_type
         val
       when ::Regexp
         self.load(val.gen)
       when ::Array
+        # TODO: handle arrays of non native types, i.e. arrays of regexps.... ?
         val.pick
       when nil
         if values = self.options[:values]
           values.pick
         else
-          self.type.example(self.options)
+          self.type.example(self.options, context)
         end
       else
         raise "unknown example type, got: #{val}"
@@ -140,7 +147,6 @@ module Attributor
       errors += self.type.validate(object,context,self)
       
       if self.attributes
-        #binding.pry
         self.attributes.each do |sub_attribute_name, sub_attribute|
           sub_context = self.type.generate_subcontext(context,sub_attribute_name)
           errors += sub_attribute.validate(object.get(sub_attribute_name), sub_context)

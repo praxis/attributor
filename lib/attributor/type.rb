@@ -1,7 +1,7 @@
 # Need types fleshed out:
-#   Boolean
 #   String
 #   Integer
+#   Boolean
 #   DateTime
 #   Float
 # Will need eventually, but not right now:
@@ -67,7 +67,7 @@ module Attributor
 
 
       # Default, overridable example function
-      def example(options=nil)
+      def example(options=nil, context=nil)
         raise "#{self} must implement #example"
         # return options[:example] if options.has_key? :example
         # return options[:default] if options.has_key? :default

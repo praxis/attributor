@@ -46,11 +46,12 @@ module Attributor
 
       # @!group Tested
 
-      def example(options={})
+      def example(options={}, context=nil)
         result = self.new
 
-        self.definition.attributes.each do |k,v|
-          result.set(k, v.example)
+        self.definition.attributes.each do |sub_attribute_name,sub_attribute|
+          sub_context = self.generate_subcontext(context,sub_attribute_name)
+          result.set(sub_attribute_name, sub_attribute.example(context))
         end
 
         result

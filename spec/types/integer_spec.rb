@@ -29,39 +29,20 @@ describe Attributor::Integer do
 
         context 'with simple alphanumeric text' do
           let(:value) { 'not an integer' }
+
+          it 'raises an error' do
+            expect { type.load(value) }.to raise_error(/invalid value/)
+          end
         end
 
         context 'with a floating point value' do
           let(:value) { '98.76' }
+          it 'raises an error' do
+            expect { type.load(value) }.to raise_error(/invalid value/)
+          end
         end
 
       end
-
-
-      #       it 'contains simple alphanumeric text' do
-      #         val="not an integer"
-      #         object, errors = subject.decode(val,'context')
-      #         errors.first.should =~ /Could not decode an integer from this String./
-      #         object.should be_nil
-      #       end
-      #       it 'contains a floating point value' do
-      #         val="98.76"
-      #         object, errors = subject.decode(val,'context')
-      #         errors.first.should =~ /Could not decode an integer from this String./
-      #         object.should be_nil
-      #       end
-      #     end
-      #   end
-
-      #   context 'for incoming values of non-supported types' do
-      #     it 'always returns errors complaining about the unknown type' do
-      #       val={'this'=>'is', 'a'=>'hash' }
-      #       object, errors = subject.decode(val,'context')
-      #       errors.first.should =~ /Do not know how to load an integer from/
-      #       object.should be_nil
-      #     end
-      #   end
-      # end
 
     end
   end
