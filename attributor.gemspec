@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["RightScale"]
-  s.date = "2013-07-22"
+  s.date = "2013-09-24"
   s.description = "longer description of your gem"
   s.email = "blanquer@rightscale.com"
   s.extra_rdoc_files = [
@@ -19,65 +19,107 @@ Gem::Specification.new do |s|
   s.files = [
     ".document",
     ".rspec",
+    ".ruby-version",
     "Gemfile",
     "Gemfile.lock",
+    "Guardfile",
     "LICENSE.txt",
     "README.md",
     "Rakefile",
     "VERSION",
     "attributor.gemspec",
     "lib/attributor.rb",
-    "lib/attributor/array.rb",
     "lib/attributor/attribute.rb",
-    "lib/attributor/boolean.rb",
-    "lib/attributor/csv.rb",
-    "lib/attributor/date_time.rb",
-    "lib/attributor/hash.rb",
-    "lib/attributor/ids.rb",
-    "lib/attributor/integer.rb",
-    "lib/attributor/string.rb",
-    "spec/array_spec.rb",
+    "lib/attributor/attribute_resolver.rb",
+    "lib/attributor/dsl_compiler.rb",
+    "lib/attributor/old school types/array.rb",
+    "lib/attributor/old school types/base.rb",
+    "lib/attributor/old school types/boolean.rb",
+    "lib/attributor/old school types/csv.rb",
+    "lib/attributor/old school types/date_time.rb",
+    "lib/attributor/old school types/hash.rb",
+    "lib/attributor/old school types/ids.rb",
+    "lib/attributor/type.rb",
+    "lib/attributor/types/integer.rb",
+    "lib/attributor/types/model.rb",
+    "lib/attributor/types/string.rb",
+    "lib/attributor/types/struct.rb",
+    "prior-spec/array_spec.rb",
+    "prior-spec/attribute_spec.rb",
+    "prior-spec/base_spec.rb",
+    "prior-spec/boolean_spec.rb",
+    "prior-spec/csv_spec.rb",
+    "prior-spec/date_time_spec.rb",
+    "prior-spec/hash_spec.rb",
+    "prior-spec/ids_spec.rb",
+    "prior-spec/integer_spec.rb",
+    "prior-spec/spec_helper.rb",
+    "prior-spec/string_spec.rb",
+    "prior-spec/struct_spec.rb",
+    "spec/attribute_resolver_spec.rb",
     "spec/attribute_spec.rb",
-    "spec/boolean_spec.rb",
-    "spec/csv_spec.rb",
-    "spec/date_time_spec.rb",
-    "spec/hash_spec.rb",
-    "spec/ids_spec.rb",
-    "spec/integer_spec.rb",
+    "spec/attributor_spec.rb",
     "spec/spec_helper.rb",
-    "spec/string_spec.rb"
+    "spec/support/models.rb",
+    "spec/support/types.rb",
+    "spec/type_spec.rb",
+    "spec/types/integer_spec.rb",
+    "spec/types/model_spec.rb",
+    "spec/types/struct_spec.rb",
+    "tmp/rspec_guard_result"
   ]
   s.homepage = "http://github.com/blanquer/attributor"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = "1.8.25"
+  s.rubygems_version = "1.8.23"
   s.summary = "one-line summary of your gem"
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
+      s.add_runtime_dependency(%q<hashie>, [">= 0"])
       s.add_runtime_dependency(%q<randexp>, [">= 0"])
       s.add_development_dependency(%q<rspec>, [">= 0"])
-      s.add_development_dependency(%q<yard>, ["~> 0.7"])
+      s.add_development_dependency(%q<yard>, ["~> 0.8.7"])
+      s.add_development_dependency(%q<redcarpet>, [">= 0"])
       s.add_development_dependency(%q<rdoc>, ["~> 3.12"])
       s.add_development_dependency(%q<bundler>, [">= 0"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.8.4"])
+      s.add_development_dependency(%q<guard>, [">= 0"])
+      s.add_development_dependency(%q<guard-rspec>, [">= 0"])
+      s.add_development_dependency(%q<pry>, [">= 0"])
+      s.add_development_dependency(%q<pry-debugger>, [">= 0"])
+      s.add_development_dependency(%q<ruby-prof>, [">= 0"])
     else
+      s.add_dependency(%q<hashie>, [">= 0"])
       s.add_dependency(%q<randexp>, [">= 0"])
       s.add_dependency(%q<rspec>, [">= 0"])
-      s.add_dependency(%q<yard>, ["~> 0.7"])
+      s.add_dependency(%q<yard>, ["~> 0.8.7"])
+      s.add_dependency(%q<redcarpet>, [">= 0"])
       s.add_dependency(%q<rdoc>, ["~> 3.12"])
       s.add_dependency(%q<bundler>, [">= 0"])
       s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
+      s.add_dependency(%q<guard>, [">= 0"])
+      s.add_dependency(%q<guard-rspec>, [">= 0"])
+      s.add_dependency(%q<pry>, [">= 0"])
+      s.add_dependency(%q<pry-debugger>, [">= 0"])
+      s.add_dependency(%q<ruby-prof>, [">= 0"])
     end
   else
+    s.add_dependency(%q<hashie>, [">= 0"])
     s.add_dependency(%q<randexp>, [">= 0"])
     s.add_dependency(%q<rspec>, [">= 0"])
-    s.add_dependency(%q<yard>, ["~> 0.7"])
+    s.add_dependency(%q<yard>, ["~> 0.8.7"])
+    s.add_dependency(%q<redcarpet>, [">= 0"])
     s.add_dependency(%q<rdoc>, ["~> 3.12"])
     s.add_dependency(%q<bundler>, [">= 0"])
     s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
+    s.add_dependency(%q<guard>, [">= 0"])
+    s.add_dependency(%q<guard-rspec>, [">= 0"])
+    s.add_dependency(%q<pry>, [">= 0"])
+    s.add_dependency(%q<pry-debugger>, [">= 0"])
+    s.add_dependency(%q<ruby-prof>, [">= 0"])
   end
 end
 
