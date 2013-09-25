@@ -87,6 +87,7 @@ module Attributor
 
         hash = case value
         when ::String
+          # Strings are assumed to be JSON-serialized for now.
           JSON.parse(value)
         when ::Hash
           value
@@ -240,24 +241,6 @@ module Attributor
       #   raise "This attribute does not have a sub definition, therefore a named attribute cannot be accessed" unless sub_definition
       #   sub_definition.has_key? name
       # end
-
-
-      # Validates an incoming value (corresponding to this native type) only against the defined options.
-      # For example, if there's an option (i.e., :max_size=>4) that said that instances of this model type can only
-      # have 4 attributes defined. This function would validate that the incoming model value has no more than 4 attributes.
-      # TODO: verify, I belive we're guaranteed that the incoming value is of native_type of this model?...
-      # It returns an array of errors (human string explanations for which it might not have passed validation). Empty array means "passed".
-      def validate(value,context,attribute)
-        errors = []
-        attribute.options.each_pair do |option, opt_value|
-          case option
-          when :max_size
-            #TODO: completely remove the max_size option
-            #errors << "#{context} has more attributes than the maximum allowed (#{opt_value})" unless value.attributes.size <= opt_value
-          end
-        end
-        errors
-      end
 
 
 

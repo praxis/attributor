@@ -3,6 +3,7 @@ module Attributor
   class Struct 
     include Attributor::Model
 
+    # Construct a new subclass, using attribute_definition to define attributes.
     def self.construct(attribute_definition, options={})
       # TODO: massage the options here to pull out only the relevant ones
       Class.new(self) do

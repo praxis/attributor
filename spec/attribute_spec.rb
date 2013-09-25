@@ -78,6 +78,7 @@ describe Attributor::Attribute do
 
   context 'checking options' do
     it 'has specs'
+    it 'has a spec that we try to validate the :default value'
   end
 
 

@@ -60,22 +60,22 @@ module Attributor
   # end
 
 
-  def self.resolve_type(type, options={}, block=nil)
+  def self.resolve_type(type, options={}, constructor_block=nil)
     if type < Attributor::Type
       klass = type
     else    
       name = type.name.split("::").last # TOO EXPENSIVE?
 
-      klass ||= const_get(name) if const_defined?(name)
+      klass = const_get(name) if const_defined?(name)
       raise "Could not find class with name #{name}" unless klass
       raise "Could not find attribute type for: #{name} [klass: #{klass.name}]"  unless  klass < Attributor::Type
     end
 
-    return klass unless block
+    return klass unless constructor_block
 
     raise "Type: #{type} does not support anonymous generation" unless klass.respond_to?(:construct)
 
-    klass.construct(block, options)
+    klass.construct(constructor_block, options)
   end
   
 

@@ -7,7 +7,7 @@ module Attributor
   class Attribute
 
     # hierarchical separator string for composing human readable attributes
-    SEPARATOR = '.'
+    SEPARATOR = '.'.freeze
 
     attr_reader :type
 
@@ -37,7 +37,7 @@ module Attributor
 
     def validate_type(value, context)
       unless value.is_a? self.native_type
-        return ["Attribute #{context} received value: #{value.inspect} is of the wrong type (got:#{value.class.name} expected:#{self.native_type.name})"]
+        return ["Attribute #{context} received value: #{value.inspect} is of the wrong type (got: #{value.class.name} expected: #{self.native_type.name})"]
       end
       []
     end
@@ -217,7 +217,7 @@ module Attributor
         raise "Required_if must be a String, a Hash definition or a Proc" unless definition.is_a?(::String) || definition.is_a?(::Hash) || definition.is_a?(::Proc)
         raise "Required_if cannot be specified together with :required" if self.options[:required]
       when :example
-        unless definition.is_a?(self.native_type) || definition.is_a?(Regexp) || definition.is_a?(::String) || definition.is_a?(::Array)
+        unless definition.is_a?(self.native_type) || definition.is_a?(::Regexp) || definition.is_a?(::String) || definition.is_a?(::Array)
           raise "Invalid example type (got: #{definition.class.name}) for type (#{self.native_type.inspect}). It must always match the type of the attribute (except if passing Regex that is allowed for some types)"
         end
       else
