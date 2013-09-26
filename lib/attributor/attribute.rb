@@ -14,10 +14,7 @@ module Attributor
     # @block: code definition for struct attributes (nil for predefined types or leaf/simple types)
     def initialize(type, options={}, &block)
       @type = Attributor.resolve_type(type, options, block)
-
       @options = options
-      @saved_block = block
-      # @inherit_from = @options.delete(:inherit_from) # AttributeType object to inherit options/subdefinitions from
 
       check_options!
     end
@@ -126,7 +123,6 @@ module Attributor
     # Lazy compilation
     def compiled_definition
       unless @compiled_definition
-        #@compiled_definition = type.definition( @options, @saved_block )
         @compiled_definition = type.definition
         @compiled_options = @compiled_definition.options.merge(@options)
       end
