@@ -101,6 +101,19 @@ Contributing to attributor
 * Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.
 * Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.
 
+
+Documentation
+-------------
+
+Generated documentation:
+
+    bundle exec yard
+
+Code coverage:
+
+    bundle exec rspec
+    open coverage/index.html
+
 Copyright
 ---------
 
