@@ -17,17 +17,6 @@ describe Attributor::DSLCompiler do
   let(:dsl_compiler_options) { {} }
   subject(:dsl_compiler) { Attributor::DSLCompiler.new(dsl_compiler_options) }
 
-
-
-  context 'adding a typed attribute' do
-    it 'works'
-  end
-
-
-  it 'needs specs for nested attributes'
-  it 'needs specs for anonymous structs if the spec above did not cover those well enough'
-
-
   let(:attribute_name) { "name" }
   let(:attribute_type) { Attributor::String }
 
@@ -35,6 +24,50 @@ describe Attributor::DSLCompiler do
   let(:reference_attribute_type) { reference_attribute.type }
   let(:reference_attribute_options) { reference_attribute.options }
   let(:reference_attribute) {reference_attributes[attribute_name] }
+
+  context '#parse_arguments' do
+
+    let(:type_or_options) { nil }
+    let(:opts) { nil }
+
+    subject(:parsed_arguments) { dsl_compiler.parse_arguments(type_or_options, opts) }
+
+    context 'with nil and nil' do
+      its(:first) { should == nil } # type
+      its(:last)  { should == {}  } # opts
+    end
+
+    context 'with nil and {}' do
+      let(:opts) { Hash.new }
+
+      its(:first) { should == nil }   # type
+      its(:last)  { should be(opts) } # opts
+    end
+
+    context 'with hash and nil' do
+      let(:type_or_options) { Hash.new }
+
+      its(:first) { should == nil }              # type
+      its(:last)  { should be(type_or_options) } # opts
+    end
+
+    context 'with a class and hash' do
+      let(:type_or_options) { ::Object }
+      let(:opts) { Hash.new }
+
+      its(:first) { should == type_or_options } # type
+      its(:last)  { should be(opts)  }          # opts
+    end
+
+    context 'with a class and nil' do
+      let(:type_or_options) { ::Object }
+
+      its(:first) { should == type_or_options } # type
+      its(:last)  { should == {} }              # opts
+    end
+
+  end
+
 
   context '#attribute' do
     let(:attribute_options) { {} }
@@ -51,7 +84,7 @@ describe Attributor::DSLCompiler do
         it 'raises an error for a missing type' do
           expect {
             dsl_compiler.attribute(attribute_name)
-          }.to raise_error(/type not specified/)
+          }.to raise_error(/type for attribute/)
 
         end
 
@@ -131,7 +164,7 @@ describe Attributor::DSLCompiler do
       context 'with a reference' do
         let(:dsl_compiler_options) { {reference: Turducken} }
         let(:expected_options) do
-            attribute_options.merge(reference:reference_attribute_type)
+          attribute_options.merge(reference:reference_attribute_type)
         end
 
         it 'is unhappy from somewhere else if you do not specify a type' do
@@ -152,118 +185,3 @@ describe Attributor::DSLCompiler do
   end
 
 end
-
-
-
-# context 'inferring type from a reference' do
-#   let(:reference_attributes) { Turducken.definition.attributes }
-#   let(:reference_attribute) {reference_attributes[name] }
-#   let(:reference_attribute_type) { reference_attribute.type }
-
-#   subject(:inferred_type) { dsl_compiler.infer_type(attribute_name) }
-
-#   context 'for simple attributes' do
-#     let(:attribute_name) { "name" }
-
-#     it { should be(reference_attribute_type) }
-
-
-#     context 'for an unknown attribute name' do
-#       it 'raises an error' do
-#         expect {
-#           dsl_compiler.attribute('unknown')
-#         }.to raise_error(/can not inherit attribute/)
-#       end
-#     end
-#   end
-
-
-
-#   context 'determining type for reference option' do
-#   end
-
-
-
-
-
-
-
-
-#   context 'inheriting from a reference' do
-#     let(:reference_attributes) { Turducken.definition.attributes }
-#     let(:name) { "name" }
-#     let(:name_attribute) {reference_attributes[name] }
-
-
-#     shared_examples 'inheritance' do
-#       context 'type' do
-#       end
-#     end
-
-#     context 'passing only a name' do
-#       subject(:attribute) { dsl_compiler.attribute(name)}
-#       it 'inherits type' do
-#         attribute.type.should be(chicken_attributes[name].type)
-#       end
-#       it 'inherits exact options' do
-#         attribute.options.should == chicken_attributes[name].options
-#       end
-
-#       context 'for an unknown attribute name' do
-#         it 'raises an error' do
-#           expect {
-#             dsl_compiler.attribute('unknown')
-#           }.to raise_error(/can not inherit attribute/)
-#         end
-#       end
-#     end
-
-
-#     context 'passing name and options' do
-#       subject(:attribute) { dsl_compiler.attribute(name, attribute_options)}
-
-#       let(:attribute_options) { {required: true, regexp:/\w+@/} }
-
-#       it 'inherits type' do
-#         attribute.type.should == (chicken_attributes[name].type)
-#       end
-
-#       it 'merges inherited plus new options' do
-#         attribute.options[:required].should == attribute_options[:required]
-#         attribute.options[:description].should == chicken_attribute.options[:description]
-#       end
-
-#       it 'overrides duplicated options' do
-#         attribute.options[:regexp].should_not == chicken_attribute.options[:regexp]
-#         attribute.options[:regexp].should == attribute_options[:regexp]
-#       end
-#     end
-
-
-#     context 'passing name, nil for type, and options' do
-#       subject(:attribute) { dsl_compiler.attribute(name, nil, attribute_options)}
-
-#       let(:attribute_options) { {required: true, regexp:/\w+@/} }
-
-#       it 'inherits type' do
-#         attribute.type.should == (chicken_attributes[name].type)
-#       end
-
-#       it 'merges inherited plus new options' do
-#         attribute.options[:required].should == attribute_options[:required]
-#         attribute.options[:description].should == chicken_attribute.options[:description]
-#       end
-
-#       it 'overrides duplicated options' do
-#         attribute.options[:regexp].should_not == chicken_attribute.options[:regexp]
-#         attribute.options[:regexp].should == attribute_options[:regexp]
-#       end
-#     end
-
-
-#   end
-
-
-
-
-# end

@@ -9,7 +9,7 @@ module Attributor
       # TODO: massage the options here to pull out only the relevant ones
       Class.new(self) do
         attributes options, &attribute_definition
-
+        
       end
     end
 
