@@ -11,7 +11,17 @@ module Attributor
 
     attr_reader :type
 
-    # @!group Tested
+    # @options: metadata about the attribute
+    # @block: code definition for struct attributes (nil for predefined types or leaf/simple types)
+    def initialize(type, options={}, &block)
+      @type = Attributor.resolve_type(type, options, block)
+
+      @options = options
+      @saved_block = block
+      # @inherit_from = @options.delete(:inherit_from) # AttributeType object to inherit options/subdefinitions from
+
+      check_options!
+    end
 
 
     def parse(value)
@@ -184,11 +194,6 @@ module Attributor
     end
 
 
-    # @endgroup
-
-
-    # @!group Half-Tested
-
     def check_options!
       self.options.each do |option_name, option_value|
         if self.check_option!(option_name, option_value) == :unknown
@@ -226,22 +231,6 @@ module Attributor
 
       :ok # passes
     end
-
-
-    # @endgroup
-
-    # @options: metadata about the attribute
-    # @block: code definition for struct attributes (nil for predefined types or leaf/simple types)
-    def initialize(type, options={}, &block)
-      @type = Attributor.resolve_type(type, options, block)
-
-      @options = options
-      @saved_block = block
-      # @inherit_from = @options.delete(:inherit_from) # AttributeType object to inherit options/subdefinitions from
-
-      check_options!
-    end
-
 
   end
 end
