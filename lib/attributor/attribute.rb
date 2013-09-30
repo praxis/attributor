@@ -6,8 +6,7 @@ module Attributor
   # TODO: should this be a mixin since it is an abstract class?
   class Attribute
 
-    # hierarchical separator string for composing human readable attributes
-    SEPARATOR = '.'.freeze
+   
 
     attr_reader :type
 

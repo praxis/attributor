@@ -16,8 +16,6 @@ module Attributor
   # It is the abstract base class to hold an attribute, both a leaf and a container (hash/Array...)
   # TODO: should this be a mixin since it is an abstract class?
   module Type
-    # hierarchical separator string for composing human readable attributes
-    SEPARATOR = '.'
 
     def self.included( klass )
       klass.extend(ClassMethods)
@@ -87,7 +85,7 @@ module Attributor
 
       def generate_subcontext( context, subname )
         return subname if context.nil? || context == ""
-        "#{context}#{Attributor::Attribute::SEPARATOR}#{subname}"
+        "#{context}#{Attributor::SEPARATOR}#{subname}"
       end
 
       def dsl_compiler
