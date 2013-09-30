@@ -48,9 +48,9 @@ module Attributor
       def example(options={}, context=nil)
         result = self.new
 
-        self.definition.attributes.each do |sub_attribute_name,sub_attribute|
-          sub_context = self.generate_subcontext(context,sub_attribute_name)
-          result.set(sub_attribute_name, sub_attribute.example(context))
+        self.definition.attributes.each do |attribute_name,attribute|
+          sub_context = self.generate_subcontext(context,attribute_name)
+          result.set(attribute_name, attribute.example(context))
         end
 
         result
