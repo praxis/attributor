@@ -17,6 +17,7 @@ module Attributor
   require_relative 'attributor/types/string'
   require_relative 'attributor/types/model'
   require_relative 'attributor/types/struct'
+  require_relative 'attributor/types/boolean'
 
 
 
