@@ -26,14 +26,15 @@ describe Attributor::Attribute do
         Attributor.should_receive(:resolve_type).once.with(Struct,attribute_options, anything()).and_call_original
         Attributor.should_receive(:resolve_type).once.with(Integer,{}, nil).and_call_original
       end
-      
+
       it 'generates the class' do
         thing = Attributor::Attribute.new(Struct, attribute_options) do
           attribute "id", Integer
         end
       end
-      
+
     end
+
   end
 
 
@@ -45,7 +46,7 @@ describe Attributor::Attribute do
 
     context 'for an anonymous type (aka: Struct)' do
       let(:attribute_options) { Hash.new }
-      let(:attribute) do 
+      let(:attribute) do
         Attributor::Attribute.new(Struct, attribute_options) do
           attribute "id", Integer
         end
@@ -157,7 +158,7 @@ describe Attributor::Attribute do
         example_1.should_not eq example_2
       end
 
-   end
+    end
 
 
 
@@ -465,5 +466,3 @@ describe Attributor::Attribute do
   end
 
 end
-
-
