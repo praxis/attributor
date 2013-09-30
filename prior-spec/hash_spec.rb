@@ -20,17 +20,14 @@ describe Attributor::Hash do
   
   its(:native_type) { should == ::Hash }
   its(:supported_options_for_type) { should == [:max_size,:id] }
+  its(:supports_sub_definition?) { should be(true) }
   
   context 'parse_block' do
     context 'initializing subdefinition' do
       let(:sub_proc) { nil }
-      before(:each) { 
-        subject.instance_variable_set(:@sub_definition,nil)
-        subject.sub_definition.should be_nil
-      }
       after(:each){subject.sub_definition.should be_a(Hash) }
       it 'initializes the sub_definition with no block' do
-        subject.parse_block {}
+        subject.parse_block 
       end
       it 'initializes the sub_definition with a block' do
         subject.parse_block { hi=true}
@@ -49,22 +46,13 @@ describe Attributor::Hash do
     end
     
   end
-  context 'initializing' do
-
-# TODO: How to test this properly...the block doesn't seem to be passed into the should_receive...   
-    it 'calls parse_block with the defined block of the constructor' do
-      Attributor::Hash.any_instance.should_receive(:parse_block)
-    
-      Attributor::Hash.new(name, opts, &sub_proc)
-    end
-    
-  end
   
-  context 'attribute parsing on initialization' do
-    after(:each) { Attributor::Hash.new(name, opts, &sub_proc) }
-    it 'should call attribute for each definition' do
-      Attributor::Hash.any_instance.should_receive(:attribute).with('age', Integer, :min => 0, :max => 120, :description => "The age")
-      Attributor::Hash.any_instance.should_receive(:attribute).with('email', String, :regexp => /@/, :description => "The address")
+  context 'attribute parsing on (lazy) initialization' do
+    
+    it 'should call attribute for each definition in the block' do
+      subject.should_receive(:attribute).with('age', Integer, :min => 0, :max => 120, :description => "The age")
+      subject.should_receive(:attribute).with('email', String, :regexp => /@/, :description => "The address")
+      subject.sub_definition #force lazy initialization
     end
     
   end

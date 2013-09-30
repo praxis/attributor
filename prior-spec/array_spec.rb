@@ -9,6 +9,7 @@ describe Attributor::Array do
     Attributor::Array.new(students, opts, &sub_proc)
   }
   its(:native_type) { should == ::Array }
+  its(:supports_sub_definition?) { should be(true) }
 
 
   context 'parse_block' do

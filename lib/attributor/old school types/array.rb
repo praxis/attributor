@@ -5,6 +5,10 @@
 
     class Array < Attribute
       
+      def supports_sub_definition?
+        true
+      end
+      
       # Invoked at the end of the attribute initializatino
       # We will create and store a skeletor attribute based on the element_type class (defaulting to Hash)
       # If a block is passed, we will pass it along when we instantiate the attribute
@@ -108,7 +112,9 @@
           element_index += 1
           sub_object
         end
-        [ loaded_value, loaded_errors ]
+        
+        loaded_value , sub_errors = decode_substructure( loaded_value, context )
+        [ loaded_value, loaded_errors + sub_errors ]
       end
 
       def decode_substructure( decoded_value , context )
