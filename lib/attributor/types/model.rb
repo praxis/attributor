@@ -44,7 +44,6 @@ module Attributor
 
     module ClassMethods
 
-      # @!group Tested
 
       def example(options={}, context=nil)
         result = self.new
@@ -77,8 +76,6 @@ module Attributor
         end
       end
 
-
-      # @endgroup
 
       # Model-specific decoding and coercion of the attribute.
       def load(value)
