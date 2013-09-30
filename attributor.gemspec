@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["RightScale"]
-  s.date = "2013-09-24"
+  s.date = "2013-09-30"
   s.description = "longer description of your gem"
   s.email = "blanquer@rightscale.com"
   s.extra_rdoc_files = [
@@ -19,7 +19,6 @@ Gem::Specification.new do |s|
   s.files = [
     ".document",
     ".rspec",
-    ".ruby-version",
     "Gemfile",
     "Gemfile.lock",
     "Guardfile",
@@ -28,6 +27,7 @@ Gem::Specification.new do |s|
     "Rakefile",
     "VERSION",
     "attributor.gemspec",
+    "attributor.rconf",
     "lib/attributor.rb",
     "lib/attributor/attribute.rb",
     "lib/attributor/attribute_resolver.rb",
@@ -86,6 +86,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<rdoc>, ["~> 3.12"])
       s.add_development_dependency(%q<bundler>, [">= 0"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.8.4"])
+      s.add_development_dependency(%q<simplecov>, [">= 0"])
       s.add_development_dependency(%q<guard>, [">= 0"])
       s.add_development_dependency(%q<guard-rspec>, [">= 0"])
       s.add_development_dependency(%q<pry>, [">= 0"])
@@ -100,6 +101,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<rdoc>, ["~> 3.12"])
       s.add_dependency(%q<bundler>, [">= 0"])
       s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
+      s.add_dependency(%q<simplecov>, [">= 0"])
       s.add_dependency(%q<guard>, [">= 0"])
       s.add_dependency(%q<guard-rspec>, [">= 0"])
       s.add_dependency(%q<pry>, [">= 0"])
@@ -115,6 +117,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<rdoc>, ["~> 3.12"])
     s.add_dependency(%q<bundler>, [">= 0"])
     s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
+    s.add_dependency(%q<simplecov>, [">= 0"])
     s.add_dependency(%q<guard>, [">= 0"])
     s.add_dependency(%q<guard-rspec>, [">= 0"])
     s.add_dependency(%q<pry>, [">= 0"])
