@@ -4,7 +4,6 @@ module Attributor
 
 
   class AttributeResolver
-    SEPARATOR = '.'.freeze
 
     class Data < Hash
       include Hashie::Extensions::MethodReader

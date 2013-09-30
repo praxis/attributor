@@ -681,7 +681,7 @@ describe Attributor::Attribute do
       context 'when generating a subcontext from another attribute' do
         let(:parent_ctx) { "parent_attribute" }
         it "does prepend the separator before the subcontext" do
-          generated_context.should == "#{parent_ctx}#{Attributor::Attribute::SEPARATOR}#{subattr}"
+          generated_context.should == "#{parent_ctx}#{Attributor::SEPARATOR}#{subattr}"
         end
       end
 
