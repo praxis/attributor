@@ -4,6 +4,7 @@ module Attributor
 
 
   class AttributeResolver
+    ROOT_PREFIX = '$'.freeze
 
     class Data < Hash
       include Hashie::Extensions::MethodReader
@@ -17,14 +18,14 @@ module Attributor
 
 
     # TODO: support collection queries
-    def query!(key_path, path_prefix='$')
+    def query!(key_path, path_prefix=ROOT_PREFIX)
       # if the incoming key_path is not an absolute path, append the given prefix
-      unless key_path[0] == '$'
-        # TODO: prepend '$' to path_prefix if it did not include it? hm.
+      unless key_path[0] == ROOT_PREFIX
+        # TODO: prepend path_prefix to path_prefix if it did not include it? hm.
         key_path = path_prefix + SEPARATOR + key_path
       end
 
-      # discard the initial element, which should always be '$' at this point
+      # discard the initial element, which should always be ROOT_PREFIX at this point
       _root, *path = key_path.split(SEPARATOR)
 
       path.inject(@data) do |hash, key|
@@ -34,7 +35,7 @@ module Attributor
     end
 
 
-    def query(key_path,path_prefix='$')
+    def query(key_path,path_prefix=ROOT_PREFIX)
       query!(key_path,path_prefix)
     rescue NoMethodError => e
       nil
@@ -74,21 +75,6 @@ module Attributor
     def self.current
       Thread.current[:_attributor_attribute_resolver] ||= self.new
     end
-
-
-    # def self.query(key_path, path_prefix='$')
-    #   self.current.query(key_path,path_prefix)
-    # end
-
-
-    # def self.register(key_path, value)
-    #   self.current.register(key_path, value)
-    # end
-
-
-    # def self.check(context, key_path, condition=nil)
-    #   self.current.check(context,key_path, condition)
-    # end
 
   end
 

@@ -28,7 +28,7 @@ end
 
 class Turducken
   include Attributor::Model
-  attributes(:identity => :email) do
+  attributes do
     attribute 'chicken', Chicken
     attribute 'duck', Duck
     attribute 'turkey', Turkey    
