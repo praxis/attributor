@@ -2,10 +2,16 @@
 
   module Attributor
     
-    class Hash < Attribute
+    class Hash < Base
   
+      class << self
+        
       def supported_options_for_type
         [:max_size,:id]
+      end
+
+      def supports_sub_definition?
+        true
       end
       
       def parse_block(&block)
@@ -18,7 +24,7 @@
       # Each attribute will create an attribute and save it on the "definition" piece.
       def attribute(name, incoming_type=nil, incoming_opts={}, &block)
 
-        raise "Attribute #{name} already defined" if @sub_definition.has_key? name        
+        raise "Attribute #{name} already defined" if sub_definition.has_key? name        
         args = private_decode_args_for_attribute( incoming_type, incoming_opts)
         opts = args[:opts]        
         
@@ -38,7 +44,7 @@
         
         klass = Attributor.determine_class(type)        
         opts[:inherit_from] = @inherit_from[name] if @inherit_from
-        @sub_definition[name] = klass.new(name, opts, &block)
+        @sub_definition[name] = Attributor::Attribute.new(klass, opts, &block)
       end
       alias_method :param, :attribute
 
@@ -61,14 +67,14 @@
 
       def [](name)
         raise "Symbols are not allowed for attribute names, use strings please." if name.is_a? Symbol
-        raise "This attribute does not have a sub definition, therefore a named attribute cannot be accessed" unless @sub_definition
-        @sub_definition[name]
+        raise "This attribute does not have a sub definition, therefore a named attribute cannot be accessed" unless sub_definition
+        sub_definition[name]
       end
       
       def has_key?(name)
         raise "Symbols are not allowed for attribute names, use strings please." if name.is_a? Symbol
-        raise "This attribute does not have a sub definition, therefore a named attribute cannot be accessed" unless @sub_definition
-        @sub_definition.has_key? name
+        raise "This attribute does not have a sub definition, therefore a named attribute cannot be accessed" unless sub_definition 
+        sub_definition.has_key? name
       end   
       
       def private_decode_args_for_attribute( incoming_type, incoming_opts)
@@ -95,9 +101,9 @@
 ##############        @sub_definition[@id_name]
 ##############      end
       
-      def validate(value,context)
+      def validate(value,context,options)
         errors = []
-        @options.each_pair do |option, definition|
+        options.each_pair do |option, definition|
           case option
           when :max_size
             errors << "#{context} has more attributes than the maximum allowed (#{definition})" unless value.keys.size <= definition 
@@ -123,34 +129,19 @@
         else
           error << "Encoded Hashes for this type is not SUPPORTED! (got: #{value.class.name})"
         end
-        
-        [ decoded, error ]
+        decoded , sub_errors = decode_substructure( decoded, context )
+        [ decoded, error + sub_errors ]
       end
       
-     def self.native_type
+     def native_type
        return ::Hash
      end
-
-      
-#      def to_string(numspaces=0)
-#        str =  "%-#{numspaces}s HASH(%s,opts=%s)\n" % ["",@name, @options.inspect]
-#
-#        str += "%-#{numspaces}s {\n" % [" "]  if @sub_definition.size > 0
-#        @sub_definition.each do |key, obj |
-#          str += "%-#{numspaces}s  %s=>%s" % ["",key, obj.to_string(numspaces+2)]
-#        end
-#        str += "%-#{numspaces}s }\n" % [""] if @sub_definition.size > 0
-#        str
-#      end
-
-
-#########################NEW FOR HASH!!!
 
       def decode_substructure( decoded_value , context )
         errors = []
         object = {}
         # Validate the individual hash attributes for each defined attribute
-        @sub_definition.each_pair do |sub_name, sub_attr|    
+        sub_definition.each_pair do |sub_name, sub_attr|    
           sub_context = generate_subcontext(context,sub_name)      
           load_object, load_errors = sub_attr.load( decoded_value[sub_name] , sub_context )
           # Skip saving an empty value key if the incoming decoded value didn't even have it (and it had no default for it)
@@ -160,10 +151,10 @@
         [ object, errors ]
       end  
         
-      def check_dependencies_substructure(myself,root)
+      def check_dependencies_substructure(myself,root,options)
         return [] unless myself
         errors = []
-        @sub_definition.each_pair do |sub_name, sub_attr|    
+        sub_definition.each_pair do |sub_name, sub_attr|    
           errors += sub_attr.check_dependencies(myself[sub_name],root)
         end
         return errors      
@@ -177,7 +168,7 @@
         out
       end
       
-      def describe_attribute_specific_options
+      def describe_attribute_specific_options(options)
         out = {}
         out[:max_size] = options[:max_size] if options.has_key?(:max_size)
         out[:id] = options[:id] if options.has_key?(:id)
@@ -190,7 +181,7 @@
         out
       end
       
-      def example
+      def example(options)
         return options[:example] if options.has_key? :example
         return super if options.has_key?(:default) || options.has_key?(:value)
         
@@ -204,7 +195,7 @@
         result
       end      
       
-      
+      end
     end
   end
 
