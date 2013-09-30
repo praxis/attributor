@@ -69,7 +69,7 @@ module Attributor
     def example(context=nil)
       if context
         seed, _ = Digest::SHA1.digest(context).unpack("QQ")
-        Random.srand(seed) 
+        Random.srand(seed)
       end
 
       val = self.options[:example]
@@ -90,7 +90,7 @@ module Attributor
           self.type.example(self.options, context)
         end
       else
-        raise "unknown example type, got: #{val}"
+        raise AttributorException.new("unknown example type, got: #{val}")
       end
     end
 
@@ -145,7 +145,7 @@ module Attributor
       end
 
       errors += self.type.validate(object,context,self)
-      
+
       if self.attributes
         self.attributes.each do |sub_attribute_name, sub_attribute|
           sub_context = self.type.generate_subcontext(context,sub_attribute_name)
@@ -171,7 +171,7 @@ module Attributor
         key_path = requirement.keys.first
         condition = requirement.values.first
       else
-        raise "unknown type of dependency: #{requirement.inspect}" # should never get here if the option validation worked...
+        raise AttributorException.new("unknown type of dependency: #{requirement.inspect}") # should never get here if the option validation worked...
       end
 
 
@@ -193,7 +193,7 @@ module Attributor
       self.options.each do |option_name, option_value|
         if self.check_option!(option_name, option_value) == :unknown
           if self.type.check_option!(option_name, option_value) == :unknown
-            raise "unsupported option: #{option_name} with value: #{option_value.inspect} for attribute: #{self.inspect}"
+            raise AttributorException.new("unsupported option: #{option_name} with value: #{option_value.inspect} for attribute: #{self.inspect}")
           end
         end
       end
@@ -205,20 +205,20 @@ module Attributor
     def check_option!(name, definition)
       case name
       when :values
-        raise "Allowed set of values requires an array. Got (#{definition})" unless definition.is_a? ::Array
+        raise AttributorException.new("Allowed set of values requires an array. Got (#{definition})") unless definition.is_a? ::Array
       when :default
-        raise "Default value doesn't have the correct type. Requires (#{self.native_type.name}). Got (#{definition})" unless definition.is_a? self.native_type
+        raise AttributorException.new("Default value doesn't have the correct type. Requires (#{self.native_type.name}). Got (#{definition})") unless definition.is_a? self.native_type
       when :description
-        raise "Description value must be a string. Got (#{definition})" unless definition.is_a? ::String
+        raise AttributorException.new("Description value must be a string. Got (#{definition})") unless definition.is_a? ::String
       when :required
-        raise "Required must be a boolean" unless !!definition == definition # Boolean check
-        raise "Required cannot be enabled in combination with :default" if definition == true && options.has_key?(:default)
+        raise AttributorException.new("Required must be a boolean") unless !!definition == definition # Boolean check
+        raise AttributorException.new("Required cannot be enabled in combination with :default") if definition == true && options.has_key?(:default)
       when :required_if
-        raise "Required_if must be a String, a Hash definition or a Proc" unless definition.is_a?(::String) || definition.is_a?(::Hash) || definition.is_a?(::Proc)
-        raise "Required_if cannot be specified together with :required" if self.options[:required]
+        raise AttributorException.new("Required_if must be a String, a Hash definition or a Proc") unless definition.is_a?(::String) || definition.is_a?(::Hash) || definition.is_a?(::Proc)
+        raise AttributorException.new("Required_if cannot be specified together with :required") if self.options[:required]
       when :example
         unless definition.is_a?(self.native_type) || definition.is_a?(::Regexp) || definition.is_a?(::String) || definition.is_a?(::Array)
-          raise "Invalid example type (got: #{definition.class.name}) for type (#{self.native_type.inspect}). It must always match the type of the attribute (except if passing Regex that is allowed for some types)"
+          raise AttributorException.new("Invalid example type (got: #{definition.class.name}) for type (#{self.native_type.inspect}). It must always match the type of the attribute (except if passing Regex that is allowed for some types)")
         end
       else
         return :unknown # unknown option

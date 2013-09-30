@@ -31,7 +31,7 @@ module Attributor
       # Generic decoding and coercion of the attribute.
       def load(value)
         unless value.is_a?(self.native_type)
-          raise "#{self.name} can not load value that is not of type #{self.native_type}. Got: #{value.inspect}."
+          raise AttributorException.new("#{self.name} can not load value that is not of type #{self.native_type}. Got: #{value.inspect}.")
         end
 
         value
@@ -68,7 +68,7 @@ module Attributor
 
       # Default, overridable example function
       def example(options=nil, context=nil)
-        raise "#{self} must implement #example"
+        raise AttributorException.new("#{self} must implement #example")
         # return options[:example] if options.has_key? :example
         # return options[:default] if options.has_key? :default
         # if options.has_key? :values
@@ -169,7 +169,7 @@ module Attributor
       #  [ value, [] ]
       #end
 
-  
+
 
       # HELPER FUNCTIONS
 
@@ -177,14 +177,12 @@ module Attributor
       def check_option!(name, definition)
         case name
         when :min
-          raise "Value for option :min does not implement '<='. Got: (#{definition.inspect})" unless definition.respond_to?(:<=)
+          raise AttributorException.new("Value for option :min does not implement '<='. Got: (#{definition.inspect})") unless definition.respond_to?(:<=)
         when :max
-          raise "Value for option :max does not implement '>='. Got(#{definition.inspect})" unless definition.respond_to?(:>=)
+          raise AttributorException.new("Value for option :max does not implement '>='. Got(#{definition.inspect})") unless definition.respond_to?(:>=)
         when :regexp
           # could go for a respoind_to? :=~ here, but that seems overly... cute... and not useful.
-          raise "Value for option :regexp is not a Regexp object. Got (#{definition.inspect})" unless definition.is_a? ::Regexp
-          #when :max_size
-          #  raise "Max size size option requires an Integer. Got (#{definition})" unless definition.is_a? ::Integer
+          raise AttributorException.new("Value for option :regexp is not a Regexp object. Got (#{definition.inspect})") unless definition.is_a? ::Regexp
         else
           return :unknown
         end
@@ -204,7 +202,7 @@ module Attributor
 
       # By default, non complex types will not have a DSL subdefinition this handles such case
       def compile_dsl( options, block )
-        raise "Basic structures cannot take extra block definitions" if block
+        raise AttributorException.new("Basic structures cannot take extra block definitions") if block
         # Simply create a DSL compiler to store the options, and not to parse any DSL
         sub_definition=dsl_compiler.new( options )
         return sub_definition

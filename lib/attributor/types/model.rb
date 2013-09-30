@@ -23,7 +23,9 @@ module Attributor
 
     def set(attribute_name,value)
       attribute = self.class.definition.attributes.fetch(attribute_name) do |key|
-        raise "Can not set unknown attribute: #{attribute_name} for #{self.inspect}"
+        raise AttributorException.new(
+          "Can not set unknown attribute: #{attribute_name} for #{self.inspect}"
+        )
       end
       attributes[attribute_name] = attribute.load(value)
     end
@@ -66,11 +68,11 @@ module Attributor
       def check_option!(name, value)
         case name
         when :identity
-          raise "Invalid identity type #{value.inspect}" unless value.kind_of?(::String) || value.kind_of?(::Symbol)
+          raise AttributorException.new("Invalid identity type #{value.inspect}") unless value.kind_of?(::String) || value.kind_of?(::Symbol)
           if self.definition.attributes.has_key?(value.to_s)
             :ok
           else
-            raise "Identity attribute #{value.inspect} for #{self.name} not found"
+            raise AttributorException.new("Identity attribute #{value.inspect} for #{self.name} not found")
           end
         else
           super
@@ -92,7 +94,9 @@ module Attributor
         when ::Hash
           value
         else
-          raise "Can not load #{self} from value #{value.inspect} of type #{value.class}"
+          raise AttributorException.new(
+            "Can not load #{self} from value #{value.inspect} of type #{value.class}"
+          )
         end
 
 
@@ -176,7 +180,7 @@ module Attributor
       # method to only define the block of attributes for the model
       # This will be a lazy definition. So we'll only save it in an instance class var for later.
       def attributes(opts={},&block)
-        raise "There is no getter for attributes here (go through definition.attributes)" unless block_given?
+        raise AttributorException.new("There is no getter for attributes here (go through definition.attributes)") unless block_given?
         @saved_dsl = block
         @saved_options = opts
       end
@@ -185,8 +189,8 @@ module Attributor
       # Returns the "compiled" definition for the model.
       # By "compiled" I mean that it will create a new Compiler object with the saved options and saved block that has been passed in the 'attributes' method. This compiled object is memoized (remember, there's one instance of a compiled definition PER MODEL CLASS).
       def definition( options=nil, block=nil )
-        raise "Blueprint structures cannot take extra block definitions" if block
-        raise "Models cannot take additional attribute options (options already defined in the Model )" if options
+        raise AttributorException.new("Blueprint structures cannot take extra block definitions") if block
+        raise AttributorException.new("Models cannot take additional attribute options (options already defined in the Model )") if options
 
         unless @compiled_class_block
           @compiled_class_block = DSLCompiler.new(@saved_options)
