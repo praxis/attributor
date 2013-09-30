@@ -43,7 +43,7 @@ module Attributor
 
     def register(key_path, value)
       if key_path.split(SEPARATOR).size > 1
-        raise "can only register top-level attributes. got: #{key_path}"
+        raise AttributorException.new("can only register top-level attributes. got: #{key_path}")
       end
 
       @data[key_path] = value
@@ -65,7 +65,7 @@ module Attributor
       when nil
         return !value.nil?
       else
-        raise "condition not supported: #{condition.inspect}"
+        raise AttributorException.new("condition not supported: #{condition.inspect}")
       end
 
     end
