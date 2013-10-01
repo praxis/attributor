@@ -18,7 +18,7 @@ module Attributor
   require_relative 'attributor/types/model'
   require_relative 'attributor/types/struct'
   require_relative 'attributor/types/boolean'
-
+  require_relative 'attributor/types/date_time'
 
 
   #  require_relative 'attributor/hash'
