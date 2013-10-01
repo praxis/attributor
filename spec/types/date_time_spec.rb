@@ -1,57 +1,68 @@
 require_relative '../spec_helper'
 
-describe Attributor::Boolean do
+describe Attributor::DateTime do
 
-  subject(:type) { Attributor::Boolean }
+  subject(:type) { Attributor::DateTime }
 
   context '.native_type' do
-    it "should return TrueClass" do
-      type.native_type.should be(TrueClass)
+    it "should return DateTime" do
+      type.native_type.should be(::DateTime)
+    end
+  end
+
+  context '.example' do
+    it "should return a valid DateTime" do
+      type.example.should be_a(::DateTime)
     end
   end
 
   context '.load' do
 
-    context 'for incoming Boolean false values' do
+    context 'for incoming values' do
 
-      [false, 'false', 'FALSE', '0', 0, 'f', 'F'].each do |value|
+      [
+          '2001-02-03T04:05:06+07:00',
+          'Sat, 03 Feb 2001 04:05:06 GMT',
+          '20010203T040506+0700',
+          '2001-W05-6T04:05:06+07:00',
+          'H13.02.03T04:05:06+07:00',
+          'Sat, 3 Feb 2001 04:05:06 +0700',
+          '2013/08/23 00:39:55 +0000', # Right API 1.5
+          '2007-10-19T04:11:33Z', # Right API 1.0
+          '2001-02-03T04:05:06+07:00.123456', # custom format with microseconds
+      ].each do |value|
 
-        it "returns false for #{value.inspect}" do
-          type.load(value).should be(false)
-        end
-
-        it "returns native_type TrueClass for #{value.inspect}" do
-          type.load(value).should be_a(type.native_type)
-        end
-
-      end
-
-    end
-
-    context 'for incoming Boolean false values' do
-
-      [true, 'true', 'TRUE', '1', 1, 't', 'T'].each do |value|
-
-        it "returns true for #{value.inspect}" do
-          type.load(value).should be(true)
-        end
-
-        it "returns native_type TrueClass for #{value.inspect}" do
-          type.load(value).should be_a(type.native_type)
+        it "returns correct DateTime for #{value.inspect}" do
+          type.load(value).should == DateTime.parse(value)
         end
 
       end
 
-    end
-
-    context 'that are not valid Booleans' do
-
-      ['string', 2, 1.0, Class, Object.new,].each do |value|
+      [
+          'Sat, 30 Feb 2001 04:05:06 GMT', # No such date exists
+          '2013/08/33 00:39:55 +0000', # Right API 1.5
+          '2007-10-33T04:11:33Z', # Right API 1.0
+          '2001-02-33T04:05:06+07:00.123456', # custom format with microseconds
+      ].each do |value|
 
         it "raises Attributor::AttributorException for #{value.inspect}" do
           expect {
             type.load(value)
-          }.to raise_error(Attributor::AttributorException, "Cannot coerce '#{value.inspect}' into Boolean type")
+          }.to raise_error(Attributor::AttributorException, "invalid date: #{value.inspect}")
+        end
+
+      end
+
+      [
+          '',
+          'foobar',
+          'Sat, 30 Feb 2001 04:05:06 FOOBAR', # No such date format exists
+      ].each do |value|
+
+        it "raises Attributor::AttributorException for #{value.inspect}" do
+          expect {
+            type.load(value)
+          }.to raise_error(Attributor::AttributorException, "invalid date: #{value.inspect}")
         end
 
       end
