@@ -1,5 +1,3 @@
-# Need types fleshed out:
-#   Float
 # Will need eventually, but not right now:
 #   Hash
 #   Array
@@ -23,13 +21,14 @@ module Attributor
       # Generic decoding and coercion of the attribute.
       def load(value)
         unless value.is_a?(self.native_type)
-          raise AttributorException.new("#{self.name} can not load value that is not of type #{self.native_type}. Got: #{value.inspect}.")
+          raise AttributorException.new("#{self.name} cannot load value that is not of type #{self.native_type}. Got: #{value.inspect}.")
         end
 
         value
       end
 
       # TODO: refactor this to take just the options instead of the full attribute?
+      # TODO: delegate to subclass
       def validate(value,context,attribute)
         errors = []
         attribute.options.each do |option, opt_definition|
