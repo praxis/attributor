@@ -3,6 +3,35 @@ require_relative '../spec_helper'
 describe Attributor::Boolean do
 
   subject(:type) { Attributor::Boolean }
+
+  context '.valid_type?' do
+
+    context 'for incoming Boolean values' do
+
+      [false, true].each do |value|
+
+        it "returns true for #{value.inspect}" do
+          type.valid_type?(value).should be_true
+        end
+
+      end
+
+    end
+
+    context 'for incoming non-Boolean values' do
+
+      ['false', 2, 1.0, Class, Object.new].each do |value|
+
+        it "returns false for #{value.inspect}" do
+          type.valid_type?(value).should be_false
+        end
+
+      end
+
+    end
+
+  end
+
   context '.load' do
 
     context 'for incoming Boolean false values' do
@@ -31,7 +60,7 @@ describe Attributor::Boolean do
 
     context 'that are not valid Booleans' do
 
-      ['string', 2, 1.0, Class, Object.new,].each do |value|
+      ['string', 2, 1.0, Class, Object.new].each do |value|
 
         it "raises Attributor::AttributorException for #{value.inspect}" do
           expect {

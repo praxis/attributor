@@ -1,8 +1,4 @@
 # Need types fleshed out:
-#   String
-#   Integer
-#   Boolean
-#   DateTime
 #   Float
 # Will need eventually, but not right now:
 #   Hash
@@ -49,6 +45,12 @@ module Attributor
         errors
       end
 
+      # Default, overridable valid_type? function
+      def valid_type?(value)
+        return value.is_a?(native_type) if respond_to?(:native_type)
+
+        raise AttributorException.new("#{self} must implement #valid_type? or #native_type")
+      end
 
       # Default, overridable example function
       def example(options=nil, context=nil)

@@ -7,9 +7,8 @@ module Attributor
   class Boolean
     include Type
 
-    # Ruby only has TrueClass and FalseClass, but internally they are stored as longs (?)
-    def self.native_type
-      return ::TrueClass
+    def self.valid_type?(value)
+      value == true || value == false
     end
 
     def self.example(options={}, context=nil)

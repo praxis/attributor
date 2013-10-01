@@ -14,7 +14,7 @@ class Duck
     attribute 'age', Attributor::Integer, :required_if => {"name" => "Daffy" }
     attribute 'name', Attributor::String
     attribute 'email', Attributor::String, :required_if => "name"
-    attribute 'angry', Attributor::Boolean, :example => /true|false/, :description => "Angry bird?"
+    attribute 'angry', Attributor::Boolean, :default => true, :example => /true|false/, :description => "Angry bird?"
   end
 end
 
