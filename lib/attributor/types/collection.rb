@@ -1,4 +1,6 @@
-
+# Represents an unordered collection of attributes
+#
+require_relative '../exceptions'
 
 module Attributor
 
@@ -40,6 +42,17 @@ module Attributor
     def self.validate_options( value, context, attribute )
       errors = []
       errors
+    end
+
+    # @param type [Attributor::Type] optional, defines the type of all collection elements
+    # @return anonymous class with specified type of collection elements
+    #
+    # @example Collection.of(Struct)
+    #
+    def self.of(type)
+      Class.new(self) do
+        @element_type = type
+      end
     end
   end
 end
