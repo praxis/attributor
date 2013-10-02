@@ -3,6 +3,24 @@ require_relative '../spec_helper'
 describe Attributor::Integer do
 
   subject(:type) { Attributor::Integer }
+
+  context '.example' do
+    let(:min) { 1 }
+    let(:max) { 5 }
+
+    it 'returns an Integer' do
+      type.example.should be_a(::Integer)
+    end
+
+    it 'returns an Integer in the requested interval' do
+      20.times do
+        value = type.example(:min => min, :max => max)
+        value.should <= max
+        value.should >= min
+      end
+    end
+  end
+
   context '.load' do
     let(:value) { nil }
 
