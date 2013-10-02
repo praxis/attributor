@@ -13,7 +13,7 @@ module Attributor
       min = options[:min] || 0
       max = options[:max] || 1000
 
-      rand(max-min) + min
+      rand(max-min+1) + min # Generate random number on interval [min,max]
     end
 
     def self.load(value)
