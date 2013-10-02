@@ -46,6 +46,19 @@ describe Attributor::Collection do
         errors.include?("Collection monkey[0] is not an Attributor::Type").should be_true
         errors.include?("Collection monkey[1] is not an Attributor::Type").should be_true
       end
+
+      it "returns errors for [nil]" do
+        errors = type.validate([nil], "dog", nil)
+        errors.should_not be_empty
+        errors.include?("Collection dog[0] is not an Attributor::Type").should be_true
+      end
+
+      it "returns errors for [1.0, Object.new]" do
+        errors = type.validate([1.0, Object.new], "cat", nil)
+        errors.should_not be_empty
+        errors.include?("Collection cat[0] is not an Attributor::Type").should be_true
+        errors.include?("Collection cat[1] is not an Attributor::Type").should be_true
+      end
     end
   end
 
@@ -53,6 +66,13 @@ describe Attributor::Collection do
     it "returns an Array" do
       value = type.example({})
       value.should be_a(::Array)
+    end
+
+    Attributor::BASIC_TYPES.each do |element_type|
+      it "returns an Array of #{element_type} objects" do
+        value = type.example({:element_type => element_type})
+        value.all? { |element| element.is_a?(element_type) }.should be_true
+      end
     end
   end
 end

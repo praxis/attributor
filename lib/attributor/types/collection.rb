@@ -29,6 +29,16 @@ module Attributor
         errors << "Collection #{context}[#{i}] is not an Attributor::Type" unless element.is_a?(Attributor::Type)
       end
 
+      # All elements in the collection Array must be the same type provided
+      value.each_with_index do |element, i|
+        errors << "Collection #{context}[#{i}] is not an Attributor::Type" unless element.is_a?(Attributor::Type)
+      end
+
+      errors
+    end
+
+    def self.validate_options( value, context, attribute )
+      errors = []
       errors
     end
   end
