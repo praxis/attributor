@@ -5,20 +5,28 @@ describe Attributor::Integer do
   subject(:type) { Attributor::Integer }
 
   context '.example' do
-    let(:min) { 1 }
-    let(:max) { 5 }
 
     it 'returns an Integer' do
       type.example.should be_a(::Integer)
     end
 
-    it 'returns an Integer in the requested interval' do
-      20.times do
-        value = type.example(:min => min, :max => max)
-        value.should <= max
-        value.should >= min
+    [[1,1], [1,5], [-2,-2], [-3,2]].each do |min, max|
+      it "returns an Integer in the range [#{min},#{max}]" do
+        20.times do
+          value = type.example(:min => min, :max => max)
+          value.should <= max
+          value.should >= min
+        end
       end
     end
+
+    [[1,-1], [1,"5"], ["-2",4], [false, false], [true, true]].each do |min, max|
+      it "raises for the invalid range [#{min.inspect}, #{max.inspect}]" do
+        opts = {:min => min, :max => max}
+        expect { type.example(opts) }.to raise_error("Invalid range: [#{min.inspect}, #{max.inspect}]")
+      end
+    end
+
   end
 
   context '.load' do
