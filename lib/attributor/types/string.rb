@@ -10,7 +10,7 @@ module Attributor
       if options[:regexp]
         return options[:regexp].gen
       else
-        return /[:sentence:]/.gen
+        return /\w+/.gen
       end
     end
   end

@@ -26,7 +26,7 @@ module Attributor
         begin
           return ::DateTime.parse(value)
         rescue ArgumentError => e
-          raise AttributorException.new("invalid date: #{value.inspect}")
+          raise AttributorException.new("#{e.message}: #{value.inspect}")
         end
       end
 

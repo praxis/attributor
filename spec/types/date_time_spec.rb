@@ -5,15 +5,11 @@ describe Attributor::DateTime do
   subject(:type) { Attributor::DateTime }
 
   context '.native_type' do
-    it "should return DateTime" do
-      type.native_type.should be(::DateTime)
-    end
+    its(:native_type) { should be(::DateTime) }
   end
 
   context '.example' do
-    it "should return a valid DateTime" do
-      type.example.should be_a(::DateTime)
-    end
+    its(:example) { should be_a(::DateTime) }
   end
 
   context '.load' do

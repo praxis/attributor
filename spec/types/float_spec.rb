@@ -5,15 +5,11 @@ describe Attributor::Float do
   subject(:type) { Attributor::Float }
 
   context '.native_type' do
-    it "should return Float" do
-      type.native_type.should be(::Float)
-    end
+    its(:native_type) { should be(::Float) }
   end
 
   context '.example' do
-    it "should return a valid Float" do
-      type.example.should be_a(::Float)
-    end
+    its(:example) { should be_a(::Float) }
   end
 
   context '.load' do
