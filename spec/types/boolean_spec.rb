@@ -32,6 +32,12 @@ describe Attributor::Boolean do
 
   end
 
+  context '.example' do
+    it "should return a valid Boolean" do
+      [true, false].should include type.example
+    end
+  end
+
   context '.load' do
 
     context 'for incoming Boolean false values' do
