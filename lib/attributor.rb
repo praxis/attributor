@@ -22,6 +22,7 @@ module Attributor
   require_relative 'attributor/types/boolean'
   require_relative 'attributor/types/date_time'
   require_relative 'attributor/types/float'
+  require_relative 'attributor/types/collection'
 
   # hierarchical separator string for composing human readable attributes
   SEPARATOR = '.'.freeze
