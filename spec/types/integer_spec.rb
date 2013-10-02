@@ -6,8 +6,22 @@ describe Attributor::Integer do
 
   context '.example' do
 
-    it 'returns an Integer' do
+    it 'returns an Integer when :min and :max are unspecified' do
       type.example.should be_a(::Integer)
+    end
+
+    it 'returns an Integer when :min is unspecified' do
+      expect {
+        value = type.example(:max => 5)
+        value.should be_a(::Integer)
+      }.to_not raise_error
+    end
+
+    it 'returns an Integer when :max is unspecified' do
+      expect {
+        value = type.example(:min => 1)
+        value.should be_a(::Integer)
+      }.to_not raise_error
     end
 
     [[1,1], [1,5], [-2,-2], [-3,2]].each do |min, max|
@@ -23,9 +37,30 @@ describe Attributor::Integer do
     [[1,-1], [1,"5"], ["-2",4], [false, false], [true, true]].each do |min, max|
       it "raises for the invalid range [#{min.inspect}, #{max.inspect}]" do
         opts = {:min => min, :max => max}
-        expect { type.example(opts) }.to raise_error("Invalid range: [#{min.inspect}, #{max.inspect}]")
+        expect {
+          type.example(opts)
+        }.to raise_error(Attributor::AttributorException, "Invalid range: [#{min.inspect}, #{max.inspect}]")
       end
     end
+
+    [false, true].each do |min|
+      it "raises for the invalid range [#{min},]" do
+        expect {
+          value = type.example(:min => min)
+          value.should be_a(::Integer)
+        }.to raise_error(Attributor::AttributorException, "Invalid range: [#{min.inspect},]")
+      end
+    end
+
+    [false, true].each do |max|
+      it "raises for the invalid range [,#{max}]" do
+        expect {
+          value = type.example(:max => max)
+          value.should be_a(::Integer)
+        }.to raise_error(Attributor::AttributorException, "Invalid range: [, #{max.inspect}]")
+      end
+    end
+
 
   end
 
