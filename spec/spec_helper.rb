@@ -15,9 +15,10 @@ Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each {|f| require f}
 
 RSpec.configure do |config|
 
-  config.after do
-    # TODO: need to support this better in Skeletor somehow too.
-    Thread.current[:_attributor_attribute_resolver] = nil
+  config.around(:each) do |example|
+    Attributor::AttributeResolver.current = Attributor::AttributeResolver.new
+    example.run
+    Attributor::AttributeResolver.current = nil
   end
 
 end

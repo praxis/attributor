@@ -75,8 +75,17 @@ module Attributor
 
 
     # TODO: kill this when we also kill Taylor's IdentityMap.current
+    def self.current=(resolver)
+      Thread.current[:_attributor_attribute_resolver] = resolver
+    end
+
+
     def self.current
-      Thread.current[:_attributor_attribute_resolver] ||= self.new
+      if resolver = Thread.current[:_attributor_attribute_resolver]
+        return resolver
+      else
+        raise AttributorException, "No AttributeResolver set."
+      end
     end
 
   end
