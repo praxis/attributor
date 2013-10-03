@@ -48,11 +48,11 @@ end
 class Cormorant
   include Attributor::Model
   attributes do
-    # This is a collection of arbitrary objects
+    # This will be a collection of arbitrary Ruby Objects
     attribute 'fish', Attributor::Collection, :description => "All kinds of fish for feeding the babies"
-    # This is a collection of Cormorants (note, this relationship is circular)
+    # This will be a collection of Cormorants (note, this relationship is circular)
     attribute 'neighbors', Attributor::Collection.of(Cormorant), :description => "Neighbor cormorants"
-    # This is a collection of babies with an anonymous type with two attributes
+    # This will be a collection of instances of an anonymous Struct class, each having two well-defined attributes
     attribute 'babies', Attributor::Collection.of(Struct), :description => "All the babies" do
       attribute 'months', Attributor::Integer, :default => 0, :min => 0, :description => "The age in months of the baby cormorant"
       attribute 'weight', Attributor::Float, :example => /\d{1,2}\.\d{3}/, :description => "The weight in kg of the baby cormorant"
