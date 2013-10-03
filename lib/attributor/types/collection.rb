@@ -39,6 +39,64 @@ module Attributor
       result
     end
 
+    # Decode JSON string that encapsulates an array
+    #
+    # @param value [String] JSON string
+    # @return [Array] a normal Ruby Array
+    #
+    def self.decode_json(value)
+      raise AttributorException.new("Cannot parse #{value.inspect} as JSON string") unless value.is_a?(::String)
+      parsed_value = nil
+      begin
+        # attempt to parse as JSON
+        parsed_value = JSON.parse(value)
+      rescue JSON::JSONError => e
+        raise AttributorException.new("Could not decode the incoming string as an Array. Is it not JSON? (string was: #{value}). Exception: #{e.inspect}")
+      end
+
+      if parsed_value.is_a? ::Array
+        value = parsed_value
+      else
+        raise AttributorException.new("JSON-encoded value doesn't appear to be an array (#{parsed_value.inspect})")
+      end
+
+      return value
+    end
+
+    # The incoming value should be an array here, so the only decoding that we need to do
+    # is from the elements (if there's an :element_type defined option).
+    def self.load(value)
+      if value.is_a?(Array)
+        loaded_value = value
+      elsif value.is_a?(::String)
+        loaded_value = decode_json(value)
+      else
+        raise AttributorException.new("Do not know how to decode an array from a #{value.class.name}")
+      end
+
+      return loaded_value if (@element_type.nil? || loaded_value.empty?)
+
+      # load each element; may raise AttributorException
+      another_array = []
+      loaded_value.each_with_index do |element, i|
+        loaded_element = @element_type.load(element)
+        another_array << loaded_element
+      end
+
+      return another_array
+
+      #element_index = 0
+      #loaded_value = loaded_value.map do |element|
+      #  sub_object, sub_errors = sub_definition.decode( element, self.generate_subcontext( context, element_index ) )
+      #  loaded_errors << sub_errors unless sub_errors.empty?
+      #  element_index += 1
+      #  sub_object
+      #end
+      #
+      #loaded_value , sub_errors = decode_substructure( loaded_value, context )
+      #[ loaded_value, loaded_errors + sub_errors ]
+    end
+
     # @param value [Array] currently an array of native types
     def self.validate( value, context, attribute )
       errors = []
