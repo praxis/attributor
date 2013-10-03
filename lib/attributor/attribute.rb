@@ -156,7 +156,7 @@ module Attributor
       if self.attributes
         self.attributes.each do |sub_attribute_name, sub_attribute|
           sub_context = self.type.generate_subcontext(context,sub_attribute_name)
-          errors += sub_attribute.validate(object.get(sub_attribute_name), sub_context)
+          errors += sub_attribute.validate(object.send(sub_attribute_name), sub_context)
         end
       end
 

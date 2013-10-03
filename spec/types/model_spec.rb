@@ -20,11 +20,8 @@ describe Attributor::Model do
 
       it { should be_kind_of(Chicken) }
       
-      it 'sets the sub-attributes' do
-        example.get('age').should == age
-        example.get('email').should =~ /\w+@.*\.example\.org/
-      end
-
+      its(:age) { should == age }
+      its(:email) { should =~ /\w+@.*\.example\.org/ }
     end
 
 
@@ -82,8 +79,8 @@ describe Attributor::Model do
       context "with a hash" do
           context 'for a complete set of attributes' do
           it 'loads the given attributes' do
-            model.get('age').should == age
-            model.get('email').should == email
+            model.age.should == age
+            model.email.should == email
           end
         end
 
@@ -91,8 +88,8 @@ describe Attributor::Model do
           let(:hash) { Hash.new }
 
           it 'sets the defaults' do
-            model.get('age').should == 1
-            model.get('email').should == nil
+            model.age.should == 1
+            model.email.should == nil
           end
         end
 
@@ -102,7 +99,7 @@ describe Attributor::Model do
           it 'raises an error' do
             expect { 
               Chicken.load(hash)
-            }.to raise_error(/Can not set unknown attribute: invalid_attribute/)
+            }.to raise_error(NoMethodError, /undefined method/)
           end
         end
       end
@@ -116,25 +113,30 @@ describe Attributor::Model do
   context 'instance methods' do
     subject(:chicken) { Chicken.new }
 
+    context '#respond_to?' do
+      [:age, :email, :age=, :email=].each do |method|
+        it { should respond_to(method) }
+      end
+    end
 
     context 'getting and setting attributes' do
       context 'for valid attributes' do
         let(:age) { 1 }
         it 'gets and sets attributes' do
-          chicken.set('age', age)
-          chicken.get('age').should == age
+          chicken.age = age
+          chicken.age.should == age
         end
       end
 
       context 'setting nil' do
         it 'assigns the default value if there is one' do
-          chicken.set('age',nil)
-          chicken.get('age').should == 1
+          chicken.age = nil
+          chicken.age.should == 1
         end
 
         it 'sets the value to nil if there is no default' do
-          chicken.set('email',nil)
-          chicken.get('email').should == nil
+          chicken.email = nil
+          chicken.email.should == nil
         end
 
       end
@@ -142,24 +144,9 @@ describe Attributor::Model do
       context 'for unknown attributes' do
         it 'raises an exception' do
           expect { 
-            chicken.set("invalid_attribute", 'value') 
-          }.to raise_error(/Can not set unknown attribute/)
+            chicken.invalid_attribute =  'value'
+          }.to raise_error(NoMethodError, /undefined method/)
         end
-      end
-
-
-    end
-
-    context 'magic accessors' do
-      subject(:chicken) { Chicken.example }
-
-      context 'getters' do
-        its(:age) { should be chicken.get('age')}
-        its(:email) { should be chicken.get('email') }
-      end
-
-      context 'setters' do
-        it 'should have them? or not?'
       end
 
     end

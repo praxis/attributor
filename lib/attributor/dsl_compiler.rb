@@ -63,6 +63,7 @@ module Attributor
     #     end
     def attribute(name, type_or_options=nil, opts={}, &block)
       raise AttributorException.new("Attribute #{name} already defined") if attributes.has_key? name
+      raise AttributorException, "Attribute names must be strings, got: #{name.to_s}" unless name.kind_of? ::String
 
       type, opts = self.parse_arguments(type_or_options, opts)
 
