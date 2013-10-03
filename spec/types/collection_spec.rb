@@ -69,9 +69,9 @@ describe Attributor::Collection do
     end
 
     Attributor::BASIC_TYPES.each do |element_type|
-      it "returns an Array of #{element_type} objects" do
-        value = type.example({:element_type => element_type})
-        value.all? { |element| element.is_a?(element_type) }.should be_true
+      it "returns an Array of native types of #{element_type}" do
+        value = Attributor::Collection.of(element_type).example({})
+        value.all? { |element| element_type.valid_type?(element) }.should be_true
       end
     end
   end
