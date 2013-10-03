@@ -50,22 +50,25 @@ module Attributor
     end
 
 
-    def check(path_prefix, key_path, condition=nil)
+    # check that the the condition is met:
+    #   that the attribute identified by path_prefix and key_path 
+    #   satisfies the optional predicate, which when nil simply checks for existance.
+    def check(path_prefix, key_path, predicate=nil)
       value = self.query(key_path, path_prefix)
 
-      # we have a value, any value, which is good enough given no condition
-      if !value.nil? && condition.nil?
+      # we have a value, any value, which is good enough given no predicate
+      if !value.nil? && predicate.nil?
         return true
       end
 
 
-      case condition
+      case predicate
       when ::String, ::Regexp, ::Proc
-        return condition === value
+        return predicate === value
       when nil
         return !value.nil?
       else
-        raise AttributorException.new("condition not supported: #{condition.inspect}")
+        raise AttributorException.new("predicate not supported: #{predicate.inspect}")
       end
 
     end
