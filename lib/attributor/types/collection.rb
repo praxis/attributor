@@ -76,7 +76,7 @@ module Attributor
 
       return loaded_value if (@element_type.nil? || loaded_value.empty?)
 
-      # load each element; may raise AttributorException
+      # load each element if the element type is an Attributor::Type; may raise AttributorException
       another_array = []
       loaded_value.each_with_index do |element, i|
         loaded_element = @element_type.load(element)
@@ -84,17 +84,6 @@ module Attributor
       end
 
       return another_array
-
-      #element_index = 0
-      #loaded_value = loaded_value.map do |element|
-      #  sub_object, sub_errors = sub_definition.decode( element, self.generate_subcontext( context, element_index ) )
-      #  loaded_errors << sub_errors unless sub_errors.empty?
-      #  element_index += 1
-      #  sub_object
-      #end
-      #
-      #loaded_value , sub_errors = decode_substructure( loaded_value, context )
-      #[ loaded_value, loaded_errors + sub_errors ]
     end
 
     # @param value [Array] currently an array of native types

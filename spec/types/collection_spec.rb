@@ -4,8 +4,23 @@ describe Attributor::Collection do
 
   subject(:type) { Attributor::Collection }
 
+  context '.of' do
+
+    it "returns an anonymous class with correct element type" do
+      element_type = Attributor::Integer
+      klass = type.of(element_type)
+      klass.should be_a(::Class)
+      klass.instance_variable_get(:@element_type).should == element_type
+    end
+
+    it "raises when given invalid element type" do
+      element_type = ::String # Must be an Attributor::Type
+      expect { klass = type.of(element_type) }.to raise_error(Attributor::AttributorException)
+    end
+  end
+
   context '.native_type' do
-    it "should return Array" do
+    it "returns Array" do
       type.native_type.should be(::Array)
     end
   end
@@ -44,25 +59,60 @@ describe Attributor::Collection do
   end
 
   context '.load' do
-    context 'for incoming Array values' do
-      [
-        [],
-        [1,2,3],
-        [Object.new, [1,2], nil, true]
-      ].each do |value|
-        it "returns value when incoming value is #{value.inspect}" do
-          type.load(value).should == value
+    context 'with unspecified element type' do
+      context 'for valid values' do
+        [
+          [],
+          [1,2,3],
+          [Object.new, [1,2], nil, true]
+        ].each do |value|
+          it "returns value when incoming value is #{value.inspect}" do
+            type.load(value).should == value
+          end
+        end
+      end
+
+      context 'for invalid values' do
+        [nil, 1, Object.new, false, true, 3.0].each do |value|
+          it "raises error when incoming value is #{value.inspect}" do
+            expect { type.load(value).should == value }.to raise_error(Attributor::AttributorException)
+          end
         end
       end
     end
 
-    #context 'for incoming invalid values' do
-    #
-    #  it "raises when incoming value is #{value.inspect}" do
-    #    value = [nil, Object.new, {}, true, false, 1]
-    #    expect { type.load(value) }.to raise_error(Attributor::AttributorException, /cannot load value/)
-    #  end
-    #end
+    context 'with Attributor::Type element type' do
+      context 'for valid values' do
+        {
+          Attributor::String   => ["foo", "bar"],
+          Attributor::Integer  => [1, "2", 3],
+          Attributor::Float    => [1.0, "2.0", Math::PI, Math::E],
+          Attributor::DateTime => ["2001-02-03T04:05:06+07:00", "Sat, 3 Feb 2001 04:05:06 +0700"],
+          ::Chicken            => [::Chicken.new, ::Chicken.new]
+        }.each do |element_type, value|
+          it "returns value when element_type is #{element_type} and value is #{value.inspect}" do
+            expected_result = value.map {|v| element_type.load(v)}
+            type.of(element_type).load(value).should == expected_result
+          end
+        end
+      end
+
+      context 'for invalid values' do
+        {
+          ::String  => ["foo", "bar"],
+          ::Object  => [::Object.new],
+          ::Chicken => [::Turkey.new]
+        }.each do |element_type, value|
+          it "raises error when element_type is #{element_type} and value is #{value.inspect}" do
+            expect { type.of(element_type).load(value).should == value }.to raise_error(Attributor::AttributorException)
+          end
+        end
+      end
+    end
+
+    context 'with Attributor::Struct element type' do
+
+    end
   end
 
   context '.validate' do
