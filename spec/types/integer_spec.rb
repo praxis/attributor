@@ -8,8 +8,13 @@ describe Attributor::Integer do
 
     context 'when :min and :max are unspecified' do
       context 'valid cases' do
-        it 'returns an Integer when :min and :max are unspecified' do
-          type.example.should be_a(::Integer)
+        it "returns an Integer in the range [0,#{Attributor::Integer::EXAMPLE_RANGE}]" do
+          20.times do
+            value = type.example
+            value.should be_a(::Integer)
+            value.should <= Attributor::Integer::EXAMPLE_RANGE
+            value.should >= 0
+          end
         end
       end
     end
@@ -22,7 +27,7 @@ describe Attributor::Integer do
               value = type.example(:max => max)
               value.should be_a(::Integer)
               value.should <= max
-              value.should >= max - 1000
+              value.should >= max - Attributor::Integer::EXAMPLE_RANGE
             end
           end
         end
@@ -47,7 +52,7 @@ describe Attributor::Integer do
             20.times do
               value = type.example(:min => min)
               value.should be_a(::Integer)
-              value.should <= min + 1000
+              value.should <= min + Attributor::Integer::EXAMPLE_RANGE
               value.should >= min
             end
           end
@@ -72,7 +77,8 @@ describe Attributor::Integer do
           [1,1],
           [1,5],
           [-2,-2],
-          [-3,2]
+          [-3,2],
+          [-1000000000000000,1000000000000000]
         ].each do |min, max|
           it "returns an Integer in the range [#{min.inspect},#{max.inspect}]" do
             20.times do

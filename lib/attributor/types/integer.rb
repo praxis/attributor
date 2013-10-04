@@ -5,6 +5,8 @@ module Attributor
   class Integer
     include Type
 
+    EXAMPLE_RANGE = 1000.freeze
+
     def self.native_type
       return ::Integer
     end
@@ -16,13 +18,13 @@ module Attributor
       # Set default values
       if options[:min].nil? && options[:max].nil?
         min = 0
-        max = 1000
+        max = EXAMPLE_RANGE
       elsif options[:min].nil?
-        min = options[:max] - 1000
         max = options[:max]
+        min = max - EXAMPLE_RANGE
       elsif options[:max].nil?
         min = options[:min]
-        max = options[:min] + 1000
+        max = min + EXAMPLE_RANGE
       else
         min = options[:min]
         max = options[:max]
