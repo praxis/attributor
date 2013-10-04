@@ -2,6 +2,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     addressable (2.3.5)
+    backports (2.6.7)
     builder (3.2.2)
     coderay (1.0.9)
     columnize (0.3.6)
@@ -98,12 +99,15 @@ GEM
     simplecov-html (0.7.1)
     slop (3.4.6)
     thor (0.18.1)
-    yard (0.8.7)
+    yard (0.8.7.2)
+    yardstick (0.9.7)
+      yard (~> 0.8, >= 0.8.7)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  backports
   bundler
   guard
   guard-rspec
@@ -118,3 +122,4 @@ DEPENDENCIES
   ruby-prof
   simplecov
   yard (~> 0.8.7)
+  yardstick
