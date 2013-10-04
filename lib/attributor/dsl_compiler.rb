@@ -39,7 +39,28 @@ module Attributor
       return type, opts
     end
 
-
+    # Creates an Attributor:Attribute with given definition.
+    #
+    # @overload attribute(name, type, opts, &block)
+    #   With an explicit type.
+    #   @param [string] name describe name param
+    #   @param [Attributor::Type] type describe type param
+    #   @param [Hash] opts describe opts param
+    #   @param [Block] block describe block param
+    #   @example
+    #     attribute "email", String, example: /[:email:]/
+    # @overload attribute(name, opts, &block)
+    #   Assume a type of Attributor::Struct
+    #   @param [string] name describe name param
+    #   @param [Hash] opts describe opts param
+    #   @param [Block] block describe block param
+    #   @example
+    #     attribute "address" do
+    #       attribute "number", String
+    #       attribute "street", String
+    #       attribute "city", String
+    #       attribute "state", String
+    #     end
     def attribute(name, type_or_options=nil, opts={}, &block)
       raise AttributorException.new("Attribute #{name} already defined") if attributes.has_key? name
 
