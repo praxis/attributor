@@ -13,11 +13,12 @@ module Attributor
     # @example Collection.of(Struct)
     #
     def self.of(type)
-      unless type.ancestors.include?(Attributor::Type)
+      resolved_type = Attributor.resolve_type(type)
+      unless resolved_type.ancestors.include?(Attributor::Type)
         raise Attributor::AttributorException.new("Collections can only have elements that are Attributor::Types")
       end
       Class.new(self) do
-        @element_type = type
+        @element_type = resolved_type
       end
     end
 
