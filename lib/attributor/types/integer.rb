@@ -14,8 +14,19 @@ module Attributor
       validate_options(options)
 
       # Set default values
-      min = options[:min] || 0
-      max = options[:max] || 1000
+      if options[:min].nil? && options[:max].nil?
+        min = 0
+        max = 1000
+      elsif options[:min].nil?
+        min = options[:max] - 1000
+        max = options[:max]
+      elsif options[:max].nil?
+        min = options[:min]
+        max = options[:min] + 1000
+      else
+        min = options[:min]
+        max = options[:max]
+      end
 
       # Generate random number on interval [min,max]
       rand(max-min+1) + min
@@ -40,11 +51,12 @@ module Attributor
         # :max must be an integer
         raise AttributorException.new("Invalid range: [, #{options[:max].inspect}]") if !options[:max].is_a?(::Integer)
       elsif options.has_key?(:min) && !options.has_key?(:max)
-        # :max must be an integer
+        # :min must be an integer
         raise AttributorException.new("Invalid range: [#{options[:min].inspect},]") if !options[:min].is_a?(::Integer)
       else
         # Neither :min nor :max were given, noop
       end
+      true
     end
 
   end
