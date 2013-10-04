@@ -17,15 +17,9 @@ module Attributor
   require_relative 'attributor/types/string'
   require_relative 'attributor/types/model'
   require_relative 'attributor/types/struct'
-
-
-
-  #  require_relative 'attributor/hash'
-  #  require_relative 'attributor/array'
-  #  require_relative 'attributor/csv'
-  #  require_relative 'attributor/ids'
-  #  require_relative 'attributor/date_time'
-  #  require_relative 'attributor/boolean'
+  require_relative 'attributor/types/boolean'
+  require_relative 'attributor/types/date_time'
+  require_relative 'attributor/types/float'
 
   # hierarchical separator string for composing human readable attributes
   SEPARATOR = '.'.freeze
@@ -47,7 +41,5 @@ module Attributor
 
     klass.construct(constructor_block, options)
   end
-
-
 
 end

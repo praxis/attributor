@@ -43,10 +43,10 @@ module Attributor
       value
     end
 
-
     def validate_type(value, context)
-      unless value.is_a? self.native_type
-        return ["Attribute #{context} received value: #{value.inspect} is of the wrong type (got: #{value.class.name} expected: #{self.native_type.name})"]
+      # delegate check to type subclass if it exists
+      unless self.type.valid_type?(value)
+        return ["Attribute #{context} received value: #{value.inspect} is of the wrong type (got: #{value.class.name} expected: #{self.type.native_type.name})"]
       end
       []
     end
@@ -69,12 +69,6 @@ module Attributor
       hash
     end
 
-
-    def native_type
-      self.type.native_type
-    end
-
-
     def example(context=nil)
       if context
         seed, _ = Digest::SHA1.digest(context).unpack("QQ")
@@ -85,7 +79,7 @@ module Attributor
 
       case val
       when ::String
-        # FIXME: spec this properly to use self.native_type
+        # FIXME: spec this properly to use self.type.native_type
         val
       when ::Regexp
         self.load(val.gen)
@@ -205,13 +199,13 @@ module Attributor
       true
     end
 
-
+    # TODO: override in type subclass
     def check_option!(name, definition)
       case name
       when :values
         raise AttributorException.new("Allowed set of values requires an array. Got (#{definition})") unless definition.is_a? ::Array
       when :default
-        raise AttributorException.new("Default value doesn't have the correct type. Requires (#{self.native_type.name}). Got (#{definition})") unless definition.is_a? self.native_type
+        raise AttributorException.new("Default value doesn't have the correct type. Got (#{definition})") unless self.type.valid_type?(definition)
       when :description
         raise AttributorException.new("Description value must be a string. Got (#{definition})") unless definition.is_a? ::String
       when :required
@@ -221,8 +215,8 @@ module Attributor
         raise AttributorException.new("Required_if must be a String, a Hash definition or a Proc") unless definition.is_a?(::String) || definition.is_a?(::Hash) || definition.is_a?(::Proc)
         raise AttributorException.new("Required_if cannot be specified together with :required") if self.options[:required]
       when :example
-        unless definition.is_a?(self.native_type) || definition.is_a?(::Regexp) || definition.is_a?(::String) || definition.is_a?(::Array)
-          raise AttributorException.new("Invalid example type (got: #{definition.class.name}) for type (#{self.native_type.inspect}). It must always match the type of the attribute (except if passing Regex that is allowed for some types)")
+        unless self.type.valid_type?(definition) || definition.is_a?(::Regexp) || definition.is_a?(::String) || definition.is_a?(::Array)
+          raise AttributorException.new("Invalid example type (got: #{definition.class.name}). It must always match the type of the attribute (except if passing Regex that is allowed for some types)")
         end
       else
         return :unknown # unknown option
