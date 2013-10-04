@@ -36,6 +36,8 @@ module Attributor
   # hierarchical separator string for composing human readable attributes
   SEPARATOR = '.'.freeze
 
+  # @param type [Class] The class of the type to resolve
+  #
   def self.resolve_type(type, options={}, constructor_block=nil)
     if type < Attributor::Type
       klass = type
