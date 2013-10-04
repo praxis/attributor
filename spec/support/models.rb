@@ -32,9 +32,6 @@ class Turducken
   include Attributor::Model
   attributes do
     attribute 'name', String, description: "Turducken name", example: /[:name:]/
-
-    #attribute 'address' Struct 
-
     attribute 'chicken', Chicken
     attribute 'duck', Duck
     attribute 'turkey', Turkey, description: "The turkey"

@@ -1,15 +1,6 @@
 require_relative 'spec_helper'
 
 
-# RULES FOR ATTRIBUTES
-#   The type of an attribute is:
-#     the specified type
-#     inferred from a reference type.
-#       it should always end up being an anonymous type, otherwise the Model class will explode
-#     Struct if a block is given
-
-#   The reference option for an attribute is passed if a block is given
-
 
 describe Attributor::DSLCompiler do
 

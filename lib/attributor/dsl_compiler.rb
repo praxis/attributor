@@ -1,5 +1,15 @@
 #Container of options and structure definition
 module Attributor
+
+  # RULES FOR ATTRIBUTES
+  #   The type of an attribute is:
+  #     the specified type
+  #     inferred from a reference type.
+  #       it should always end up being an anonymous type, otherwise the Model class will explode
+  #     Struct if a block is given
+
+  #   The reference option for an attribute is passed if a block is given
+
   class DSLCompiler
 
     attr_accessor :attributes, :options
@@ -12,7 +22,6 @@ module Attributor
 
     def parse(&block)
       self.instance_eval(&block) if block
-      # OPTIMIZE: clear out the saved block?
       return self
     end
 

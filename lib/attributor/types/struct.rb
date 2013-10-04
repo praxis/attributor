@@ -5,7 +5,7 @@ module Attributor
 
     # Construct a new subclass, using attribute_definition to define attributes.
     def self.construct(attribute_definition, options={})
-      raise 'can not construct from already-constructed Struct' unless self == Attributor::Struct
+      raise AttributorException, 'can not construct from already-constructed Struct' unless self == Attributor::Struct
       # TODO: massage the options here to pull out only the relevant ones
       Class.new(self) do
         attributes options, &attribute_definition
