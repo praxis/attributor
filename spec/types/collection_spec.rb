@@ -6,16 +6,19 @@ describe Attributor::Collection do
 
   context '.of' do
 
-    it "returns an anonymous class with correct element type" do
-      element_type = Attributor::Integer
-      klass = type.of(element_type)
-      klass.should be_a(::Class)
-      klass.instance_variable_get(:@element_type).should == element_type
+    [Attributor::Integer, Attributor::Struct].each do |element_type|
+      it "returns an anonymous class with correct element type #{element_type}" do
+        klass = type.of(element_type)
+        klass.should be_a(::Class)
+        klass.instance_variable_get(:@element_type).should == element_type
+      end
     end
 
-    it "raises when given invalid element type" do
-      element_type = ::String # Must be an Attributor::Type
-      expect { klass = type.of(element_type) }.to raise_error(Attributor::AttributorException)
+    [::Integer, ::String, ::Object].each do |element_type|
+      it "raises when given invalid element type #{element_type}" do
+        element_type = ::String # Must be an Attributor::Type
+        expect { klass = type.of(element_type) }.to raise_error(Attributor::AttributorException)
+      end
     end
   end
 
@@ -90,7 +93,7 @@ describe Attributor::Collection do
           Attributor::DateTime => ["2001-02-03T04:05:06+07:00", "Sat, 3 Feb 2001 04:05:06 +0700"],
           ::Chicken            => [::Chicken.new, ::Chicken.new]
         }.each do |element_type, value|
-          it "returns value when element_type is #{element_type} and value is #{value.inspect}" do
+          it "returns loaded value when element_type is #{element_type} and value is #{value.inspect}" do
             expected_result = value.map {|v| element_type.load(v)}
             type.of(element_type).load(value).should == expected_result
           end
@@ -111,7 +114,13 @@ describe Attributor::Collection do
     end
 
     context 'with Attributor::Struct element type' do
+      context 'for valid values' do
+        it "succeeds"
+      end
 
+      context 'for invalid values' do
+        it "raises"
+      end
     end
   end
 
