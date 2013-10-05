@@ -9,12 +9,12 @@ describe Attributor::Struct do
         Proc.new {}
       end
 
-      subject(:new_class) { Attributor::Struct.construct(attribute_definition) }
+      subject(:empty_struct) { Attributor::Struct.construct(attribute_definition) }
 
-      it 'returns a new class with no attributes' do
-        new_class.should < Attributor::Struct
+      it 'constructs a struct with no attributes' do
+        empty_struct.should < Attributor::Struct
 
-        attributes = new_class.definition.attributes
+        attributes = empty_struct.definition.attributes
         attributes.should be_empty
       end
     end
@@ -26,12 +26,12 @@ describe Attributor::Struct do
         end
       end
 
-      subject(:new_class) { Attributor::Struct.construct(attribute_definition) }
+      subject(:simple_struct) { Attributor::Struct.construct(attribute_definition) }
 
-      it 'returns a new class with one attribute' do
-        new_class.should < Attributor::Struct
+      it 'constructs a struct with one attribute' do
+        simple_struct.should < Attributor::Struct
 
-        attributes = new_class.definition.attributes
+        attributes = simple_struct.definition.attributes
         attributes.should have_key('age')
       end
     end
@@ -47,12 +47,12 @@ describe Attributor::Struct do
         end
       end
 
-      subject(:new_class) { Attributor::Struct.construct(attribute_definition) }
+      subject(:large_struct) { Attributor::Struct.construct(attribute_definition) }
 
-      it 'returns a new class with five attributes' do
-        new_class.should < Attributor::Struct
+      it 'constructs a struct with five attributes' do
+        large_struct.should < Attributor::Struct
 
-        attributes = new_class.definition.attributes
+        attributes = large_struct.definition.attributes
         attributes.should have_key('age')
         attributes.should have_key('name')
         attributes.should have_key('employed?')
@@ -68,32 +68,73 @@ describe Attributor::Struct do
         end
       end
 
-      subject(:new_class) { Attributor::Struct.construct(attribute_definition) }
+      subject(:struct_of_models) { Attributor::Struct.construct(attribute_definition) }
 
-      it 'returns a new class with attribute attributes' do
-        new_class.should < Attributor::Struct
+      it 'constructs a struct with a model attribute' do
+        struct_of_models.should < Attributor::Struct
 
-        attributes = new_class.definition.attributes
+        attributes = struct_of_models.definition.attributes
         attributes.should have_key('pet')
       end
     end
 
-    context 'complex struct containing other struct' do
+    context 'complex struct containing named struct' do
       let(:attribute_definition) do
         Proc.new do
-          Proc.new do
+          attribute 'stats', Attributor::Struct do
             attribute 'months', Attributor::Integer
+            attribute 'days', Attributor::Integer
           end
         end
       end
 
-      subject(:new_class) { Attributor::Struct.construct(attribute_definition) }
+      subject(:struct_of_structs) { Attributor::Struct.construct(attribute_definition) }
 
-      it 'raises' do
-        pending("FIXME: https://github.com/rightscale/attributor/issues/23")
-        # new_class.should < Attributor::Struct
+      it 'constructs a struct with a named struct attribute' do
+        struct_of_structs.should < Attributor::Struct
 
-        # expect { attributes = new_class.definition.attributes }.to raise_error(Attributor::AttributorException)
+        attributes = struct_of_structs.definition.attributes
+        attributes.should have_key('stats')
+
+        stats = attributes['stats'].attributes
+        stats.should have_key('months')
+        stats.should have_key('days')
+      end
+    end
+
+    context 'complex struct containing multi-level recursive structs' do
+      let(:attribute_definition) do
+        Proc.new do
+          attribute 'arthropods', Attributor::Struct do
+            attribute 'insects', Attributor::Struct do
+              attribute 'ants', Attributor::Struct do
+                attribute 'name', Attributor::String
+                attribute 'age', Attributor::Integer
+                attribute 'weight', Attributor::Float
+              end
+            end
+          end
+        end
+      end
+
+      subject(:multi_level_struct_of_structs) { Attributor::Struct.construct(attribute_definition) }
+
+      it 'constructs a struct with multiple levels of named struct attributes' do
+        multi_level_struct_of_structs.should < Attributor::Struct
+
+        root = multi_level_struct_of_structs.definition.attributes
+        root.should have_key('arthropods')
+
+        arthropods = root['arthropods'].attributes
+        arthropods.should have_key('insects')
+
+        insects = arthropods['insects'].attributes
+        insects.should have_key('ants')
+
+        ants = insects['ants'].attributes
+        ants.should have_key('name')
+        ants.should have_key('age')
+        ants.should have_key('weight')
       end
     end
   end
