@@ -19,19 +19,22 @@ end
 
 class Turkey
   include Attributor::Model
-  attributes(:identity => :email) do
-    attribute 'age', Integer, :default => 1, :min => 0, :max => 120, :description => "The age of the chicken"
-    attribute 'email', String, :example => /[:email:]/, :regexp => /@/, :description => "The email address of the chichen"
+  attributes do
+    attribute 'age', Integer, :default => 1, :min => 0, :max => 120, :description => "The age of the turkey"
+    attribute 'name', String , :description => "name of the turkey", :example => /[:name:]/ #, :default => "Providencia Zboncak"
+    attribute 'email', String, :example => /[:email:]/, :regexp => /@/, :description => "The email address of the turkey"
   end
 end
+
 
 
 class Turducken
   include Attributor::Model
   attributes do
+    attribute 'name', String, description: "Turducken name", example: /[:name:]/
     attribute 'chicken', Chicken
     attribute 'duck', Duck
-    attribute 'turkey', Turkey    
+    attribute 'turkey', Turkey, description: "The turkey"
   end
 end
 

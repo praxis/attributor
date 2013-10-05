@@ -144,7 +144,6 @@ describe Attributor::Model do
           expect { 
             chicken.set("invalid_attribute", 'value') 
           }.to raise_error(/Can not set unknown attribute/)
-
         end
       end
 
@@ -166,9 +165,5 @@ describe Attributor::Model do
     end
 
   end
-
-
-  it 'validate'
-  it 'validate_dependency'
 
 end

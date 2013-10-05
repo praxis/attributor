@@ -1,50 +1,96 @@
 #Container of options and structure definition
-class DSLCompiler
+module Attributor
 
-  attr_accessor :attributes, :options
+  # RULES FOR ATTRIBUTES
+  #   The type of an attribute is:
+  #     the specified type
+  #     inferred from a reference type.
+  #       it should always end up being an anonymous type, otherwise the Model class will explode
+  #     Struct if a block is given
 
-  def initialize(options={})
-    @options = options
-    @attributes={}
+  #   The reference option for an attribute is passed if a block is given
+
+  class DSLCompiler
+
+    attr_accessor :attributes, :options
+
+    def initialize(options={})
+      @options = options
+      @attributes={}
+    end
+
+
+    def parse(&block)
+      self.instance_eval(&block) if block
+      return self
+    end
+
+
+    def parse_arguments(type_or_options, opts)
+      type = nil
+
+      if type_or_options.kind_of? ::Class
+        type = type_or_options
+      elsif type_or_options.kind_of? ::Hash
+        opts = type_or_options
+      end
+
+      opts ||= {}
+      return type, opts
+    end
+
+    # Creates an Attributor:Attribute with given definition.
+    #
+    # @overload attribute(name, type, opts, &block)
+    #   With an explicit type.
+    #   @param [string] name describe name param
+    #   @param [Attributor::Type] type describe type param
+    #   @param [Hash] opts describe opts param
+    #   @param [Block] block describe block param
+    #   @example
+    #     attribute "email", String, example: /[:email:]/
+    # @overload attribute(name, opts, &block)
+    #   Assume a type of Attributor::Struct
+    #   @param [string] name describe name param
+    #   @param [Hash] opts describe opts param
+    #   @param [Block] block describe block param
+    #   @example
+    #     attribute "address" do
+    #       attribute "number", String
+    #       attribute "street", String
+    #       attribute "city", String
+    #       attribute "state", String
+    #     end
+    def attribute(name, type_or_options=nil, opts={}, &block)
+      raise AttributorException.new("Attribute #{name} already defined") if attributes.has_key? name
+
+      type, opts = self.parse_arguments(type_or_options, opts)
+
+      if (reference = self.options[:reference])
+        inherited_attribute = reference.definition.attributes[name]
+      else
+        inherited_attribute = nil
+      end
+
+      if type.nil?
+        if inherited_attribute
+          type = inherited_attribute.type
+          # Only inherit opts if no explicit type was given.
+          opts = inherited_attribute.options.merge(opts)
+        elsif block_given?
+          type = Attributor::Struct
+        else
+          raise AttributorException, "type for attribute with name: #{name} could not be determined"
+        end
+      end
+
+      if block_given? && inherited_attribute
+        opts[:reference] = inherited_attribute.type
+      end
+
+      return attributes[name] = Attributor::Attribute.new(type, opts, &block)
+    end
+
+
   end
-
-  def parse(&block)
-    self.instance_eval(&block) if block
-    return self
-  end
-
-  # Hash definitions support "attribute", [Type], options, (block)
-  # Which can define the attributes possible in the hash and their format (can be recursive)
-  # Each attribute will create an attribute and save it on the "definition" piece.
-  def attribute(name, type, opts={}, &block)
-    raise AttributorException.new("Attribute #{name} already defined") if attributes.has_key? name
-
-    #opts[:inherit_from] = @inherit_from[name] if @inherit_from
-    attributes[name] = Attributor::Attribute.new(type, opts, &block)
-  end
-  alias_method :param, :attribute
-
-
-  # def private_decode_args_for_attribute( incoming_type, incoming_opts)
-  #   if( incoming_type == nil )
-  #     type = nil
-  #     opts = incoming_opts.dup
-  #   elsif( incoming_type.is_a?(::Hash) )
-  #     type = nil
-  #     opts = incoming_type.dup
-  #   else
-  #     type = incoming_type
-  #     opts = incoming_opts.dup
-  #   end
-  #   { :type => type, :opts=>opts }
-  # end
-
-  # def describe_attributes
-  #   sub_definition = {}
-  #   attributes.each do |name, object|
-  #     sub_definition[name] = object.describe
-  #   end
-  #   sub_definition
-  # end
-
 end
