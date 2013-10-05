@@ -119,18 +119,77 @@ describe Attributor::Collection do
     end
 
     context 'with Attributor::Struct element type' do
-      context 'for valid values' do
-        [
-          [Attributor::Struct.example]
-        ].each do |value|
-          it "returns value when incoming value is #{value.inspect}" do
-            type.of(Struct).load(value).should == value
+      context 'for empty structs' do
+        let(:attribute_definition) do
+          Proc.new do
+          end
+        end
+
+        let(:empty_struct) { Attributor::Struct.construct(attribute_definition) }
+
+        context 'for valid struct values' do
+          [
+              [],
+              [nil],
+              [nil, nil],
+              [{}],
+              ["{}", "{}"],
+          ].each do |value|
+            it "returns value when incoming value is #{value.inspect}" do
+              expected_value = value.map {|v| empty_struct.load(v)}
+              type.of(Struct).load(value).should == expected_value
+            end
+          end
+        end
+
+        context 'for invalid struct values' do
+          [
+              [{"name" => "value"}, {"foo" => "another_value"}], # Ruby hash
+              ['{"bar":"value"}'], # JSON hash
+          ].each do |value|
+            it "raises when incoming value is #{value.inspect}" do
+              expect {
+                type.of(empty_struct).load(value)
+              }.to raise_error(Attributor::AttributorException)
+            end
           end
         end
       end
 
-      context 'for invalid values' do
-        it "raises" do
+      context 'for simple structs' do
+        let(:attribute_definition) do
+          Proc.new do
+            attribute 'name', Attributor::String
+          end
+        end
+
+        let(:simple_struct) { Attributor::Struct.construct(attribute_definition) }
+
+        context 'for valid struct values' do
+          [
+              [{"name" => "value"}, {"name" => "another_value"}], # Ruby hash
+              ['{"name":"value"}'], # JSON hash
+          ].each do |value|
+            it "returns value when incoming value is #{value.inspect}" do
+              expected_value = value.map {|v| simple_struct.load(v)}
+
+              type.of(simple_struct).load(value).should == expected_value
+            end
+          end
+        end
+
+        context 'for invalid struct values' do
+          [
+              [{"name" => "value"}, {"foo" => "another_value"}], # Ruby hash
+              ['{"bar":"value"}'], # JSON hash
+              [1,2],
+          ].each do |value|
+            it "raises when incoming value is #{value.inspect}" do
+              expect {
+                type.of(simple_struct).load(value)
+              }.to raise_error(Attributor::AttributorException)
+            end
+          end
         end
       end
     end
