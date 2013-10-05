@@ -3,12 +3,6 @@ require_relative 'spec_helper'
 describe Attributor::AttributeResolver do
   let(:value) { /\w+/.gen }
 
-#  after do
-#    # TODO: need to support this better in Skeletor somehow too.
-#    Thread.current[:_attributor_attribute_resolver] = nil
-#  end
-
-
   context 'registering and querying simple values' do
     let(:name) { "string_value" }
     before { subject.register(name,value) }

@@ -14,10 +14,7 @@ module Attributor
     # @block: code definition for struct attributes (nil for predefined types or leaf/simple types)
     def initialize(type, options={}, &block)
       @type = Attributor.resolve_type(type, options, block)
-
       @options = options
-      @saved_block = block
-      # @inherit_from = @options.delete(:inherit_from) # AttributeType object to inherit options/subdefinitions from
 
       check_options!
     end
@@ -126,7 +123,6 @@ module Attributor
     # Lazy compilation
     def compiled_definition
       unless @compiled_definition
-        #@compiled_definition = type.definition( @options, @saved_block )
         @compiled_definition = type.definition
         @compiled_options = @compiled_definition.options.merge(@options)
       end
@@ -139,13 +135,15 @@ module Attributor
       errors=[]
 
       # Validate any requirements, absolute or conditional, and return.
+
+
       if object.nil? # == Attributor::UNSET
-        if self.options[:required]
-          return ["Attribute #{context} is required"]
-        else
-          return self.validate_dependency(context)
-        end
+        # With no value, we can only validate whether that is acceptable or not and return. 
+        # Beyond that, no further validation should be done.
+        return self.validate_missing_value(context)
       end
+
+      # TODO: support validation for other types of conditional dependencies based on values of other attributes
 
       errors += self.validate_type(object,context)
 
@@ -166,29 +164,45 @@ module Attributor
     end
 
 
-    def validate_dependency(context)
-      return [] unless self.options.has_key? :required_if
-
+    def validate_missing_value(context)
+      return ["Attribute #{context} is required"] if self.options[:required]
+        
       requirement = self.options[:required_if]
+      return [] unless requirement
 
       case requirement
       when ::String
         key_path = requirement
-        condition = nil
+        predicate = nil
       when ::Hash
         # TODO: support multiple dependencies?
         key_path = requirement.keys.first
-        condition = requirement.values.first
+        predicate = requirement.values.first
       else
         raise AttributorException.new("unknown type of dependency: #{requirement.inspect}") # should never get here if the option validation worked...
       end
 
+      *requirement_context, _ = context.split(Attributor::SEPARATOR)
+      requirement_context = requirement_context.join(Attributor::SEPARATOR)
+      # OPTIMIZE: probably should.
 
-      # TODO: need to pass object in here (if we want to have conditions that use the attribute's value)
-      if AttributeResolver.current.check(context, key_path, condition)
-        return []
+      if AttributeResolver.current.check(requirement_context, key_path, predicate)
+        message = "Attribute #{context} is required when #{key_path} "
+
+        # give a hint about what the full path for a relative key_path would be
+        unless key_path[0] == Attributor::AttributeResolver::ROOT_PREFIX
+         message << "(for #{requirement_context}) "
+        end
+
+        if predicate
+          message << "matches #{predicate.inspect}."
+        else
+          message << "is present."
+        end
+
+        return [message]
       else
-        return ["Attribute #{context.inspect} fails to satisfy dependency #{requirement.inspect}"]
+        return []
       end
     end
 

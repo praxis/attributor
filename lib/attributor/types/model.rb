@@ -73,6 +73,8 @@ module Attributor
           else
             raise AttributorException.new("Identity attribute #{value.inspect} for #{self.name} not found")
           end
+        when :reference
+          :ok # FIXME ... actually do something smart 
         else
           super
         end

@@ -26,14 +26,15 @@ describe Attributor::Attribute do
         Attributor.should_receive(:resolve_type).once.with(Struct,attribute_options, anything()).and_call_original
         Attributor.should_receive(:resolve_type).once.with(Integer,{}, nil).and_call_original
       end
-      
+
       it 'generates the class' do
         thing = Attributor::Attribute.new(Struct, attribute_options) do
           attribute "id", Integer
         end
       end
-      
+
     end
+
   end
 
 
@@ -45,7 +46,7 @@ describe Attributor::Attribute do
 
     context 'for an anonymous type (aka: Struct)' do
       let(:attribute_options) { Hash.new }
-      let(:attribute) do 
+      let(:attribute) do
         Attributor::Attribute.new(Struct, attribute_options) do
           attribute "id", Integer
         end
@@ -157,7 +158,7 @@ describe Attributor::Attribute do
         example_1.should_not eq example_2
       end
 
-   end
+    end
 
 
 
@@ -272,8 +273,9 @@ describe Attributor::Attribute do
 
       end
 
-      context '#validate_dependency' do
+      context '#validate_missing_value' do
         let(:key) { "$.instance.ssh_key.name" }
+        let(:value) { /\w+/.gen }
 
         let(:attribute_options) { {required_if: key} }
 
@@ -282,46 +284,50 @@ describe Attributor::Attribute do
 
         before { Attributor::AttributeResolver.current.register('instance', instance) }
 
-        subject(:errors) { attribute.validate_dependency('') }
+        let(:attribute_context) { '$.params.key_material' }
+        subject(:errors) { attribute.validate_missing_value(attribute_context) }
 
-        context 'for a simple dependency without a condition' do
+
+        context 'for a simple dependency without a predicate' do
           context 'that is satisfied' do
-            it { should be_empty }
+            it { should_not be_empty }
           end
 
           context 'that is missing' do
             let(:value) { nil }
-            it { should_not be_empty }
+            it { should be_empty }
           end
         end
 
-        context 'with a dependency that has a condition' do
+        context 'with a dependency that has a predicate' do
           let(:value) { "default_ssh_key_name" }
-          subject(:errors) { attribute.validate_dependency('') }
+          #subject(:errors) { attribute.validate_missing_value('') }
 
-          context 'that is satisfied' do
+          context 'where the target attribute exists, and matches the predicate' do
             let(:attribute_options) { {required_if: {key => /default/} } }
+
+            it { should_not be_empty }
+            
+            its(:first) { should =~ /Attribute #{Regexp.quote(attribute_context)} is required when #{Regexp.quote(key)} matches/ }
+          end
+
+          context 'where the target attribute exists, but does not match the predicate' do
+            let(:attribute_options) { {required_if: {key => /other/} } }
+
             it { should be_empty }
           end
 
-          context 'that is not satisfied' do
-            let(:attribute_options) { {required_if: {key => /other/} } }
-            it { should_not be_empty }
-          end
-
-          context 'for an attribute that is missing' do
+          context 'where the target attribute does not exist' do
             let(:attribute_options) { {required_if: {key => /default/} } }
             let(:ssh_key) { double("ssh_key", name: nil) }
 
-            it { should_not be_empty }
+            it { should be_empty }
           end
         end
 
       end
 
     end
-
-
 
 
     context 'for an attribute for a subclass of Model' do
@@ -402,16 +408,21 @@ describe Attributor::Attribute do
       end
 
 
-      context '#validate_dependency' do
+      context '#validate_missing_value' do
         let(:type) { Duck }
+        let(:attribute_name) { nil }
+        let(:attribute) { Duck.definition.attributes[attribute_name] }
 
-        subject(:errors) { attribute.validate(duck, 'duck') }
+        let(:attribute_context) { "$.duck.#{attribute_name}" }
+        subject(:errors) { attribute.validate_missing_value(attribute_context) }
 
         before do
           Attributor::AttributeResolver.current.register('duck', duck)
         end
 
-        context 'for a simple dependency' do
+        context 'for a dependency with no predicate' do
+          let(:attribute_name) { 'email' }
+
           let(:duck) do
             d = Duck.new
             d.set 'age', 1
@@ -419,20 +430,22 @@ describe Attributor::Attribute do
             d
           end
 
-          context 'that is satisfied' do
-            before do
-              duck.set 'email', /[:email:]/.gen
+          context 'where the target attribute exists, and matches the predicate' do
+            it { should_not be_empty }
+            its(:first) { should == "Attribute $.duck.email is required when name (for $.duck) is present." }
+          end
+          context 'where the target attribute does not exist' do
+            before do 
+              duck.set 'name', nil
             end
             it { should be_empty }
-          end
-          context 'that is unsatisfied' do
-            it { should_not be_empty }
-            its(:first) { should =~ /fails to satisfy dependency/ }
           end
         end
 
 
-        context 'for a complex dependency' do
+        context 'for a dependency with a predicate' do
+          let(:attribute_name) { 'age' }
+
           let(:duck) do
             d = Duck.new
             d.set 'name', 'Daffy'
@@ -440,16 +453,23 @@ describe Attributor::Attribute do
             d
           end
 
-          context 'that is satisfied' do
-            before do
-              duck.set 'age', 1
+          context 'where the target attribute exists, and matches the predicate' do
+            it { should_not be_empty }
+            its(:first) { should =~ /Attribute #{Regexp.quote('$.duck.age')} is required when name #{Regexp.quote('(for $.duck)')} matches/ }
+          end
+
+          context 'where the target attribute exists, and does not match the predicate' do
+           before do 
+              duck.set 'name', 'Donald'
             end
             it { should be_empty }
           end
 
-          context 'that is unsatisfied' do
-            it { should_not be_empty }
-            its(:first) { should =~ /fails to satisfy dependency/ }
+          context 'where the target attribute does not exist' do
+           before do 
+              duck.set 'name', nil
+            end
+            it { should be_empty }
           end
 
         end
@@ -458,12 +478,6 @@ describe Attributor::Attribute do
 
     end
 
-
-
-
-
   end
 
 end
-
-
