@@ -87,6 +87,13 @@ module Attributor
       return another_array
     end
 
+    def self.construct(*args)
+      # Actually need to construct the element type so that we can
+      # compile the block and define the element type.
+      @element_type = @element_type.construct(*args)
+      return self
+    end
+
     # @param value [Array] currently an array of native types
     def self.validate( value, context, attribute )
       errors = []
@@ -102,6 +109,14 @@ module Attributor
     def self.validate_options( value, context, attribute )
       errors = []
       errors
+    end
+
+    def self.respond_to?(method_name)
+      if method_name == :construct
+        return @element_type.respond_to?(:construct)
+      end
+
+      super
     end
   end
 end

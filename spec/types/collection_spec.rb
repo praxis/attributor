@@ -119,6 +119,7 @@ describe Attributor::Collection do
     end
 
     context 'with Attributor::Struct element type' do
+      # FIXME: Raise in all cases of empty Structs
       context 'for empty structs' do
         let(:attribute_definition) do
           Proc.new do
@@ -153,6 +154,12 @@ describe Attributor::Collection do
               }.to raise_error(Attributor::AttributorException)
             end
           end
+        end
+      end
+
+      context 'for model examples' do
+        it "should work" do
+          Cormorant.definition
         end
       end
 
