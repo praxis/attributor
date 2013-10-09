@@ -49,11 +49,13 @@ module Attributor
       raise AttributorException.new("Could not find attribute type for: #{name} [klass: #{klass.name}]")  unless  klass < Attributor::Type
     end
 
-    return klass unless constructor_block
+    if klass.respond_to?(:construct)
+      return klass.construct(constructor_block, options)
+    end
 
-    raise AttributorException.new("Type: #{type} does not support anonymous generation") unless klass.respond_to?(:construct)
+    raise AttributorException.new("Type: #{type} does not support anonymous generation") if constructor_block
 
-    klass.construct(constructor_block, options)
+    klass
   end
 
 end

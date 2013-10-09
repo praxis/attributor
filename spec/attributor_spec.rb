@@ -7,9 +7,6 @@ describe Attributor do
       {
         ::Integer => Attributor::Integer,
         Integer => Attributor::Integer,
-        # FIXME: Ruby removes the initial :: before evaluating the expression,
-        # thus above two are equivalent
-        # https://github.com/rightscale/attributor/issues/24
         Attributor::Integer => Attributor::Integer,
         ::Attributor::Integer => Attributor::Integer,
         ::Attributor::DateTime => Attributor::DateTime,

@@ -50,13 +50,17 @@ class Cormorant
   attributes do
     # This will be a collection of arbitrary Ruby Objects
     attribute 'fish', Attributor::Collection, :description => "All kinds of fish for feeding the babies"
+    
     # This will be a collection of Cormorants (note, this relationship is circular)
     attribute 'neighbors', Attributor::Collection.of(Cormorant), :description => "Neighbor cormorants"
+    
     # This will be a collection of instances of an anonymous Struct class, each having two well-defined attributes
-    #attribute 'babies', Attributor::Collection.of(Attributor::Struct), :description => "All the babies" do
-    #  attribute 'months', Attributor::Integer, :default => 0, :min => 0, :description => "The age in months of the baby cormorant"
-    #  attribute 'weight', Attributor::Float, :example => /\d{1,2}\.\d{3}/, :description => "The weight in kg of the baby cormorant"
-    #end
+    attribute 'babies', Attributor::Collection.of(Attributor::Struct), :description => "All the babies", :member_options => {:identity => 'name'} do
+      attribute 'name', Attributor::String, :example => /[:name]/, :description => "The name of the baby cormorant"
+      attribute 'months', Attributor::Integer, :default => 0, :min => 0, :description => "The age in months of the baby cormorant"
+      attribute 'weight', Attributor::Float, :example => /\d{1,2}\.\d{3}/, :description => "The weight in kg of the baby cormorant"
+    end
+      
   end
 end
 

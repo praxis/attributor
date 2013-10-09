@@ -73,7 +73,6 @@ describe Attributor::Attribute do
 
       attribute.parse(value)
     end
-
   end
 
 
@@ -159,9 +158,6 @@ describe Attributor::Attribute do
       end
 
     end
-
-
-
   end
 
   context 'load' do
@@ -477,7 +473,42 @@ describe Attributor::Attribute do
       end
 
     end
+  end
 
+  context 'for a Collection' do
+    context 'of non-Model (or Struct) type' do
+      let(:member_type) { Attributor::Integer }
+      let(:type) { Attributor::Collection.of(member_type)}
+      let(:member_options) { {:max => 10} }
+      let(:attribute_options) { {:member_options => member_options} }
+
+
+
+      context 'the member_attribute of that type' do
+        subject(:member_attribute) { attribute.type.member_attribute }        
+
+        it { should be_kind_of(Attributor::Attribute)}
+        its(:type) { should be(member_type) }
+        its(:options) { should be(member_options) }
+      end
+
+      context "working with members" do
+        let(:values) { ['1',2,'12'] }
+        
+        it 'loads?' do
+          attribute.load(values).should =~ [1,2,12]
+        end
+
+        it 'validates?' do
+          p attribute.validate(values)
+        end
+      end
+
+
+    end
+    
+    context 'of a Model (or Struct) type' do
+    end
   end
 
 end

@@ -7,18 +7,18 @@ module Attributor
   class Collection
     include Type
 
-    # @param type [Attributor::Type] optional, defines the type of all collection elements
-    # @return anonymous class with specified type of collection elements
+    # @param type [Attributor::Type] optional, defines the type of all collection members
+    # @return anonymous class with specified type of collection members
     #
     # @example Collection.of(Struct)
     #
     def self.of(type)
       resolved_type = Attributor.resolve_type(type)
       unless resolved_type.ancestors.include?(Attributor::Type)
-        raise Attributor::AttributorException.new("Collections can only have elements that are Attributor::Types")
+        raise Attributor::AttributorException.new("Collections can only have members that are Attributor::Types")
       end
       Class.new(self) do
-        @element_type = resolved_type
+        @member_type = resolved_type
       end
     end
 
@@ -26,14 +26,22 @@ module Attributor
       return ::Array
     end
 
+    def self.member_type
+      @member_type
+    end
+
+    def self.member_attribute
+      @member_attribute
+    end
+    
     # generates an example Collection
-    # @return An Array of native type objects conforming to the specified element_type
+    # @return An Array of native type objects conforming to the specified member_type
     def self.example(options={}, context=nil)
       result = []
       size = rand(10)
 
       size.times do
-        random_type = @element_type || Attributor::BASIC_TYPES.sample
+        random_type = @member_type || Attributor::BASIC_TYPES.sample
         result << Attributor::Attribute.new(random_type, options).example(context)
       end
 
@@ -65,7 +73,7 @@ module Attributor
     end
 
     # The incoming value should be an array here, so the only decoding that we need to do
-    # is from the elements (if there's an :element_type defined option).
+    # is from the members (if there's an :member_type defined option).
     def self.load(value)
       if value.is_a?(Array)
         loaded_value = value
@@ -75,32 +83,51 @@ module Attributor
         raise AttributorException.new("Do not know how to decode an array from a #{value.class.name}")
       end
 
-      return loaded_value if (@element_type.nil? || loaded_value.empty?)
+      return loaded_value if (@member_type.nil? || loaded_value.empty?)
 
-      # load each element if the element type is an Attributor::Type; may raise AttributorException
+      # load each member if the member type is an Attributor::Type; may raise AttributorException
       another_array = []
-      loaded_value.each_with_index do |element, i|
-        loaded_element = @element_type.load(element)
-        another_array << loaded_element
+      loaded_value.each_with_index do |member, i|
+        loaded_member = @member_type.load(member)
+        another_array << loaded_member
       end
 
       return another_array
     end
 
-    def self.construct(*args)
-      # Actually need to construct the element type so that we can
-      # compile the block and define the element type.
-      @element_type = @element_type.construct(*args)
+    def self.construct(constructor_block, options)
+      # Actually need to construct the member type so that we can
+      # compile the block and define the member type.
+
+      if @member_type.respond_to?(:construct)
+        @member_type = @member_type.construct(constructor_block, options) 
+      end  
+      
+      @member_attribute = Attributor::Attribute.new member_type, options[:member_options], &constructor_block
+      
       return self
+    end
+
+
+    def self.check_option!(name, definition)
+      # TODO: support more options like :max_size
+      case name
+      when :member_options
+
+      else
+        :unknown
+      end
+
+      :ok
     end
 
     # @param value [Array] currently an array of native types
     def self.validate( value, context, attribute )
       errors = []
 
-      # All elements in the collection Array must be of type Attributor::Type
-      value.each_with_index do |element, i|
-        errors << "Collection #{context}[#{i}] is not an Attributor::Type" unless element.is_a?(Attributor::Type)
+      # All members in the collection Array must be of type Attributor::Type
+      value.each_with_index do |member, i|
+        errors << "Collection #{context}[#{i}] is not an Attributor::Type" unless member.is_a?(Attributor::Type)
       end
 
       errors
@@ -111,12 +138,12 @@ module Attributor
       errors
     end
 
-    def self.respond_to?(method_name)
-      if method_name == :construct
-        return @element_type.respond_to?(:construct)
-      end
-
-      super
-    end
+#    def self.respond_to?(method_name)
+#      if method_name == :construct
+#        return @member_type.respond_to?(:construct)
+#      end
+#
+#      super
+#    end
   end
 end
