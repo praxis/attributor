@@ -385,9 +385,9 @@ describe Attributor::Attribute do
 
         before do
           type_attributes["email"].should_receive(:validate).
-            with(chicken.get('email'), 'email').and_return(email_validation_response)
+            with(chicken.email, 'email').and_return(email_validation_response)
           type_attributes["age"].should_receive(:validate).
-            with(chicken.get('age'), 'age').and_return(age_validation_response)
+            with(chicken.age, 'age').and_return(age_validation_response)
         end
 
         it 'validates sub-attributes' do
@@ -425,8 +425,8 @@ describe Attributor::Attribute do
 
           let(:duck) do
             d = Duck.new
-            d.set 'age', 1
-            d.set 'name', 'Donald'
+            d.age = 1
+            d.name = 'Donald'
             d
           end
 
@@ -436,7 +436,7 @@ describe Attributor::Attribute do
           end
           context 'where the target attribute does not exist' do
             before do 
-              duck.set 'name', nil
+              duck.name = nil
             end
             it { should be_empty }
           end
@@ -448,8 +448,8 @@ describe Attributor::Attribute do
 
           let(:duck) do
             d = Duck.new
-            d.set 'name', 'Daffy'
-            d.set 'email', 'daffy@darkwing.uoregon.edu' # he's a duck,get it?
+            d.name = 'Daffy'
+            d.email = 'daffy@darkwing.uoregon.edu' # he's a duck,get it?
             d
           end
 
@@ -460,14 +460,14 @@ describe Attributor::Attribute do
 
           context 'where the target attribute exists, and does not match the predicate' do
            before do 
-              duck.set 'name', 'Donald'
+              duck.name = 'Donald'
             end
             it { should be_empty }
           end
 
           context 'where the target attribute does not exist' do
            before do 
-              duck.set 'name', nil
+              duck.name = nil
             end
             it { should be_empty }
           end
