@@ -16,30 +16,29 @@ module Attributor
     end
 
 
-    def get(attribute_name)
-      attributes[attribute_name]
-    end
-
-
-    def set(attribute_name,value)
-      attribute = self.class.definition.attributes.fetch(attribute_name) do |key|
-        raise AttributorException.new(
-          "Can not set unknown attribute: #{attribute_name} for #{self.inspect}"
-        )
-      end
-      attributes[attribute_name] = attribute.load(value)
-    end
-
-
     def respond_to?(name, include_private = false)
-      return true if attributes.key?(name.to_s) || attributes.key?(name.to_sym)
+      attribute_name = name.to_s
+      attribute_name.sub!('=','')
+
+      return true if self.class.definition.attributes.key?(attribute_name)
+
       super
     end
 
 
     def method_missing(name, *args)
-      return attributes[name.to_s] if attributes.key?(name.to_s)
-      return attributes[name.to_sym] if attributes.key?(name.to_sym)
+      attribute_name = name.to_s
+      attribute_name.sub!('=','')
+
+      if attribute = self.class.definition.attributes[attribute_name]
+        if name.to_s[-1] == '='
+          value, *rest = args
+          return attributes[attribute_name]  = attribute.load(value)
+        else
+          return attributes[attribute_name]
+        end
+      end
+
       super
     end
 
@@ -52,7 +51,7 @@ module Attributor
 
         self.definition.attributes.each do |attribute_name,attribute|
           sub_context = self.generate_subcontext(context,attribute_name)
-          result.set(attribute_name, attribute.example(context))
+          result.send("#{attribute_name}=", attribute.example(context))
         end
 
         result
@@ -74,7 +73,7 @@ module Attributor
             raise AttributorException.new("Identity attribute #{value.inspect} for #{self.name} not found")
           end
         when :reference
-          :ok # FIXME ... actually do something smart 
+          :ok # FIXME ... actually do something smart
         else
           super
         end
@@ -107,7 +106,7 @@ module Attributor
         model = self.new
 
         (hash.keys | self.definition.attributes.keys).each do |k|
-          model.set(k, hash[k])
+          model.send("#{k}=", hash[k])
         end
 
         model
