@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["RightScale"]
-  s.date = "2013-09-30"
+  s.date = "2013-10-02"
   s.description = "longer description of your gem"
   s.email = "blanquer@rightscale.com"
   s.extra_rdoc_files = [
@@ -32,30 +32,15 @@ Gem::Specification.new do |s|
     "lib/attributor/attribute.rb",
     "lib/attributor/attribute_resolver.rb",
     "lib/attributor/dsl_compiler.rb",
-    "lib/attributor/old school types/array.rb",
-    "lib/attributor/old school types/base.rb",
-    "lib/attributor/old school types/boolean.rb",
-    "lib/attributor/old school types/csv.rb",
-    "lib/attributor/old school types/date_time.rb",
-    "lib/attributor/old school types/hash.rb",
-    "lib/attributor/old school types/ids.rb",
+    "lib/attributor/exceptions.rb",
     "lib/attributor/type.rb",
+    "lib/attributor/types/boolean.rb",
+    "lib/attributor/types/date_time.rb",
+    "lib/attributor/types/float.rb",
     "lib/attributor/types/integer.rb",
     "lib/attributor/types/model.rb",
     "lib/attributor/types/string.rb",
     "lib/attributor/types/struct.rb",
-    "prior-spec/array_spec.rb",
-    "prior-spec/attribute_spec.rb",
-    "prior-spec/base_spec.rb",
-    "prior-spec/boolean_spec.rb",
-    "prior-spec/csv_spec.rb",
-    "prior-spec/date_time_spec.rb",
-    "prior-spec/hash_spec.rb",
-    "prior-spec/ids_spec.rb",
-    "prior-spec/integer_spec.rb",
-    "prior-spec/spec_helper.rb",
-    "prior-spec/string_spec.rb",
-    "prior-spec/struct_spec.rb",
     "spec/attribute_resolver_spec.rb",
     "spec/attribute_spec.rb",
     "spec/attributor_spec.rb",
@@ -63,8 +48,12 @@ Gem::Specification.new do |s|
     "spec/support/models.rb",
     "spec/support/types.rb",
     "spec/type_spec.rb",
+    "spec/types/boolean_spec.rb",
+    "spec/types/date_time_spec.rb",
+    "spec/types/float_spec.rb",
     "spec/types/integer_spec.rb",
     "spec/types/model_spec.rb",
+    "spec/types/string_spec.rb",
     "spec/types/struct_spec.rb",
     "tmp/rspec_guard_result"
   ]

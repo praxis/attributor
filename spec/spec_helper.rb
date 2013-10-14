@@ -1,7 +1,11 @@
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'simplecov'
-SimpleCov.start
+
+SimpleCov.start do
+  add_filter 'spec' # Don't include RSpec stuff
+  add_group 'Types', 'lib/attributor/types'
+end
 
 require 'rspec'
 require 'attributor'
