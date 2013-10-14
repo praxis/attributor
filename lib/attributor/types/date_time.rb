@@ -7,14 +7,12 @@ module Attributor
     class DateTime
       include Type
 
-      ATTRIBUTOR_EPOCH = ::DateTime.new(2013, 9, 30, 8, 0, 0)
-
       def self.native_type
         return ::DateTime
       end
 
       def self.example
-        return ATTRIBUTOR_EPOCH - rand(1000)
+        return self.load(/[:date:]/.gen)
       end
 
       def self.load(value)

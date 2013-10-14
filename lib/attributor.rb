@@ -13,6 +13,8 @@ module Attributor
   require_relative 'attributor/dsl_compiler'
   require_relative 'attributor/attribute_resolver'
 
+  require_relative 'attributor/extensions/randexp'
+
   require_relative 'attributor/types/integer'
   require_relative 'attributor/types/string'
   require_relative 'attributor/types/model'
