@@ -1,6 +1,7 @@
 # Represents a plain old boolean type. TBD: can be nil?
 #
 require_relative '../exceptions'
+require 'date'
 
 module Attributor
 
