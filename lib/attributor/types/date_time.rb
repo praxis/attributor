@@ -12,7 +12,7 @@ module Attributor
         return ::DateTime
       end
 
-      def self.example
+      def self.example(options={}, context=nil)
         return self.load(/[:date:]/.gen)
       end
 

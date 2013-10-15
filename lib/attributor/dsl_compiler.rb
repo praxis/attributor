@@ -91,7 +91,5 @@ module Attributor
 
       return attributes[name] = Attributor::Attribute.new(type, opts, &block)
     end
-
-
   end
 end

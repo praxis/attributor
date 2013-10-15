@@ -22,10 +22,22 @@ module Attributor
   require_relative 'attributor/types/boolean'
   require_relative 'attributor/types/date_time'
   require_relative 'attributor/types/float'
+  require_relative 'attributor/types/collection'
+
+  # List of all basic types (i.e. not collections, structs or models)
+  BASIC_TYPES = [
+    Attributor::Integer,
+    Attributor::String,
+    Attributor::Boolean,
+    Attributor::DateTime,
+    Attributor::Float
+  ].freeze
 
   # hierarchical separator string for composing human readable attributes
   SEPARATOR = '.'.freeze
 
+  # @param type [Class] The class of the type to resolve
+  #
   def self.resolve_type(type, options={}, constructor_block=nil)
     if type < Attributor::Type
       klass = type

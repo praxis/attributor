@@ -109,6 +109,10 @@ Generated documentation:
 
     bundle exec yard
 
+Documentation coverage:
+
+    bundle exec yardstick 'lib/**/*.rb'
+
 Code coverage:
 
     bundle exec rspec
