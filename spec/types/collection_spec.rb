@@ -171,8 +171,7 @@ describe Attributor::Collection do
               ['{"name":"value"}'], # JSON hash
           ].each do |value|
             it "returns value when incoming value is #{value.inspect}" do
-              expected_value = value.map {|v| simple_struct.load(v)}
-
+              expected_value = value.map {|v| simple_struct.load(v.clone)}
               type.of(simple_struct).load(value).should == expected_value
             end
           end

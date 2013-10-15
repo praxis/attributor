@@ -99,7 +99,7 @@ describe Attributor::Model do
           it 'raises an error' do
             expect { 
               Chicken.load(hash)
-            }.to raise_error(NoMethodError, /undefined method/)
+            }.to raise_error(Attributor::AttributorException, /Unknown attributes/)
           end
         end
       end
