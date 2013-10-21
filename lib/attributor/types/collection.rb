@@ -27,13 +27,17 @@ module Attributor
     end
 
     def self.member_type
-      @member_type
+      @member_type ||= Attributor::Object
     end
 
     def self.member_attribute
-      @member_attribute
+      @member_attribute ||= begin
+        self.construct(nil,{})
+        @member_attribute
+      end
     end
-    
+
+
     # generates an example Collection
     # @return An Array of native type objects conforming to the specified member_type
     def self.example(options={}, context=nil)
@@ -41,8 +45,7 @@ module Attributor
       size = rand(10)
 
       size.times do
-        random_type = @member_type || Attributor::BASIC_TYPES.sample
-        result << Attributor::Attribute.new(random_type, options).example(context)
+        result << self.member_attribute.example(context)
       end
 
       result
@@ -83,28 +86,28 @@ module Attributor
         raise AttributorException.new("Do not know how to decode an array from a #{value.class.name}")
       end
 
-      return loaded_value if (@member_type.nil? || loaded_value.empty?)
-
       # load each member if the member type is an Attributor::Type; may raise AttributorException
       another_array = []
       loaded_value.each_with_index do |member, i|
-        loaded_member = @member_type.load(member)
+        loaded_member = self.member_attribute.load(member)
         another_array << loaded_member
       end
 
       return another_array
     end
 
-    def self.construct(constructor_block, options)
-      # Actually need to construct the member type so that we can
-      # compile the block and define the member type.
 
-      if @member_type.respond_to?(:construct)
-        @member_type = @member_type.construct(constructor_block, options) 
-      end  
-      
-      @member_attribute = Attributor::Attribute.new member_type, options[:member_options], &constructor_block
-      
+    def self.construct(constructor_block, options)
+
+      member_options = options[:member_options]  || {}
+
+      # create the member_attribute, passing in our member_type and whatever constructor_block is.
+      # that in turn will call construct on the type if applicable.
+      @member_attribute = Attributor::Attribute.new self.member_type, member_options, &constructor_block
+
+      # overwrite our type with whatever type comes out of the attribute
+      @member_type = @member_attribute.type
+
       return self
     end
 
@@ -138,12 +141,5 @@ module Attributor
       errors
     end
 
-#    def self.respond_to?(method_name)
-#      if method_name == :construct
-#        return @member_type.respond_to?(:construct)
-#      end
-#
-#      super
-#    end
   end
 end

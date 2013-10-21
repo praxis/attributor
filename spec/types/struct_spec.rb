@@ -2,6 +2,15 @@ require_relative '../spec_helper'
 
 describe Attributor::Struct do
 
+  context '.definition for a Struct with no sub-attributes' do
+    subject { Attributor::Struct }
+    it 'raises an error' do
+      expect {
+        subject.definition
+      }.to raise_error(Attributor::AttributorException,"Can not use a pure Struct without defining sub-attributes")
+    end
+
+  end
   context '.construct' do
 
     context 'empty struct' do

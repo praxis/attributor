@@ -15,6 +15,7 @@ module Attributor
 
   require_relative 'attributor/extensions/randexp'
 
+  require_relative 'attributor/types/object'
   require_relative 'attributor/types/integer'
   require_relative 'attributor/types/string'
   require_relative 'attributor/types/model'
@@ -25,13 +26,6 @@ module Attributor
   require_relative 'attributor/types/collection'
 
   # List of all basic types (i.e. not collections, structs or models)
-  BASIC_TYPES = [
-    Attributor::Integer,
-    Attributor::String,
-    Attributor::Boolean,
-    Attributor::DateTime,
-    Attributor::Float
-  ].freeze
 
   # hierarchical separator string for composing human readable attributes
   SEPARATOR = '.'.freeze

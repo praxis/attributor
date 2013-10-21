@@ -18,7 +18,7 @@ describe Attributor::Collection do
       # FIXME: https://github.com/rightscale/attributor/issues/24
       #::Integer,
       #::String,
-      ::Object
+      #::Object
     ].each do |member_type|
       it "raises when given invalid element type #{member_type}" do
         expect { klass = type.of(member_type) }.to raise_error(Attributor::AttributorException)
@@ -33,7 +33,7 @@ describe Attributor::Collection do
 
     #   it 'calls construct on that type' do
     #     member_type.should_receive(:construct).and_call_original
-        
+
     #     Attributor::Collection.of(member_type)
     #   end
 
@@ -48,7 +48,7 @@ describe Attributor::Collection do
 
     #     Attributor::Collection.of(member_type)
     #   end
-      
+
     # end
 
     context 'with :member_options option' do
@@ -130,6 +130,7 @@ describe Attributor::Collection do
         }.each do |member_type, value|
           it "returns loaded value when member_type is #{member_type} and value is #{value.inspect}" do
             expected_result = value.map {|v| member_type.load(v)}
+            #binding.pry
             type.of(member_type).load(value).should == expected_result
           end
         end
@@ -139,7 +140,7 @@ describe Attributor::Collection do
         {
           # FIXME: https://github.com/rightscale/attributor/issues/24
           #::String  => ["foo", "bar"],
-          ::Object  => [::Object.new],
+          #::Object  => [::Object.new]
           ::Chicken => [::Turkey.new]
         }.each do |member_type, value|
           it "raises error when member_type is #{member_type} and value is #{value.inspect}" do
@@ -151,47 +152,49 @@ describe Attributor::Collection do
 
     context 'with Attributor::Struct element type' do
 
-
-
       # FIXME: Raise in all cases of empty Structs
-      context 'for empty structs' do
-        let(:attribute_definition) do
-          Proc.new do
-          end
-        end
+      # context 'for empty structs' do
+      #   let(:attribute_definition) do
+      #     Proc.new do
+      #     end
+      #   end
 
-        let(:empty_struct) { Attributor::Struct.construct(attribute_definition) }
+      #   let(:empty_struct) { Attributor::Struct.construct(attribute_definition) }
 
-        context 'for valid struct values' do
-          [
-            [],
-            [nil],
-            [nil, nil],
-            [{}],
-            ["{}", "{}"],
-          ].each do |value|
-            it "returns value when incoming value is #{value.inspect}" do
-              expected_value = value.map {|v| empty_struct.load(v)}
-              type.of(Struct).load(value).should == expected_value
-            end
-          end
-        end
+      #   # FIXME: these values are only valid because they aren't values at all.
+      #   #        which isn't so bad, since a straight Struct can't have any values.
+      #   #        so I suppose this is all correct, but not entirely valuable or obvious.
+      #   context 'for valid struct values' do
+      #     [
+      #       [],
+      #       [nil],
+      #       [nil, nil],
+      #       [{}],
+      #       ["{}", "{}"],
+      #     ].each do |value|
+      #       it "returns value when incoming value is #{value.inspect}" do
+      #         #pending
+      #         expected_value = value.map {|v| empty_struct.load(v)}
+      #         type.of(Struct).load(value).should == expected_value
+      #       end
+      #     end
+      #   end
 
-        context 'for invalid struct values' do
-          [
-            [{"name" => "value"}, {"foo" => "another_value"}], # Ruby hash
-            ['{"bar":"value"}'], # JSON hash
-          ].each do |value|
-            it "raises when incoming value is #{value.inspect}" do
-              expect {
-                type.of(empty_struct).load(value)
-              }.to raise_error(Attributor::AttributorException)
-            end
-          end
-        end
+      #   context 'for invalid struct values' do
+      #     [
+      #       [{"name" => "value"}, {"foo" => "another_value"}], # Ruby hash
+      #       ['{"bar":"value"}'], # JSON hash
+      #     ].each do |value|
+      #       it "raises when incoming value is #{value.inspect}" do
+      #         expect {
+      #           type.of(empty_struct).load(value)
+      #         }.to raise_error(Attributor::AttributorException)
+      #       end
+      #     end
+      #   end
 
 
-      end
+      # end
 
 
       context 'for simple structs' do
@@ -268,7 +271,14 @@ describe Attributor::Collection do
       value.should be_a(::Array)
     end
 
-    Attributor::BASIC_TYPES.each do |member_type|
+    [
+      Attributor::Integer,
+      Attributor::String,
+      Attributor::Boolean,
+      Attributor::DateTime,
+      Attributor::Float,
+      Attributor::Object
+    ].each do |member_type|
       it "returns an Array of native types of #{member_type}" do
         value = Attributor::Collection.of(member_type).example({})
         value.all? { |element| member_type.valid_type?(element) }.should be_true

@@ -12,6 +12,7 @@ module Attributor
     # @block: code definition for struct attributes (nil for predefined types or leaf/simple types)
     def initialize(type, options={}, &block)
       @type = Attributor.resolve_type(type, options, block)
+
       @options = options
 
       check_options!
@@ -106,14 +107,6 @@ module Attributor
 
     def options
       return self.compiled_options
-
-      if type < Model
-
-        compiled_definition unless @compiled_definition
-        @compiled_options
-      else # Simple, no DSL anywhere type
-        @options
-      end
     end
 
 
