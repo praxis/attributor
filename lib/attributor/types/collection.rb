@@ -10,7 +10,7 @@ module Attributor
     # @param type [Attributor::Type] optional, defines the type of all collection members
     # @return anonymous class with specified type of collection members
     #
-    # @example Collection.of(Struct)
+    # @example Collection.of(Integer)
     #
     def self.of(type)
       resolved_type = Attributor.resolve_type(type)
@@ -63,7 +63,7 @@ module Attributor
         # attempt to parse as JSON
         parsed_value = JSON.parse(value)
       rescue JSON::JSONError => e
-        raise AttributorException.new("Could not decode the incoming string as an Array. Is it not JSON? (string was: #{value}). Exception: #{e.inspect}")
+        raise AttributorException.new("Could not decode the incoming string as an Array. Is it not JSON? (string was: '#{value}'). Exception: #{e.inspect}")
       end
 
       if parsed_value.is_a? ::Array
@@ -87,13 +87,7 @@ module Attributor
       end
 
       # load each member if the member type is an Attributor::Type; may raise AttributorException
-      another_array = []
-      loaded_value.each_with_index do |member, i|
-        loaded_member = self.member_attribute.load(member)
-        another_array << loaded_member
-      end
-
-      return another_array
+      return loaded_value.collect { |member| self.member_attribute.load(member) }
     end
 
 
