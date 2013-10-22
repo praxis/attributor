@@ -129,8 +129,6 @@ module Attributor
 
     # Validates stuff and checks dependencies
     def validate(object, context=nil)
-      errors=[]
-
       # Validate any requirements, absolute or conditional, and return.
 
 
@@ -142,7 +140,11 @@ module Attributor
 
       # TODO: support validation for other types of conditional dependencies based on values of other attributes
 
-      errors += self.validate_type(object,context)
+
+      errors = self.validate_type(object,context)
+
+      # End validation if we don't even have the proper type to begin with
+      return errors if errors.any?
 
       if self.options[:values] && !self.options[:values].include?(object)
         errors << "Attribute #{context}: #{object.inspect} is not within the allowed values=#{self.options[:values].inspect} "

@@ -161,7 +161,7 @@ describe Attributor::Attribute do
   end
 
   context 'load' do
-    let(:value) { 1 }
+    let(:value) { '1' }
 
     it 'does not call type.load for nil values' do
       type.should_not_receive(:load)
@@ -240,7 +240,6 @@ describe Attributor::Attribute do
           attribute.should_receive(:validate_type).with(value, context).and_call_original
           attribute.should_not_receive(:validate_dependency)
           type.should_receive(:validate).and_call_original
-
           attribute.validate(value, context)
         end
 
@@ -500,7 +499,8 @@ describe Attributor::Attribute do
         end
 
         it 'validates?' do
-          p attribute.validate(values)
+          errors = attribute.validate(values)
+          errors.should_not be_empty
         end
       end
 
