@@ -12,7 +12,6 @@ module Attributor
     # @block: code definition for struct attributes (nil for predefined types or leaf/simple types)
     def initialize(type, options={}, &block)
       @type = Attributor.resolve_type(type, options, block)
-
       @options = options
 
       check_options!

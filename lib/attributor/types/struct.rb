@@ -20,6 +20,7 @@ module Attributor
       Class.new(self) do
 
         attributes options, &attribute_definition
+
       end
 
     end

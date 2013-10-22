@@ -303,7 +303,7 @@ describe Attributor::Attribute do
             let(:attribute_options) { {required_if: {key => /default/} } }
 
             it { should_not be_empty }
-            
+
             its(:first) { should =~ /Attribute #{Regexp.quote(attribute_context)} is required when #{Regexp.quote(key)} matches/ }
           end
 
@@ -431,7 +431,7 @@ describe Attributor::Attribute do
             its(:first) { should == "Attribute $.duck.email is required when name (for $.duck) is present." }
           end
           context 'where the target attribute does not exist' do
-            before do 
+            before do
               duck.name = nil
             end
             it { should be_empty }
@@ -455,14 +455,14 @@ describe Attributor::Attribute do
           end
 
           context 'where the target attribute exists, and does not match the predicate' do
-           before do 
+           before do
               duck.name = 'Donald'
             end
             it { should be_empty }
           end
 
           context 'where the target attribute does not exist' do
-           before do 
+           before do
               duck.name = nil
             end
             it { should be_empty }
@@ -485,7 +485,7 @@ describe Attributor::Attribute do
 
 
       context 'the member_attribute of that type' do
-        subject(:member_attribute) { attribute.type.member_attribute }        
+        subject(:member_attribute) { attribute.type.member_attribute }
 
         it { should be_kind_of(Attributor::Attribute)}
         its(:type) { should be(member_type) }
@@ -494,7 +494,7 @@ describe Attributor::Attribute do
 
       context "working with members" do
         let(:values) { ['1',2,'12'] }
-        
+
         it 'loads?' do
           attribute.load(values).should =~ [1,2,12]
         end
@@ -506,7 +506,7 @@ describe Attributor::Attribute do
 
 
     end
-    
+
     context 'of a Model (or Struct) type' do
     end
   end

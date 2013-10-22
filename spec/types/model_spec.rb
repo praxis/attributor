@@ -4,7 +4,7 @@ describe Attributor::Model do
 
   context 'class methods' do
     subject(:chicken) { Chicken }
-    
+
     its(:native_type) { should eq(Chicken) }
 
     context '.example'  do
@@ -19,7 +19,7 @@ describe Attributor::Model do
       end
 
       it { should be_kind_of(Chicken) }
-      
+
       its(:age) { should == age }
       its(:email) { should =~ /\w+@.*\.example\.org/ }
     end
@@ -71,7 +71,7 @@ describe Attributor::Model do
       context 'with an invalid object type' do
         it 'raises some sort of error' do
           expect {
-            Chicken.load(Object.new) 
+            Chicken.load(Object.new)
           }.to raise_error(/Can not load Chicken from value .* of type Object/)
         end
       end
@@ -97,7 +97,7 @@ describe Attributor::Model do
           let(:hash) { {"invalid_attribute" => "value"} }
 
           it 'raises an error' do
-            expect { 
+            expect {
               Chicken.load(hash)
             }.to raise_error(Attributor::AttributorException, /Unknown attributes/)
           end
@@ -143,7 +143,7 @@ describe Attributor::Model do
 
       context 'for unknown attributes' do
         it 'raises an exception' do
-          expect { 
+          expect {
             chicken.invalid_attribute =  'value'
           }.to raise_error(NoMethodError, /undefined method/)
         end
