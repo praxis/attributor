@@ -118,16 +118,12 @@ module Attributor
       :ok
     end
 
-    # @param value [Array] currently an array of native types
-    def self.validate( value, context, attribute )
-      errors = []
-
-      # All members in the collection Array must be of type Attributor::Type
-      value.each_with_index do |member, i|
-        errors << "Collection #{context}[#{i}] is not an Attributor::Type" unless member.is_a?(Attributor::Type)
-      end
-
-      errors
+    # @param values [Array] Array of values to validate
+    def self.validate(values, context, attribute)
+      values.each_with_index.collect do |value, i|
+        subcontext = "#{context}[#{i}]"
+        self.member_attribute.validate(value, subcontext)
+      end.flatten.compact
     end
 
     def self.validate_options( value, context, attribute )

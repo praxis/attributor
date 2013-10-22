@@ -236,34 +236,22 @@ describe Attributor::Collection do
   end
 
   context '.validate' do
-    context 'for valid Array values' do
-      it "returns no errors for []" do
-        type.validate([], nil, nil).should == []
+    let(:collection_members) { [1, 2, 'three'] }
+    let(:expected_errors) { ["error 1", "error 2", "error 3"]}
+
+    before do
+      collection_members.zip(expected_errors).each do |member, expected_error|
+        type.member_attribute.should_receive(:validate).
+          with(member,an_instance_of(String)). # we don't care about the exact context here
+          and_return([expected_error])
       end
     end
 
-    context 'for invalid Array values' do
-      it "returns errors for [1,2]" do
-        errors = type.validate([1,2], "monkey", nil)
-        errors.should_not be_empty
-        errors.include?("Collection monkey[0] is not an Attributor::Type").should be_true
-        errors.include?("Collection monkey[1] is not an Attributor::Type").should be_true
-      end
-
-      it "returns errors for [nil]" do
-        errors = type.validate([nil], "dog", nil)
-        errors.should_not be_empty
-        errors.include?("Collection dog[0] is not an Attributor::Type").should be_true
-      end
-
-      it "returns errors for [1.0, Object.new]" do
-        errors = type.validate([1.0, Object.new], "cat", nil)
-        errors.should_not be_empty
-        errors.include?("Collection cat[0] is not an Attributor::Type").should be_true
-        errors.include?("Collection cat[1] is not an Attributor::Type").should be_true
-      end
+    it 'validates members' do
+      type.validate(collection_members,nil,nil).should =~ expected_errors
     end
   end
+
 
   context '.example' do
     it "returns an Array" do
