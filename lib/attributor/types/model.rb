@@ -11,6 +11,7 @@ module Attributor
     end
 
 
+
     def attributes
       @attributes ||= Hash.new
     end
@@ -18,7 +19,7 @@ module Attributor
 
     def respond_to?(name, include_private = false)
       attribute_name = name.to_s
-      attribute_name.sub!('=','')
+      attribute_name.chomp!('=')
 
       return true if self.class.definition.attributes.key?(attribute_name)
 
@@ -28,15 +29,11 @@ module Attributor
 
     def method_missing(name, *args)
       attribute_name = name.to_s
-      attribute_name.sub!('=','')
+      attribute_name.chomp!('=')
 
       if attribute = self.class.definition.attributes[attribute_name]
-        if name.to_s[-1] == '='
-          value, *rest = args
-          return attributes[attribute_name]  = attribute.load(value)
-        else
-          return attributes[attribute_name]
-        end
+        self.class.define_accessors(attribute_name)
+        return self.send(name, *args)
       end
 
       super
@@ -44,6 +41,37 @@ module Attributor
 
 
     module ClassMethods
+
+      # Define accessors for attribute of given name.
+      #
+      # @param name [::String, ::Symbol] attribute name, converted to String before use.
+      # 
+      def define_accessors(name)
+        name = name.to_s
+        self.define_reader(name)
+        self.define_writer(name)
+      end
+
+      def define_reader(name)
+        module_eval <<-RUBY, __FILE__, __LINE__ + 1
+          def #{name}
+           attributes['#{name}']
+          end
+        RUBY
+      end
+
+      def define_writer(name)
+        attribute = self.attributes[name]
+        # note: paradoxically, using define_method ends up being faster for the writer
+        #       attribute is captured by the block, saving us from having to retrieve it from
+        #       the class's attributes hash on each write.
+        module_eval do
+          define_method(name + "=") do |value|
+            attributes[name] = attribute.load(value)
+          end
+        end
+
+      end
 
 
       def example(options={}, context=nil)
@@ -97,7 +125,6 @@ module Attributor
           )
         end
 
-
         self.from_hash(hash)
       end
 
@@ -105,8 +132,13 @@ module Attributor
       def from_hash(hash)
         model = self.new
 
-        (hash.keys | self.definition.attributes.keys).each do |k|
-          model.send("#{k}=", hash[k])
+        # set known attributes first
+        self.attributes.keys.each do |k|
+          model.send "#{k}=", hash.delete(k)
+        end
+
+        unless hash.empty?
+          raise AttributorException.new("Unknown attributes received: #{hash.keys.join(',')}")
         end
 
         model
@@ -115,12 +147,15 @@ module Attributor
       # method to only define the block of attributes for the model
       # This will be a lazy definition. So we'll only save it in an instance class var for later.
       def attributes(opts={},&block)
-        raise AttributorException.new("There is no getter for attributes here (go through definition.attributes)") unless block_given?
-        @saved_dsl = block
-        @saved_options = opts
+        if block_given?
+          @saved_dsl = block
+          @saved_options = opts
+        end
+ 
+        @attributes ||= self.definition.attributes
       end
 
-
+  
       # Returns the "compiled" definition for the model.
       # By "compiled" I mean that it will create a new Compiler object with the saved options and saved block that has been passed in the 'attributes' method. This compiled object is memoized (remember, there's one instance of a compiled definition PER MODEL CLASS).
       def definition( options=nil, block=nil )

@@ -6,8 +6,6 @@ module Attributor
   # TODO: should this be a mixin since it is an abstract class?
   class Attribute
 
-   
-
     attr_reader :type
 
     # @options: metadata about the attribute
@@ -96,16 +94,21 @@ module Attributor
 
 
     def attributes
-      if type < Model
-        compiled_definition.attributes
-      else
-        nil
+      @attributes ||= begin
+        if type < Model
+          compiled_definition.attributes
+        else
+          nil
+        end
       end
     end
 
 
     def options
+      return self.compiled_options
+
       if type < Model
+
         compiled_definition unless @compiled_definition
         @compiled_options
       else # Simple, no DSL anywhere type
@@ -123,6 +126,14 @@ module Attributor
       @compiled_definition
     end
 
+    def compiled_options
+      @compiled_options ||= begin
+        if type < Model
+          compiled_definition
+        end
+        @compiled_options || @options
+      end
+    end
 
     # Validates stuff and checks dependencies
     def validate(object, context=nil)
@@ -132,7 +143,7 @@ module Attributor
 
 
       if object.nil? # == Attributor::UNSET
-        # With no value, we can only validate whether that is acceptable or not and return. 
+        # With no value, we can only validate whether that is acceptable or not and return.
         # Beyond that, no further validation should be done.
         return self.validate_missing_value(context)
       end
@@ -160,7 +171,7 @@ module Attributor
 
     def validate_missing_value(context)
       return ["Attribute #{context} is required"] if self.options[:required]
-        
+
       requirement = self.options[:required_if]
       return [] unless requirement
 
@@ -185,7 +196,7 @@ module Attributor
 
         # give a hint about what the full path for a relative key_path would be
         unless key_path[0] == Attributor::AttributeResolver::ROOT_PREFIX
-         message << "(for #{requirement_context}) "
+          message << "(for #{requirement_context}) "
         end
 
         if predicate
