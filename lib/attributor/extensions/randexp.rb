@@ -1,3 +1,6 @@
+require 'date'
+
+
 class Randgen
   DATE_TIME_EPOCH = ::DateTime.new(2015, 1, 1, 0, 0, 0)
 
