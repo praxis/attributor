@@ -45,7 +45,7 @@ module Attributor
       # Define accessors for attribute of given name.
       #
       # @param name [::String, ::Symbol] attribute name, converted to String before use.
-      # 
+      #
       def define_accessors(name)
         name = name.to_s
         self.define_reader(name)
@@ -151,11 +151,11 @@ module Attributor
           @saved_dsl = block
           @saved_options = opts
         end
- 
+
         @attributes ||= self.definition.attributes
       end
 
-  
+
       # Returns the "compiled" definition for the model.
       # By "compiled" I mean that it will create a new Compiler object with the saved options and saved block that has been passed in the 'attributes' method. This compiled object is memoized (remember, there's one instance of a compiled definition PER MODEL CLASS).
       def definition( options=nil, block=nil )

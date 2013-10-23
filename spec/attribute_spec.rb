@@ -73,7 +73,6 @@ describe Attributor::Attribute do
 
       attribute.parse(value)
     end
-
   end
 
 
@@ -159,13 +158,10 @@ describe Attributor::Attribute do
       end
 
     end
-
-
-
   end
 
   context 'load' do
-    let(:value) { 1 }
+    let(:value) { '1' }
 
     it 'does not call type.load for nil values' do
       type.should_not_receive(:load)
@@ -244,7 +240,6 @@ describe Attributor::Attribute do
           attribute.should_receive(:validate_type).with(value, context).and_call_original
           attribute.should_not_receive(:validate_dependency)
           type.should_receive(:validate).and_call_original
-
           attribute.validate(value, context)
         end
 
@@ -307,7 +302,7 @@ describe Attributor::Attribute do
             let(:attribute_options) { {required_if: {key => /default/} } }
 
             it { should_not be_empty }
-            
+
             its(:first) { should =~ /Attribute #{Regexp.quote(attribute_context)} is required when #{Regexp.quote(key)} matches/ }
           end
 
@@ -435,7 +430,7 @@ describe Attributor::Attribute do
             its(:first) { should == "Attribute $.duck.email is required when name (for $.duck) is present." }
           end
           context 'where the target attribute does not exist' do
-            before do 
+            before do
               duck.name = nil
             end
             it { should be_empty }
@@ -459,14 +454,14 @@ describe Attributor::Attribute do
           end
 
           context 'where the target attribute exists, and does not match the predicate' do
-           before do 
+           before do
               duck.name = 'Donald'
             end
             it { should be_empty }
           end
 
           context 'where the target attribute does not exist' do
-           before do 
+           before do
               duck.name = nil
             end
             it { should be_empty }
@@ -477,7 +472,45 @@ describe Attributor::Attribute do
       end
 
     end
+  end
 
+  context 'for a Collection' do
+    context 'of non-Model (or Struct) type' do
+      let(:member_type) { Attributor::Integer }
+      let(:type) { Attributor::Collection.of(member_type)}
+      let(:member_options) { {:max => 10} }
+      let(:attribute_options) { {:member_options => member_options} }
+
+
+
+      context 'the member_attribute of that type' do
+        subject(:member_attribute) { attribute.type.member_attribute }
+
+        it { should be_kind_of(Attributor::Attribute)}
+        its(:type) { should be(member_type) }
+        its(:options) { should be(member_options) }
+      end
+
+      context "working with members" do
+        let(:values) { ['1',2,12] }
+
+        it 'loads' do
+          attribute.load(values).should =~ [1,2,12]
+        end
+
+        it 'validates' do
+          errors = attribute.validate(values)
+          errors.should_not be_empty
+          errors[0].should =~ /of the wrong type/
+          errors[1].should =~ /value is larger/
+        end
+      end
+
+
+    end
+
+    context 'of a Model (or Struct) type' do
+    end
   end
 
 end

@@ -15,6 +15,7 @@ module Attributor
 
   require_relative 'attributor/extensions/randexp'
 
+  require_relative 'attributor/types/object'
   require_relative 'attributor/types/integer'
   require_relative 'attributor/types/string'
   require_relative 'attributor/types/model'
@@ -25,13 +26,6 @@ module Attributor
   require_relative 'attributor/types/collection'
 
   # List of all basic types (i.e. not collections, structs or models)
-  BASIC_TYPES = [
-    Attributor::Integer,
-    Attributor::String,
-    Attributor::Boolean,
-    Attributor::DateTime,
-    Attributor::Float
-  ].freeze
 
   # hierarchical separator string for composing human readable attributes
   SEPARATOR = '.'.freeze
@@ -49,11 +43,13 @@ module Attributor
       raise AttributorException.new("Could not find attribute type for: #{name} [klass: #{klass.name}]")  unless  klass < Attributor::Type
     end
 
-    return klass unless constructor_block
+    if klass.respond_to?(:construct)
+      return klass.construct(constructor_block, options)
+    end
 
-    raise AttributorException.new("Type: #{type} does not support anonymous generation") unless klass.respond_to?(:construct)
+    raise AttributorException.new("Type: #{type} does not support anonymous generation") if constructor_block
 
-    klass.construct(constructor_block, options)
+    klass
   end
 
 end
