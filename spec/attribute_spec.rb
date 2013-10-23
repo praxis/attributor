@@ -492,15 +492,17 @@ describe Attributor::Attribute do
       end
 
       context "working with members" do
-        let(:values) { ['1',2,'12'] }
+        let(:values) { ['1',2,12] }
 
-        it 'loads?' do
+        it 'loads' do
           attribute.load(values).should =~ [1,2,12]
         end
 
-        it 'validates?' do
+        it 'validates' do
           errors = attribute.validate(values)
           errors.should_not be_empty
+          errors[0].should =~ /of the wrong type/
+          errors[1].should =~ /value is larger/
         end
       end
 
