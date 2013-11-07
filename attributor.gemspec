@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["RightScale"]
-  s.date = "2013-10-02"
+  s.date = "2013-11-07"
   s.description = "longer description of your gem"
   s.email = "blanquer@rightscale.com"
   s.extra_rdoc_files = [
@@ -33,22 +33,27 @@ Gem::Specification.new do |s|
     "lib/attributor/attribute_resolver.rb",
     "lib/attributor/dsl_compiler.rb",
     "lib/attributor/exceptions.rb",
+    "lib/attributor/extensions/randexp.rb",
     "lib/attributor/type.rb",
     "lib/attributor/types/boolean.rb",
+    "lib/attributor/types/collection.rb",
     "lib/attributor/types/date_time.rb",
     "lib/attributor/types/float.rb",
     "lib/attributor/types/integer.rb",
     "lib/attributor/types/model.rb",
+    "lib/attributor/types/object.rb",
     "lib/attributor/types/string.rb",
     "lib/attributor/types/struct.rb",
     "spec/attribute_resolver_spec.rb",
     "spec/attribute_spec.rb",
     "spec/attributor_spec.rb",
+    "spec/dsl_compiler_spec.rb",
     "spec/spec_helper.rb",
     "spec/support/models.rb",
     "spec/support/types.rb",
     "spec/type_spec.rb",
     "spec/types/boolean_spec.rb",
+    "spec/types/collection_spec.rb",
     "spec/types/date_time_spec.rb",
     "spec/types/float_spec.rb",
     "spec/types/integer_spec.rb",
@@ -60,17 +65,19 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/blanquer/attributor"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = "1.8.23"
+  s.rubygems_version = "2.0.3"
   s.summary = "one-line summary of your gem"
 
   if s.respond_to? :specification_version then
-    s.specification_version = 3
+    s.specification_version = 4
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<hashie>, [">= 0"])
       s.add_runtime_dependency(%q<randexp>, [">= 0"])
       s.add_development_dependency(%q<rspec>, [">= 0"])
       s.add_development_dependency(%q<yard>, ["~> 0.8.7"])
+      s.add_development_dependency(%q<backports>, [">= 0"])
+      s.add_development_dependency(%q<yardstick>, [">= 0"])
       s.add_development_dependency(%q<redcarpet>, [">= 0"])
       s.add_development_dependency(%q<rdoc>, ["~> 3.12"])
       s.add_development_dependency(%q<bundler>, [">= 0"])
@@ -86,6 +93,8 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<randexp>, [">= 0"])
       s.add_dependency(%q<rspec>, [">= 0"])
       s.add_dependency(%q<yard>, ["~> 0.8.7"])
+      s.add_dependency(%q<backports>, [">= 0"])
+      s.add_dependency(%q<yardstick>, [">= 0"])
       s.add_dependency(%q<redcarpet>, [">= 0"])
       s.add_dependency(%q<rdoc>, ["~> 3.12"])
       s.add_dependency(%q<bundler>, [">= 0"])
@@ -102,6 +111,8 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<randexp>, [">= 0"])
     s.add_dependency(%q<rspec>, [">= 0"])
     s.add_dependency(%q<yard>, ["~> 0.8.7"])
+    s.add_dependency(%q<backports>, [">= 0"])
+    s.add_dependency(%q<yardstick>, [">= 0"])
     s.add_dependency(%q<redcarpet>, [">= 0"])
     s.add_dependency(%q<rdoc>, ["~> 3.12"])
     s.add_dependency(%q<bundler>, [">= 0"])
