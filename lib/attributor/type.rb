@@ -27,6 +27,11 @@ module Attributor
         value
       end
 
+      # Generic encoding of the attribute
+      def dump(value,opts=nil)
+        value
+      end
+
       # TODO: refactor this to take just the options instead of the full attribute?
       # TODO: delegate to subclass
       def validate(value,context,attribute)

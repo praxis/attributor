@@ -26,7 +26,6 @@ module Attributor
     end
 
 
-    # TODO:  might want to expose load directly too?..."
     def load(value)
       value = type.load(value) unless value.nil?
 
@@ -37,6 +36,11 @@ module Attributor
 
       value
     end
+
+    def dump(value, opts={})
+      type.dump(value, opts)
+    end
+
 
     def validate_type(value, context)
       # delegate check to type subclass if it exists
@@ -82,7 +86,7 @@ module Attributor
         # TODO: handle arrays of non native types, i.e. arrays of regexps.... ?
         val.pick
       when nil
-        if values = self.options[:values]
+        if (values = self.options[:values])
           values.pick
         else
           self.type.example(self.options, context)
@@ -95,8 +99,8 @@ module Attributor
 
     def attributes
       @attributes ||= begin
-        if type < Model
-          compiled_definition.attributes
+        if type.respond_to?(:attributes)
+          type.attributes
         else
           nil
         end
@@ -105,7 +109,7 @@ module Attributor
 
 
     def options
-      return self.compiled_options
+      self.compiled_options
     end
 
 
@@ -131,7 +135,6 @@ module Attributor
     def validate(object, context=nil)
       # Validate any requirements, absolute or conditional, and return.
 
-
       if object.nil? # == Attributor::UNSET
         # With no value, we can only validate whether that is acceptable or not and return.
         # Beyond that, no further validation should be done.
@@ -139,7 +142,6 @@ module Attributor
       end
 
       # TODO: support validation for other types of conditional dependencies based on values of other attributes
-
 
       errors = self.validate_type(object,context)
 
@@ -150,16 +152,7 @@ module Attributor
         errors << "Attribute #{context}: #{object.inspect} is not within the allowed values=#{self.options[:values].inspect} "
       end
 
-      errors += self.type.validate(object,context,self)
-
-      if self.attributes
-        self.attributes.each do |sub_attribute_name, sub_attribute|
-          sub_context = self.type.generate_subcontext(context,sub_attribute_name)
-          errors += sub_attribute.validate(object.send(sub_attribute_name), sub_context)
-        end
-      end
-
-      errors
+      errors + self.type.validate(object,context,self)
     end
 
 
@@ -199,9 +192,9 @@ module Attributor
           message << "is present."
         end
 
-        return [message]
+        [message]
       else
-        return []
+        []
       end
     end
 

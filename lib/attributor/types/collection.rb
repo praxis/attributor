@@ -86,8 +86,12 @@ module Attributor
         raise AttributorException.new("Do not know how to decode an array from a #{value.class.name}")
       end
 
-      # load each member if the member type is an Attributor::Type; may raise AttributorException
       return loaded_value.collect { |member| self.member_attribute.load(member) }
+    end
+
+
+    def self.dump(values, opts=nil)
+      values.collect { |value| member_attribute.dump(value,opts) }
     end
 
 
