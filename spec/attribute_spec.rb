@@ -335,9 +335,9 @@ describe Attributor::Attribute do
         attribute.attributes.should == type.definition.attributes
       end
 
-      it 'has compiled_definition' do
-        attribute.compiled_definition.should == type.definition
-      end
+      #it 'has compiled_definition' do
+      #  attribute.compiled_definition.should == type.definition
+      #end
 
 
       it 'merges its options with those of the compiled_definition' do
