@@ -12,7 +12,16 @@ module Attributor
     # @block: code definition for struct attributes (nil for predefined types or leaf/simple types)
     def initialize(type, options={}, &block)
       @type = Attributor.resolve_type(type, options, block)
+
       @options = options
+      if @type.respond_to?(:options)
+        if @type.options.nil?
+          binding.pry
+        end
+
+        @options = @type.options.merge(@options)
+      end
+      
 
       check_options!
     end
@@ -109,22 +118,23 @@ module Attributor
 
 
     def options
-      self.compiled_options
+      @options
     end
 
 
     # Lazy compilation
-    def compiled_definition
-      unless @compiled_definition
-        @compiled_definition = type.definition
-        @compiled_options = @compiled_definition.options.merge(@options)
-      end
-      @compiled_definition
-    end
+    #def compiled_definition
+    #  unless @compiled_definition
+    #    @compiled_definition = type.definition
+    #    @compiled_options = @compiled_definition.options.merge(@options)
+    #  end
+    #  @compiled_definition
+    #end
 
     def compiled_options
       @compiled_options ||= begin
-        if type < Model
+        if type.respond_to?(:options)
+
           compiled_definition
         end
         @compiled_options || @options

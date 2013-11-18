@@ -89,7 +89,7 @@ module Attributor
       def example(options={}, context=nil)
         result = self.new
 
-        self.definition.attributes.each do |attribute_name,attribute|
+        self.attributes.each do |attribute_name,attribute|
           sub_context = self.generate_subcontext(context,attribute_name)
           result.send("#{attribute_name}=", attribute.example(context))
         end
@@ -171,6 +171,12 @@ module Attributor
 
         @attributes ||= self.definition.attributes
       end
+
+
+      def options
+        @options ||= self.definition.options
+      end
+
 
       def validate(object,context,attribute)
         errors = super
