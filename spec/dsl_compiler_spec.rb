@@ -1,5 +1,4 @@
-require_relative 'spec_helper'
-
+require File.join(File.dirname(__FILE__), 'spec_helper.rb')
 
 
 describe Attributor::DSLCompiler do
@@ -12,7 +11,7 @@ describe Attributor::DSLCompiler do
   let(:attribute_type) { Attributor::String }
 
   let!(:reference_attributes) { Turducken.definition.attributes }
-  let(:reference_attribute_type) { reference_attribute.type }
+  let(:reference_attribute_type) { reference_attribute.attribute_type }
   let(:reference_attribute_options) { reference_attribute.options }
   let(:reference_attribute) {reference_attributes[attribute_name] }
 
@@ -95,7 +94,7 @@ describe Attributor::DSLCompiler do
 
 
       context 'with a reference' do
-        let(:dsl_compiler_options) { {reference: Turducken} }
+        let(:dsl_compiler_options) { {:reference => Turducken} }
 
         context 'with no options' do
           let(:expected_options) { reference_attribute_options }
@@ -107,7 +106,7 @@ describe Attributor::DSLCompiler do
         end
 
         context 'with options' do
-          let(:attribute_options) { {description: "some new description", required: true} }
+          let(:attribute_options) { {:description => "some new description", :required => true} }
           let(:expected_options) { reference_attribute_options.merge(attribute_options) }
 
           before do
@@ -154,9 +153,9 @@ describe Attributor::DSLCompiler do
       end
 
       context 'with a reference' do
-        let(:dsl_compiler_options) { {reference: Turducken} }
+        let(:dsl_compiler_options) { {:reference => Turducken} }
         let(:expected_options) do
-          attribute_options.merge(reference:reference_attribute_type)
+          attribute_options.merge(:reference => reference_attribute_type)
         end
 
         it 'is unhappy from somewhere else if you do not specify a type' do

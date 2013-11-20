@@ -1,4 +1,4 @@
-require_relative 'spec_helper'
+require File.join(File.dirname(__FILE__), 'spec_helper.rb')
 
 
 describe Attributor::Type do
@@ -11,8 +11,8 @@ describe Attributor::Type do
 
   let(:attribute) do
     double "attribute",
-      options: attribute_options,
-      attributes: attribute_attributes
+      :options => attribute_options,
+      :attributes => attribute_attributes
   end
 
 
@@ -49,14 +49,14 @@ describe Attributor::Type do
 
     let(:attribute_options) { {} }
 
-      let(:attribute) { double("some_attribute", options: attribute_options)}
+      let(:attribute) { double("some_attribute", :options => attribute_options)}
       subject(:errors) { test_type.validate(value, context, attribute) }
 
     context 'min and max' do
       let(:min) { 10 }
       let(:max) { 100}
 
-      let(:attribute_options) { {min: min, max: max} }
+      let(:attribute_options) { {:min => min, :max => max} }
 
 
 
@@ -90,7 +90,7 @@ describe Attributor::Type do
 
      context 'regexp' do
       let(:regexp) { /dog/ }
-      let(:attribute_options) { {regexp: regexp} }
+      let(:attribute_options) { {:regexp => regexp} }
 
       context 'with a value that matches' do
         let(:value) { 'bulldog' }

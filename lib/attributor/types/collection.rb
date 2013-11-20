@@ -100,7 +100,7 @@ module Attributor
       @member_attribute = Attributor::Attribute.new self.member_type, member_options, &constructor_block
 
       # overwrite our type with whatever type comes out of the attribute
-      @member_type = @member_attribute.type
+      @member_type = @member_attribute.attribute_type
 
       return self
     end

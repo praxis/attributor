@@ -1,10 +1,14 @@
+require 'require_relative' if RUBY_VERSION =~ /1\.8/
+
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
-require 'simplecov'
 
-SimpleCov.start do
-  add_filter 'spec' # Don't include RSpec stuff
-  add_group 'Types', 'lib/attributor/types'
+unless RUBY_VERSION =~ /1\.8/
+  require 'simplecov'
+  SimpleCov.start do
+    add_filter 'spec' # Don't include RSpec stuff
+    add_group 'Types', 'lib/attributor/types'
+  end
 end
 
 require 'rspec'

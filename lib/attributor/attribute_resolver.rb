@@ -19,22 +19,35 @@ module Attributor
 
     # TODO: support collection queries
     def query!(key_path, path_prefix=ROOT_PREFIX)
-      # if the incoming key_path is not an absolute path, append the given prefix
-      unless key_path[0] == ROOT_PREFIX
+      # If the incoming key_path is not an absolute path, append the given prefix
+      # NOTE: Need to index key_path by range here because Ruby 1.8 returns a
+      # FixNum for the ASCII code, not the actual character, when indexing by a number.
+      unless key_path[0..0] == ROOT_PREFIX
         # TODO: prepend path_prefix to path_prefix if it did not include it? hm.
         key_path = path_prefix + SEPARATOR + key_path
       end
 
-      # discard the initial element, which should always be ROOT_PREFIX at this point
+      # Discard the initial element, which should always be ROOT_PREFIX at this point
       _root, *path = key_path.split(SEPARATOR)
 
-      path.inject(@data) do |hash, key|
+      # Follow the hierarchy path to the requested node and returns it
+      # Example path => ["instance", "ssh_key", "name"]
+      # Example @data => {"instance" => { "ssh_key" => { "name" => "foobar" } }}
+      result = path.inject(@data) do |hash, key|
         return nil if hash.nil?
         hash.send key
       end
+      result
     end
 
 
+    # Query for a certain key in the attribute hierarchy
+    #
+    # @param [String] key_path The name of the key to query and its path
+    # @param [String] path_prefix
+    #
+    # @return [String] The value of the specified attribute/key
+    #
     def query(key_path,path_prefix=ROOT_PREFIX)
       query!(key_path,path_prefix)
     rescue NoMethodError => e
@@ -50,9 +63,18 @@ module Attributor
     end
 
 
-    # check that the the condition is met:
-    #   that the attribute identified by path_prefix and key_path 
-    #   satisfies the optional predicate, which when nil simply checks for existance.
+    # Checks that the the condition is met. This means the attribute identified
+    # by path_prefix and key_path satisfies the optional predicate, which when
+    # nil simply checks for existence.
+    #
+    # @param path_prefix [String]
+    # @param key_path [String]
+    # @param predicate [String|Regexp|Proc|NilClass]
+    #
+    # @returns [Boolean] True if :required_if condition is met, false otherwise
+    #
+    # @raise [AttributorException] When an unsupported predicate is passed
+    #
     def check(path_prefix, key_path, predicate=nil)
       value = self.query(key_path, path_prefix)
 
@@ -61,10 +83,14 @@ module Attributor
         return true
       end
 
-
       case predicate
-      when ::String, ::Regexp, ::Proc
+      when ::String, ::Regexp
         return predicate === value
+      #when ::Regexp
+      #  return predicate =~ value
+      when ::Proc
+        # Cannot use === here as above due to different behavior in Ruby 1.8
+        return predicate.call(value)
       when nil
         return !value.nil?
       else
@@ -72,7 +98,6 @@ module Attributor
       end
 
     end
-
 
     # TODO: kill this when we also kill Taylor's IdentityMap.current
     def self.current=(resolver)

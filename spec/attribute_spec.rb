@@ -1,26 +1,26 @@
-require_relative 'spec_helper'
+require File.join(File.dirname(__FILE__), 'spec_helper.rb')
 
 
 describe Attributor::Attribute do
 
   let(:attribute_options) { Hash.new }
-  let(:type) { AttributeType }
-  subject(:attribute) { Attributor::Attribute.new(type, attribute_options) }
+  let(:attribute_type) { AttributeType }
+  subject(:attribute) { Attributor::Attribute.new(attribute_type, attribute_options) }
 
   let(:context) { "context" }
   let(:value) { "one" }
 
   context 'initialize' do
-    its(:type) { should be type }
+    its(:attribute_type) { should be attribute_type }
     its(:options) { should be attribute_options }
 
     it 'calls check_options!' do
       Attributor::Attribute.any_instance.should_receive(:check_options!)
-      Attributor::Attribute.new(type, attribute_options)
+      Attributor::Attribute.new(attribute_type, attribute_options)
     end
 
     context 'for anonymous types (aka Structs)' do
-      let(:attribute_options) { {identity: 'id'} }
+      let(:attribute_options) { {:identity => 'id'} }
 
       before do
         Attributor.should_receive(:resolve_type).once.with(Struct,attribute_options, anything()).and_call_original
@@ -39,8 +39,8 @@ describe Attributor::Attribute do
 
 
   context 'describe' do
-    let(:attribute_options) { {required: true, values:["one"], description: "something"} }
-    let(:expected) { {type: type.name}.merge(attribute_options) }
+    let(:attribute_options) { {:required => true, :values => ["one"], :description => "something"} }
+    let(:expected) { {:type => attribute_type.name}.merge(attribute_options) }
 
     its(:describe) { should == expected }
 
@@ -84,12 +84,12 @@ describe Attributor::Attribute do
 
   context 'example' do
     let(:example) { nil }
-    let(:attribute_options) { {example: example} }
+    let(:attribute_options) { {:example => example} }
 
     context 'with nothing specified' do
       let(:attribute_options) { {} }
       before do
-        type.should_receive(:example).and_return(example)
+        attribute_type.should_receive(:example).and_return(example)
       end
 
       it 'defers to the type' do
@@ -114,13 +114,13 @@ describe Attributor::Attribute do
       end
 
       context 'for a type with a non-String native_type' do
-        let(:type) { IntegerAttributeType}
+        let(:attribute_type) { IntegerAttributeType}
         let(:example) { /\d{5}/ }
         it 'coerces the example value properly' do
           example.should_receive(:gen).and_call_original
-          type.should_receive(:load).and_call_original
+          attribute_type.should_receive(:load).and_call_original
 
-          subject.example.should be_kind_of(type.native_type)
+          subject.example.should be_kind_of(attribute_type.native_type)
         end
       end
     end
@@ -134,7 +134,7 @@ describe Attributor::Attribute do
 
     context 'with an attribute that has the values option set' do
       let(:values) { ["one", "two"] }
-      let(:attribute_options) { {values: values} }
+      let(:attribute_options) { {:values => values} }
       it 'picks a random value' do
         values.should include subject.example
       end
@@ -164,19 +164,19 @@ describe Attributor::Attribute do
     let(:value) { '1' }
 
     it 'does not call type.load for nil values' do
-      type.should_not_receive(:load)
+      attribute_type.should_not_receive(:load)
       attribute.load(nil)
     end
 
     it 'delegates to type.load' do
-      type.should_receive(:load).with(value)
+      attribute_type.should_receive(:load).with(value)
       attribute.load(value)
     end
 
 
     context 'applying default values' do
       let(:default_value) { "default value" }
-      let(:attribute_options) { {default: default_value} }
+      let(:attribute_options) { {:default => default_value} }
 
       subject(:result) { attribute.load(value) }
 
@@ -189,7 +189,7 @@ describe Attributor::Attribute do
       context 'for a value that the type loads as nil' do
         let(:value) { "not nil"}
         before do
-          type.should_receive(:load).and_return(nil)
+          attribute_type.should_receive(:load).and_return(nil)
         end
         it { should == default_value}
       end
@@ -201,7 +201,7 @@ describe Attributor::Attribute do
       context '#validate' do
         context 'applying attribute options' do
           context ':required' do
-            let(:attribute_options) { {required: true} }
+            let(:attribute_options) { {:required => true} }
             context 'with a nil value' do
               let(:value) { nil }
               it 'returns an error' do
@@ -212,7 +212,7 @@ describe Attributor::Attribute do
 
           context ':values' do
             let(:values) { ['one','two'] }
-            let(:attribute_options) { {values: values} }
+            let(:attribute_options) { {:values => values} }
             let(:value) { nil }
 
             subject(:errors) { attribute.validate(value, context)}
@@ -239,7 +239,7 @@ describe Attributor::Attribute do
         it 'calls the right validate_X methods?' do
           attribute.should_receive(:validate_type).with(value, context).and_call_original
           attribute.should_not_receive(:validate_dependency)
-          type.should_receive(:validate).and_call_original
+          attribute_type.should_receive(:validate).and_call_original
           attribute.validate(value, context)
         end
 
@@ -272,10 +272,10 @@ describe Attributor::Attribute do
         let(:key) { "$.instance.ssh_key.name" }
         let(:value) { /\w+/.gen }
 
-        let(:attribute_options) { {required_if: key} }
+        let(:attribute_options) { {:required_if => key} }
 
-        let(:ssh_key) { double("ssh_key", name:value) }
-        let(:instance) { double("instance", ssh_key:ssh_key) }
+        let(:ssh_key) { double("ssh_key", :name => value) }
+        let(:instance) { double("instance", :ssh_key => ssh_key) }
 
         before { Attributor::AttributeResolver.current.register('instance', instance) }
 
@@ -299,7 +299,7 @@ describe Attributor::Attribute do
           #subject(:errors) { attribute.validate_missing_value('') }
 
           context 'where the target attribute exists, and matches the predicate' do
-            let(:attribute_options) { {required_if: {key => /default/} } }
+            let(:attribute_options) { {:required_if => {key => /default/} } }
 
             it { should_not be_empty }
 
@@ -307,14 +307,14 @@ describe Attributor::Attribute do
           end
 
           context 'where the target attribute exists, but does not match the predicate' do
-            let(:attribute_options) { {required_if: {key => /other/} } }
+            let(:attribute_options) { {:required_if => {key => /other/} } }
 
             it { should be_empty }
           end
 
           context 'where the target attribute does not exist' do
-            let(:attribute_options) { {required_if: {key => /default/} } }
-            let(:ssh_key) { double("ssh_key", name: nil) }
+            let(:attribute_options) { {:required_if => {key => /default/} } }
+            let(:ssh_key) { double("ssh_key", :name => nil) }
 
             it { should be_empty }
           end
@@ -326,17 +326,17 @@ describe Attributor::Attribute do
 
 
     context 'for an attribute for a subclass of Model' do
-      let(:type) { Chicken }
+      let(:attribute_type) { Chicken }
       let(:type_options) { Chicken.definition.options }
 
-      subject(:attribute) { Attributor::Attribute.new(type, attribute_options) }
+      subject(:attribute) { Attributor::Attribute.new(attribute_type, attribute_options) }
 
       it 'has attributes' do
-        attribute.attributes.should == type.definition.attributes
+        attribute.attributes.should == attribute_type.definition.attributes
       end
 
       it 'has compiled_definition' do
-        attribute.compiled_definition.should == type.definition
+        attribute.compiled_definition.should == attribute_type.definition
       end
 
 
@@ -348,7 +348,7 @@ describe Attributor::Attribute do
       it 'describe handles sub-attributes nicely' do
         describe = attribute.describe
 
-        describe[:type].should == type.name
+        describe[:type].should == attribute_type.name
         attribute_options.each do |k,v|
           describe[k].should == v
         end
@@ -372,7 +372,7 @@ describe Attributor::Attribute do
 
       context '#validate' do
         let(:chicken) { Chicken.example }
-        let(:type_attributes) { type.definition.attributes }
+        let(:type_attributes) { attribute_type.definition.attributes }
 
 
         let(:email_validation_response) { [] }
@@ -404,7 +404,7 @@ describe Attributor::Attribute do
 
 
       context '#validate_missing_value' do
-        let(:type) { Duck }
+        let(:attribute_type) { Duck }
         let(:attribute_name) { nil }
         let(:attribute) { Duck.definition.attributes[attribute_name] }
 
@@ -477,17 +477,17 @@ describe Attributor::Attribute do
   context 'for a Collection' do
     context 'of non-Model (or Struct) type' do
       let(:member_type) { Attributor::Integer }
-      let(:type) { Attributor::Collection.of(member_type)}
+      let(:attribute_type) { Attributor::Collection.of(member_type)}
       let(:member_options) { {:max => 10} }
       let(:attribute_options) { {:member_options => member_options} }
 
 
 
       context 'the member_attribute of that type' do
-        subject(:member_attribute) { attribute.type.member_attribute }
+        subject(:member_attribute) { attribute.attribute_type.member_attribute }
 
         it { should be_kind_of(Attributor::Attribute)}
-        its(:type) { should be(member_type) }
+        its(:attribute_type) { should be(member_type) }
         its(:options) { should be(member_options) }
       end
 

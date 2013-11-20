@@ -5,6 +5,9 @@ require 'hashie'
 
 require 'digest/sha1'
 
+# Method require_relative was added in ruby 1.9, so use the gem
+require 'require_relative' if RUBY_VERSION =~ /1\.8/
+
 module Attributor
 
   require_relative 'attributor/exceptions'
@@ -13,6 +16,7 @@ module Attributor
   require_relative 'attributor/dsl_compiler'
   require_relative 'attributor/attribute_resolver'
 
+  require_relative 'attributor/extensions/core'
   require_relative 'attributor/extensions/randexp'
 
   require_relative 'attributor/types/object'
@@ -32,11 +36,11 @@ module Attributor
 
   # @param type [Class] The class of the type to resolve
   #
-  def self.resolve_type(type, options={}, constructor_block=nil)
-    if type < Attributor::Type
-      klass = type
+  def self.resolve_type(attr_type, options={}, constructor_block=nil)
+    if attr_type < Attributor::Type
+      klass = attr_type
     else
-      name = type.name.split("::").last # TOO EXPENSIVE?
+      name = attr_type.name.split("::").last # TOO EXPENSIVE?
 
       klass = const_get(name) if const_defined?(name)
       raise AttributorException.new("Could not find class with name #{name}") unless klass
@@ -47,7 +51,7 @@ module Attributor
       return klass.construct(constructor_block, options)
     end
 
-    raise AttributorException.new("Type: #{type} does not support anonymous generation") if constructor_block
+    raise AttributorException.new("Type: #{attr_type} does not support anonymous generation") if constructor_block
 
     klass
   end
