@@ -6,7 +6,8 @@ require 'hashie'
 require 'digest/sha1'
 
 # Method require_relative was added in ruby 1.9, so use the gem
-require 'require_relative' if RUBY_VERSION =~ /1\.8/
+# if we have a Ruby version less than 1.9
+require 'require_relative' if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("1.9")
 
 module Attributor
 

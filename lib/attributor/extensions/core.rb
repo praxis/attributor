@@ -1,10 +1,10 @@
 
 # Custom core patches for Ruby 1.8.x
-if RUBY_VERSION =~ /1\.8/
+if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("1.9")
 
 # Ruby 1.8.x doesn't provide a Random module, so make a minimal version here
 module Random
-  def self.random(x)
+  def self.rand(x)
     Kernel.rand(x) + 1
   end
 
@@ -19,6 +19,3 @@ class Array
 end
 
 end
-
-
-
