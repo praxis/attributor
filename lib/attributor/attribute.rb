@@ -187,8 +187,8 @@ module Attributor
         raise AttributorException.new("unknown type of dependency: #{requirement.inspect}")
       end
 
-      context_tokens = context.split(Attributor::SEPARATOR)
-      context_tokens = context_tokens - Array(context_tokens.last)
+      # Convert the context into an array of tokens and chop off the last part
+      context_tokens = context.split(Attributor::SEPARATOR)[0..-2]
       requirement_context = context_tokens.join(Attributor::SEPARATOR)
       # OPTIMIZE: probably should.
 

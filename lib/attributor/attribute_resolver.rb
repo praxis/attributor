@@ -86,8 +86,6 @@ module Attributor
       case predicate
       when ::String, ::Regexp
         return predicate === value
-      #when ::Regexp
-      #  return predicate =~ value
       when ::Proc
         # Cannot use === here as above due to different behavior in Ruby 1.8
         return predicate.call(value)
