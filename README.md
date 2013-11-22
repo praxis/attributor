@@ -1,12 +1,11 @@
-Attributor
-==========================
+# Attributor
 
 An Attribute management, self documenting framework, designed for getting rid of most of your parameter handling boylerplate.
 While initially designed to be the backbone for parameter handling in REST services, attribute management can be applied in many other areas.
 
 With Attributor you can:
 * Express complex and type-rich attribute structures using an elegant ruby DSL
-* Process incoming values against those designs: 
+* Process incoming values against those designs:
     * By verifying they follow constraints and available options specified in your design
     * By coercing values into the specified types when there's a type impedance mismatch
     * By checking presence requirements and conditional dependencies
@@ -15,10 +14,9 @@ With Attributor you can:
     * easily consume it to generate human consumable documentation about parameter expectations
     * easily aggregate it across different systems.
 
-How does it work?
--------------------
+## How does it work?
 
-You first design the attribute structure you desire into an attributor object. 
+You first design the attribute structure you desire into an attributor object.
 
 An attribute can be a simple as a single element type. For example, defining a simple Integer that can range from 0 to 100:
 
@@ -32,7 +30,7 @@ or a complex hierarchical structure which tells much more about types, restricti
 Attributor::Hash.new("person") do
   # Social Security Number as a string, required
   attribute 'ssn', String, :required => true, :description => 'Sociall Security Number'
-  # Sex as a string. Only allowing two possible values 
+  # Sex as a string. Only allowing two possible values
   attribute 'sex', String, :values => ['male','female']
   # An address parameter with 3 typed sub-parameters
   attribute 'address', Hash do
@@ -81,18 +79,40 @@ person.parse(incoming_hash)
 While many of the options allowed for each attribute are type-specific, there are a few options that apply to all types. All attributes can specify:
 * :description => Simply a human readable string describing this attribute. Used for documentation purposes"
 * :default => "the default value to use when not specified (and not required)". Value must be expressed in the native type of the attribute.
-* :values => an array of the only possible values allowed for the attribute. Each value in the array must be of the native type of the attribute. 
+* :values => an array of the only possible values allowed for the attribute. Each value in the array must be of the native type of the attribute.
 * :required => true|false
 * :required_if => A conditional requirement based on existence or values of other attributes, or even custom made functions. Currently supported definitions:
     * :required_if => 'security.use_authentication'  : required if the 'use_authentication' sub-attribute under 'security' has been passed in.
     * :required_if => { 'repository.cvs_type' => 'git' }  : required if the 'cvs_type' sub-attribute under 'repository' is exactly equal to "git".
     * :required_if => { 'repository.cvs_type' => /git/ }  : required if the 'cvs_type' sub-attribute under 'repository' matches the regular expression /git/ .
-    * :required_if => { 'repository.cvs_type' => lambda{|val| !x.nil? } }: required if passing the value of 'cvs_type' sub-attribute under 'repository' into the defined function returns true. 
+    * :required_if => { 'repository.cvs_type' => lambda{|val| !x.nil? } }: required if passing the value of 'cvs_type' sub-attribute under 'repository' into the defined function returns true.
 
 
-Contributing to attributor
--------------------------
- 
+## General Help
+
+### Running specs:
+
+    `bundle exec rake spec`
+
+Note: This should also compute code coverage. See below for details on viewing code coverage.
+
+### Generating documentation:
+
+    `bundle exec yard`
+
+### Computing documentation coverage:
+
+    `bundle exec yardstick 'lib/**/*.rb'`
+
+### Computing code coverage:
+
+    `bundle exec rake spec`
+
+    `open coverage/index.html`
+
+
+## Contributing to attributor
+
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet.
 * Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it.
 * Fork the project.
@@ -102,25 +122,7 @@ Contributing to attributor
 * Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.
 
 
-Documentation
--------------
+## Copyright
 
-Generated documentation:
-
-    bundle exec yard
-
-Documentation coverage:
-
-    bundle exec yardstick 'lib/**/*.rb'
-
-Code coverage:
-
-    bundle exec rspec
-    open coverage/index.html
-
-Copyright
----------
-
-Copyright (c) 2013 RightScale. See LICENSE.txt for
-further details.
+Copyright (c) 2013 RightScale. See LICENSE.txt for further details.
 
