@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 gem 'hashie'
 gem 'randexp'
 
-gem 'require_relative', :platform => :ruby_18
+gem 'require_relative', :platforms => :ruby_18
 
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
@@ -17,10 +17,23 @@ group :development do
   gem 'bundler'
   gem 'jeweler', '~> 1.8.4'
   gem 'simplecov', :require => false
-  gem 'guard'
-  gem 'guard-rspec'
   gem 'pry'
-  gem "ruby-debug-pry", :platform => :ruby_18, :require => "ruby-debug/pry"
-  gem 'pry-debugger', :platform => :ruby_19
   gem 'ruby-prof'
+
+  platforms :ruby_18 do
+    # pry debugger
+    gem "ruby-debug-pry", :require => "ruby-debug/pry"
+    # code coverage
+    gem 'rcov'
+  end
+
+  platforms :ruby_19 do
+    # pry debugger
+    gem 'pry-debugger'
+    # code coverage
+    gem 'simplecov'
+    # Guard (Ruby 1.9 only)
+    gem 'guard'
+    gem 'guard-rspec'
+  end
 end
