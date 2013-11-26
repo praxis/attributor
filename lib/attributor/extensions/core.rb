@@ -1,6 +1,6 @@
 
 # Custom core patches for Ruby 1.8.x
-if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("1.9")
+if Attributor.check_ruby_version('<', '1.9')
 
 # Ruby 1.8.x doesn't provide a Random module, so make a minimal version here
 module Random

@@ -5,15 +5,47 @@ require 'hashie'
 
 require 'digest/sha1'
 
-if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("1.9")
-  # Method require_relative was added in Ruby 1.9, so use the gem
-  # if we have a Ruby version less than 1.9
-  require 'require_relative'
-  # Needed so that 'bundle exec rake rcov' actually runs the specs
-  require 'rspec/autorun'
-end
-
 module Attributor
+  # Checks if a given constraint is true for the current Ruby version
+  #
+  # @param [String] op A binary comparison operator
+  # @param [String] rhs A version to compare to the current Ruby version
+  #
+  # @example Basic usage
+  #   if Attributor.check_ruby_version('<', '1.9')
+  #     # Do something supported in Ruby 1.8 or lower
+  #   end
+  #
+  # @return [Boolean] true if "lhs op rhs" is true, false otherwise
+  #
+  def self.check_ruby_version(op, rhs)
+    self.compare_versions(RUBY_VERSION, op, rhs)
+  end
+
+  # Performs a comparison on two versions
+  #
+  # @param [String] lhs A String version that is the left-hand side of binary op
+  # @param [String] op A binary comparison operator
+  # @param [String] rhs A String version that is the right-hand side of binary op
+  #
+  # @example Basic usage
+  #   if Attributor.compare_versions(RUBY_VERSION, '<', '1.9')
+  #     # Do something supported in Ruby 1.8 or lower
+  #   end
+  #
+  # @return [Boolean] true if "lhs op rhs" is true, false otherwise
+  #
+  def self.compare_versions(lhs, op, rhs)
+    Gem::Version.new(lhs.dup).send(op.to_sym, Gem::Version.new(rhs.dup))
+  end
+
+  if Attributor.check_ruby_version('<', '1.9')
+    # Method require_relative was added in Ruby 1.9, so use the gem
+    # if we have a Ruby version less than 1.9
+    require 'require_relative'
+    # Needed so that 'bundle exec rake rcov' actually runs the specs
+    require 'rspec/autorun'
+  end
 
   require_relative 'attributor/exceptions'
   require_relative 'attributor/attribute'

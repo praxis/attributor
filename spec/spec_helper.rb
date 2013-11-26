@@ -1,9 +1,9 @@
-require 'require_relative' if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("1.9")
+require 'require_relative' if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new('1.9')
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
-unless Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("1.9")
+if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('1.9')
   require 'simplecov'
   SimpleCov.start do
     add_filter 'spec' # Don't include RSpec stuff
