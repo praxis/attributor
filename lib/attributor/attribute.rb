@@ -6,12 +6,12 @@ module Attributor
   # TODO: should this be a mixin since it is an abstract class?
   class Attribute
 
-    attr_reader :attribute_type
+    attr_reader :type
 
     # @options: metadata about the attribute
     # @block: code definition for struct attributes (nil for predefined types or leaf/simple types)
-    def initialize(attribute_type, options={}, &block)
-      @attribute_type = Attributor.resolve_type(attribute_type, options, block)
+    def initialize(type, options={}, &block)
+      @type = Attributor.resolve_type(type, options, block)
       @options = options
 
       check_options!
@@ -28,9 +28,9 @@ module Attributor
 
     # TODO:  might want to expose load directly too?..."
     def load(value)
-      value = attribute_type.load(value) unless value.nil?
+      value = type.load(value) unless value.nil?
 
-      # just in case attribute_type.load(value) returned nil, even though value is not nil.
+      # just in case type.load(value) returned nil, even though value is not nil.
       if value.nil?
         value = self.options[:default] if self.options[:default]
       end
@@ -39,9 +39,9 @@ module Attributor
     end
 
     def validate_type(value, context)
-      # delegate check to attribute_type subclass if it exists
-      unless self.attribute_type.valid_type?(value)
-        return ["Attribute #{context} received value: #{value.inspect} is of the wrong type (got: #{value.class.name} expected: #{self.attribute_type.native_type.name})"]
+      # delegate check to type subclass if it exists
+      unless self.type.valid_type?(value)
+        return ["Attribute #{context} received value: #{value.inspect} is of the wrong type (got: #{value.class.name} expected: #{self.type.native_type.name})"]
       end
       []
     end
@@ -51,7 +51,7 @@ module Attributor
     def describe
       # In Ruby 1.8, the name attribute of an anonymous class is an empty string,
       # while in Ruby 1.9, it is nil.
-      type_name = self.attribute_type.ancestors.find { |k| k.name && !k.name.empty? }.name
+      type_name = self.type.ancestors.find { |k| k.name && !k.name.empty? }.name
 
       hash = {:type => type_name.split('::').last }.merge(options)
 
@@ -76,7 +76,7 @@ module Attributor
 
       case val
       when ::String
-        # FIXME: spec this properly to use self.attribute_type.native_type
+        # FIXME: spec this properly to use self.type.native_type
         val
       when ::Regexp
         self.load(val.gen)
@@ -87,7 +87,7 @@ module Attributor
         if values = self.options[:values]
           values.pick
         else
-          self.attribute_type.example(self.options, context)
+          self.type.example(self.options, context)
         end
       else
         raise AttributorException.new("unknown example attribute type, got: #{val}")
@@ -97,7 +97,7 @@ module Attributor
 
     def attributes
       @attributes ||= begin
-        if attribute_type < Model
+        if type < Model
           compiled_definition.attributes
         else
           nil
@@ -114,7 +114,7 @@ module Attributor
     # Lazy compilation
     def compiled_definition
       unless @compiled_definition
-        @compiled_definition = attribute_type.definition
+        @compiled_definition = type.definition
         @compiled_options = @compiled_definition.options.merge(@options)
       end
       @compiled_definition
@@ -122,7 +122,7 @@ module Attributor
 
     def compiled_options
       @compiled_options ||= begin
-        if attribute_type < Model
+        if type < Model
           compiled_definition
         end
         @compiled_options || @options
@@ -152,11 +152,11 @@ module Attributor
         errors << "Attribute #{context}: #{object.inspect} is not within the allowed values=#{self.options[:values].inspect} "
       end
 
-      errors += self.attribute_type.validate(object,context,self)
+      errors += self.type.validate(object,context,self)
 
       if self.attributes
         self.attributes.each do |sub_attribute_name, sub_attribute|
-          sub_context = self.attribute_type.generate_subcontext(context,sub_attribute_name)
+          sub_context = self.type.generate_subcontext(context,sub_attribute_name)
           errors += sub_attribute.validate(object.send(sub_attribute_name), sub_context)
         end
       end
@@ -216,7 +216,7 @@ module Attributor
     def check_options!
       self.options.each do |option_name, option_value|
         if self.check_option!(option_name, option_value) == :unknown
-          if self.attribute_type.check_option!(option_name, option_value) == :unknown
+          if self.type.check_option!(option_name, option_value) == :unknown
             raise AttributorException.new("unsupported option: #{option_name} with value: #{option_value.inspect} for attribute: #{self.inspect}")
           end
         end
@@ -225,13 +225,13 @@ module Attributor
       true
     end
 
-    # TODO: override in attribute_type subclass
+    # TODO: override in type subclass
     def check_option!(name, definition)
       case name
       when :values
         raise AttributorException.new("Allowed set of values requires an array. Got (#{definition})") unless definition.is_a? ::Array
       when :default
-        raise AttributorException.new("Default value doesn't have the correct attribute type. Got (#{definition})") unless self.attribute_type.valid_type?(definition)
+        raise AttributorException.new("Default value doesn't have the correct attribute type. Got (#{definition})") unless self.type.valid_type?(definition)
       when :description
         raise AttributorException.new("Description value must be a string. Got (#{definition})") unless definition.is_a? ::String
       when :required
@@ -241,7 +241,7 @@ module Attributor
         raise AttributorException.new("Required_if must be a String, a Hash definition or a Proc") unless definition.is_a?(::String) || definition.is_a?(::Hash) || definition.is_a?(::Proc)
         raise AttributorException.new("Required_if cannot be specified together with :required") if self.options[:required]
       when :example
-        unless self.attribute_type.valid_type?(definition) || definition.is_a?(::Regexp) || definition.is_a?(::String) || definition.is_a?(::Array)
+        unless self.type.valid_type?(definition) || definition.is_a?(::Regexp) || definition.is_a?(::String) || definition.is_a?(::Array)
           raise AttributorException.new("Invalid example type (got: #{definition.class.name}). It must always match the type of the attribute (except if passing Regex that is allowed for some types)")
         end
       else

@@ -4,19 +4,19 @@ require File.join(File.dirname(__FILE__), 'spec_helper.rb')
 describe Attributor::Attribute do
 
   let(:attribute_options) { Hash.new }
-  let(:attribute_type) { AttributeType }
-  subject(:attribute) { Attributor::Attribute.new(attribute_type, attribute_options) }
+  let(:type) { AttributeType }
+  subject(:attribute) { Attributor::Attribute.new(type, attribute_options) }
 
   let(:context) { "context" }
   let(:value) { "one" }
 
   context 'initialize' do
-    its(:attribute_type) { should be attribute_type }
+    its(:type) { should be type }
     its(:options) { should be attribute_options }
 
     it 'calls check_options!' do
       Attributor::Attribute.any_instance.should_receive(:check_options!)
-      Attributor::Attribute.new(attribute_type, attribute_options)
+      Attributor::Attribute.new(type, attribute_options)
     end
 
     context 'for anonymous types (aka Structs)' do
@@ -40,7 +40,7 @@ describe Attributor::Attribute do
 
   context 'describe' do
     let(:attribute_options) { {:required => true, :values => ["one"], :description => "something"} }
-    let(:expected) { {:type => attribute_type.name}.merge(attribute_options) }
+    let(:expected) { {:type => type.name}.merge(attribute_options) }
 
     its(:describe) { should == expected }
 
@@ -89,7 +89,7 @@ describe Attributor::Attribute do
     context 'with nothing specified' do
       let(:attribute_options) { {} }
       before do
-        attribute_type.should_receive(:example).and_return(example)
+        type.should_receive(:example).and_return(example)
       end
 
       it 'defers to the type' do
@@ -114,13 +114,13 @@ describe Attributor::Attribute do
       end
 
       context 'for a type with a non-String native_type' do
-        let(:attribute_type) { IntegerAttributeType}
+        let(:type) { IntegerAttributeType}
         let(:example) { /\d{5}/ }
         it 'coerces the example value properly' do
           example.should_receive(:gen).and_call_original
-          attribute_type.should_receive(:load).and_call_original
+          type.should_receive(:load).and_call_original
 
-          subject.example.should be_kind_of(attribute_type.native_type)
+          subject.example.should be_kind_of(type.native_type)
         end
       end
     end
@@ -164,12 +164,12 @@ describe Attributor::Attribute do
     let(:value) { '1' }
 
     it 'does not call type.load for nil values' do
-      attribute_type.should_not_receive(:load)
+      type.should_not_receive(:load)
       attribute.load(nil)
     end
 
     it 'delegates to type.load' do
-      attribute_type.should_receive(:load).with(value)
+      type.should_receive(:load).with(value)
       attribute.load(value)
     end
 
@@ -189,7 +189,7 @@ describe Attributor::Attribute do
       context 'for a value that the type loads as nil' do
         let(:value) { "not nil"}
         before do
-          attribute_type.should_receive(:load).and_return(nil)
+          type.should_receive(:load).and_return(nil)
         end
         it { should == default_value}
       end
@@ -239,7 +239,7 @@ describe Attributor::Attribute do
         it 'calls the right validate_X methods?' do
           attribute.should_receive(:validate_type).with(value, context).and_call_original
           attribute.should_not_receive(:validate_dependency)
-          attribute_type.should_receive(:validate).and_call_original
+          type.should_receive(:validate).and_call_original
           attribute.validate(value, context)
         end
 
@@ -326,17 +326,17 @@ describe Attributor::Attribute do
 
 
     context 'for an attribute for a subclass of Model' do
-      let(:attribute_type) { Chicken }
+      let(:type) { Chicken }
       let(:type_options) { Chicken.definition.options }
 
-      subject(:attribute) { Attributor::Attribute.new(attribute_type, attribute_options) }
+      subject(:attribute) { Attributor::Attribute.new(type, attribute_options) }
 
       it 'has attributes' do
-        attribute.attributes.should == attribute_type.definition.attributes
+        attribute.attributes.should == type.definition.attributes
       end
 
       it 'has compiled_definition' do
-        attribute.compiled_definition.should == attribute_type.definition
+        attribute.compiled_definition.should == type.definition
       end
 
 
@@ -348,7 +348,7 @@ describe Attributor::Attribute do
       it 'describe handles sub-attributes nicely' do
         describe = attribute.describe
 
-        describe[:type].should == attribute_type.name
+        describe[:type].should == type.name
         attribute_options.each do |k,v|
           describe[k].should == v
         end
@@ -372,7 +372,7 @@ describe Attributor::Attribute do
 
       context '#validate' do
         let(:chicken) { Chicken.example }
-        let(:type_attributes) { attribute_type.definition.attributes }
+        let(:type_attributes) { type.definition.attributes }
 
 
         let(:email_validation_response) { [] }
@@ -404,7 +404,7 @@ describe Attributor::Attribute do
 
 
       context '#validate_missing_value' do
-        let(:attribute_type) { Duck }
+        let(:type) { Duck }
         let(:attribute_name) { nil }
         let(:attribute) { Duck.definition.attributes[attribute_name] }
 
@@ -477,17 +477,17 @@ describe Attributor::Attribute do
   context 'for a Collection' do
     context 'of non-Model (or Struct) type' do
       let(:member_type) { Attributor::Integer }
-      let(:attribute_type) { Attributor::Collection.of(member_type)}
+      let(:type) { Attributor::Collection.of(member_type)}
       let(:member_options) { {:max => 10} }
       let(:attribute_options) { {:member_options => member_options} }
 
 
 
       context 'the member_attribute of that type' do
-        subject(:member_attribute) { attribute.attribute_type.member_attribute }
+        subject(:member_attribute) { attribute.type.member_attribute }
 
         it { should be_kind_of(Attributor::Attribute)}
-        its(:attribute_type) { should be(member_type) }
+        its(:type) { should be(member_type) }
         its(:options) { should be(member_options) }
       end
 

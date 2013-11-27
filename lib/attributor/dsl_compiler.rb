@@ -75,7 +75,7 @@ module Attributor
 
       if attr_type.nil?
         if inherited_attribute
-          attr_type = inherited_attribute.attribute_type
+          attr_type = inherited_attribute.type
           # Only inherit opts if no explicit attr_type was given.
           opts = inherited_attribute.options.merge(opts)
         elsif block_given?
@@ -86,7 +86,7 @@ module Attributor
       end
 
       if block_given? && inherited_attribute
-        opts[:reference] = inherited_attribute.attribute_type
+        opts[:reference] = inherited_attribute.type
       end
 
       return attributes[name] = Attributor::Attribute.new(attr_type, opts, &block)
