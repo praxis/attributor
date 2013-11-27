@@ -43,8 +43,6 @@ module Attributor
     # Method require_relative was added in Ruby 1.9, so use the gem
     # if we have a Ruby version less than 1.9
     require 'require_relative'
-    # Needed so that 'bundle exec rake rcov' actually runs the specs
-    require 'rspec/autorun'
   end
 
   require_relative 'attributor/exceptions'
