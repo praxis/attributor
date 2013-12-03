@@ -36,10 +36,10 @@ end
 class Turducken
   include Attributor::Model
   attributes do
-    attribute 'name', String, description: "Turducken name", example: /[:name:]/
+    attribute 'name', String, :description => "Turducken name", :example => /[:name:]/
     attribute 'chicken', Chicken
     attribute 'duck', Duck
-    attribute 'turkey', Turkey, description: "The turkey"
+    attribute 'turkey', Turkey, :description => "The turkey"
   end
 end
 
@@ -61,6 +61,6 @@ end
       attribute 'months', Attributor::Integer, :default => 0, :min => 0, :description => "The age in months of the baby cormorant"
       attribute 'weight', Attributor::Float, :example => /\d{1,2}\.\d{3}/, :description => "The weight in kg of the baby cormorant"
     end
-      
+
   end
 end

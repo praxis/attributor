@@ -1,4 +1,5 @@
-require_relative 'spec_helper'
+require File.join(File.dirname(__FILE__), 'spec_helper.rb')
+
 
 describe Attributor::AttributeResolver do
   let(:value) { /\w+/.gen }
@@ -25,8 +26,8 @@ describe Attributor::AttributeResolver do
 
 
   context 'querying nested values from models' do
-    let(:instance) { double("instance", ssh_key:ssh_key) }
-    let(:ssh_key) { double("ssh_key", name:value) }
+    let(:instance) { double("instance", :ssh_key => ssh_key) }
+    let(:ssh_key) { double("ssh_key", :name => value) }
     let(:key) { "instance.ssh_key.name" }
 
     before { subject.register('instance', instance) }
@@ -68,8 +69,8 @@ describe Attributor::AttributeResolver do
 
   context 'checking attribute conditions' do
     let(:key) { "instance.ssh_key.name" }
-    let(:ssh_key) { double("ssh_key", name:value) }
-    let(:instance) { double("instance", ssh_key:ssh_key) }
+    let(:ssh_key) { double("ssh_key", :name => value) }
+    let(:instance) { double("instance", :ssh_key => ssh_key) }
 
     let(:context) { '$' }
 
@@ -119,8 +120,8 @@ describe Attributor::AttributeResolver do
       let(:failing_condition) { Proc.new { |test_value| test_value != value } }
 
       it 'works' do
-        subject.check(context, key, passing_condition).should be true
-        subject.check(context, key, failing_condition).should be false
+        expect(subject.check(context, key, passing_condition)).to eq(true)
+        expect(subject.check(context, key, failing_condition)).to eq(false)
       end
 
     end
@@ -133,7 +134,7 @@ describe Attributor::AttributeResolver do
     end
 
     context 'with a condition that asserts something IS nil' do
-      let(:ssh_key) { double("ssh_key", name: nil) }
+      let(:ssh_key) { double("ssh_key", :name => nil) }
       it 'can be done using the almighty Proc' do
         cond = Proc.new { |value| !value.nil? }
         subject.check(context, key, cond).should be false

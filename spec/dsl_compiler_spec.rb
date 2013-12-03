@@ -1,5 +1,4 @@
-require_relative 'spec_helper'
-
+require File.join(File.dirname(__FILE__), 'spec_helper.rb')
 
 
 describe Attributor::DSLCompiler do
@@ -9,10 +8,10 @@ describe Attributor::DSLCompiler do
   subject(:dsl_compiler) { Attributor::DSLCompiler.new(dsl_compiler_options) }
 
   let(:attribute_name) { "name" }
-  let(:attribute_type) { Attributor::String }
+  let(:type) { Attributor::String }
 
   let!(:reference_attributes) { Turducken.definition.attributes }
-  let(:reference_attribute_type) { reference_attribute.type }
+  let(:reference_type) { reference_attribute.type }
   let(:reference_attribute_options) { reference_attribute.options }
   let(:reference_attribute) {reference_attributes[attribute_name] }
 
@@ -64,7 +63,7 @@ describe Attributor::DSLCompiler do
     let(:attribute_options) { {} }
 
     let(:expected_options) { attribute_options }
-    let(:expected_type) { attribute_type }
+    let(:expected_type) { type }
 
     it 'has a spec for non-string names blowing'
 
@@ -82,20 +81,20 @@ describe Attributor::DSLCompiler do
 
         it 'creates an attribute given a name and type' do
           Attributor::Attribute.should_receive(:new).with(expected_type, expected_options)
-          dsl_compiler.attribute(attribute_name, attribute_type)
+          dsl_compiler.attribute(attribute_name, type)
         end
 
 
         it 'creates an attribute given a name, type, and options' do
           Attributor::Attribute.should_receive(:new).with(expected_type, expected_options)
-          dsl_compiler.attribute(attribute_name, attribute_type, attribute_options)
+          dsl_compiler.attribute(attribute_name, type, attribute_options)
         end
 
       end
 
 
       context 'with a reference' do
-        let(:dsl_compiler_options) { {reference: Turducken} }
+        let(:dsl_compiler_options) { {:reference => Turducken} }
 
         context 'with no options' do
           let(:expected_options) { reference_attribute_options }
@@ -107,7 +106,7 @@ describe Attributor::DSLCompiler do
         end
 
         context 'with options' do
-          let(:attribute_options) { {description: "some new description", required: true} }
+          let(:attribute_options) { {:description => "some new description", :required => true} }
           let(:expected_options) { reference_attribute_options.merge(attribute_options) }
 
           before do
@@ -143,7 +142,7 @@ describe Attributor::DSLCompiler do
     context 'when given a block for sub-attributes' do
       let(:attribute_block) { Proc.new { } }
       let(:attribute_name) { "turkey" }
-      let(:attribute_type) { Attributor::Struct }
+      let(:type) { Attributor::Struct }
       let(:expected_type) { Attributor::Struct }
 
       context 'without a reference' do
@@ -154,9 +153,9 @@ describe Attributor::DSLCompiler do
       end
 
       context 'with a reference' do
-        let(:dsl_compiler_options) { {reference: Turducken} }
+        let(:dsl_compiler_options) { {:reference => Turducken} }
         let(:expected_options) do
-          attribute_options.merge(reference:reference_attribute_type)
+          attribute_options.merge(:reference => reference_type)
         end
 
         it 'is unhappy from somewhere else if you do not specify a type' do
@@ -167,7 +166,7 @@ describe Attributor::DSLCompiler do
 
         it 'passes the correct reference to the created attribute' do
           Attributor::Attribute.should_receive(:new).with(expected_type, expected_options)
-          dsl_compiler.attribute(attribute_name, attribute_type,  attribute_options, &attribute_block)
+          dsl_compiler.attribute(attribute_name, type,  attribute_options, &attribute_block)
         end
 
       end

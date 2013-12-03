@@ -1,10 +1,20 @@
+
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
-require 'simplecov'
 
-SimpleCov.start do
-  add_filter 'spec' # Don't include RSpec stuff
-  add_group 'Types', 'lib/attributor/types'
+# Configure simplecov gem (must be here at top of file)
+if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('1.9')
+  require 'simplecov'
+  SimpleCov.start do
+    add_filter 'spec' # Don't include RSpec stuff
+    add_group 'Types', 'lib/attributor/types'
+  end
+end
+
+# Configure some Ruby 1.8-specific stuff
+if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new('1.9')
+  # Needed so that 'bundle exec rake rcov' actually runs the specs
+  require 'rspec/autorun'
 end
 
 require 'rspec'
@@ -26,3 +36,4 @@ RSpec.configure do |config|
   end
 
 end
+

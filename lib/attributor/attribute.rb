@@ -49,7 +49,9 @@ module Attributor
 
     # TODO: split bits of this...
     def describe
-      type_name = self.type.ancestors.find { |k| k.name }.name
+      # In Ruby 1.8, the name attribute of an anonymous class is an empty string,
+      # while in Ruby 1.9, it is nil.
+      type_name = self.type.ancestors.find { |k| k.name && !k.name.empty? }.name
 
       hash = {:type => type_name.split('::').last }.merge(options)
 
@@ -88,7 +90,7 @@ module Attributor
           self.type.example(self.options, context)
         end
       else
-        raise AttributorException.new("unknown example type, got: #{val}")
+        raise AttributorException.new("unknown example attribute type, got: #{val}")
       end
     end
 
@@ -164,8 +166,11 @@ module Attributor
 
 
     def validate_missing_value(context)
+      # Missing attribute was required if :required option was set
       return ["Attribute #{context} is required"] if self.options[:required]
 
+      # Missing attribute was not required if :required_if (and :required)
+      # option was NOT set
       requirement = self.options[:required_if]
       return [] unless requirement
 
@@ -178,18 +183,20 @@ module Attributor
         key_path = requirement.keys.first
         predicate = requirement.values.first
       else
-        raise AttributorException.new("unknown type of dependency: #{requirement.inspect}") # should never get here if the option validation worked...
+        # should never get here if the option validation worked...
+        raise AttributorException.new("unknown type of dependency: #{requirement.inspect}")
       end
 
-      *requirement_context, _ = context.split(Attributor::SEPARATOR)
-      requirement_context = requirement_context.join(Attributor::SEPARATOR)
+      # Convert the context into an array of tokens and chop off the last part
+      context_tokens = context.split(Attributor::SEPARATOR)[0..-2]
+      requirement_context = context_tokens.join(Attributor::SEPARATOR)
       # OPTIMIZE: probably should.
 
       if AttributeResolver.current.check(requirement_context, key_path, predicate)
         message = "Attribute #{context} is required when #{key_path} "
 
         # give a hint about what the full path for a relative key_path would be
-        unless key_path[0] == Attributor::AttributeResolver::ROOT_PREFIX
+        unless key_path[0..0] == Attributor::AttributeResolver::ROOT_PREFIX
           message << "(for #{requirement_context}) "
         end
 
@@ -224,7 +231,7 @@ module Attributor
       when :values
         raise AttributorException.new("Allowed set of values requires an array. Got (#{definition})") unless definition.is_a? ::Array
       when :default
-        raise AttributorException.new("Default value doesn't have the correct type. Got (#{definition})") unless self.type.valid_type?(definition)
+        raise AttributorException.new("Default value doesn't have the correct attribute type. Got (#{definition})") unless self.type.valid_type?(definition)
       when :description
         raise AttributorException.new("Description value must be a string. Got (#{definition})") unless definition.is_a? ::String
       when :required

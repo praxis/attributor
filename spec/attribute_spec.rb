@@ -1,4 +1,4 @@
-require_relative 'spec_helper'
+require File.join(File.dirname(__FILE__), 'spec_helper.rb')
 
 
 describe Attributor::Attribute do
@@ -20,7 +20,7 @@ describe Attributor::Attribute do
     end
 
     context 'for anonymous types (aka Structs)' do
-      let(:attribute_options) { {identity: 'id'} }
+      let(:attribute_options) { {:identity => 'id'} }
 
       before do
         Attributor.should_receive(:resolve_type).once.with(Struct,attribute_options, anything()).and_call_original
@@ -39,8 +39,8 @@ describe Attributor::Attribute do
 
 
   context 'describe' do
-    let(:attribute_options) { {required: true, values:["one"], description: "something"} }
-    let(:expected) { {type: type.name}.merge(attribute_options) }
+    let(:attribute_options) { {:required => true, :values => ["one"], :description => "something"} }
+    let(:expected) { {:type => type.name}.merge(attribute_options) }
 
     its(:describe) { should == expected }
 
@@ -84,7 +84,7 @@ describe Attributor::Attribute do
 
   context 'example' do
     let(:example) { nil }
-    let(:attribute_options) { {example: example} }
+    let(:attribute_options) { {:example => example} }
 
     context 'with nothing specified' do
       let(:attribute_options) { {} }
@@ -134,7 +134,7 @@ describe Attributor::Attribute do
 
     context 'with an attribute that has the values option set' do
       let(:values) { ["one", "two"] }
-      let(:attribute_options) { {values: values} }
+      let(:attribute_options) { {:values => values} }
       it 'picks a random value' do
         values.should include subject.example
       end
@@ -176,7 +176,7 @@ describe Attributor::Attribute do
 
     context 'applying default values' do
       let(:default_value) { "default value" }
-      let(:attribute_options) { {default: default_value} }
+      let(:attribute_options) { {:default => default_value} }
 
       subject(:result) { attribute.load(value) }
 
@@ -201,7 +201,7 @@ describe Attributor::Attribute do
       context '#validate' do
         context 'applying attribute options' do
           context ':required' do
-            let(:attribute_options) { {required: true} }
+            let(:attribute_options) { {:required => true} }
             context 'with a nil value' do
               let(:value) { nil }
               it 'returns an error' do
@@ -212,7 +212,7 @@ describe Attributor::Attribute do
 
           context ':values' do
             let(:values) { ['one','two'] }
-            let(:attribute_options) { {values: values} }
+            let(:attribute_options) { {:values => values} }
             let(:value) { nil }
 
             subject(:errors) { attribute.validate(value, context)}
@@ -272,10 +272,10 @@ describe Attributor::Attribute do
         let(:key) { "$.instance.ssh_key.name" }
         let(:value) { /\w+/.gen }
 
-        let(:attribute_options) { {required_if: key} }
+        let(:attribute_options) { {:required_if => key} }
 
-        let(:ssh_key) { double("ssh_key", name:value) }
-        let(:instance) { double("instance", ssh_key:ssh_key) }
+        let(:ssh_key) { double("ssh_key", :name => value) }
+        let(:instance) { double("instance", :ssh_key => ssh_key) }
 
         before { Attributor::AttributeResolver.current.register('instance', instance) }
 
@@ -299,7 +299,7 @@ describe Attributor::Attribute do
           #subject(:errors) { attribute.validate_missing_value('') }
 
           context 'where the target attribute exists, and matches the predicate' do
-            let(:attribute_options) { {required_if: {key => /default/} } }
+            let(:attribute_options) { {:required_if => {key => /default/} } }
 
             it { should_not be_empty }
 
@@ -307,14 +307,14 @@ describe Attributor::Attribute do
           end
 
           context 'where the target attribute exists, but does not match the predicate' do
-            let(:attribute_options) { {required_if: {key => /other/} } }
+            let(:attribute_options) { {:required_if => {key => /other/} } }
 
             it { should be_empty }
           end
 
           context 'where the target attribute does not exist' do
-            let(:attribute_options) { {required_if: {key => /default/} } }
-            let(:ssh_key) { double("ssh_key", name: nil) }
+            let(:attribute_options) { {:required_if => {key => /default/} } }
+            let(:ssh_key) { double("ssh_key", :name => nil) }
 
             it { should be_empty }
           end
