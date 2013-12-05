@@ -15,9 +15,9 @@ module Attributor
 
       @options = options
       if @type.respond_to?(:options)
-        if @type.options.nil?
-          binding.pry
-        end
+        #if @type.options.nil?
+        #  binding.pry
+        #end
 
         @options = @type.options.merge(@options)
       end
