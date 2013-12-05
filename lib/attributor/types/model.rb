@@ -167,14 +167,20 @@ module Attributor
         if block_given?
           @saved_dsl = block
           @saved_options = opts
+        else
+          @attributes ||= self.definition.attributes
         end
-
-        @attributes ||= self.definition.attributes
       end
 
 
       def options
-        @options ||= self.definition.options
+        # FIXME: this seems like a really dumb way to do this. 
+        @saved_options
+        # if @compiled_class_block
+        #   @options ||= self.definition.options
+        # else
+        #   @saved_options
+        # end
       end
 
 
