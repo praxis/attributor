@@ -15,12 +15,15 @@ require 'jeweler'
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
   gem.name = "attributor"
-  gem.homepage = "http://github.com/blanquer/attributor"
-  gem.license = "MIT"
-  gem.summary = %Q{one-line summary of your gem}
-  gem.description = %Q{longer description of your gem}
-  gem.email = "blanquer@rightscale.com"
-  gem.authors = ["RightScale"]
+  gem.homepage = "https://github.com/rightscale/attributor"
+  gem.license = "RightScale, Inc."
+  gem.summary = "Attributor is a component of RESTful Skeletor"
+  gem.description = "makes building Resource-based Web APIs a walk in the park"
+  gem.email = "salmon.sprint@rightscale.com"
+  gem.authors = ["RightScale, Inc."]
+  gem.files.exclude 'spec/**/*' # exclude specs
+  gem.files.exclude '**/.gitignore'
+  gem.files.exclude 'Gemfile.lock'
   # dependencies defined in Gemfile
 end
 Jeweler::RubygemsDotOrgTasks.new
