@@ -22,6 +22,20 @@ describe Attributor::Model do
 
       its(:age) { should == age }
       its(:email) { should =~ /\w+@.*\.example\.org/ }
+
+      context 'generating multiple examples' do
+        before do
+          Attributor::Integer.should_receive(:example).with(/age$/, age_opts).and_call_original
+        end
+
+        context 'without a context' do
+          let(:other_example) { Chicken.example }
+          it 'should not be identical' do
+            example.attributes.should_not == other_example.attributes
+          end
+        end
+      end
+
     end
 
 

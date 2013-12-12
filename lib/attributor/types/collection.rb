@@ -40,12 +40,13 @@ module Attributor
 
     # generates an example Collection
     # @return An Array of native type objects conforming to the specified member_type
-    def self.example(options={}, context=nil)
+    def self.example(context=nil, options={})
       result = []
-      size = rand(10)
+      size = rand(10) + 1
 
-      size.times do
-        result << self.member_attribute.example(context)
+      size.times do |i|
+        subcontext = "#{context}[#{i}]"
+        result << self.member_attribute.example(subcontext)
       end
 
       result
