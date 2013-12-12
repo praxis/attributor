@@ -86,12 +86,12 @@ module Attributor
       end
 
 
-      def example(options={}, context=nil)
+      def example(context=nil, options={})
         result = self.new
 
         self.attributes.each do |attribute_name,attribute|
           sub_context = self.generate_subcontext(context,attribute_name)
-          result.send("#{attribute_name}=", attribute.example(context))
+          result.send("#{attribute_name}=", attribute.example(sub_context, result))
         end
 
         result

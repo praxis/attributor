@@ -11,7 +11,7 @@ module Attributor
       return ::Object
     end
 
-    def self.example(options={},context=nil)
+    def self.example(context=nil, options={})
       'An Object'
     end
 

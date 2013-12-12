@@ -10,7 +10,7 @@ module Attributor
       return ::Float
     end
 
-    def self.example(options={},context=nil)
+    def self.example(context=nil, options={})
       min = options[:min].to_f || 0.0
       max = options[:max].to_f || Math.PI
 

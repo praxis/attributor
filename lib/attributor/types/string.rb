@@ -6,7 +6,7 @@ module Attributor
       return ::String
     end
 
-    def self.example(options={},context=nil)
+    def self.example(context=nil, options={})
       if options[:regexp]
         return options[:regexp].gen
       else
