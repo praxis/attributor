@@ -21,7 +21,7 @@ module Attributor
 
         @options = @type.options.merge(@options)
       end
-      
+
 
       check_options!
     end
@@ -77,7 +77,8 @@ module Attributor
       hash
     end
 
-    def example(context=nil)
+    def example(context=nil, parent=nil)
+
       if context
         seed, _ = Digest::SHA1.digest(context).unpack("QQ")
         Random.srand(seed)
@@ -94,11 +95,17 @@ module Attributor
       when ::Array
         # TODO: handle arrays of non native types, i.e. arrays of regexps.... ?
         val.pick
+      when ::Proc
+        if val.arity > 0
+          val.call(parent)
+        else
+          val.call
+        end
       when nil
         if (values = self.options[:values])
           values.pick
         else
-          self.type.example(self.options, context)
+          self.type.example(context, self.options)
         end
       else
         raise AttributorException.new("unknown example type, got: #{val}")
@@ -237,7 +244,7 @@ module Attributor
         raise AttributorException.new("Required_if must be a String, a Hash definition or a Proc") unless definition.is_a?(::String) || definition.is_a?(::Hash) || definition.is_a?(::Proc)
         raise AttributorException.new("Required_if cannot be specified together with :required") if self.options[:required]
       when :example
-        unless self.type.valid_type?(definition) || definition.is_a?(::Regexp) || definition.is_a?(::String) || definition.is_a?(::Array)
+        unless self.type.valid_type?(definition) || definition.is_a?(::Regexp) || definition.is_a?(::String) || definition.is_a?(::Array) || definition.is_a?(::Proc)
           raise AttributorException.new("Invalid example type (got: #{definition.class.name}). It must always match the type of the attribute (except if passing Regex that is allowed for some types)")
         end
       else
