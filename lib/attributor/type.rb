@@ -27,6 +27,11 @@ module Attributor
         value
       end
 
+      # Generic encoding of the attribute
+      def dump(value,opts=nil)
+        value
+      end
+
       # TODO: refactor this to take just the options instead of the full attribute?
       # TODO: delegate to subclass
       def validate(value,context,attribute)
@@ -52,7 +57,7 @@ module Attributor
       end
 
       # Default, overridable example function
-      def example(options=nil, context=nil)
+      def example(context=nil, options=nil)
         raise AttributorException.new("#{self} must implement #example")
         # return options[:example] if options.has_key? :example
         # return options[:default] if options.has_key? :default

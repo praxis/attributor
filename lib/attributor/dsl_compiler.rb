@@ -68,7 +68,7 @@ module Attributor
       attr_type, opts = self.parse_arguments(type_or_options, opts)
 
       if (reference = self.options[:reference])
-        inherited_attribute = reference.definition.attributes[name]
+        inherited_attribute = reference.attributes[name]
       else
         inherited_attribute = nil
       end

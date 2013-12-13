@@ -12,7 +12,16 @@ module Attributor
     # @block: code definition for struct attributes (nil for predefined types or leaf/simple types)
     def initialize(type, options={}, &block)
       @type = Attributor.resolve_type(type, options, block)
+
       @options = options
+      if @type.respond_to?(:options)
+        #if @type.options.nil?
+        #  binding.pry
+        #end
+
+        @options = @type.options.merge(@options)
+      end
+
 
       check_options!
     end
@@ -26,7 +35,6 @@ module Attributor
     end
 
 
-    # TODO:  might want to expose load directly too?..."
     def load(value)
       value = type.load(value) unless value.nil?
 
@@ -37,6 +45,11 @@ module Attributor
 
       value
     end
+
+    def dump(value, opts={})
+      type.dump(value, opts)
+    end
+
 
     def validate_type(value, context)
       # delegate check to type subclass if it exists
@@ -66,7 +79,8 @@ module Attributor
       hash
     end
 
-    def example(context=nil)
+    def example(context=nil, parent=nil)
+
       if context
         seed, _ = Digest::SHA1.digest(context).unpack("QQ")
         Random.srand(seed)
@@ -83,11 +97,17 @@ module Attributor
       when ::Array
         # TODO: handle arrays of non native types, i.e. arrays of regexps.... ?
         val.pick
+      when ::Proc
+        if val.arity > 0
+          val.call(parent)
+        else
+          val.call
+        end
       when nil
-        if values = self.options[:values]
+        if (values = self.options[:values])
           values.pick
         else
-          self.type.example(self.options, context)
+          self.type.example(context, self.options)
         end
       else
         raise AttributorException.new("unknown example attribute type, got: #{val}")
@@ -97,8 +117,8 @@ module Attributor
 
     def attributes
       @attributes ||= begin
-        if type < Model
-          compiled_definition.attributes
+        if type.respond_to?(:attributes)
+          type.attributes
         else
           nil
         end
@@ -107,22 +127,23 @@ module Attributor
 
 
     def options
-      return self.compiled_options
+      @options
     end
 
 
     # Lazy compilation
-    def compiled_definition
-      unless @compiled_definition
-        @compiled_definition = type.definition
-        @compiled_options = @compiled_definition.options.merge(@options)
-      end
-      @compiled_definition
-    end
+    #def compiled_definition
+    #  unless @compiled_definition
+    #    @compiled_definition = type.definition
+    #    @compiled_options = @compiled_definition.options.merge(@options)
+    #  end
+    #  @compiled_definition
+    #end
 
     def compiled_options
       @compiled_options ||= begin
-        if type < Model
+        if type.respond_to?(:options)
+
           compiled_definition
         end
         @compiled_options || @options
@@ -133,7 +154,6 @@ module Attributor
     def validate(object, context=nil)
       # Validate any requirements, absolute or conditional, and return.
 
-
       if object.nil? # == Attributor::UNSET
         # With no value, we can only validate whether that is acceptable or not and return.
         # Beyond that, no further validation should be done.
@@ -141,7 +161,6 @@ module Attributor
       end
 
       # TODO: support validation for other types of conditional dependencies based on values of other attributes
-
 
       errors = self.validate_type(object,context)
 
@@ -152,16 +171,7 @@ module Attributor
         errors << "Attribute #{context}: #{object.inspect} is not within the allowed values=#{self.options[:values].inspect} "
       end
 
-      errors += self.type.validate(object,context,self)
-
-      if self.attributes
-        self.attributes.each do |sub_attribute_name, sub_attribute|
-          sub_context = self.type.generate_subcontext(context,sub_attribute_name)
-          errors += sub_attribute.validate(object.send(sub_attribute_name), sub_context)
-        end
-      end
-
-      errors
+      errors + self.type.validate(object,context,self)
     end
 
 
@@ -206,9 +216,9 @@ module Attributor
           message << "is present."
         end
 
-        return [message]
+        [message]
       else
-        return []
+        []
       end
     end
 
@@ -241,7 +251,7 @@ module Attributor
         raise AttributorException.new("Required_if must be a String, a Hash definition or a Proc") unless definition.is_a?(::String) || definition.is_a?(::Hash) || definition.is_a?(::Proc)
         raise AttributorException.new("Required_if cannot be specified together with :required") if self.options[:required]
       when :example
-        unless self.type.valid_type?(definition) || definition.is_a?(::Regexp) || definition.is_a?(::String) || definition.is_a?(::Array)
+        unless self.type.valid_type?(definition) || definition.is_a?(::Regexp) || definition.is_a?(::String) || definition.is_a?(::Array) || definition.is_a?(::Proc)
           raise AttributorException.new("Invalid example type (got: #{definition.class.name}). It must always match the type of the attribute (except if passing Regex that is allowed for some types)")
         end
       else

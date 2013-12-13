@@ -255,7 +255,7 @@ describe Attributor::Collection do
 
   context '.example' do
     it "returns an Array" do
-      value = type.example({})
+      value = type.example(nil, {})
       value.should be_a(::Array)
     end
 
@@ -268,7 +268,7 @@ describe Attributor::Collection do
       Attributor::Object
     ].each do |member_type|
       it "returns an Array of native types of #{member_type}" do
-        value = Attributor::Collection.of(member_type).example({})
+        value = Attributor::Collection.of(member_type).example(nil, {})
         value.all? { |element| member_type.valid_type?(element) }.should be_true
       end
     end

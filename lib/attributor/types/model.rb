@@ -31,12 +31,24 @@ module Attributor
       attribute_name = name.to_s
       attribute_name.chomp!('=')
 
-      if attribute = self.class.definition.attributes[attribute_name]
+      if self.class.definition.attributes.has_key?(attribute_name)
         self.class.define_accessors(attribute_name)
         return self.send(name, *args)
       end
 
       super
+    end
+
+
+    def dump(opts=nil)
+      result = {}
+      
+      self.attributes.each do |name, value|
+        attribute = self.class.attributes[name]
+        result[name.to_sym] = attribute.dump(value)
+      end
+    
+      result
     end
 
 
@@ -74,17 +86,22 @@ module Attributor
       end
 
 
-      def example(options={}, context=nil)
+      def example(context=nil, options={})
         result = self.new
 
-        self.definition.attributes.each do |attribute_name,attribute|
+        context ||= result.object_id.to_s
+
+        self.attributes.each do |attribute_name,attribute|
           sub_context = self.generate_subcontext(context,attribute_name)
-          result.send("#{attribute_name}=", attribute.example(context))
+          result.send("#{attribute_name}=", attribute.example(sub_context, result))
         end
 
         result
       end
 
+      def dump(value, opts=nil)
+        value.dump(opts)
+      end
 
       def native_type
         self
@@ -132,13 +149,15 @@ module Attributor
       def from_hash(hash)
         model = self.new
 
-        # set known attributes first
         self.attributes.keys.each do |k|
-          model.send "#{k}=", hash.delete(k)
+          # OPTIMIZE: deleting the keys as we go is mucho faster, but also very risky
+          model.send "#{k}=", (hash[k] || hash[k.to_sym])
         end
-
-        unless hash.empty?
-          raise AttributorException.new("Unknown attributes received: #{hash.keys.join(',')}")
+        
+        unknown_keys = hash.keys.collect {|k| k.to_s} - self.attributes.keys
+        
+        if unknown_keys.any?
+          raise AttributorException.new("Unknown attributes received: #{unknown_keys.inspect}")
         end
 
         model
@@ -150,11 +169,33 @@ module Attributor
         if block_given?
           @saved_dsl = block
           @saved_options = opts
+        else
+          @attributes ||= self.definition.attributes
         end
-
-        @attributes ||= self.definition.attributes
       end
 
+
+      def options
+        # FIXME: this seems like a really dumb way to do this. 
+        @saved_options
+        # if @compiled_class_block
+        #   @options ||= self.definition.options
+        # else
+        #   @saved_options
+        # end
+      end
+
+
+      def validate(object,context,attribute)
+        errors = super
+
+        self.attributes.each do |sub_attribute_name, sub_attribute|
+          sub_context = self.generate_subcontext(context,sub_attribute_name)
+          errors += sub_attribute.validate(object.send(sub_attribute_name), sub_context)
+        end
+
+        errors
+      end
 
       # Returns the "compiled" definition for the model.
       # By "compiled" I mean that it will create a new Compiler object with the saved options and saved block that has been passed in the 'attributes' method. This compiled object is memoized (remember, there's one instance of a compiled definition PER MODEL CLASS).
