@@ -6,7 +6,7 @@ module Attributor
   # TODO: should this be a mixin since it is an abstract class?
   class Attribute
 
-    attr_reader :type
+    attr_reader :type, :options
 
     # @options: metadata about the attribute
     # @block: code definition for struct attributes (nil for predefined types or leaf/simple types)
@@ -125,10 +125,6 @@ module Attributor
       end
     end
 
-
-    def options
-      @options
-    end
 
 
     # Lazy compilation
