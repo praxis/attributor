@@ -9,8 +9,9 @@ Gem::Specification.new do |s|
   s.version = "0.0.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
+  s.require_paths = ["lib"]
   s.authors = ["RightScale, Inc."]
-  s.date = "2013-12-06"
+  s.date = "2014-01-03"
   s.description = "makes building Resource-based Web APIs a walk in the park"
   s.email = "salmon.sprint@rightscale.com"
   s.extra_rdoc_files = [
@@ -34,6 +35,7 @@ Gem::Specification.new do |s|
     "lib/attributor/attribute_resolver.rb",
     "lib/attributor/dsl_compiler.rb",
     "lib/attributor/exceptions.rb",
+    "lib/attributor/extensions/core.rb",
     "lib/attributor/extensions/randexp.rb",
     "lib/attributor/type.rb",
     "lib/attributor/types/boolean.rb",
@@ -48,8 +50,7 @@ Gem::Specification.new do |s|
   ]
   s.homepage = "https://github.com/rightscale/attributor"
   s.licenses = ["RightScale, Inc."]
-  s.require_paths = ["lib"]
-  s.rubygems_version = "2.1.11"
+  s.rubygems_version = "2.2.0"
   s.summary = "Attributor is a component of RESTful Skeletor"
 
   if s.respond_to? :specification_version then
@@ -58,55 +59,64 @@ Gem::Specification.new do |s|
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<hashie>, [">= 0"])
       s.add_runtime_dependency(%q<randexp>, [">= 0"])
+      s.add_runtime_dependency(%q<require_relative>, [">= 0"])
       s.add_development_dependency(%q<rspec>, [">= 0"])
       s.add_development_dependency(%q<yard>, ["~> 0.8.7"])
       s.add_development_dependency(%q<backports>, [">= 0"])
       s.add_development_dependency(%q<yardstick>, [">= 0"])
-      s.add_development_dependency(%q<redcarpet>, [">= 0"])
+      s.add_development_dependency(%q<redcarpet>, ["< 3.0"])
       s.add_development_dependency(%q<rdoc>, ["~> 3.12"])
       s.add_development_dependency(%q<bundler>, [">= 0"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.8.4"])
+      s.add_development_dependency(%q<pry>, [">= 0"])
+      s.add_development_dependency(%q<ruby-prof>, [">= 0"])
+      s.add_development_dependency(%q<ruby-debug-pry>, [">= 0"])
+      s.add_development_dependency(%q<rcov>, [">= 0"])
+      s.add_development_dependency(%q<pry-debugger>, [">= 0"])
       s.add_development_dependency(%q<simplecov>, [">= 0"])
       s.add_development_dependency(%q<guard>, [">= 0"])
       s.add_development_dependency(%q<guard-rspec>, [">= 0"])
-      s.add_development_dependency(%q<pry>, [">= 0"])
-      s.add_development_dependency(%q<pry-debugger>, [">= 0"])
-      s.add_development_dependency(%q<ruby-prof>, [">= 0"])
     else
       s.add_dependency(%q<hashie>, [">= 0"])
       s.add_dependency(%q<randexp>, [">= 0"])
+      s.add_dependency(%q<require_relative>, [">= 0"])
       s.add_dependency(%q<rspec>, [">= 0"])
       s.add_dependency(%q<yard>, ["~> 0.8.7"])
       s.add_dependency(%q<backports>, [">= 0"])
       s.add_dependency(%q<yardstick>, [">= 0"])
-      s.add_dependency(%q<redcarpet>, [">= 0"])
+      s.add_dependency(%q<redcarpet>, ["< 3.0"])
       s.add_dependency(%q<rdoc>, ["~> 3.12"])
       s.add_dependency(%q<bundler>, [">= 0"])
       s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
+      s.add_dependency(%q<pry>, [">= 0"])
+      s.add_dependency(%q<ruby-prof>, [">= 0"])
+      s.add_dependency(%q<ruby-debug-pry>, [">= 0"])
+      s.add_dependency(%q<rcov>, [">= 0"])
+      s.add_dependency(%q<pry-debugger>, [">= 0"])
       s.add_dependency(%q<simplecov>, [">= 0"])
       s.add_dependency(%q<guard>, [">= 0"])
       s.add_dependency(%q<guard-rspec>, [">= 0"])
-      s.add_dependency(%q<pry>, [">= 0"])
-      s.add_dependency(%q<pry-debugger>, [">= 0"])
-      s.add_dependency(%q<ruby-prof>, [">= 0"])
     end
   else
     s.add_dependency(%q<hashie>, [">= 0"])
     s.add_dependency(%q<randexp>, [">= 0"])
+    s.add_dependency(%q<require_relative>, [">= 0"])
     s.add_dependency(%q<rspec>, [">= 0"])
     s.add_dependency(%q<yard>, ["~> 0.8.7"])
     s.add_dependency(%q<backports>, [">= 0"])
     s.add_dependency(%q<yardstick>, [">= 0"])
-    s.add_dependency(%q<redcarpet>, [">= 0"])
+    s.add_dependency(%q<redcarpet>, ["< 3.0"])
     s.add_dependency(%q<rdoc>, ["~> 3.12"])
     s.add_dependency(%q<bundler>, [">= 0"])
     s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
+    s.add_dependency(%q<pry>, [">= 0"])
+    s.add_dependency(%q<ruby-prof>, [">= 0"])
+    s.add_dependency(%q<ruby-debug-pry>, [">= 0"])
+    s.add_dependency(%q<rcov>, [">= 0"])
+    s.add_dependency(%q<pry-debugger>, [">= 0"])
     s.add_dependency(%q<simplecov>, [">= 0"])
     s.add_dependency(%q<guard>, [">= 0"])
     s.add_dependency(%q<guard-rspec>, [">= 0"])
-    s.add_dependency(%q<pry>, [">= 0"])
-    s.add_dependency(%q<pry-debugger>, [">= 0"])
-    s.add_dependency(%q<ruby-prof>, [">= 0"])
   end
 end
 
