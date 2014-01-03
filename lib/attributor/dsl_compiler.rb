@@ -43,27 +43,27 @@ module Attributor
     #
     # @overload attribute(name, type, opts, &block)
     #   With an explicit type.
-    #   @param [string] name describe name param
+    #   @param [symbol] name describe name param
     #   @param [Attributor::Type] type describe type param
     #   @param [Hash] opts describe opts param
     #   @param [Block] block describe block param
     #   @example
-    #     attribute "email", String, example: /[:email:]/
+    #     attribute :email, String, example: /[:email:]/
     # @overload attribute(name, opts, &block)
     #   Assume a type of Attributor::Struct
-    #   @param [string] name describe name param
+    #   @param [symbol] name describe name param
     #   @param [Hash] opts describe opts param
     #   @param [Block] block describe block param
     #   @example
-    #     attribute "address" do
-    #       attribute "number", String
-    #       attribute "street", String
-    #       attribute "city", String
-    #       attribute "state", String
+    #     attribute :address do
+    #       attribute :number, String
+    #       attribute :street, String
+    #       attribute :city, String
+    #       attribute :state, String
     #     end
     def attribute(name, type_or_options=nil, opts={}, &block)
       raise AttributorException.new("Attribute #{name} already defined") if attributes.has_key? name
-      raise AttributorException, "Attribute names must be strings, got: #{name.to_s}" unless name.kind_of? ::String
+      raise AttributorException, "Attribute names must be symbols, got: #{name.inspect}" unless name.kind_of? ::Symbol
 
       attr_type, opts = self.parse_arguments(type_or_options, opts)
 

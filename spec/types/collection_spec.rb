@@ -200,7 +200,7 @@ describe Attributor::Collection do
       context 'for simple structs' do
         let(:attribute_definition) do
           Proc.new do
-            attribute 'name', Attributor::String
+            attribute :name, Attributor::String
           end
         end
 

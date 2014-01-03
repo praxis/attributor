@@ -30,7 +30,7 @@ module Attributor
       # Discard the initial element, which should always be ROOT_PREFIX at this point
       _root, *path = key_path.split(SEPARATOR)
 
-      # Follow the hierarchy path to the requested node and returns it
+      # Follow the hierarchy path to the requested node and return it
       # Example path => ["instance", "ssh_key", "name"]
       # Example @data => {"instance" => { "ssh_key" => { "name" => "foobar" } }}
       result = path.inject(@data) do |hash, key|

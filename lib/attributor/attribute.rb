@@ -139,12 +139,12 @@ module Attributor
     def compiled_options
       @compiled_options ||= begin
         if type.respond_to?(:options)
-
           compiled_definition
         end
         @compiled_options || @options
       end
     end
+
 
     # Validates stuff and checks dependencies
     def validate(object, context=nil)
@@ -230,6 +230,7 @@ module Attributor
 
       true
     end
+
 
     # TODO: override in type subclass
     def check_option!(name, definition)

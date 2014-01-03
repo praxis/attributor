@@ -20,6 +20,8 @@ group :development do
   gem 'pry'
   gem 'ruby-prof'
 
+  gem 'rake-notes'
+
   platforms :ruby_18 do
     # pry debugger
     gem "ruby-debug-pry", :require => "ruby-debug/pry"
@@ -36,4 +38,9 @@ group :development do
     gem 'guard'
     gem 'guard-rspec'
   end
+end
+
+
+group :test do
+  gem 'fuubar'
 end

@@ -7,7 +7,7 @@ describe Attributor::DSLCompiler do
   let(:dsl_compiler_options) { {} }
   subject(:dsl_compiler) { Attributor::DSLCompiler.new(dsl_compiler_options) }
 
-  let(:attribute_name) { "name" }
+  let(:attribute_name) { :name }
   let(:type) { Attributor::String }
 
   let!(:reference_attributes) { Turducken.definition.attributes }
@@ -124,7 +124,7 @@ describe Attributor::DSLCompiler do
         end
 
         context 'for a referenced Model attribute' do
-          let(:attribute_name) { "turkey" }
+          let(:attribute_name) { :turkey }
           let(:expected_type) { Turkey }
           let(:expected_options) { reference_attribute_options.merge(attribute_options) }
 
@@ -141,7 +141,7 @@ describe Attributor::DSLCompiler do
 
     context 'when given a block for sub-attributes' do
       let(:attribute_block) { Proc.new { } }
-      let(:attribute_name) { "turkey" }
+      let(:attribute_name) { :turkey }
       let(:type) { Attributor::Struct }
       let(:expected_type) { Attributor::Struct }
 
