@@ -16,23 +16,17 @@ group :development do
   gem 'rdoc', '~> 3.12'
   gem 'bundler'
   gem 'jeweler', '~> 1.8.4'
-  gem 'simplecov', :require => false
   gem 'pry'
   gem 'ruby-prof'
 
   platforms :ruby_18 do
-    # pry debugger
     gem "ruby-debug-pry", :require => "ruby-debug/pry"
-    # code coverage
     gem 'rcov'
   end
 
-  platforms :ruby_19 do
-    # pry debugger
+  platforms :ruby_19, :ruby_20, :ruby_21 do
     gem 'pry-debugger'
-    # code coverage
     gem 'simplecov'
-    # Guard (Ruby 1.9 only)
     gem 'guard'
     gem 'guard-rspec'
   end
