@@ -29,19 +29,19 @@ or a complex hierarchical structure which tells much more about types, restricti
 ```ruby
 Attributor::Hash.new("person") do
   # Social Security Number as a string, required
-  attribute 'ssn', String, :required => true, :description => 'Sociall Security Number'
+  attribute :ssn, String, :required => true, :description => 'Sociall Security Number'
   # Sex as a string. Only allowing two possible values
-  attribute 'sex', String, :values => ['male','female']
+  attribute :sex, String, :values => ['male','female']
   # An address parameter with 3 typed sub-parameters
-  attribute 'address', Hash do
-    attribute 'street',  String
-    attribute 'city',    String
-	attribute 'zipcode', Integer
+  attribute :address, Hash do
+    attribute :street,  String
+    attribute :city,    String
+	attribute :zipcode, Integer
   end
   # A Boolean parameter indicating it the person is an admin, false by default
   attribute 'is_admin?', Boolean, :default => false
   # An array of tags represented as strings, allowing a maximum of 10 within the array
-  attribute 'tags',  Array, :element_type => String, :max_size => 10
+  attribute :tags,  Array, :element_type => String, :max_size => 10
 end
 ```
 With those defintion in place you can then start processing objects against them. From a simple Integer:

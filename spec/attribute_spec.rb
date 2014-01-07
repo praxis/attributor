@@ -20,7 +20,7 @@ describe Attributor::Attribute do
     end
 
     context 'for anonymous types (aka Structs)' do
-      let(:attribute_options) { {:identity => 'id'} }
+      let(:attribute_options) { {:identity => :id} }
 
       before do
         Attributor.should_receive(:resolve_type).once.with(Struct,attribute_options, anything()).and_call_original
@@ -29,7 +29,7 @@ describe Attributor::Attribute do
 
       it 'generates the class' do
         thing = Attributor::Attribute.new(Struct, attribute_options) do
-          attribute "id", Integer
+          attribute :id, Integer
         end
       end
 
@@ -48,7 +48,7 @@ describe Attributor::Attribute do
       let(:attribute_options) { Hash.new }
       let(:attribute) do
         Attributor::Attribute.new(Struct, attribute_options) do
-          attribute "id", Integer
+          attribute :id, Integer
         end
       end
       subject(:description) { attribute.describe }
@@ -59,7 +59,7 @@ describe Attributor::Attribute do
       end
 
       it 'includes sub-attributes' do
-        description[:attributes].should have_key('id')
+        description[:attributes].should have_key :id
       end
 
     end
@@ -395,10 +395,10 @@ describe Attributor::Attribute do
         let(:age_validation_response) { [] }
 
         before do
-          type_attributes["email"].should_receive(:validate).
-            with(chicken.email, 'email').and_return(email_validation_response)
-          type_attributes["age"].should_receive(:validate).
-            with(chicken.age, 'age').and_return(age_validation_response)
+          type_attributes[:email].should_receive(:validate).
+            with(chicken.email, :email).and_return(email_validation_response)
+          type_attributes[:age].should_receive(:validate).
+            with(chicken.age, :age).and_return(age_validation_response)
         end
 
         it 'validates sub-attributes' do
@@ -432,7 +432,7 @@ describe Attributor::Attribute do
         end
 
         context 'for a dependency with no predicate' do
-          let(:attribute_name) { 'email' }
+          let(:attribute_name) { :email }
 
           let(:duck) do
             d = Duck.new
@@ -455,7 +455,7 @@ describe Attributor::Attribute do
 
 
         context 'for a dependency with a predicate' do
-          let(:attribute_name) { 'age' }
+          let(:attribute_name) { :age }
 
           let(:duck) do
             d = Duck.new

@@ -17,11 +17,11 @@ module Attributor
     end
 
 
-    def respond_to?(name, include_private = false)
+    def respond_to_missing?(name,*)
       attribute_name = name.to_s
       attribute_name.chomp!('=')
 
-      return true if self.class.definition.attributes.key?(attribute_name)
+      return true if self.class.definition.attributes.key?(attribute_name.to_sym)
 
       super
     end
@@ -31,7 +31,7 @@ module Attributor
       attribute_name = name.to_s
       attribute_name.chomp!('=')
 
-      if self.class.definition.attributes.has_key?(attribute_name)
+      if self.class.definition.attributes.has_key?(attribute_name.to_sym)
         self.class.define_accessors(attribute_name)
         return self.send(name, *args)
       end
@@ -56,10 +56,10 @@ module Attributor
 
       # Define accessors for attribute of given name.
       #
-      # @param name [::String, ::Symbol] attribute name, converted to String before use.
+      # @param name [::String, ::Symbol] attribute name, converted to Symbol before use.
       #
       def define_accessors(name)
-        name = name.to_s
+        name = name.to_sym
         self.define_reader(name)
         self.define_writer(name)
       end
@@ -67,7 +67,7 @@ module Attributor
       def define_reader(name)
         module_eval <<-RUBY, __FILE__, __LINE__ + 1
           def #{name}
-           attributes['#{name}']
+           attributes[:#{name}]
           end
         RUBY
       end
@@ -78,7 +78,7 @@ module Attributor
         #       attribute is captured by the block, saving us from having to retrieve it from
         #       the class's attributes hash on each write.
         module_eval do
-          define_method(name + "=") do |value|
+          define_method(name.to_s + "=") do |value|
             attributes[name] = attribute.load(value)
           end
         end
@@ -111,8 +111,8 @@ module Attributor
       def check_option!(name, value)
         case name
         when :identity
-          raise AttributorException.new("Invalid identity type #{value.inspect}") unless value.kind_of?(::String) || value.kind_of?(::Symbol)
-          if self.definition.attributes.has_key?(value.to_s)
+          raise AttributorException.new("Invalid identity type #{value.inspect}") unless value.kind_of?(::Symbol)
+          if self.definition.attributes.has_key?(value)
             :ok
           else
             raise AttributorException.new("Identity attribute #{value.inspect} for #{self.name} not found")
@@ -151,10 +151,10 @@ module Attributor
 
         self.attributes.keys.each do |k|
           # OPTIMIZE: deleting the keys as we go is mucho faster, but also very risky
-          model.send "#{k}=", (hash[k] || hash[k.to_sym])
+          model.send "#{k}=", (hash[k] || hash[k.to_s])
         end
         
-        unknown_keys = hash.keys.collect {|k| k.to_s} - self.attributes.keys
+        unknown_keys = hash.keys.collect {|k| k.to_sym} - self.attributes.keys
         
         if unknown_keys.any?
           raise AttributorException.new("Unknown attributes received: #{unknown_keys.inspect}")

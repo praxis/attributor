@@ -10,7 +10,7 @@ describe Attributor::Model do
     context '.example'  do
       subject(:example) { Chicken.example }
 
-      let(:age_opts) { chicken.definition.attributes['age'].options }
+      let(:age_opts) { chicken.definition.attributes[:age].options }
       let(:age) { /\d{2}/.gen.to_i }
 
       before do
@@ -44,8 +44,8 @@ describe Attributor::Model do
 
       context '#attributes' do
         subject(:attributes) { definition.attributes }
-        it { should have_key "age" }
-        it { should have_key "email" }
+        it { should have_key :age }
+        it { should have_key :email }
       end
     end
 
@@ -53,7 +53,7 @@ describe Attributor::Model do
     context '.load' do
       let(:age) { 1 }
       let(:email) { "cluck@example.org" }
-      let(:hash) { {"age"=>age, "email"=>email} }
+      let(:hash) { {:age => age, :email => email} }
 
       subject(:model) { Chicken.load(hash) }
 
@@ -70,10 +70,11 @@ describe Attributor::Model do
       end
 
       context 'with a JSON-serialized hash' do
+        let(:expected_hash) { {"age" => age, "email" => email} }
         let(:json) { hash.to_json }
         before do
           Chicken.should_receive(:from_hash).
-            with(hash)
+            with(expected_hash)
           JSON.should_receive(:parse).with(json).and_call_original
         end
 

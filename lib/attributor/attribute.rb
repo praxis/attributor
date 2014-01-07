@@ -6,7 +6,7 @@ module Attributor
   # TODO: should this be a mixin since it is an abstract class?
   class Attribute
 
-    attr_reader :type
+    attr_reader :type, :options
 
     # @options: metadata about the attribute
     # @block: code definition for struct attributes (nil for predefined types or leaf/simple types)
@@ -126,10 +126,6 @@ module Attributor
     end
 
 
-    def options
-      @options
-    end
-
 
     # Lazy compilation
     #def compiled_definition
@@ -143,12 +139,12 @@ module Attributor
     def compiled_options
       @compiled_options ||= begin
         if type.respond_to?(:options)
-
           compiled_definition
         end
         @compiled_options || @options
       end
     end
+
 
     # Validates stuff and checks dependencies
     def validate(object, context=nil)
@@ -234,6 +230,7 @@ module Attributor
 
       true
     end
+
 
     # TODO: override in type subclass
     def check_option!(name, definition)
