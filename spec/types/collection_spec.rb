@@ -97,6 +97,15 @@ describe Attributor::Collection do
   end
 
   context '.load' do
+    context 'from a Set' do
+      let(:values) { [1,2,3]}
+      let(:value) { Set.new(values) }
+      it 'loads properly' do
+        type.load(value).should =~ values
+      end
+
+    end
+
     context 'with unspecified element type' do
       context 'for valid values' do
         [
