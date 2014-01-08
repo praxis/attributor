@@ -79,10 +79,13 @@ module Attributor
     # The incoming value should be an array here, so the only decoding that we need to do
     # is from the members (if there's an :member_type defined option).
     def self.load(value)
-      if value.is_a?(Array)
+      case value
+      when Array
         loaded_value = value
-      elsif value.is_a?(::String)
+      when ::String
         loaded_value = decode_json(value)
+      when Set
+        loaded_value = value.to_a
       else
         raise AttributorException.new("Do not know how to decode an array from a #{value.class.name}")
       end
