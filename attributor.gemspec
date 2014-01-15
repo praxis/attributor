@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["RightScale, Inc."]
-  s.date = "2014-01-07"
+  s.date = "2014-01-15"
   s.description = "makes building Resource-based Web APIs a walk in the park"
   s.email = "salmon.sprint@rightscale.com"
   s.extra_rdoc_files = [
@@ -69,9 +69,8 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<jeweler>, ["~> 1.8.4"])
       s.add_development_dependency(%q<pry>, [">= 0"])
       s.add_development_dependency(%q<ruby-prof>, [">= 0"])
-      s.add_development_dependency(%q<ruby-debug-pry>, [">= 0"])
+      s.add_development_dependency(%q<rake-notes>, [">= 0"])
       s.add_development_dependency(%q<rcov>, [">= 0"])
-      s.add_development_dependency(%q<pry-debugger>, [">= 0"])
       s.add_development_dependency(%q<simplecov>, [">= 0"])
       s.add_development_dependency(%q<guard>, [">= 0"])
       s.add_development_dependency(%q<guard-rspec>, [">= 0"])
@@ -89,9 +88,8 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
       s.add_dependency(%q<pry>, [">= 0"])
       s.add_dependency(%q<ruby-prof>, [">= 0"])
-      s.add_dependency(%q<ruby-debug-pry>, [">= 0"])
+      s.add_dependency(%q<rake-notes>, [">= 0"])
       s.add_dependency(%q<rcov>, [">= 0"])
-      s.add_dependency(%q<pry-debugger>, [">= 0"])
       s.add_dependency(%q<simplecov>, [">= 0"])
       s.add_dependency(%q<guard>, [">= 0"])
       s.add_dependency(%q<guard-rspec>, [">= 0"])
@@ -110,9 +108,8 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
     s.add_dependency(%q<pry>, [">= 0"])
     s.add_dependency(%q<ruby-prof>, [">= 0"])
-    s.add_dependency(%q<ruby-debug-pry>, [">= 0"])
+    s.add_dependency(%q<rake-notes>, [">= 0"])
     s.add_dependency(%q<rcov>, [">= 0"])
-    s.add_dependency(%q<pry-debugger>, [">= 0"])
     s.add_dependency(%q<simplecov>, [">= 0"])
     s.add_dependency(%q<guard>, [">= 0"])
     s.add_dependency(%q<guard-rspec>, [">= 0"])
