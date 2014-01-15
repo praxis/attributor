@@ -14,7 +14,25 @@ describe Attributor::DateTime do
 
   context '.load' do
 
-    context 'for incoming values' do
+    context 'for incoming objects' do
+     
+      it "returns correct DateTime for Time objects" do
+        object = Time.now
+        loaded = type.load(object)
+        loaded.should be_a(::DateTime)
+        loaded.to_time.should == object
+      end
+     
+      it "returns correct DateTime for DateTime objects" do
+        object = DateTime.now
+        loaded = type.load(object)
+        loaded.should be_a(::DateTime)
+        loaded.should be( object )
+      end
+
+    end    
+    
+    context 'for incoming strings' do
 
       [
           '2001-02-03T04:05:06+07:00',
