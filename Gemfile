@@ -22,12 +22,10 @@ group :development do
   gem 'rake-notes'
 
   platforms :ruby_18 do
-    gem "ruby-debug-pry", :require => "ruby-debug/pry"
     gem 'rcov'
   end
 
   platforms :ruby_19, :ruby_20, :ruby_21 do
-    gem 'pry-debugger'
     gem 'simplecov'
     gem 'guard'
     gem 'guard-rspec'
