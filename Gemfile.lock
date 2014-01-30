@@ -2,15 +2,23 @@ GEM
   remote: https://rubygems.org/
   specs:
     addressable (2.3.5)
-    backports (3.3.5)
+    backports (3.4.0)
+    binding_of_caller (0.7.2)
+      debug_inspector (>= 0.0.1)
     builder (3.2.2)
+    byebug (2.5.0)
+      columnize (~> 0.3.6)
+      debugger-linecache (~> 1.2.0)
     celluloid (0.15.2)
       timers (~> 1.1.0)
     coderay (1.1.0)
     colored (1.2)
+    columnize (0.3.6)
+    debug_inspector (0.0.2)
+    debugger-linecache (1.2.0)
     diff-lcs (1.2.5)
-    docile (1.1.1)
-    faraday (0.8.8)
+    docile (1.1.2)
+    faraday (0.8.9)
       multipart-post (~> 1.2.0)
     ffi (1.9.3)
     formatador (0.2.4)
@@ -25,18 +33,17 @@ GEM
       multi_json (~> 1.4)
       nokogiri (~> 1.5.2)
       oauth2
-    guard (2.2.4)
+    guard (2.3.0)
       formatador (>= 0.2.4)
       listen (~> 2.1)
       lumberjack (~> 1.0)
       pry (>= 0.9.12)
       thor (>= 0.18.1)
-    guard-rspec (4.2.0)
-      guard (>= 2.1.1)
+    guard-rspec (4.2.5)
+      guard (~> 2.1)
       rspec (>= 2.14, < 4.0)
     hashie (2.0.5)
     highline (1.6.20)
-    httpauth (0.2.0)
     jeweler (1.8.8)
       builder
       bundler (~> 1.0)
@@ -47,7 +54,7 @@ GEM
       rake
       rdoc
     json (1.8.1)
-    jwt (0.1.8)
+    jwt (0.1.11)
       multi_json (>= 1.5)
     listen (2.4.0)
       celluloid (>= 0.15.2)
@@ -55,29 +62,34 @@ GEM
       rb-inotify (>= 0.9)
     lumberjack (1.0.4)
     method_source (0.8.2)
-    multi_json (1.8.2)
+    multi_json (1.8.4)
     multi_xml (0.5.5)
     multipart-post (1.2.0)
     nokogiri (1.5.10)
-    oauth2 (0.9.2)
-      faraday (~> 0.8)
-      httpauth (~> 0.2)
-      jwt (~> 0.1.4)
-      multi_json (~> 1.0)
+    oauth2 (0.9.3)
+      faraday (>= 0.8, < 0.10)
+      jwt (~> 0.1.8)
+      multi_json (~> 1.3)
       multi_xml (~> 0.5)
       rack (~> 1.2)
-    pry (0.9.12.4)
+    pry (0.9.12.6)
       coderay (~> 1.0)
       method_source (~> 0.8)
       slop (~> 3.4)
+    pry-byebug (1.2.1)
+      byebug (~> 2.2)
+      pry (~> 0.9.12)
+    pry-stack_explorer (0.4.9.1)
+      binding_of_caller (>= 0.7)
+      pry (>= 0.9.11)
     rack (1.5.2)
-    rake (10.1.0)
+    rake (10.1.1)
     rake-notes (0.2.0)
       colored
       rake
     randexp (0.1.7)
-    rb-fsevent (0.9.3)
-    rb-inotify (0.9.2)
+    rb-fsevent (0.9.4)
+    rb-inotify (0.9.3)
       ffi (>= 0.5.0)
     rcov (1.0.0)
     rdoc (3.12.2)
@@ -92,8 +104,8 @@ GEM
     rspec-expectations (2.14.4)
       diff-lcs (>= 1.1.3, < 2.0)
     rspec-mocks (2.14.4)
-    ruby-prof (0.13.0)
-    ruby-progressbar (1.3.2)
+    ruby-prof (0.14.2)
+    ruby-progressbar (1.4.1)
     simplecov (0.8.2)
       docile (~> 1.1.0)
       multi_json
@@ -103,8 +115,8 @@ GEM
     thor (0.18.1)
     timers (1.1.0)
     yard (0.8.7.3)
-    yardstick (0.9.7)
-      yard (~> 0.8, >= 0.8.7)
+    yardstick (0.9.9)
+      yard (~> 0.8, >= 0.8.7.2)
 
 PLATFORMS
   ruby
@@ -118,6 +130,8 @@ DEPENDENCIES
   hashie
   jeweler (~> 1.8.4)
   pry
+  pry-byebug
+  pry-stack_explorer
   rake-notes
   randexp
   rcov

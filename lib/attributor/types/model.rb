@@ -13,7 +13,7 @@ module Attributor
 
 
     def attributes
-      @attributes ||= Hash.new
+      @attributes ||= ::Hash.new
     end
 
 
@@ -56,7 +56,7 @@ module Attributor
 
       # Define accessors for attribute of given name.
       #
-      # @param name [::String, ::Symbol] attribute name, converted to Symbol before use.
+      # @param name [::Symbol] attribute name
       #
       def define_accessors(name)
         name = name.to_sym
@@ -79,6 +79,7 @@ module Attributor
         #       the class's attributes hash on each write.
         module_eval do
           define_method(name.to_s + "=") do |value|
+
             attributes[name] = attribute.load(value)
           end
         end
