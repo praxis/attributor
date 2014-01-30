@@ -33,7 +33,7 @@ Attributor::Hash.new("person") do
   # Sex as a string. Only allowing two possible values
   attribute :sex, String, :values => ['male','female']
   # An address parameter with 3 typed sub-parameters
-  attribute :address, Hash do
+  attribute :address, ::Hash do
     attribute :street,  String
     attribute :city,    String
 	attribute :zipcode, Integer

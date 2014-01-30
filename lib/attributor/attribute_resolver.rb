@@ -6,7 +6,7 @@ module Attributor
   class AttributeResolver
     ROOT_PREFIX = '$'.freeze
 
-    class Data < Hash
+    class Data < ::Hash
       include Hashie::Extensions::MethodReader
     end
 

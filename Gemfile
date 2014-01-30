@@ -25,10 +25,12 @@ group :development do
     gem 'rcov'
   end
 
-  platforms :ruby_19, :ruby_20, :ruby_21 do
+  platforms :ruby_20, :ruby_21 do
+    gem 'pry-byebug'
     gem 'simplecov'
     gem 'guard'
     gem 'guard-rspec'
+    gem 'pry-stack_explorer'
   end
 end
 

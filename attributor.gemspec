@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["RightScale, Inc."]
-  s.date = "2014-01-15"
+  s.date = "2014-01-30"
   s.description = "makes building Resource-based Web APIs a walk in the park"
   s.email = "salmon.sprint@rightscale.com"
   s.extra_rdoc_files = [
@@ -41,6 +41,7 @@ Gem::Specification.new do |s|
     "lib/attributor/types/collection.rb",
     "lib/attributor/types/date_time.rb",
     "lib/attributor/types/float.rb",
+    "lib/attributor/types/hash.rb",
     "lib/attributor/types/integer.rb",
     "lib/attributor/types/model.rb",
     "lib/attributor/types/object.rb",
@@ -71,9 +72,11 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<ruby-prof>, [">= 0"])
       s.add_development_dependency(%q<rake-notes>, [">= 0"])
       s.add_development_dependency(%q<rcov>, [">= 0"])
+      s.add_development_dependency(%q<pry-byebug>, [">= 0"])
       s.add_development_dependency(%q<simplecov>, [">= 0"])
       s.add_development_dependency(%q<guard>, [">= 0"])
       s.add_development_dependency(%q<guard-rspec>, [">= 0"])
+      s.add_development_dependency(%q<pry-stack_explorer>, [">= 0"])
     else
       s.add_dependency(%q<hashie>, [">= 0"])
       s.add_dependency(%q<randexp>, [">= 0"])
@@ -90,9 +93,11 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<ruby-prof>, [">= 0"])
       s.add_dependency(%q<rake-notes>, [">= 0"])
       s.add_dependency(%q<rcov>, [">= 0"])
+      s.add_dependency(%q<pry-byebug>, [">= 0"])
       s.add_dependency(%q<simplecov>, [">= 0"])
       s.add_dependency(%q<guard>, [">= 0"])
       s.add_dependency(%q<guard-rspec>, [">= 0"])
+      s.add_dependency(%q<pry-stack_explorer>, [">= 0"])
     end
   else
     s.add_dependency(%q<hashie>, [">= 0"])
@@ -110,9 +115,11 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<ruby-prof>, [">= 0"])
     s.add_dependency(%q<rake-notes>, [">= 0"])
     s.add_dependency(%q<rcov>, [">= 0"])
+    s.add_dependency(%q<pry-byebug>, [">= 0"])
     s.add_dependency(%q<simplecov>, [">= 0"])
     s.add_dependency(%q<guard>, [">= 0"])
     s.add_dependency(%q<guard-rspec>, [">= 0"])
+    s.add_dependency(%q<pry-stack_explorer>, [">= 0"])
   end
 end
 

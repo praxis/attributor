@@ -51,3 +51,6 @@ pkg
 # For rubinius:
 #*.rbc
 
+.idea
+attributor.sublime-workspace
+attributor.sublime-project

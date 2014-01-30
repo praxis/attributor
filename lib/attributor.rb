@@ -63,6 +63,7 @@ module Attributor
   require_relative 'attributor/types/date_time'
   require_relative 'attributor/types/float'
   require_relative 'attributor/types/collection'
+  require_relative 'attributor/types/hash'
 
   # List of all basic types (i.e. not collections, structs or models)
 
