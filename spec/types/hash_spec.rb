@@ -29,5 +29,17 @@ describe Attributor::Hash do
 
   end
 
+  context 'in an Attribute' do
+    let(:options) { {} }
+    subject(:attribute) { Attributor::Attribute.new(Attributor::Hash, options)}
+
+    context 'with an example option that is a proc' do
+      let(:example_hash) { {:key => "value"} }
+      let(:options) { { example: proc { example_hash } } }
+      it 'uses the hash' do
+        attribute.example.should be(example_hash)
+      end
+    end
+  end
 end
 
