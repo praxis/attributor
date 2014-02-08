@@ -117,6 +117,13 @@ describe Attributor::Type do
 
   end
 
+  context 'describe' do
+    subject(:description) { test_type.describe }
+    it 'outputs the type name' do
+      description[:name].should == test_type.name
+    end
+
+  end
 
 
   # context 'for a Model' do

@@ -15,13 +15,8 @@ module Attributor
 
       @options = options
       if @type.respond_to?(:options)
-        #if @type.options.nil?
-        #  binding.pry
-        #end
-
         @options = @type.options.merge(@options)
       end
-
 
       check_options!
     end
@@ -60,24 +55,17 @@ module Attributor
     end
 
 
-    # TODO: split bits of this...
-    def describe
-      # In Ruby 1.8, the name attribute of an anonymous class is an empty string,
-      # while in Ruby 1.9, it is nil.
-      type_name = self.type.ancestors.find { |k| k.name && !k.name.empty? }.name
+    def describe(shallow=true)
+      description = self.options.clone
 
-      hash = {:type => type_name.split('::').last }.merge(options)
-
-      if self.attributes
-        sub_attributes = {}
-        self.attributes.each do |sub_name, sub_attribute|
-          sub_attributes[sub_name] = sub_attribute.describe
-        end
-        hash[:attributes] = sub_attributes
+      if (reference = description.delete :reference)
+        description[:reference] = reference.name
       end
 
-      hash
+      description[:type] = self.type.describe(shallow)
+      description
     end
+
 
     def example(context=nil, parent=nil)
 
@@ -122,26 +110,6 @@ module Attributor
         else
           nil
         end
-      end
-    end
-
-
-
-    # Lazy compilation
-    #def compiled_definition
-    #  unless @compiled_definition
-    #    @compiled_definition = type.definition
-    #    @compiled_options = @compiled_definition.options.merge(@options)
-    #  end
-    #  @compiled_definition
-    #end
-
-    def compiled_options
-      @compiled_options ||= begin
-        if type.respond_to?(:options)
-          compiled_definition
-        end
-        @compiled_options || @options
       end
     end
 

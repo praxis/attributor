@@ -91,5 +91,9 @@ module Attributor
 
     klass
   end
+  
+
+  MODULE_PREFIX       = "Attributor\:\:".freeze
+  MODULE_PREFIX_REGEX = Regexp.new(MODULE_PREFIX)
 
 end

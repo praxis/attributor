@@ -40,8 +40,9 @@ describe Attributor::Attribute do
 
   context 'describe' do
     let(:attribute_options) { {:required => true, :values => ["one"], :description => "something"} }
-    let(:expected) { {:type => type.name}.merge(attribute_options) }
+    let(:expected) { {:type => {:name => type.name} }.merge(attribute_options) }
 
+    
     its(:describe) { should == expected }
 
     context 'for an anonymous type (aka: Struct)' do
@@ -51,15 +52,17 @@ describe Attributor::Attribute do
           attribute :id, Integer
         end
       end
+      
+      
       subject(:description) { attribute.describe }
 
 
       it 'uses the name of the first non-anonymous ancestor' do
-        description[:type].should == 'Struct'
+        description[:type][:name].should == 'Struct' 
       end
 
       it 'includes sub-attributes' do
-        description[:attributes].should have_key :id
+        description[:type][:attributes].should have_key(:id)
       end
 
     end
@@ -361,10 +364,11 @@ describe Attributor::Attribute do
       end
 
 
+      #TODO: attribute now only gets describe from the type and adds options (move tests to the appropriate type classes)
       it 'describe handles sub-attributes nicely' do
-        describe = attribute.describe
+        describe = attribute.describe(false)
 
-        describe[:type].should == type.name
+        describe[:type][:name].should == type.name 
         attribute_options.each do |k,v|
           describe[k].should == v
         end
@@ -373,8 +377,9 @@ describe Attributor::Attribute do
           describe[k].should == v
         end
 
+
         attribute.attributes.each do |name, attr|
-          describe[:attributes].should have_key(name)
+          describe[:type][:attributes].should have_key(name)
         end
 
       end
@@ -497,8 +502,6 @@ describe Attributor::Attribute do
       let(:member_options) { {:max => 10} }
       let(:attribute_options) { {:member_options => member_options} }
 
-
-
       context 'the member_attribute of that type' do
         subject(:member_attribute) { attribute.type.member_attribute }
 
@@ -520,6 +523,8 @@ describe Attributor::Attribute do
           errors[0].should =~ /of the wrong type/
           errors[1].should =~ /value is larger/
         end
+        
+        
       end
 
 
