@@ -95,6 +95,12 @@ module Attributor
       values.collect { |value| member_attribute.dump(value,opts) }
     end
 
+    def self.describe(shallow=false)
+      #puts "Collection: #{self.type}"      
+      hash = super(shallow)
+      hash[:member_attribute] = self.member_attribute.describe
+      hash
+    end
 
     def self.construct(constructor_block, options)
 

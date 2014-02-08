@@ -86,6 +86,18 @@ module Attributor
 
       end
 
+      def describe(shallow=false)
+        hash = super
+        
+        # Spit attributes if it's the root or if it's an anonymous structures
+        if ( !shallow || self.name == nil) && self.attributes
+          hash[:attributes] = self.attributes.each_with_object({}) do |(sub_name, sub_attribute), sub_attributes|
+            sub_attributes[sub_name] = sub_attribute.describe(true)
+          end
+        end
+
+        hash
+      end
 
       def example(context=nil, options={})
         result = self.new

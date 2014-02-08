@@ -17,7 +17,7 @@ module Attributor
 
 
     module ClassMethods
-
+      
       # Generic decoding and coercion of the attribute.
       def load(value)
         unless value.is_a?(self.native_type)
@@ -106,7 +106,11 @@ module Attributor
         return sub_definition
       end
 
-
+      # Default describe for simple types...only their name (stripping the base attributor module)
+      def describe(root=false)
+        type_name = self.ancestors.find { |k| k.name && !k.name.empty? }.name
+        { :name => type_name.gsub( Attributor::MODULE_PREFIX_REGEX, '' ) }        
+      end
 
     end
   end
