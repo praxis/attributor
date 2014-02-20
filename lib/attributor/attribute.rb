@@ -57,6 +57,10 @@ module Attributor
 
     def describe(shallow=true)
       description = self.options.clone
+      # Make sure this option definition is not mistaken for the real generated example
+      if ( ex_def = description.delete(:example) )
+        description[:example_definition] = ex_def
+      end
 
       if (reference = description.delete :reference)
         description[:reference] = reference.name

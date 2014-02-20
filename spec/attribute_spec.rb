@@ -44,6 +44,15 @@ describe Attributor::Attribute do
 
     
     its(:describe) { should == expected }
+    
+    context 'with example options' do
+      let(:attribute_options) { {:description=> "something", :example => "ex_def"} }
+      its(:describe) { should have_key(:example_definition) }
+      its(:describe) { should_not have_key(:example) }
+      it 'should have the example value in the :example_definition key' do
+        subject.describe[:example_definition].should == "ex_def"
+      end
+    end
 
     context 'for an anonymous type (aka: Struct)' do
       let(:attribute_options) { Hash.new }
