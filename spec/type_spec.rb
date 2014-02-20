@@ -35,7 +35,7 @@ describe Attributor::Type do
       let(:value) { 1 }
 
       it 'raises an exception' do
-        expect { test_type.load(value) }.to raise_error(/is not of type/)
+        expect { test_type.load(value) }.to raise_error(/cannot load value of type/)
       end
 
 

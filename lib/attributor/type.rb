@@ -21,7 +21,7 @@ module Attributor
       # Generic decoding and coercion of the attribute.
       def load(value)
         unless value.is_a?(self.native_type)
-          raise AttributorException.new("#{self.name} cannot load value that is not of type #{self.native_type}. Got: #{value.inspect}.")
+          raise AttributorException, "#{self.name} cannot load value of type: #{value.class.name}"
         end
 
         value

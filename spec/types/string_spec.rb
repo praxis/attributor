@@ -33,16 +33,18 @@ describe Attributor::String do
     end
 
     context 'for incoming Integer values' do
-
-      context 'with an integer value' do
-        let(:value) { 1 }
-
-        it 'raises an error' do
-          expect { type.load(value) }.to raise_error(/String cannot load value/)
-        end
+      let(:value) { 1 }
+      it 'raises an error' do
+        expect { type.load(value) }.to raise_error(/String cannot load value/)
       end
     end
   end
 
-end
+  context 'for incoming Symbol values' do
+    let(:value) { :something }
+    it 'returns the stringified-value' do
+      type.load(value).should == value.to_s
+    end
+  end
 
+end

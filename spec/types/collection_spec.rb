@@ -109,6 +109,7 @@ describe Attributor::Collection do
     context 'with unspecified element type' do
       context 'for valid values' do
         [
+          nil,
           [],
           [1,2,3],
           [Object.new, [1,2], nil, true]
@@ -120,7 +121,7 @@ describe Attributor::Collection do
       end
 
       context 'for invalid values' do
-        [nil, 1, Object.new, false, true, 3.0].each do |value|
+        [1, Object.new, false, true, 3.0].each do |value|
           it "raises error when incoming value is #{value.inspect}" do
             expect { type.load(value).should == value }.to raise_error(Attributor::AttributorException)
           end
