@@ -6,6 +6,17 @@ module Attributor
       return ::String
     end
 
+
+    def self.load(value)
+      # Special handling for Symbols. 
+      case value
+      when Symbol
+        return value.to_s
+      else
+        super
+      end
+    end
+
     def self.example(context=nil, options={})
       if options[:regexp]
         return options[:regexp].gen

@@ -3,8 +3,6 @@ source 'https://rubygems.org'
 gem 'hashie'
 gem 'randexp'
 
-gem 'require_relative', :platforms => :ruby_18
-
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
 group :development do
@@ -20,10 +18,6 @@ group :development do
   gem 'ruby-prof'
 
   gem 'rake-notes'
-
-  platforms :ruby_18 do
-    gem 'rcov'
-  end
 
   platforms :ruby_20, :ruby_21 do
     gem 'pry-byebug'
