@@ -132,6 +132,8 @@ module Attributor
           end
         when :reference
           :ok # FIXME ... actually do something smart
+        when :dsl_compiler
+          :ok # FIXME ... actually do something smart
         else
           super
         end
@@ -210,6 +212,10 @@ module Attributor
         errors
       end
 
+      def dsl_class
+        @saved_options[:dsl_compiler] || DSLCompiler
+      end
+      
       # Returns the "compiled" definition for the model.
       # By "compiled" I mean that it will create a new Compiler object with the saved options and saved block that has been passed in the 'attributes' method. This compiled object is memoized (remember, there's one instance of a compiled definition PER MODEL CLASS).
       def definition( options=nil, block=nil )
@@ -217,7 +223,7 @@ module Attributor
         raise AttributorException.new("Models cannot take additional attribute options (options already defined in the Model )") if options
 
         unless @compiled_class_block
-          @compiled_class_block = DSLCompiler.new(@saved_options)
+          @compiled_class_block = dsl_class.new(@saved_options)
           @compiled_class_block.parse(&@saved_dsl) if @saved_dsl
         end
         @compiled_class_block
