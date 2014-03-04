@@ -123,9 +123,8 @@ module Attributor
       # TODO: support more options like :max_size
       case name
       when :member_options
-
       else
-        :unknown
+        return :unknown
       end
 
       :ok
