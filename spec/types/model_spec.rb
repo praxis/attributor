@@ -83,6 +83,18 @@ describe Attributor::Model do
         end
       end
 
+      context 'with an invalid JSON string' do
+        let(:json) { "{'invalid'}" }
+
+        it 'catches the error and reports it correctly' do
+          JSON.should_receive(:parse).with(json).and_call_original
+          expect { 
+            Chicken.load(json)
+          }.to raise_error(Attributor::AttributorException, /Could not decode the incoming string as a model/)
+        end
+      end
+
+      
       context 'with an invalid object type' do
         it 'raises some sort of error' do
           expect {

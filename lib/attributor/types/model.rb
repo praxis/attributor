@@ -148,7 +148,11 @@ module Attributor
         hash = case value
         when ::String
           # Strings are assumed to be JSON-serialized for now.
-          JSON.parse(value)
+          begin
+            JSON.parse(value)
+          rescue JSON::JSONError => e
+            raise AttributorException.new("Could not decode the incoming string as a model. Is it not JSON? (string was: '#{value}'). Exception: #{e.inspect}")
+          end
         when ::Hash
           value
         else
