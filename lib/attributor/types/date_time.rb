@@ -26,7 +26,7 @@ module Attributor
         begin
           return ::DateTime.parse(value)
         rescue ArgumentError => e
-          raise AttributorException.new("#{e.message}: #{value.inspect}")
+          raise Attributor::DeserializationError, from: value.class, encoding: "DateTime" , value: value            
         end
       end
 

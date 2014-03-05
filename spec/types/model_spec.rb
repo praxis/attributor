@@ -83,11 +83,23 @@ describe Attributor::Model do
         end
       end
 
+      context 'with an invalid JSON string' do
+        let(:json) { "{'invalid'}" }
+
+        it 'catches the error and reports it correctly' do
+          JSON.should_receive(:parse).with(json).and_call_original
+          expect { 
+            Chicken.load(json)
+          }.to raise_error(Attributor::DeserializationError, /Error deserializing a String using JSON/)
+        end
+      end
+
+      
       context 'with an invalid object type' do
         it 'raises some sort of error' do
           expect {
             Chicken.load(Object.new)
-          }.to raise_error(/Can not load Chicken from value .* of type Object/)
+          }.to raise_error(Attributor::IncompatibleTypeError, /Type Chicken cannot load values of type Object/)
         end
       end
 

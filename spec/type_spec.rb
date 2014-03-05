@@ -35,7 +35,7 @@ describe Attributor::Type do
       let(:value) { 1 }
 
       it 'raises an exception' do
-        expect { test_type.load(value) }.to raise_error(/cannot load value of type/)
+        expect { test_type.load(value) }.to raise_error( Attributor::IncompatibleTypeError, /AttributeType cannot load values of type Fixnum/)
       end
 
 
@@ -126,34 +126,39 @@ describe Attributor::Type do
   end
 
 
-  # context 'for a Model' do
-  #   class TestModelType
-  #     include Attributor::Model
-  #     def self.native_type
-  #       ::Integer
-  #     end
-
-  #     def self.decode(value,attribute)
-  #        p 'in self decode'
-  #        case value
-  #        when String
-  #          value.to_i
-  #        else
-  #          raise "unknown type for value #{value.inspect}"
-  #        end
-  #      end
-
-  #   end
-
-  #   subject(:test_model_type) { TestModelType }
-
-  #   let(:value) { "1" }
-  #   let(:context) { nil }
-
-  #   it 'loads magically' do
-  #     load_value, load_errors = test_model_type.load(value, context,attribute)
-  #   end
-
-  # end
+  context '.decode_json' do
+    let(:mock_type) do
+      Class.new do
+        include Attributor::Type
+        def self.native_type
+          ::Hash   
+        end
+      end
+    end       
+    context 'for valid JSON strings' do
+      it "parses JSON string into the native type" do
+        a_hash = {"a" => 1, "b" => 2}
+        json_hash =  JSON.dump( a_hash )
+        mock_type.decode_json(json_hash).should == a_hash
+      end
+      it 'complains when trying to decode a non-String value' do
+        expect{ 
+          mock_type.decode_json(Object.new)
+        }.to raise_error(Attributor::DeserializationError, /Error deserializing a Object using JSON/)
+      end
+      
+      it 'complains when the deserialized value is not of the native_type' do
+        expect{ 
+          mock_type.decode_json("[1,2,3]")
+        }.to raise_error(Attributor::CoercionError, /Error coercing from Array/)
+      end
+      
+      it 'complains if there is a error deserializing the string' do
+        expect{ 
+          mock_type.decode_json("{invalid_json}")
+        }.to raise_error(Attributor::DeserializationError, /Error deserializing a String using JSON/)
+      end
+    end
+  end
 
 end

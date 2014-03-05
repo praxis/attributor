@@ -148,13 +148,15 @@ module Attributor
         hash = case value
         when ::String
           # Strings are assumed to be JSON-serialized for now.
-          JSON.parse(value)
+          begin
+            JSON.parse(value)
+          rescue 
+            raise Attributor::DeserializationError, from: value.class, encoding: "JSON" , value: value            
+          end
         when ::Hash
           value
         else
-          raise AttributorException.new(
-            "Can not load #{self} from value #{value.inspect} of type #{value.class}"
-          )
+          raise Attributor::IncompatibleTypeError, value_type: value.class, type: self 
         end
 
         self.from_hash(hash)

@@ -62,7 +62,7 @@ describe Attributor::DateTime do
         it "raises Attributor::AttributorException for #{value.inspect}" do
           expect {
             type.load(value)
-          }.to raise_error(Attributor::AttributorException, "invalid date: #{value.inspect}")
+          }.to raise_error(Attributor::DeserializationError, /Error deserializing a String using DateTime/)
         end
 
       end
@@ -76,7 +76,7 @@ describe Attributor::DateTime do
         it "raises Attributor::AttributorException for #{value.inspect}" do
           expect {
             type.load(value)
-          }.to raise_error(Attributor::AttributorException, "invalid date: #{value.inspect}")
+          }.to raise_error(Attributor::DeserializationError, /Error deserializing a String using DateTime/)
         end
 
       end

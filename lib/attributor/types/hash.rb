@@ -6,6 +6,8 @@ module Attributor
       return ::Hash
     end
 
+    @key_type = Object
+    @value_type = Object
     # @example Collection.of(Integer)
     #
     def self.of( key: Object, value: Object )
@@ -30,7 +32,7 @@ module Attributor
     end
     
     def self.key_type
-      @key_type 
+      @key_type
     end
 
     def self.value_type
@@ -40,7 +42,7 @@ module Attributor
     def self.example(context=nil, options={})
       result = ::Hash.new
       # Let's not bother to generate any hash contents if there's absolutely no type defined
-      return result unless key_type || value_type
+      return result if ( key_type == Object && value_type == Object )
       
       size = rand(3) + 1
 
@@ -70,14 +72,16 @@ module Attributor
       elsif value.is_a?(::String)
         loaded_value = decode_json(value)
       else
-        raise AttributorException.new("Do not know how to decode a Hash from a #{value.class.name}")
+        raise Attributor::IncompatibleTypeError, value_type: value.class, type: self 
       end
 
-      return loaded_value unless key_type || value_type
+      return loaded_value if ( key_type == Object && value_type == Object )
       
       loaded_value.each_with_object({}) do| (k, v), obj |
         obj[self.key_type.load(k)] = self.value_type.load(v)
       end
     end
+
+
   end
 end
