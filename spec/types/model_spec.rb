@@ -90,7 +90,7 @@ describe Attributor::Model do
           JSON.should_receive(:parse).with(json).and_call_original
           expect { 
             Chicken.load(json)
-          }.to raise_error(Attributor::AttributorException, /Could not decode the incoming string as a model/)
+          }.to raise_error(Attributor::DeserializationError, /Error deserializing a String using JSON/)
         end
       end
 
@@ -99,7 +99,7 @@ describe Attributor::Model do
         it 'raises some sort of error' do
           expect {
             Chicken.load(Object.new)
-          }.to raise_error(/Can not load Chicken from value .* of type Object/)
+          }.to raise_error(Attributor::IncompatibleTypeError, /Type Chicken cannot load values of type Object/)
         end
       end
 

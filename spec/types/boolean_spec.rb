@@ -68,10 +68,10 @@ describe Attributor::Boolean do
 
       ['string', 2, 1.0, Class, Object.new].each do |value|
 
-        it "raises Attributor::AttributorException for #{value.inspect}" do
+        it "raises Attributor::CoercionError for #{value.inspect}" do
           expect {
             type.load(value)
-          }.to raise_error(Attributor::AttributorException, "Cannot coerce '#{value.inspect}' into Boolean type")
+          }.to raise_error(Attributor::CoercionError, /Error coercing from .+ to Attributor::Boolean/)
         end
 
       end

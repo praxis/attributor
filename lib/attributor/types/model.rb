@@ -150,15 +150,13 @@ module Attributor
           # Strings are assumed to be JSON-serialized for now.
           begin
             JSON.parse(value)
-          rescue JSON::JSONError => e
-            raise AttributorException.new("Could not decode the incoming string as a model. Is it not JSON? (string was: '#{value}'). Exception: #{e.inspect}")
+          rescue 
+            raise Attributor::DeserializationError, from: value.class, encoding: "JSON" , value: value            
           end
         when ::Hash
           value
         else
-          raise AttributorException.new(
-            "Can not load #{self} from value #{value.inspect} of type #{value.class}"
-          )
+          raise Attributor::IncompatibleTypeError, value_type: value.class, type: self 
         end
 
         self.from_hash(hash)

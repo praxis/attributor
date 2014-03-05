@@ -39,6 +39,10 @@ module Attributor
       end
 
       value
+    rescue AttributorException
+      raise
+    rescue => e
+      raise Attributor::LoadError, "Error loading attribute of type #{type.name} from value #{value.inspect}"
     end
 
     def dump(value, opts={})

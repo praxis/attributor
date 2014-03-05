@@ -37,6 +37,14 @@ describe Attributor::Hash do
       end
     end
     
+    context 'for a JSON encoded hash' do
+      let(:value_as_hash) { {'one' => 'two', 'tree' => 4} }
+      let(:value) { JSON.dump( value_as_hash ) }
+      it 'deserializes and converts it to a real hash' do
+        type.load(value).should eq(value_as_hash)
+      end
+    end
+    
     context 'for a typed hash' do
       subject(:type){ Attributor::Hash.of(key: String, value: Integer)}
       context 'with good values' do

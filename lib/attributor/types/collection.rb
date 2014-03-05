@@ -52,29 +52,6 @@ module Attributor
       result
     end
 
-    # Decode JSON string that encapsulates an array
-    #
-    # @param value [String] JSON string
-    # @return [Array] a normal Ruby Array
-    #
-    def self.decode_json(value)
-      raise AttributorException.new("Cannot parse #{value.inspect} as JSON string") unless value.is_a?(::String)
-      parsed_value = nil
-      begin
-        # attempt to parse as JSON
-        parsed_value = JSON.parse(value)
-      rescue JSON::JSONError => e
-        raise AttributorException.new("Could not decode the incoming string as an Array. Is it not JSON? (string was: '#{value}'). Exception: #{e.inspect}")
-      end
-
-      if parsed_value.is_a? ::Array
-        value = parsed_value
-      else
-        raise AttributorException.new("JSON-encoded value doesn't appear to be an array (#{parsed_value.inspect})")
-      end
-
-      return value
-    end
 
     # The incoming value should be an array here, so the only decoding that we need to do
     # is from the members (if there's an :member_type defined option).
@@ -86,7 +63,7 @@ module Attributor
       elsif value.is_a?(::String)
         loaded_value = decode_json(value)
       else
-        raise AttributorException.new("Do not know how to decode an array from a #{value.class.name}")
+        raise Attributor::IncompatibleTypeError, value_type: value.class, type: self 
       end
 
       return loaded_value.collect { |member| self.member_attribute.load(member) }
