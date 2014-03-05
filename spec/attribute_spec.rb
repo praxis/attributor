@@ -516,7 +516,7 @@ describe Attributor::Attribute do
 
         it { should be_kind_of(Attributor::Attribute)}
         its(:type) { should be(member_type) }
-        its(:options) { should be(member_options) }
+        its(:options) { should eq(member_options) }
       end
 
       context "working with members" do
@@ -540,6 +540,26 @@ describe Attributor::Attribute do
     end
 
     context 'of a Model (or Struct) type' do
+      subject(:attribute) { Attributor::Attribute.new(type, attribute_options, &attribute_block)  }
+      
+      let(:attribute_block) { Proc.new{ attribute :angry , required: true } }  
+      let(:attribute_options) { {reference: Chicken, member_options: member_options} }
+      let(:member_type) { Attributor::Struct }
+      let(:type) { Attributor::Collection.of(member_type) }
+      let(:member_options) { {} }
+      
+
+      context 'the member_attribute of that type' do
+        subject(:member_attribute) { attribute.type.member_attribute }
+        it { should be_kind_of(Attributor::Attribute)}
+        its(:options) { should eq(member_options.merge(reference: Chicken)) }
+        its(:attributes) { should have_key :angry }
+        it 'inherited the type and options from the reference' do
+          member_attribute.attributes[:angry].type.should be(Chicken.attributes[:angry].type)
+          member_attribute.attributes[:angry].options.should eq(Chicken.attributes[:angry].options.merge(required: true))
+        end
+      end
+      
     end
   end
 
