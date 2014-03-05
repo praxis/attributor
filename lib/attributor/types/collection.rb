@@ -106,8 +106,11 @@ module Attributor
 
     def self.construct(constructor_block, options)
 
-      member_options = options[:member_options]  || {}
-
+      member_options =  (options[:member_options]  || {} ).clone
+      if options.has_key?(:reference) && !member_options.has_key?(:reference)
+        member_options[:reference] = options[:reference]
+      end
+      
       # create the member_attribute, passing in our member_type and whatever constructor_block is.
       # that in turn will call construct on the type if applicable.
       @member_attribute = Attributor::Attribute.new self.member_type, member_options, &constructor_block
@@ -122,6 +125,7 @@ module Attributor
     def self.check_option!(name, definition)
       # TODO: support more options like :max_size
       case name
+      when :reference
       when :member_options
       else
         return :unknown
