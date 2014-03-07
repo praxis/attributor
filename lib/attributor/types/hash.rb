@@ -1,6 +1,6 @@
 module Attributor
   class Hash
-    include Type
+    include Container
 
     def self.native_type
       return ::Hash

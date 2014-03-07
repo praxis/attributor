@@ -54,6 +54,7 @@ module Attributor
   require_relative 'attributor/extensions/core'
   require_relative 'attributor/extensions/randexp'
 
+  require_relative 'attributor/types/container'
   require_relative 'attributor/types/object'
   require_relative 'attributor/types/integer'
   require_relative 'attributor/types/string'

@@ -5,7 +5,7 @@ require_relative '../exceptions'
 module Attributor
 
   class Collection
-    include Type
+    include Container
 
     # @param type [Attributor::Type] optional, defines the type of all collection members
     # @return anonymous class with specified type of collection members
