@@ -38,12 +38,5 @@ describe Attributor do
         end
       end
     end
-
-    context 'given invalid types' do
-
-      it 'raises when given invalid type Foo'
-      it 'raises when given invalid type Attributor::Foo'
-
-    end
   end
 end

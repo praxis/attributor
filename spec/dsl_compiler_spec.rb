@@ -65,8 +65,6 @@ describe Attributor::DSLCompiler do
     let(:expected_options) { attribute_options }
     let(:expected_type) { type }
 
-    it 'has a spec for non-string names blowing'
-
     context 'when not not given a block for a sub-definition' do
 
 

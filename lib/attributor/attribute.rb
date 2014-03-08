@@ -214,7 +214,7 @@ module Attributor
       when :values
         raise AttributorException.new("Allowed set of values requires an array. Got (#{definition})") unless definition.is_a? ::Array
       when :default
-        raise AttributorException.new("Default value doesn't have the correct attribute type. Got (#{definition})") unless self.type.valid_type?(definition)
+        raise AttributorException.new("Default value doesn't have the correct attribute type. Got (#{definition.inspect})") unless self.type.valid_type?(definition)
       when :description
         raise AttributorException.new("Description value must be a string. Got (#{definition})") unless definition.is_a? ::String
       when :required

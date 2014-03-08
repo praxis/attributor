@@ -42,9 +42,9 @@ describe Attributor::Attribute do
     let(:attribute_options) { {:required => true, :values => ["one"], :description => "something"} }
     let(:expected) { {:type => {:name => type.name} }.merge(attribute_options) }
 
-    
+
     its(:describe) { should == expected }
-    
+
     context 'with example options' do
       let(:attribute_options) { {:description=> "something", :example => "ex_def"} }
       its(:describe) { should have_key(:example_definition) }
@@ -61,13 +61,13 @@ describe Attributor::Attribute do
           attribute :id, Integer
         end
       end
-      
-      
+
+
       subject(:description) { attribute.describe }
 
 
       it 'uses the name of the first non-anonymous ancestor' do
-        description[:type][:name].should == 'Struct' 
+        description[:type][:name].should == 'Struct'
       end
 
       it 'includes sub-attributes' do
@@ -89,8 +89,18 @@ describe Attributor::Attribute do
 
 
   context 'checking options' do
-    it 'has specs'
-    it 'has a spec that we try to validate the :default value'
+    it 'raises for invalid options' do
+      expect {
+        Attributor::Attribute.new(Integer, unknown_opt: true)
+      }.to raise_error(/unsupported option/)
+    end
+
+    it 'has a spec that we try to validate the :default value' do
+      expect {
+        Attributor::Attribute.new(Integer, default: "not an okay integer")
+      }.to raise_error(/Default value doesn't have the correct attribute type/)
+    end
+
   end
 
 
@@ -149,7 +159,6 @@ describe Attributor::Attribute do
       it 'passes any given parent through to the example proc' do
         subject.example(nil, some_object).should == 'ok'
       end
-
 
     end
 
@@ -377,7 +386,7 @@ describe Attributor::Attribute do
       it 'describe handles sub-attributes nicely' do
         describe = attribute.describe(false)
 
-        describe[:type][:name].should == type.name 
+        describe[:type][:name].should == type.name
         attribute_options.each do |k,v|
           describe[k].should == v
         end
@@ -484,14 +493,14 @@ describe Attributor::Attribute do
           end
 
           context 'where the target attribute exists, and does not match the predicate' do
-           before do
+            before do
               duck.name = 'Donald'
             end
             it { should be_empty }
           end
 
           context 'where the target attribute does not exist' do
-           before do
+            before do
               duck.name = nil
             end
             it { should be_empty }
@@ -532,8 +541,8 @@ describe Attributor::Attribute do
           errors[0].should =~ /of the wrong type/
           errors[1].should =~ /value is larger/
         end
-        
-        
+
+
       end
 
 
