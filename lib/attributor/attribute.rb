@@ -53,7 +53,7 @@ module Attributor
     def validate_type(value, context)
       # delegate check to type subclass if it exists
       unless self.type.valid_type?(value)
-        return ["Attribute #{context} received value: #{value.inspect} is of the wrong type (got: #{value.class.name} expected: #{self.type.native_type.name})"]
+        return ["Attribute #{context} received value: #{value.inspect} is of the wrong type (got: #{value.class.name})"]
       end
       []
     end
@@ -75,7 +75,7 @@ module Attributor
     end
 
 
-    def example(context=nil, parent=nil)
+    def example(context=nil, parent: nil, values:{})
 
       if context
         seed, _ = Digest::SHA1.digest(context).unpack("QQ")
@@ -100,10 +100,14 @@ module Attributor
           val.call
         end
       when nil
-        if (values = self.options[:values])
-          values.pick
+        if (option_values = self.options[:values])
+          option_values.pick
         else
-          self.type.example(context, self.options)
+          if type.respond_to?(:attributes)
+            self.type.example(context, values)
+          else
+            self.type.example(context, options: self.options)
+          end
         end
       else
         raise AttributorException.new("unknown example attribute type, got: #{val}")

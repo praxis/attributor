@@ -12,7 +12,7 @@ module Attributor
     end
 
 
-    def self.example(context=nil, options={})
+    def self.example(context=nil, options: {})
       validate_options(options)
 
       # Set default values

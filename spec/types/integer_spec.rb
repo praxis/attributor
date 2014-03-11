@@ -24,7 +24,7 @@ describe Attributor::Integer do
         [5, 100000000000000000000, -100000000000000000000].each do |max|
           it "returns an Integer in the range [,#{max.inspect}]" do
             20.times do
-              value = type.example(nil, :max => max)
+              value = type.example(nil, options: {max: max})
               value.should be_a(::Integer)
               value.should <= max
               value.should >= max - Attributor::Integer::EXAMPLE_RANGE
@@ -37,7 +37,7 @@ describe Attributor::Integer do
         ['invalid', false].each do |max|
           it "raises for the invalid range [,#{max.inspect}]" do
             expect {
-              value = type.example(nil, :max => max)
+              value = type.example(nil, options: {max: max})
               value.should be_a(::Integer)
             }.to raise_error(Attributor::AttributorException, "Invalid range: [, #{max.inspect}]")
           end
@@ -50,7 +50,7 @@ describe Attributor::Integer do
         [1, -100000000000000000000, 100000000000000000000].each do |min|
           it "returns an Integer in the range [#{min.inspect},]" do
             20.times do
-              value = type.example(nil, :min => min)
+              value = type.example(nil, options: {min: min})
               value.should be_a(::Integer)
               value.should <= min + Attributor::Integer::EXAMPLE_RANGE
               value.should >= min
@@ -63,7 +63,7 @@ describe Attributor::Integer do
         ['invalid', false].each do |min|
           it "raises for the invalid range [#{min.inspect},]" do
             expect {
-              value = type.example(nil, :min => min)
+              value = type.example(nil, options: {min: min})
               value.should be_a(::Integer)
             }.to raise_error(Attributor::AttributorException, "Invalid range: [#{min.inspect},]")
           end
@@ -82,7 +82,7 @@ describe Attributor::Integer do
         ].each do |min, max|
           it "returns an Integer in the range [#{min.inspect},#{max.inspect}]" do
             20.times do
-              value = type.example(nil, :min => min, :max => max)
+              value = type.example(nil, options: {max: max, min: min})
               value.should <= max
               value.should >= min
             end
@@ -93,7 +93,7 @@ describe Attributor::Integer do
       context 'invalid cases' do
         [[1,-1], [1,"5"], ["-2",4], [false, false], [true, true]].each do |min, max|
           it "raises for the invalid range [#{min.inspect}, #{max.inspect}]" do
-            opts = {:min => min, :max => max}
+            opts = {options: {max: max, min: min}}
             expect {
               type.example(nil, opts)
             }.to raise_error(Attributor::AttributorException, "Invalid range: [#{min.inspect}, #{max.inspect}]")

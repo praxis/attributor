@@ -8,34 +8,59 @@ describe Attributor::Model do
     its(:native_type) { should eq(Chicken) }
 
     context '.example'  do
-      subject(:example) { Chicken.example }
+      subject(:chicken) { Chicken.example }
 
-      let(:age_opts) { chicken.definition.attributes[:age].options }
+      let(:age_opts) { {options: Chicken.definition.attributes[:age].options } }
       let(:age) { /\d{2}/.gen.to_i }
 
-      before do
-        Attributor::Integer.should_receive(:example).with(/age$/, age_opts).and_return(age)
-        Attributor::String.should_not_receive(:example) # due to the :example option on the attribute
+      context 'for a simple model' do
+        it { should be_kind_of(Chicken) }
+
+        context 'and attribute without :example option' do
+          before do
+            Attributor::Integer.should_receive(:example).with(/age$/, age_opts).and_return(age)
+          end
+
+          its(:age) { should == age }
+        end
+
+        context 'and attribute with :example options' do
+          before do
+            Attributor::Integer.should_not_receive(:example) # due to lazy-evaluation of examples
+            Attributor::String.should_not_receive(:example) # due to the :example option on the attribute
+          end
+          its(:email) { should =~ /\w+@.*\.example\.org/ }
+        end
+
+        context 'with given values' do
+          let(:name) { 'Sir Clucksalot' }
+          subject(:example) { Chicken.example(name: name)}
+
+          its(:name) {should eq(name) }
+        end
       end
-
-      it { should be_kind_of(Chicken) }
-
-      its(:age) { should == age }
-      its(:email) { should =~ /\w+@.*\.example\.org/ }
 
       context 'generating multiple examples' do
-        before do
-          Attributor::Integer.should_receive(:example).with(/age$/, age_opts).and_call_original
+        context 'without a context' do
+          subject(:other_chicken) { Chicken.example }
+          its(:attributes) { should_not eq(chicken.attributes) }
+        end
+        context 'with identical contexts' do
+          let(:example_context) { 'some context' }
+          let(:some_chicken) { Chicken.example(example_context) }
+          subject(:another_chicken) { Chicken.example(example_context) }
+
+          its(:attributes) { should eq(some_chicken.attributes) }
         end
 
-        context 'without a context' do
-          let(:other_example) { Chicken.example }
-          it 'should not be identical' do
-            example.attributes.should_not == other_example.attributes
-          end
-        end
       end
 
+      context 'with attributes that are also models' do
+        subject(:turducken) { Turducken.example }
+       
+        its(:attributes) { should have_key(:chicken) }
+        its(:chicken) { should be_kind_of(Chicken)}
+      end
     end
 
 
@@ -88,13 +113,13 @@ describe Attributor::Model do
 
         it 'catches the error and reports it correctly' do
           JSON.should_receive(:parse).with(json).and_call_original
-          expect { 
+          expect {
             Chicken.load(json)
           }.to raise_error(Attributor::DeserializationError, /Error deserializing a String using JSON/)
         end
       end
 
-      
+
       context 'with an invalid object type' do
         it 'raises some sort of error' do
           expect {
@@ -179,5 +204,7 @@ describe Attributor::Model do
     end
 
   end
+
+
 
 end

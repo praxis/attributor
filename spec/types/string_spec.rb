@@ -12,7 +12,7 @@ describe Attributor::String do
 
   context '.example' do
     it "should return a valid String" do
-      type.example(:regexp => /\w\d{2,3}/).should be_a(::String)
+      type.example(options:{regexp: /\w\d{2,3}/}).should be_a(::String)
     end
 
     it "should return a valid String" do

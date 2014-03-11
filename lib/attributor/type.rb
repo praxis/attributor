@@ -57,7 +57,7 @@ module Attributor
       end
 
       # Default, overridable example function
-      def example(context=nil, options=nil)
+      def example(context=nil, options:{})
         raise AttributorException.new("#{self} must implement #example")
         # return options[:example] if options.has_key? :example
         # return options[:default] if options.has_key? :default
