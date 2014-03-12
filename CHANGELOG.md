@@ -1,7 +1,7 @@
 Attributor Changelog
 ============================
 
-next
+2.0.0
 ------
 
 * Added new exception subtypes (load methods return more precise errors now)
