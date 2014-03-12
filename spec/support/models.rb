@@ -67,6 +67,7 @@ class Person < Attributor::Model
   attributes do
     attribute :name, String, example: /[:first_name:]/
     attribute :title, String, values: %w{Mr Mrs Ms Dr}
+    attribute :okay, Attributor::Boolean, values: [true]
     attribute :address, Address, example: proc { |person, context| Address.example(context, person: person) }
   end
 end

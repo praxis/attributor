@@ -228,6 +228,13 @@ describe Attributor::Model do
         end
       end
 
+      context 'for false attributes' do
+        subject(:person) { Person.example(okay: false) }
+        it 'properly memoizes the value' do
+          person.okay.should be(false)
+          person.okay.should be(false) # second call to ensure we hit the memoized value
+        end
+      end
     end
 
   end

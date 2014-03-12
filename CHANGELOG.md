@@ -18,4 +18,5 @@ next
   * explicit nil values
   * procs that take 2 arguments now receive the context as the second argument.
 * Circular references are now detected and handled in validation and dumping.
+* Fixed bug with Model attribute accessors when using false values.
 

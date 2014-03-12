@@ -4,7 +4,7 @@ module Attributor
     MAX_EXAMPLE_DEPTH = 5
     CIRCULAR_REFERENCE_MARKER = '...'.freeze
 
-    # FIXME: this is not the way to fix this. 
+    # FIXME: this is not the way to fix this. Really we should add finalize! to Models.
     undef :timeout
 
     # Define accessors for attribute of given name.
@@ -21,7 +21,9 @@ module Attributor
     def self.define_reader(name)
       module_eval <<-RUBY, __FILE__, __LINE__ + 1
         def #{name}
-          @attributes[:#{name}] ||= begin
+          return @attributes[:#{name}] if @attributes.has_key?(:#{name})
+
+          @attributes[:#{name}] = begin
             if (proc = @lazy_attributes.delete :#{name})
               if proc.arity > 0
                 proc.call(self)
@@ -174,7 +176,7 @@ module Attributor
 
 
     def self.options
-      # FIXME: this seems like a really dumb way to do this. 
+      # FIXME: this seems like a really dumb way to do this. Needed because definition is lazy.
       @saved_options
       # if @compiled_class_block
       #   @options ||= self.definition.options
@@ -199,6 +201,7 @@ module Attributor
     
     # Returns the "compiled" definition for the model.
     # By "compiled" I mean that it will create a new Compiler object with the saved options and saved block that has been passed in the 'attributes' method. This compiled object is memoized (remember, there's one instance of a compiled definition PER MODEL CLASS).
+    # TODO: rework this with Model.finalize! support.
     def self.definition( options=nil, block=nil )
       raise AttributorException, "Blueprint structures cannot take extra block definitions" if block
       raise AttributorException, "Models cannot take additional attribute options (options already defined in the Model )" if options
@@ -281,14 +284,10 @@ module Attributor
 
       @dumping = true
 
-      result = {}
-      
-      self.attributes.each do |name, value|
+      self.attributes.each_with_object({}) do |(name, value), result|
         attribute = self.class.attributes[name]
         result[name.to_sym] = attribute.dump(value)
       end
-    
-      result
     ensure
       @dumping = false
     end

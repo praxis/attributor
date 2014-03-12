@@ -104,7 +104,7 @@ module Attributor
         when nil
           nil
         else
-          raise AttributorException.new("unknown example attribute type, got: #{val}")
+          raise AttributorException, "unknown example attribute type, got: #{val}"
         end
       else
         if (option_values = self.options[:values])

@@ -80,9 +80,6 @@ describe Attributor::Boolean do
 
   end
 
-  context '.validate' do
-    it 'validates values option properly'
-  end
 end
 
 
