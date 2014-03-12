@@ -57,9 +57,36 @@ describe Attributor::Model do
 
       context 'with attributes that are also models' do
         subject(:turducken) { Turducken.example }
-       
+
         its(:attributes) { should have_key(:chicken) }
         its(:chicken) { should be_kind_of(Chicken)}
+      end
+
+      context 'with infinitely-expanding sub-attributes' do
+        let(:model_class) do
+          Class.new(Attributor::Model) do
+            this = self
+            attributes do
+              attribute :name, String
+              attribute :child, this
+            end
+          end
+        end
+
+        subject(:example) { model_class.example }
+
+        it 'terminates example generation at MAX_EXAMPLE_DEPTH' do
+          # call .child on example MAX_EXAMPLE_DEPTH times
+          terminal_child = Attributor::Model::MAX_EXAMPLE_DEPTH.times.inject(example) do |object, i|
+            object.child
+          end
+          # after which .child will return nil
+          terminal_child.child.should be(nil)
+          # but simple attributes will be generated
+          terminal_child.name.should_not be(nil)
+        end
+        
+
       end
     end
 
@@ -206,5 +233,68 @@ describe Attributor::Model do
   end
 
 
+  context 'validation' do
+    context 'for simple models' do
+      context 'that are valid' do
+        subject(:chicken)  { Chicken.example }
+        its(:validate) { should be_empty}
+      end
+      context 'that are invalid' do
+        subject(:chicken) { Chicken.example(age: 150) }
+        its(:validate) { should_not be_empty }
+      end
+    end
 
+    context 'for models with circular sub-attributes' do
+      context 'that are valid' do
+        subject(:person) { Person.example }
+        its(:validate) { should be_empty}
+      end
+
+      context 'that are invalid' do
+        subject(:person) do
+          # TODO: support this? Person.example(title: 'dude', address: {name: 'ME'} )
+
+          obj = Person.example(title: 'dude')
+          obj.address.state = 'ME'
+          obj
+        end
+
+        its(:validate) { should have(2).items }
+
+        it 'recursively-validates sub-attributes with the right context' do
+          title_error, state_error = person.validate('person')
+          title_error.should =~ /^Attribute person\.title:/
+          state_error.should =~ /^Attribute person\.address\.state:/
+        end
+
+      end
+
+
+    end
+  end
+
+
+  context '#dump' do
+
+
+    context 'with circular references' do
+      subject(:person) { Person.example }
+      let(:output) { person.dump }
+      
+      it 'terminates' do
+        expect {
+          Person.example.dump
+        }.to_not raise_error
+      end
+
+      it 'outputs "..." for circular references' do
+        person.address.person.should be(person)
+        output[:address][:person].should eq(Attributor::Model::CIRCULAR_REFERENCE_MARKER)
+      end 
+
+    end
+
+
+  end
 end

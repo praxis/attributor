@@ -13,4 +13,9 @@ next
     person.name # => "Bob"
   ```
   * Example values are now lazily initialized when used.
-  
+  * Terminate sub-attribute generation after ```Attributor::Model::MAX_EXAMPLE_DEPTH``` levels to prevent infinite generation.
+* Added additional options for Attribute :example values:
+  * explicit nil values
+  * procs that take 2 arguments now receive the context as the second argument.
+* Circular references are now detected and handled in validation and dumping.
+

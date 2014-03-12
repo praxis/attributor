@@ -61,3 +61,22 @@ end
 
   end
 end
+
+
+class Person < Attributor::Model
+  attributes do
+    attribute :name, String, example: /[:first_name:]/
+    attribute :title, String, values: %w{Mr Mrs Ms Dr}
+    attribute :address, Address, example: proc { |person, context| Address.example(context, person: person) }
+  end
+end
+
+
+class Address < Attributor::Model
+  attributes do
+    attribute :name, String, example: /\w+/
+    attribute :state, String, values: %w{OR CA}
+    attribute :person, Person, example: proc { |address, context| Person.example(context, address: address) }
+  end
+end
+

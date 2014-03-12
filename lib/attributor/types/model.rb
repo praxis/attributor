@@ -1,6 +1,8 @@
 module Attributor
   class Model
     include Attributor::Type
+    MAX_EXAMPLE_DEPTH = 5
+    CIRCULAR_REFERENCE_MARKER = '...'.freeze
 
     # FIXME: this is not the way to fix this. 
     undef :timeout
@@ -14,6 +16,7 @@ module Attributor
       self.define_reader(name)
       self.define_writer(name)
     end
+
 
     def self.define_reader(name)
       module_eval <<-RUBY, __FILE__, __LINE__ + 1
@@ -30,6 +33,7 @@ module Attributor
         end
       RUBY
     end
+
 
     def self.define_writer(name)
       attribute = self.attributes[name]
@@ -61,17 +65,26 @@ module Attributor
     def self.example(context=nil, **values)
       result = self.new
 
+
       context ||= "#{self.name}-#{result.object_id.to_s}"
+      example_depth = context.split('.').size
 
-      self.attributes.each do |attribute_name,attribute|
-        sub_context = self.generate_subcontext(context,attribute_name)
 
-        result.lazy_attributes[attribute_name] = Proc.new do 
-          value = values.fetch(attribute_name) do
-            attribute.example(sub_context, parent: result)
+      self.attributes.each do |sub_attribute_name,sub_attribute|
+        if sub_attribute.attributes
+           # TODO: add option to raise an exception in this case?
+           next if example_depth > MAX_EXAMPLE_DEPTH
+        end
+
+        sub_context = self.generate_subcontext(context,sub_attribute_name)
+
+        
+        result.lazy_attributes[sub_attribute_name] = Proc.new do 
+          value = values.fetch(sub_attribute_name) do
+            sub_attribute.example(sub_context, parent: result)
           end
 
-          attribute.load(value) 
+          sub_attribute.load(value) 
         end
       end
 
@@ -171,16 +184,14 @@ module Attributor
     end
 
 
-    def self.validate(object,context,attribute)
-      errors = super
-
-      self.attributes.each do |sub_attribute_name, sub_attribute|
-        sub_context = self.generate_subcontext(context,sub_attribute_name)
-        errors += sub_attribute.validate(object.send(sub_attribute_name), sub_context)
+    def self.validate(object,context,_attribute)
+      unless object.kind_of?(self)
+        raise ArgumentError, "#{self.name} can not validate object of type #{object.class.name}."
       end
 
-      errors
+      object.validate(context)
     end
+
 
     def self.dsl_class
       @saved_options[:dsl_compiler] || DSLCompiler
@@ -200,12 +211,37 @@ module Attributor
     end
 
 
-    attr_reader :lazy_attributes
+    attr_reader :lazy_attributes, :validating, :dumping
 
 
     def initialize
       @attributes = ::Hash.new
       @lazy_attributes = ::Hash.new
+      @validating = false
+      @dumping = false
+    end
+
+
+    # TODO: memoize validation results here, but only after rejiggering how we store the context.
+    #       Two calls to validate() with different contexts should return get the same errors, 
+    #       but with their respective contexts.
+    def validate(context=nil)
+      raise AttributorException, "validation conflict" if @validating
+
+      @validating = true
+
+      self.class.attributes.each_with_object(Array.new) do |(sub_attribute_name, sub_attribute), errors|
+        sub_context = self.class.generate_subcontext(context,sub_attribute_name)
+  
+        value = self.send(sub_attribute_name)
+        if value.respond_to?(:validating) # really, it's a thing with sub-attributes
+          next if value.validating
+        end
+
+        errors.push *sub_attribute.validate(self.send(sub_attribute_name), sub_context)
+      end
+    ensure
+      @validating = false
     end
 
 
@@ -241,6 +277,10 @@ module Attributor
 
 
     def dump(opts=nil)
+      return CIRCULAR_REFERENCE_MARKER if @dumping
+
+      @dumping = true
+
       result = {}
       
       self.attributes.each do |name, value|
@@ -249,10 +289,9 @@ module Attributor
       end
     
       result
+    ensure
+      @dumping = false
     end
-
-
-
 
   end
 end
