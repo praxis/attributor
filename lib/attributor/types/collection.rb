@@ -40,7 +40,7 @@ module Attributor
 
     # generates an example Collection
     # @return An Array of native type objects conforming to the specified member_type
-    def self.example(context=nil, options={})
+    def self.example(context=nil, options: {})
       result = []
       size = rand(10) + 1
 

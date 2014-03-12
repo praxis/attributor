@@ -5,6 +5,7 @@ describe Attributor::Attribute do
 
   let(:attribute_options) { Hash.new }
   let(:type) { AttributeType }
+  
   subject(:attribute) { Attributor::Attribute.new(type, attribute_options) }
 
   let(:context) { "context" }
@@ -149,15 +150,31 @@ describe Attributor::Attribute do
 
 
     context 'with a proc' do
-      let(:example) { lambda { |obj| 'ok' } }
-      let(:some_object) { Object.new }
+      context 'with one argument' do
+        let(:example) { lambda { |obj| 'ok' } }
+        let(:some_object) { Object.new }
 
-      before do
-        example.should_receive(:call).with(some_object).and_call_original
+        before do
+          example.should_receive(:call).with(some_object).and_call_original
+        end
+
+        it 'passes any given parent through to the example proc' do
+          subject.example(nil, parent: some_object).should == 'ok'
+        end
       end
 
-      it 'passes any given parent through to the example proc' do
-        subject.example(nil, some_object).should == 'ok'
+      context 'with two arguments' do
+        let(:example) { lambda { |obj, context| "#{context} ok" } }
+        let(:some_object) { Object.new }
+        let(:some_context) { 'some_context' }
+
+        before do
+          example.should_receive(:call).with(some_object, some_context).and_call_original
+        end
+
+        it 'passes any given parent through to the example proc' do
+          subject.example(some_context, parent: some_object).should == "#{some_context} ok"
+        end
       end
 
     end
@@ -413,25 +430,15 @@ describe Attributor::Attribute do
         let(:chicken) { Chicken.example }
         let(:type_attributes) { type.definition.attributes }
 
-
-        let(:email_validation_response) { [] }
-        let(:age_validation_response) { [] }
-
-        before do
-          type_attributes[:email].should_receive(:validate).
-            with(chicken.email, :email).and_return(email_validation_response)
-          type_attributes[:age].should_receive(:validate).
-            with(chicken.age, :age).and_return(age_validation_response)
-        end
-
         it 'validates sub-attributes' do
           errors = attribute.validate(chicken)
           errors.should be_empty
         end
 
         context 'with a failing validation' do
-          let(:email_validation_response) { ["Chicken has invalid email"] }
-          let(:age_validation_response) { ["Chicken is too old"] }
+          subject(:chicken) { Chicken.example(age: 150, email: "foo") }
+          let(:email_validation_response) { ["email value does not match regexp (/@/)"] }
+          let(:age_validation_response) { ["age value is larger than the allowed max (120)"] }
 
           it 'collects sub-attribute validation errors' do
             errors = attribute.validate(chicken)

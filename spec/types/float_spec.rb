@@ -10,6 +10,16 @@ describe Attributor::Float do
 
   context '.example' do
     its(:example) { should be_a(::Float) }
+
+    context 'with options' do
+      let(:min) { 1 }
+      let(:max) { 2 }
+
+      subject(:examples) { (0..100).collect { type.example(options:{min:min, max:max})}}
+
+      its(:min) { should be > min }
+      its(:max) { should be < max }
+    end
   end
 
   context '.load' do
@@ -66,4 +76,3 @@ describe Attributor::Float do
     end
   end
 end
-

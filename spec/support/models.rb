@@ -1,6 +1,6 @@
-class Chicken
-  include Attributor::Model
+class Chicken < Attributor::Model
   attributes(:identity => :email) do
+    attribute :name, Attributor::String, example: /[:first_name:]/
     attribute :age, Attributor::Integer, :default => 1, :min => 0, :max => 120, :description => "The age of the chicken"
     attribute :email, Attributor::String, :example => /[:email:]/, :regexp => /@/, :description => "The email address of the chicken"
     attribute :angry, Attributor::Boolean, :example => "true", :description => "Angry bird?"
@@ -9,8 +9,7 @@ class Chicken
 end
 
 
-class Duck
-  include Attributor::Model
+class Duck < Attributor::Model
   attributes do
     attribute :age, Attributor::Integer, :required_if => {"name" => "Daffy" }
     attribute :name, Attributor::String
@@ -21,8 +20,7 @@ class Duck
 end
 
 
-class Turkey
-  include Attributor::Model
+class Turkey < Attributor::Model
   attributes do
     attribute :age, Integer, :default => 1, :min => 0, :max => 120, :description => "The age of the turkey"
     attribute :name, String , :description => "name of the turkey", :example => /[:name:]/ #, :default => "Providencia Zboncak"
@@ -33,8 +31,7 @@ end
 
 
 
-class Turducken
-  include Attributor::Model
+class Turducken < Attributor::Model
   attributes do
     attribute :name, String, :description => "Turducken name", :example => /[:name:]/
     attribute :chicken, Chicken
@@ -44,9 +41,9 @@ class Turducken
 end
 
 
-# http://en.wikipedia.org/wiki/Cormorant
-    class Cormorant
-      include Attributor::Model
+    # http://en.wikipedia.org/wiki/Cormorant
+    class Cormorant < Attributor::Model
+
       attributes do
         # This will be a collection of arbitrary Ruby Objects
         attribute :fish, Attributor::Collection, :description => "All kinds of fish for feeding the babies"
@@ -64,3 +61,23 @@ end
 
   end
 end
+
+
+class Person < Attributor::Model
+  attributes do
+    attribute :name, String, example: /[:first_name:]/
+    attribute :title, String, values: %w{Mr Mrs Ms Dr}
+    attribute :okay, Attributor::Boolean, values: [true]
+    attribute :address, Address, example: proc { |person, context| Address.example(context, person: person) }
+  end
+end
+
+
+class Address < Attributor::Model
+  attributes do
+    attribute :name, String, example: /\w+/
+    attribute :state, String, values: %w{OR CA}
+    attribute :person, Person, example: proc { |address, context| Person.example(context, address: address) }
+  end
+end
+

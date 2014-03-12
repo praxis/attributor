@@ -1,7 +1,7 @@
 
 module Attributor
-  class Struct
-    include Attributor::Model
+  class Struct < Attributor::Model
+    
 
     # Construct a new subclass, using attribute_definition to define attributes.
     def self.construct(attribute_definition, options={})

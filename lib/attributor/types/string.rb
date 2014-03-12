@@ -17,7 +17,7 @@ module Attributor
       end
     end
 
-    def self.example(context=nil, options={})
+    def self.example(context=nil, options:{})
       if options[:regexp]
         return options[:regexp].gen
       else

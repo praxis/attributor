@@ -39,7 +39,7 @@ module Attributor
       @value_type 
     end
         
-    def self.example(context=nil, options={})
+    def self.example(context=nil, options: {})
       result = ::Hash.new
       # Let's not bother to generate any hash contents if there's absolutely no type defined
       return result if ( key_type == Object && value_type == Object )

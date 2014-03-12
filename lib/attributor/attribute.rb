@@ -53,7 +53,7 @@ module Attributor
     def validate_type(value, context)
       # delegate check to type subclass if it exists
       unless self.type.valid_type?(value)
-        return ["Attribute #{context} received value: #{value.inspect} is of the wrong type (got: #{value.class.name} expected: #{self.type.native_type.name})"]
+        return ["Attribute #{context} received value: #{value.inspect} is of the wrong type (got: #{value.class.name})"]
       end
       []
     end
@@ -75,38 +75,47 @@ module Attributor
     end
 
 
-    def example(context=nil, parent=nil)
+    def example(context=nil, parent: nil, values:{})
 
       if context
         seed, _ = Digest::SHA1.digest(context).unpack("QQ")
         Random.srand(seed)
       end
 
-      val = self.options[:example]
-
-      case val
-      when ::String
-        # FIXME: spec this properly to use self.type.native_type
-        val
-      when ::Regexp
-        self.load(val.gen)
-      when ::Array
-        # TODO: handle arrays of non native types, i.e. arrays of regexps.... ?
-        val.pick
-      when ::Proc
-        if val.arity > 0
-          val.call(parent)
+      if self.options.has_key? :example
+        val = self.options[:example] 
+        case val
+        when ::String
+          # FIXME: spec this properly to use self.type.native_type
+          val
+        when ::Regexp
+          self.load(val.gen)
+        when ::Array
+          # TODO: handle arrays of non native types, i.e. arrays of regexps.... ?
+          val.pick
+        when ::Proc
+          if val.arity == 2
+            val.call(parent, context)
+          elsif val.arity == 1
+            val.call(parent)
+          else
+            val.call
+          end
+        when nil
+          nil
         else
-          val.call
-        end
-      when nil
-        if (values = self.options[:values])
-          values.pick
-        else
-          self.type.example(context, self.options)
+          raise AttributorException, "unknown example attribute type, got: #{val}"
         end
       else
-        raise AttributorException.new("unknown example attribute type, got: #{val}")
+        if (option_values = self.options[:values])
+          option_values.pick
+        else
+          if type.respond_to?(:attributes)
+            self.type.example(context, values)
+          else
+            self.type.example(context, options: self.options)
+          end
+        end
       end
     end
 
@@ -224,7 +233,7 @@ module Attributor
         raise AttributorException.new("Required_if must be a String, a Hash definition or a Proc") unless definition.is_a?(::String) || definition.is_a?(::Hash) || definition.is_a?(::Proc)
         raise AttributorException.new("Required_if cannot be specified together with :required") if self.options[:required]
       when :example
-        unless self.type.valid_type?(definition) || definition.is_a?(::Regexp) || definition.is_a?(::String) || definition.is_a?(::Array) || definition.is_a?(::Proc)
+        unless self.type.valid_type?(definition) || definition.is_a?(::Regexp) || definition.is_a?(::String) || definition.is_a?(::Array) || definition.is_a?(::Proc) || definition.nil?
           raise AttributorException.new("Invalid example type (got: #{definition.class.name}). It must always match the type of the attribute (except if passing Regex that is allowed for some types)")
         end
       else
