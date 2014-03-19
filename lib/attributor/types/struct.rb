@@ -17,10 +17,14 @@ module Attributor
       # simply return Struct if we don't specify any sub-attributes....
       return self if attribute_definition.nil?
 
+      if options[:reference]
+        options.merge!(options[:reference].options) do |key, oldval, newval|
+          oldval
+        end
+      end
+
       Class.new(self) do
-
         attributes options, &attribute_definition
-
       end
 
     end

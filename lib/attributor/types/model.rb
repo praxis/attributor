@@ -106,11 +106,7 @@ module Attributor
       case name
       when :identity
         raise AttributorException, "Invalid identity type #{value.inspect}" unless value.kind_of?(::Symbol)
-        if self.definition.attributes.has_key?(value)
-          :ok
-        else
-          raise AttributorException, "Identity attribute #{value.inspect} for #{self.name} not found"
-        end
+        :ok # FIXME ... actually do something smart, that doesn't break lazy attribute creation
       when :reference
         :ok # FIXME ... actually do something smart
       when :dsl_compiler

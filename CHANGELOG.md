@@ -1,6 +1,11 @@
 Attributor Changelog
 ============================
 
+next
+------
+
+* Structs now inherit type-level options from their reference.
+
 2.0.0
 ------
 

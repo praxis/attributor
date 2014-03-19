@@ -146,5 +146,44 @@ describe Attributor::Struct do
         ants.should have_key :weight
       end
     end
+
+    context 'with a reference' do
+      let(:reference) { Chicken }
+      let(:attribute_definition) do
+        proc do
+        end
+      end
+      subject(:struct) { Attributor::Struct.construct(attribute_definition, options)}
+
+      context 'with new type-level options' do
+        let(:options) { {reference: reference} }
+        its(:options) { should have_key(:identity) }
+        it 'inherits from the reference' do
+          struct.options[:identity].should eq(reference.options[:identity])
+        end
+        it 'does not raise an error when used in an attribute' do
+          expect {
+            Attributor::Attribute.new(struct)
+          }.to_not raise_error
+        end
+      end
+
+      context 'with existing type-level options' do
+        let(:options) { {reference: reference, identity: :name} }
+        its(:options) { should have_key(:identity) }
+        it 'does not override from the reference' do
+          struct.options[:identity].should eq(:name)
+        end
+        it 'does not raise an error when used in an attribute' do
+          expect {
+            Attributor::Attribute.new(struct)
+          }.to_not raise_error
+        end
+
+      end
+    end
+
+
   end
+
 end

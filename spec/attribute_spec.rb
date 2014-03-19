@@ -21,11 +21,8 @@ describe Attributor::Attribute do
     end
 
     context 'for anonymous types (aka Structs)' do
-      let(:attribute_options) { {:identity => :id} }
-
       before do
         Attributor.should_receive(:resolve_type).once.with(Struct,attribute_options, anything()).and_call_original
-        Attributor.should_receive(:resolve_type).once.with(Integer,{}, nil).and_call_original
       end
 
       it 'generates the class' do
@@ -568,7 +565,7 @@ describe Attributor::Attribute do
       context 'the member_attribute of that type' do
         subject(:member_attribute) { attribute.type.member_attribute }
         it { should be_kind_of(Attributor::Attribute)}
-        its(:options) { should eq(member_options.merge(reference: Chicken)) }
+        its(:options) { should eq(member_options.merge(reference: Chicken, identity: :email)) }
         its(:attributes) { should have_key :angry }
         it 'inherited the type and options from the reference' do
           member_attribute.attributes[:angry].type.should be(Chicken.attributes[:angry].type)
