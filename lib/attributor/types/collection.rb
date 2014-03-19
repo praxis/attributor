@@ -1,6 +1,5 @@
 # Represents an unordered collection of attributes
 #
-require_relative '../exceptions'
 
 module Attributor
 
@@ -61,12 +60,17 @@ module Attributor
       elsif value.is_a?(Enumerable)
         loaded_value = value
       elsif value.is_a?(::String)
-        loaded_value = decode_json(value)
+        loaded_value = decode_string(value)
       else
         raise Attributor::IncompatibleTypeError, value_type: value.class, type: self 
       end
 
       return loaded_value.collect { |member| self.member_attribute.load(member) }
+    end
+
+
+    def self.decode_string(value)
+      decode_json(value)
     end
 
 

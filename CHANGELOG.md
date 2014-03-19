@@ -5,6 +5,11 @@ next
 ------
 
 * Structs now inherit type-level options from their reference.
+* Add Collection subclasses for CSVs and Ids
+  * CSV type for Collection of values serialized as comma-separated strings.
+  * Ids type. A helper for creating CSVs with members matching a given a type's :identity option.
+
+
 
 2.0.0
 ------
