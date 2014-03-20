@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["RightScale, Inc."]
-  s.date = "2014-03-12"
+  s.date = "2014-03-20"
   s.description = "makes building Resource-based Web APIs a walk in the park"
   s.email = "salmon.sprint@rightscale.com"
   s.extra_rdoc_files = [
@@ -35,15 +35,16 @@ Gem::Specification.new do |s|
     "lib/attributor/attribute_resolver.rb",
     "lib/attributor/dsl_compiler.rb",
     "lib/attributor/exceptions.rb",
-    "lib/attributor/extensions/core.rb",
     "lib/attributor/extensions/randexp.rb",
     "lib/attributor/type.rb",
     "lib/attributor/types/boolean.rb",
     "lib/attributor/types/collection.rb",
     "lib/attributor/types/container.rb",
+    "lib/attributor/types/csv.rb",
     "lib/attributor/types/date_time.rb",
     "lib/attributor/types/float.rb",
     "lib/attributor/types/hash.rb",
+    "lib/attributor/types/ids.rb",
     "lib/attributor/types/integer.rb",
     "lib/attributor/types/model.rb",
     "lib/attributor/types/object.rb",
