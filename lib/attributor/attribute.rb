@@ -39,7 +39,7 @@ module Attributor
       end
 
       value
-    rescue AttributorException
+    rescue AttributorException, NameError
       raise
     rescue => e
       raise Attributor::LoadError, "Error loading attribute of type #{type.name} from value #{value.inspect}"
