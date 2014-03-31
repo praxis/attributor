@@ -198,6 +198,42 @@ describe Attributor::Model do
       end
     end
 
+    context 'initialize' do
+
+      subject(:chicken) { Chicken.new( attributes_data ) } 
+      context 'supports passing an initial hash object for attribute values' do
+        let(:attributes_data){ {age: '1', email:'rooster@coup.com'} }
+        it 'and sets them in loaded format onto the instance attributes' do
+          Chicken.should_receive(:load).with(attributes_data).and_call_original
+          attributes_data.keys.each do |attr_name|
+            Chicken.attributes[attr_name].should_receive(:load).with(attributes_data[attr_name]).and_call_original
+          end
+          subject.age.should be(1)
+          subject.email.should be(attributes_data[:email])
+        end
+      end 
+      context 'supports passing a JSON encoded data object' do
+        let(:attributes_hash){ {age: 1, email:'rooster@coup.com'} }
+        let(:attributes_data){ JSON.dump(attributes_hash) }
+          it 'and sets them in loaded format onto the instance attributes' do
+            Chicken.should_receive(:load).with(attributes_data).and_call_original
+            attributes_hash.keys.each do |attr_name|
+              Chicken.attributes[attr_name].should_receive(:load).with(attributes_hash[attr_name]).and_call_original
+            end
+            subject.age.should be(1)
+            subject.email.should == attributes_hash[:email]
+          end
+        end
+        context 'supports passing a native model for the data object' do
+          let(:attributes_data){ Chicken.example }
+          it 'sets a new instance pointing to the exact same attributes (careful about modifications!)' do
+            attributes_data.attributes.each do |attr_name, attr_value|
+              subject.send(attr_name).should be(attr_value)
+            end
+          end
+        end
+    end
+
     context 'getting and setting attributes' do
       context 'for valid attributes' do
         let(:age) { 1 }

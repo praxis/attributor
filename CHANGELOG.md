@@ -8,6 +8,8 @@ next
 * Add Collection subclasses for CSVs and Ids
   * CSV type for Collection of values serialized as comma-separated strings.
   * Ids type. A helper for creating CSVs with members matching a given a type's :identity option.
+* Allow instances of Models to be initialized with initial data. 
+  * Supported formats for the data are equivalent to the loading formats (i.e. ruby Hash, a JSON string or another instance of the same model type).
 
 
 

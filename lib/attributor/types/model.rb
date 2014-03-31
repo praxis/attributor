@@ -213,11 +213,17 @@ module Attributor
     attr_reader :lazy_attributes, :validating, :dumping
 
 
-    def initialize
-      @attributes = ::Hash.new
+    def initialize( data = nil)
+
       @lazy_attributes = ::Hash.new
       @validating = false
       @dumping = false
+      if data
+        loaded = self.class.load( data )
+        @attributes = loaded.attributes
+      else
+        @attributes = ::Hash.new
+      end
     end
 
 
