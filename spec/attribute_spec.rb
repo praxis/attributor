@@ -434,8 +434,8 @@ describe Attributor::Attribute do
 
         context 'with a failing validation' do
           subject(:chicken) { Chicken.example(age: 150, email: "foo") }
-          let(:email_validation_response) { ["email value does not match regexp (/@/)"] }
-          let(:age_validation_response) { ["age value is larger than the allowed max (120)"] }
+          let(:email_validation_response) { ["email value \(#{chicken.email}\) does not match regexp (/@/)"] }
+          let(:age_validation_response) { ["age value \(#{chicken.age}\) is larger than the allowed max (120)"] }
 
           it 'collects sub-attribute validation errors' do
             errors = attribute.validate(chicken)
@@ -543,7 +543,7 @@ describe Attributor::Attribute do
           errors = attribute.validate(values)
           errors.should_not be_empty
           errors[0].should =~ /of the wrong type/
-          errors[1].should =~ /value is larger/
+          errors[1].should =~ /value \(12\) is larger/
         end
 
 

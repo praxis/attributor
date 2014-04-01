@@ -70,7 +70,8 @@ describe Attributor::AttributeResolver do
   context 'checking attribute conditions' do
     let(:key) { "instance.ssh_key.name" }
     let(:ssh_key) { double("ssh_key", :name => value) }
-    let(:instance) { double("instance", :ssh_key => ssh_key) }
+    let(:instance_id) { 123 }
+    let(:instance) { double("instance", ssh_key: ssh_key, id: instance_id) }
 
     let(:context) { '$' }
 
@@ -111,7 +112,17 @@ describe Attributor::AttributeResolver do
 
     end
 
+    context 'with an integer condition' do
+      let(:key) { "instance.id" }
+      let(:passing_condition) { instance_id }
+      let(:failing_condition) { /\w+/.gen }
 
+      it 'works' do
+        subject.check(context, key, passing_condition).should be true
+        subject.check(context, key, failing_condition).should be false
+      end
+    end
+    
     context 'with a hash condition' do
     end
 

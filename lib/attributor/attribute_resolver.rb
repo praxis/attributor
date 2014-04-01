@@ -84,7 +84,7 @@ module Attributor
       end
 
       case predicate
-      when ::String, ::Regexp
+      when ::String, ::Regexp, ::Integer, ::Float, ::DateTime, true, false
         return predicate === value
       when ::Proc
         # Cannot use === here as above due to different behavior in Ruby 1.8

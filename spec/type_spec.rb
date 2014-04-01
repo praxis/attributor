@@ -65,7 +65,7 @@ describe Attributor::Type do
 
         it { should_not be_empty }
         it 'returns the correct error message' do
-          errors.first.should =~ /value is smaller than the allowed min/
+          errors.first.should =~ /value \(#{value}\) is smaller than the allowed min/
         end
       end
 
@@ -73,7 +73,7 @@ describe Attributor::Type do
         let(:value) { 1000 }
         it { should_not be_empty }
         it 'returns the correct error message' do
-          errors.first.should =~ /value is larger than the allowed max/
+          errors.first.should =~ /value \(#{value}\) is larger than the allowed max/
         end
 
       end
@@ -103,7 +103,7 @@ describe Attributor::Type do
         let(:value) { 'chicken' }
         it { should_not be_empty}
         it 'returns the correct error message' do
-          errors.first.should =~ /value does not match regexp/
+          errors.first.should =~ /value \(#{value}\) does not match regexp/
         end
       end
 

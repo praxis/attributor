@@ -39,11 +39,11 @@ module Attributor
         attribute.options.each do |option, opt_definition|
           case option
           when :max
-            errors << "#{context} value is larger than the allowed max (#{opt_definition.inspect})" unless value <= opt_definition
+            errors << "#{context} value (#{value}) is larger than the allowed max (#{opt_definition.inspect})" unless value <= opt_definition
           when :min
-            errors << "#{context} value is smaller than the allowed min (#{opt_definition.inspect})" unless value >= opt_definition
+            errors << "#{context} value (#{value}) is smaller than the allowed min (#{opt_definition.inspect})" unless value >= opt_definition
           when :regexp
-            errors << "#{context} value does not match regexp (#{opt_definition.inspect})"  unless value =~ opt_definition
+            errors << "#{context} value (#{value}) does not match regexp (#{opt_definition.inspect})"  unless value =~ opt_definition
           end
         end
         errors
