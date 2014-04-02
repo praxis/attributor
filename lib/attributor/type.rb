@@ -20,6 +20,7 @@ module Attributor
       
       # Generic decoding and coercion of the attribute.
       def load(value)
+        return nil if value.nil?
         unless value.is_a?(self.native_type)
           raise Attributor::IncompatibleTypeError, value_type: value.class, type: self 
         end

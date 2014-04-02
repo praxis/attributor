@@ -20,16 +20,21 @@ describe Attributor::Type do
 
 
   context 'load' do
-    let(:value) { "one" }
-
+    let(:value) { nil }
     let(:context) { nil }
 
+    context "when given a nil value" do
+      it 'always successfully returns it (i.e., you can always load nil)' do
+        test_type.load(value).should be(value)
+      end
+    end
+    
     context "when given a value that is of native_type" do
+      let(:value) { "one" }
       it 'returns the value' do
         test_type.load(value).should be(value)
       end
     end
-
 
     context "when given a value that is not of native_type" do
       let(:value) { 1 }
