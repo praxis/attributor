@@ -75,6 +75,7 @@ module Attributor
 
 
     def self.dump(values, opts=nil)
+      return nil if values.nil?
       values.collect { |value| member_attribute.dump(value,opts) }
     end
 
