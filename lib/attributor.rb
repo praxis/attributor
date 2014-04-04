@@ -22,6 +22,7 @@ module Attributor
   require_relative 'attributor/types/string'
   require_relative 'attributor/types/model'
   require_relative 'attributor/types/struct'
+  require_relative 'attributor/types/polymorphic'
   require_relative 'attributor/types/boolean'
   require_relative 'attributor/types/date_time'
   require_relative 'attributor/types/float'
@@ -38,7 +39,7 @@ module Attributor
   # @param type [Class] The class of the type to resolve
   #
   def self.resolve_type(attr_type, options={}, constructor_block=nil)
-    if attr_type < Attributor::Type
+    if attr_type < Attributor::Type || attr_type < Attributor::Polymorphic #FIXME: think about what's the right check here...
       klass = attr_type
     else
       name = attr_type.name.split("::").last # TOO EXPENSIVE?

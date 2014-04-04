@@ -94,6 +94,7 @@ module Attributor
     end
 
     def self.dump(value, opts=nil)
+      return nil unless value
       value.dump(opts)
     end
 
@@ -243,7 +244,7 @@ module Attributor
           next if value.validating
         end
 
-        errors.push *sub_attribute.validate(self.send(sub_attribute_name), sub_context)
+        errors.push *sub_attribute.validate(value, sub_context)
       end
     ensure
       @validating = false

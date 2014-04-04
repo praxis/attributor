@@ -222,6 +222,7 @@ module Attributor
       case name
       when :values
         raise AttributorException.new("Allowed set of values requires an array. Got (#{definition})") unless definition.is_a? ::Array
+        raise AttributorException.new("One or more of the set of allow values is not of type #{self.type}. Got (#{definition})") unless definition.all? {|val| self.type.valid_type?(val) }
       when :default
         raise AttributorException.new("Default value doesn't have the correct attribute type. Got (#{definition.inspect})") unless self.type.valid_type?(definition)
       when :description

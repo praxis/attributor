@@ -1,5 +1,6 @@
 class Chicken < Attributor::Model
   attributes(:identity => :email) do
+    attribute :type,  Attributor::String, values: ["chicken"]
     attribute :name, Attributor::String, example: /[:first_name:]/
     attribute :age, Attributor::Integer, :default => 1, :min => 0, :max => 120, :description => "The age of the chicken"
     attribute :email, Attributor::String, :example => /[:email:]/, :regexp => /@/, :description => "The email address of the chicken"
@@ -11,6 +12,7 @@ end
 
 class Duck < Attributor::Model
   attributes do
+    attribute :type,  Attributor::String, values: ["duck"]
     attribute :age, Attributor::Integer, :required_if => {"name" => "Daffy" }
     attribute :name, Attributor::String
     attribute :email, Attributor::String, :required_if => "name"
@@ -22,10 +24,11 @@ end
 
 class Turkey < Attributor::Model
   attributes do
+    attribute :type,  Attributor::String, values: ["turkey"]
     attribute :age, Integer, :default => 1, :min => 0, :max => 120, :description => "The age of the turkey"
     attribute :name, String , :description => "name of the turkey", :example => /[:name:]/ #, :default => "Providencia Zboncak"
     attribute :email, String, :example => /[:email:]/, :regexp => /@/, :description => "The email address of the turkey"
-    attribute :weight, Attributor::Float, :example => /\d{1,2}\.\d/, :max => 86.7, :description => "The weight of the turkey"
+    attribute :weight, Attributor::Float, :example => /\d{1,2}\.\d/, :max => 150.7, :description => "The weight of the turkey"
   end
 end
 
@@ -63,12 +66,25 @@ end
 end
 
 
+class Poultry < Attributor::Polymorphic.on(:type)
+  given :chicken, Chicken
+  given :duck, Duck
+  given :turkey, Turkey
+end
+
 class Person < Attributor::Model
   attributes do
     attribute :name, String, example: /[:first_name:]/
     attribute :title, String, values: %w{Mr Mrs Ms Dr}
     attribute :okay, Attributor::Boolean, values: [true]
     attribute :address, Address, example: proc { |person, context| Address.example(context, person: person) }
+    # Two ways to define a polymorphic attribute. Inline or by an already polymorphic type
+    attribute :favorite_bird, Attributor::Polymorphic.on(:type) do
+      given :chicken, Chicken
+      given :duck, Duck
+      given :turkey, Turkey
+    end
+    attribute :poultry, Poultry
   end
 end
 
