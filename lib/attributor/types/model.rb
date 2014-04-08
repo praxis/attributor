@@ -184,7 +184,7 @@ module Attributor
 
     def self.validate(object,context,_attribute)
       unless object.kind_of?(self)
-        raise ArgumentError, "#{self.name} can not validate object of type #{object.class.name}."
+        raise ArgumentError, "#{self.name} can not validate object of type #{object.class.name} for #{context}."
       end
 
       object.validate(context)

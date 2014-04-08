@@ -19,6 +19,8 @@ module Attributor
 
     end
 
-
+    def self.of(type)
+      raise "Invalid definition of Ids type. Defining Ids.of(type) is not allowed, you probably meant to do Ids.for(type) instead"
+    end
   end
 end

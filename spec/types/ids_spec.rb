@@ -12,7 +12,6 @@ describe Attributor::Ids do
 
     its(:member_attribute) { should be(Chicken.attributes[:email]) }
 
-
     it 'loads' do
       ids.load(value).should eq(emails)
     end
@@ -23,4 +22,11 @@ describe Attributor::Ids do
 
   end
 
+  context 'attempting to define it as a collection using .of(type)' do
+    it 'raises an error' do
+      expect{
+        Attributor::Ids.of(Chicken)
+      }.to raise_error(/Defining Ids.of\(type\) is not allowed/)
+    end
+  end
 end
