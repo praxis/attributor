@@ -11,12 +11,12 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["RightScale, Inc."]
-  s.date = "2014-03-20"
+  s.date = "2014-04-10"
   s.description = "makes building Resource-based Web APIs a walk in the park"
   s.email = "salmon.sprint@rightscale.com"
   s.extra_rdoc_files = [
     "LICENSE.txt",
-    "README.md"
+    "README.md",
   ]
   s.files = [
     ".document",
@@ -53,7 +53,7 @@ Gem::Specification.new do |s|
   ]
   s.homepage = "https://github.com/rightscale/attributor"
   s.licenses = ["RightScale, Inc."]
-  s.rubygems_version = "2.2.0"
+  s.rubygems_version = "2.2.2"
   s.summary = "Attributor is a component of RESTful Skeletor"
 
   if s.respond_to? :specification_version then
@@ -69,15 +69,13 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<redcarpet>, ["< 3.0"])
       s.add_development_dependency(%q<rdoc>, ["~> 3.12"])
       s.add_development_dependency(%q<bundler>, [">= 0"])
-      s.add_development_dependency(%q<jeweler>, ["~> 1.8.4"])
-      s.add_development_dependency(%q<pry>, [">= 0"])
+      s.add_development_dependency(%q<jeweler>, ["~> 1.8.3"])
+      s.add_development_dependency(%q<right_develop>, [">= 0"])
       s.add_development_dependency(%q<ruby-prof>, [">= 0"])
       s.add_development_dependency(%q<rake-notes>, [">= 0"])
-      s.add_development_dependency(%q<pry-byebug>, [">= 0"])
       s.add_development_dependency(%q<simplecov>, [">= 0"])
       s.add_development_dependency(%q<guard>, [">= 0"])
       s.add_development_dependency(%q<guard-rspec>, [">= 0"])
-      s.add_development_dependency(%q<pry-stack_explorer>, [">= 0"])
     else
       s.add_dependency(%q<hashie>, [">= 0"])
       s.add_dependency(%q<randexp>, [">= 0"])
@@ -88,15 +86,13 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<redcarpet>, ["< 3.0"])
       s.add_dependency(%q<rdoc>, ["~> 3.12"])
       s.add_dependency(%q<bundler>, [">= 0"])
-      s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
-      s.add_dependency(%q<pry>, [">= 0"])
+      s.add_dependency(%q<jeweler>, ["~> 1.8.3"])
+      s.add_dependency(%q<right_develop>, [">= 0"])
       s.add_dependency(%q<ruby-prof>, [">= 0"])
       s.add_dependency(%q<rake-notes>, [">= 0"])
-      s.add_dependency(%q<pry-byebug>, [">= 0"])
       s.add_dependency(%q<simplecov>, [">= 0"])
       s.add_dependency(%q<guard>, [">= 0"])
       s.add_dependency(%q<guard-rspec>, [">= 0"])
-      s.add_dependency(%q<pry-stack_explorer>, [">= 0"])
     end
   else
     s.add_dependency(%q<hashie>, [">= 0"])
@@ -108,15 +104,13 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<redcarpet>, ["< 3.0"])
     s.add_dependency(%q<rdoc>, ["~> 3.12"])
     s.add_dependency(%q<bundler>, [">= 0"])
-    s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
-    s.add_dependency(%q<pry>, [">= 0"])
+    s.add_dependency(%q<jeweler>, ["~> 1.8.3"])
+    s.add_dependency(%q<right_develop>, [">= 0"])
     s.add_dependency(%q<ruby-prof>, [">= 0"])
     s.add_dependency(%q<rake-notes>, [">= 0"])
-    s.add_dependency(%q<pry-byebug>, [">= 0"])
     s.add_dependency(%q<simplecov>, [">= 0"])
     s.add_dependency(%q<guard>, [">= 0"])
     s.add_dependency(%q<guard-rspec>, [">= 0"])
-    s.add_dependency(%q<pry-stack_explorer>, [">= 0"])
   end
 end
 
