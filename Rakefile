@@ -52,6 +52,12 @@ else
   task :spec => :simplecov
 end
 
+require 'right_support'
+
+if require_succeeds?('right_develop')
+  RightDevelop::CI::RakeTask.new
+end
+
 task :default => :spec
 
 require 'yard'
