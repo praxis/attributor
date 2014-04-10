@@ -19,11 +19,9 @@ group :development do
 
   gem 'rake-notes'
 
-  platforms :ruby_20, :ruby_21 do
-    gem 'simplecov'
-    gem 'guard'
-    gem 'guard-rspec'
-  end
+  gem 'simplecov'
+  gem 'guard'
+  gem 'guard-rspec'
 end
 
 

@@ -45,13 +45,6 @@ RSpec::Core::RakeTask.new(:simplecov) do |spec|
   # Configured in spec_helper.rb
 end
 
-# 'rake spec' should do the same as 'rake rcov'
-if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("1.9")
-  task :spec => :rcov
-else
-  task :spec => :simplecov
-end
-
 require 'right_support'
 
 if require_succeeds?('right_develop')
