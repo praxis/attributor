@@ -45,10 +45,12 @@ module Attributor
       return result if ( key_type == Object && value_type == Object )
       
       size = rand(3) + 1
+      context ||= ["#{Hash}-#{rand(10000000)}"]
 
       size.times do |i|
-        subcontext = "#{context}[#{i}]"
-        result[key_type.example(subcontext)] = value_type.example(subcontext)
+        example_key = key_type.example(context + ["at(#{i})"])
+        subcontext = context + ["at(#{example_key})"]
+        result[example_key] = value_type.example(subcontext)
       end
 
       result
@@ -64,24 +66,27 @@ module Attributor
       :ok
     end
     
-    def self.load(value)
+    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT)
       if value.nil?
         return nil
       elsif value.is_a?(::Hash)
         loaded_value = value
       elsif value.is_a?(::String)
-        loaded_value = decode_json(value)
+        loaded_value = decode_json(value,context)
       else
-        raise Attributor::IncompatibleTypeError, value_type: value.class, type: self 
+        raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self 
       end
 
       return loaded_value if ( key_type == Object && value_type == Object )
       
       loaded_value.each_with_object({}) do| (k, v), obj |
-        obj[self.key_type.load(k)] = self.value_type.load(v)
+        obj[self.key_type.load(k,context)] = self.value_type.load(v,context)
       end
     end
 
-
+    # TODO: chance value_type and key_type to be attributes?
+    # TODO: add a validate, which simply validates that the incoming keys and values are of the right type. 
+    #       Think about the format of the subcontexts to use: let's use .at(key.to_s)
+     
   end
 end

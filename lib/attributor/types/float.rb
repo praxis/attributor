@@ -17,7 +17,7 @@ module Attributor
       rand * (max-min) + min
     end
 
-    def self.load(value)
+    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT)
       if value.is_a?(::String)
         return Float(value)
       end

@@ -65,13 +65,13 @@ describe Attributor::Boolean do
     end
 
     context 'that are not valid Booleans' do
-
+      let(:context){ ['root','subattr'] }
       ['string', 2, 1.0, Class, Object.new].each do |value|
 
         it "raises Attributor::CoercionError for #{value.inspect}" do
           expect {
-            type.load(value)
-          }.to raise_error(Attributor::CoercionError, /Error coercing from .+ to Attributor::Boolean/)
+            type.load(value,context)
+          }.to raise_error(Attributor::CoercionError, /Error coercing from .+ to Attributor::Boolean.* #{context.join('.')}/)
         end
 
       end

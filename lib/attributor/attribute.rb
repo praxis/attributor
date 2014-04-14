@@ -21,17 +21,16 @@ module Attributor
       check_options!
     end
 
+    def parse(value, context=Attributor::DEFAULT_ROOT_CONTEXT)
+      object = self.load(value,context)
 
-    def parse(value)
-      object = self.load(value)
-
-      errors = self.validate(object)
+      errors = self.validate(object,context)
       [ object, errors ]
     end
 
 
-    def load(value)
-      value = type.load(value) unless value.nil?
+    def load(value,context=Attributor::DEFAULT_ROOT_CONTEXT)
+      value = type.load(value,context ) unless value.nil?
 
       # just in case type.load(value) returned nil, even though value is not nil.
       if value.nil?
@@ -42,10 +41,10 @@ module Attributor
     rescue AttributorException, NameError
       raise
     rescue => e
-      raise Attributor::LoadError, "Error loading attribute of type #{type.name} from value #{value.inspect}"
+      raise Attributor::LoadError, "Error loading attribute #{Attributor.humanize_context(context)} of type #{type.name} from value #{value.inspect}\n#{e.message}"
     end
 
-    def dump(value, opts={})
+    def dump(value, **opts)
       type.dump(value, opts)
     end
 
@@ -53,7 +52,7 @@ module Attributor
     def validate_type(value, context)
       # delegate check to type subclass if it exists
       unless self.type.valid_type?(value)
-        return ["Attribute #{context} received value: #{value.inspect} is of the wrong type (got: #{value.class.name})"]
+        return ["Attribute #{Attributor.humanize_context(context)} received value: #{value.inspect} is of the wrong type (got: #{value.class.name})"]
       end
       []
     end
@@ -76,9 +75,10 @@ module Attributor
 
 
     def example(context=nil, parent: nil, values:{})
-
+      raise ArgumentError, "attribute example cannot take a context of type String" if (context.is_a? ::String )
       if context
-        seed, _ = Digest::SHA1.digest(context).unpack("QQ")
+        ctx = Attributor.humanize_context(context)            
+        seed, _ = Digest::SHA1.digest(ctx).unpack("QQ")
         Random.srand(seed)
       end
 
@@ -89,7 +89,7 @@ module Attributor
           # FIXME: spec this properly to use self.type.native_type
           val
         when ::Regexp
-          self.load(val.gen)
+          self.load(val.gen,context)
         when ::Array
           # TODO: handle arrays of non native types, i.e. arrays of regexps.... ?
           val.pick
@@ -132,7 +132,8 @@ module Attributor
 
 
     # Validates stuff and checks dependencies
-    def validate(object, context=nil)
+    def validate(object, context=Attributor::DEFAULT_ROOT_CONTEXT )
+      raise "INVALID CONTEXT!! #{context}" unless context
       # Validate any requirements, absolute or conditional, and return.
 
       if object.nil? # == Attributor::UNSET
@@ -149,7 +150,7 @@ module Attributor
       return errors if errors.any?
 
       if self.options[:values] && !self.options[:values].include?(object)
-        errors << "Attribute #{context}: #{object.inspect} is not within the allowed values=#{self.options[:values].inspect} "
+        errors << "Attribute #{Attributor.humanize_context(context)}: #{object.inspect} is not within the allowed values=#{self.options[:values].inspect} "
       end
 
       errors + self.type.validate(object,context,self)
@@ -157,8 +158,10 @@ module Attributor
 
 
     def validate_missing_value(context)
+      raise "INVALID CONTEXT!!! (got: #{context.inspect})" unless context.is_a? Enumerable
+      
       # Missing attribute was required if :required option was set
-      return ["Attribute #{context} is required"] if self.options[:required]
+      return ["Attribute #{Attributor.humanize_context(context)} is required"] if self.options[:required]
 
       # Missing attribute was not required if :required_if (and :required)
       # option was NOT set
@@ -175,20 +178,20 @@ module Attributor
         predicate = requirement.values.first
       else
         # should never get here if the option validation worked...
-        raise AttributorException.new("unknown type of dependency: #{requirement.inspect}")
+        raise AttributorException.new("unknown type of dependency: #{requirement.inspect} for #{Attributor.humanize_context(context)}")
       end
+      
+      # chop off the last part
+      requirement_context = context[0..-2]
+      requirement_context_string = requirement_context.join(Attributor::SEPARATOR)
 
-      # Convert the context into an array of tokens and chop off the last part
-      context_tokens = context.split(Attributor::SEPARATOR)[0..-2]
-      requirement_context = context_tokens.join(Attributor::SEPARATOR)
-      # OPTIMIZE: probably should.
-
-      if AttributeResolver.current.check(requirement_context, key_path, predicate)
-        message = "Attribute #{context} is required when #{key_path} "
+      # FIXME: we're having to reconstruct a string context just to use the resolver...smell.
+      if AttributeResolver.current.check(requirement_context_string, key_path, predicate)
+        message = "Attribute #{Attributor.humanize_context(context)} is required when #{key_path} "
 
         # give a hint about what the full path for a relative key_path would be
         unless key_path[0..0] == Attributor::AttributeResolver::ROOT_PREFIX
-          message << "(for #{requirement_context}) "
+          message << "(for #{Attributor.humanize_context(requirement_context)}) "
         end
 
         if predicate

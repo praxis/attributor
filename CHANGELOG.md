@@ -10,7 +10,12 @@ next
   * Ids type. A helper for creating CSVs with members matching a given a type's :identity option.
 * Allow instances of Models to be initialized with initial data. 
   * Supported formats for the data are equivalent to the loading formats (i.e. ruby Hash, a JSON string or another instance of the same model type).
-
+* Improved context reporting in errors
+  * Added contextual information while loading and dumping attributes.
+    * `load` takes a new `context` argument (defaulting to a system-wide root) in the form of an array of parent segments.
+    * `validate` takes a `context` argument that (instead of a string) is now an array of parent segments.
+    * `dump` takes a `context:` option parameter of the same type
+  * Enhanced error messages to report the correct context scope.
 
 
 2.0.0

@@ -8,7 +8,7 @@ describe Attributor::Attribute do
   
   subject(:attribute) { Attributor::Attribute.new(type, attribute_options) }
 
-  let(:context) { "context" }
+  let(:context) { ["context"] }
   let(:value) { "one" }
 
   context 'initialize' do
@@ -77,9 +77,10 @@ describe Attributor::Attribute do
 
 
   context 'parse' do
+    let(:loaded_object){ double("I'm loaded") }
     it 'loads and validates' do
-      attribute.should_receive(:load).with(value).and_call_original
-      attribute.should_receive(:validate).and_call_original
+      attribute.should_receive(:load).with(value,Attributor::DEFAULT_ROOT_CONTEXT).and_return(loaded_object)
+      attribute.should_receive(:validate).with(loaded_object,Attributor::DEFAULT_ROOT_CONTEXT).and_call_original
 
       attribute.parse(value)
     end
@@ -163,7 +164,7 @@ describe Attributor::Attribute do
       context 'with two arguments' do
         let(:example) { lambda { |obj, context| "#{context} ok" } }
         let(:some_object) { Object.new }
-        let(:some_context) { 'some_context' }
+        let(:some_context) { ['some_context'] }
 
         before do
           example.should_receive(:call).with(some_object, some_context).and_call_original
@@ -195,15 +196,15 @@ describe Attributor::Attribute do
     context 'deterministic examples' do
       let(:example) { /\w+/ }
       it 'can take a context to pre-seed the random number generator' do
-        example_1 = subject.example('context')
-        example_2 = subject.example('context')
+        example_1 = subject.example(['context'])
+        example_2 = subject.example(['context'])
 
         example_1.should eq example_2
       end
 
       it 'can take a context to pre-seed the random number generator' do
-        example_1 = subject.example('context')
-        example_2 = subject.example('different context')
+        example_1 = subject.example(['context'])
+        example_2 = subject.example(['different context'])
 
         example_1.should_not eq example_2
       end
@@ -212,6 +213,7 @@ describe Attributor::Attribute do
   end
 
   context 'load' do
+    let(:context){ ['context'] }
     let(:value) { '1' }
 
     it 'does not call type.load for nil values' do
@@ -220,8 +222,8 @@ describe Attributor::Attribute do
     end
 
     it 'delegates to type.load' do
-      type.should_receive(:load).with(value)
-      attribute.load(value)
+      type.should_receive(:load).with(value,context)
+      attribute.load(value,context)
     end
 
 
@@ -330,7 +332,7 @@ describe Attributor::Attribute do
 
         before { Attributor::AttributeResolver.current.register('instance', instance) }
 
-        let(:attribute_context) { '$.params.key_material' }
+        let(:attribute_context) { ['$','params','key_material'] }
         subject(:errors) { attribute.validate_missing_value(attribute_context) }
 
 
@@ -354,7 +356,7 @@ describe Attributor::Attribute do
 
             it { should_not be_empty }
 
-            its(:first) { should =~ /Attribute #{Regexp.quote(attribute_context)} is required when #{Regexp.quote(key)} matches/ }
+            its(:first) { should =~ /Attribute #{Regexp.quote(Attributor.humanize_context( attribute_context ))} is required when #{Regexp.quote(key)} matches/ }
           end
 
           context 'where the target attribute exists, but does not match the predicate' do
@@ -417,8 +419,8 @@ describe Attributor::Attribute do
       end
 
       it 'supports deterministic examples' do
-        example_1 = attribute.example("Chicken context")
-        example_2 = attribute.example("Chicken context")
+        example_1 = attribute.example(["Chicken context"])
+        example_2 = attribute.example(["Chicken context"])
 
         example_1.attributes.should eq(example_2.attributes)
       end
@@ -434,8 +436,8 @@ describe Attributor::Attribute do
 
         context 'with a failing validation' do
           subject(:chicken) { Chicken.example(age: 150, email: "foo") }
-          let(:email_validation_response) { ["email value \(#{chicken.email}\) does not match regexp (/@/)"] }
-          let(:age_validation_response) { ["age value \(#{chicken.age}\) is larger than the allowed max (120)"] }
+          let(:email_validation_response) { ["$.email value \(#{chicken.email}\) does not match regexp (/@/)"] }
+          let(:age_validation_response) { ["$.age value \(#{chicken.age}\) is larger than the allowed max (120)"] }
 
           it 'collects sub-attribute validation errors' do
             errors = attribute.validate(chicken)
@@ -451,7 +453,7 @@ describe Attributor::Attribute do
         let(:attribute_name) { nil }
         let(:attribute) { Duck.definition.attributes[attribute_name] }
 
-        let(:attribute_context) { "$.duck.#{attribute_name}" }
+        let(:attribute_context) { ['$','duck',"#{attribute_name}"] }
         subject(:errors) { attribute.validate_missing_value(attribute_context) }
 
         before do

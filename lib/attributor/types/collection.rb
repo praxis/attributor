@@ -41,10 +41,11 @@ module Attributor
     # @return An Array of native type objects conforming to the specified member_type
     def self.example(context=nil, options: {})
       result = []
-      size = rand(10) + 1
+      size = rand(3) + 1
+      context ||= ["Collection-#{result.object_id}"]
 
       size.times do |i|
-        subcontext = "#{context}[#{i}]"
+        subcontext = context + ["at(#{i})"]
         result << self.member_attribute.example(subcontext)
       end
 
@@ -54,27 +55,27 @@ module Attributor
 
     # The incoming value should be an array here, so the only decoding that we need to do
     # is from the members (if there's an :member_type defined option).
-    def self.load(value)
+    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT)
       if value.nil?
         return nil
       elsif value.is_a?(Enumerable)
         loaded_value = value
       elsif value.is_a?(::String)
-        loaded_value = decode_string(value)
+        loaded_value = decode_string(value,context)
       else
-        raise Attributor::IncompatibleTypeError, value_type: value.class, type: self 
+        raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self 
       end
 
-      return loaded_value.collect { |member| self.member_attribute.load(member) }
+      return loaded_value.collect { |member| self.member_attribute.load(member,context) }
     end
 
 
-    def self.decode_string(value)
-      decode_json(value)
+    def self.decode_string(value,context)
+      decode_json(value,context)
     end
 
 
-    def self.dump(values, opts=nil)
+    def self.dump(values, **opts)
       return nil if values.nil?
       values.collect { |value| member_attribute.dump(value,opts) }
     end
@@ -117,9 +118,10 @@ module Attributor
     end
 
     # @param values [Array] Array of values to validate
-    def self.validate(values, context, attribute)
+    def self.validate(values, context=Attributor::DEFAULT_ROOT_CONTEXT, attribute=nil)
+
       values.each_with_index.collect do |value, i|
-        subcontext = "#{context}[#{i}]"
+        subcontext = context + ["at(#{i})"]
         self.member_attribute.validate(value, subcontext)
       end.flatten.compact
     end

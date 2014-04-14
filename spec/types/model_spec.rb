@@ -4,7 +4,8 @@ describe Attributor::Model do
 
   context 'class methods' do
     subject(:chicken) { Chicken }
-
+    let(:context){ ["root","subattr"] }
+    
     its(:native_type) { should eq(Chicken) }
 
     context '.example'  do
@@ -18,7 +19,7 @@ describe Attributor::Model do
 
         context 'and attribute without :example option' do
           before do
-            Attributor::Integer.should_receive(:example).with(/age$/, age_opts).and_return(age)
+            Attributor::Integer.should_receive(:example).with(kind_of(Array), age_opts).and_return(age)
           end
 
           its(:age) { should == age }
@@ -122,16 +123,17 @@ describe Attributor::Model do
       end
 
       context 'with a JSON-serialized hash' do
+        let(:context){ ['root','subattr'] }
         let(:expected_hash) { {"age" => age, "email" => email} }
         let(:json) { hash.to_json }
         before do
           Chicken.should_receive(:from_hash).
-            with(expected_hash)
+            with(expected_hash,context)
           JSON.should_receive(:parse).with(json).and_call_original
         end
 
         it 'deserializes and calls from_hash' do
-          Chicken.load(json)
+          Chicken.load(json,context)
         end
       end
 
@@ -141,8 +143,8 @@ describe Attributor::Model do
         it 'catches the error and reports it correctly' do
           JSON.should_receive(:parse).with(json).and_call_original
           expect {
-            Chicken.load(json)
-          }.to raise_error(Attributor::DeserializationError, /Error deserializing a String using JSON/)
+            Chicken.load(json,context)
+          }.to raise_error(Attributor::DeserializationError, /Error deserializing a String using JSON.*#{context.join('.')}/)
         end
       end
 
@@ -150,8 +152,8 @@ describe Attributor::Model do
       context 'with an invalid object type' do
         it 'raises some sort of error' do
           expect {
-            Chicken.load(Object.new)
-          }.to raise_error(Attributor::IncompatibleTypeError, /Type Chicken cannot load values of type Object/)
+            Chicken.load(Object.new, context)
+          }.to raise_error(Attributor::IncompatibleTypeError, /Type Chicken cannot load values of type Object.*#{context.join('.')}/)
         end
       end
 
@@ -177,8 +179,8 @@ describe Attributor::Model do
 
           it 'raises an error' do
             expect {
-              Chicken.load(hash)
-            }.to raise_error(Attributor::AttributorException, /Unknown attributes/)
+              Chicken.load(hash, context)
+            }.to raise_error(Attributor::AttributorException, /Unknown attributes.*#{context.join('.')}/)
           end
         end
       end

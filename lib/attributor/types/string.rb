@@ -7,7 +7,7 @@ module Attributor
     end
 
 
-    def self.load(value)
+    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT)
       # Special handling for Symbols. 
       case value
       when Symbol

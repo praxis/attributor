@@ -13,10 +13,10 @@ module Attributor
       end
 
       def self.example(context=nil, options: {})
-        return self.load(/[:date:]/.gen)
+        return self.load(/[:date:]/.gen, context)
       end
 
-      def self.load(value)
+      def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT)
         # We assume that if the value is already in the right type, we've decoded it already
         return value if value.is_a?(self.native_type)
         return value.to_datetime if value.is_a?(::Time)
@@ -26,7 +26,7 @@ module Attributor
         begin
           return ::DateTime.parse(value)
         rescue ArgumentError => e
-          raise Attributor::DeserializationError, from: value.class, encoding: "DateTime" , value: value            
+          raise Attributor::DeserializationError, context: context, from: value.class, encoding: "DateTime" , value: value            
         end
       end
 

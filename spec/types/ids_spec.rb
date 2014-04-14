@@ -17,7 +17,7 @@ describe Attributor::Ids do
     end
 
     it 'generates valid examples' do
-      ids.validate(ids.example,nil,nil).should be_empty
+      ids.validate(ids.example).should be_empty
     end
 
   end

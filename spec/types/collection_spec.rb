@@ -121,9 +121,10 @@ describe Attributor::Collection do
       end
 
       context 'for invalid values' do
+        let(:context){ ['root','subattr'] }
         [1, Object.new, false, true, 3.0].each do |value|
-          it "raises error when incoming value is #{value.inspect}" do
-            expect { type.load(value).should == value }.to raise_error(Attributor::AttributorException)
+          it "raises error when incoming value is #{value.inspect} (propagating the context)" do
+            expect { type.load(value,context).should == value }.to raise_error(Attributor::IncompatibleTypeError,/#{context.join('.')}/)
           end
         end
       end
@@ -251,20 +252,20 @@ describe Attributor::Collection do
     before do
       collection_members.zip(expected_errors).each do |member, expected_error|
         type.member_attribute.should_receive(:validate).
-          with(member,an_instance_of(String)). # we don't care about the exact context here
+          with(member,an_instance_of(Array)). # we don't care about the exact context here
           and_return([expected_error])
       end
     end
 
     it 'validates members' do
-      type.validate(collection_members,nil,nil).should =~ expected_errors
+      type.validate(collection_members).should =~ expected_errors
     end
   end
 
 
   context '.example' do
     it "returns an Array" do
-      value = type.example(nil)
+      value = type.example
       value.should be_a(::Array)
     end
 
@@ -277,7 +278,7 @@ describe Attributor::Collection do
       Attributor::Object
     ].each do |member_type|
       it "returns an Array of native types of #{member_type}" do
-        value = Attributor::Collection.of(member_type).example(nil)
+        value = Attributor::Collection.of(member_type).example
         value.all? { |element| member_type.valid_type?(element) }.should be_true
       end
     end

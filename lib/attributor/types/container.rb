@@ -10,8 +10,8 @@ module Attributor
 
     module ClassMethods
 
-      def decode_string(value)
-        raise "#{self.name}.decode_string is not implemented."
+      def decode_string(value, context=Attributor::DEFAULT_ROOT_CONTEXT)
+        raise "#{self.name}.decode_string is not implemented. (when decoding #{Attributor.humanize_context(context)})"
       end
 
       # Decode JSON string that encapsulates an array
@@ -19,8 +19,8 @@ module Attributor
       # @param value [String] JSON string
       # @return [Array] a normal Ruby Array
       #
-      def decode_json(value)
-        raise Attributor::DeserializationError, from: value.class, encoding: "JSON" , value: value unless value.kind_of? ::String
+      def decode_json(value, context=Attributor::DEFAULT_ROOT_CONTEXT)
+        raise Attributor::DeserializationError, context: context, from: value.class, encoding: "JSON" , value: value unless value.kind_of? ::String
 
         # attempt to parse as JSON
         parsed_value = JSON.parse(value)
@@ -28,12 +28,12 @@ module Attributor
         if parsed_value.is_a? self.native_type
           value = parsed_value
         else
-          raise Attributor::CoercionError, from: parsed_value.class, to: self.name, value: parsed_value
+          raise Attributor::CoercionError, context: context, from: parsed_value.class, to: self.name, value: parsed_value
         end
         return value
 
       rescue JSON::JSONError => e
-        raise Attributor::DeserializationError, from: value.class, encoding: "JSON" , value: value
+        raise Attributor::DeserializationError, context: context, from: value.class, encoding: "JSON" , value: value
       end
 
     end

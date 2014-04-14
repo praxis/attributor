@@ -38,9 +38,10 @@ describe Attributor::Type do
 
     context "when given a value that is not of native_type" do
       let(:value) { 1 }
-
+      let(:context) { ['top','sub'] }
+      
       it 'raises an exception' do
-        expect { test_type.load(value) }.to raise_error( Attributor::IncompatibleTypeError, /AttributeType cannot load values of type Fixnum/)
+        expect { test_type.load(value,context) }.to raise_error( Attributor::IncompatibleTypeError, /AttributeType cannot load values of type Fixnum.*while loading top.sub/)
       end
 
 
@@ -50,7 +51,7 @@ describe Attributor::Type do
 
 
   context 'validate' do
-    let(:context) { 'some_attribute'}
+    let(:context) { ['some_attribute'] }
 
     let(:attribute_options) { {} }
 
