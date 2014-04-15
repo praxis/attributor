@@ -13,19 +13,15 @@ group :development do
   gem 'redcarpet', '< 3.0'
   gem 'rdoc', '~> 3.12'
   gem 'bundler'
-  gem 'jeweler', '~> 1.8.4'
-  gem 'pry'
+  gem 'jeweler', '~> 1.8.3' # right_develop brings in old rake version, which is incompatible with newer jeweler
+  gem 'right_develop', :git => 'git@github.com:rightscale/right_develop.git'
   gem 'ruby-prof'
 
   gem 'rake-notes'
 
-  platforms :ruby_20, :ruby_21 do
-    gem 'pry-byebug'
-    gem 'simplecov'
-    gem 'guard'
-    gem 'guard-rspec'
-    gem 'pry-stack_explorer'
-  end
+  gem 'simplecov'
+  gem 'guard'
+  gem 'guard-rspec'
 end
 
 

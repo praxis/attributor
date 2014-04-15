@@ -140,7 +140,6 @@ describe Attributor::Collection do
         }.each do |member_type, value|
           it "returns loaded value when member_type is #{member_type} and value is #{value.inspect}" do
             expected_result = value.map {|v| member_type.load(v)}
-            #binding.pry
             type.of(member_type).load(value).should == expected_result
           end
         end

@@ -35,21 +35,16 @@ Jeweler::RubygemsDotOrgTasks.new
 require 'rspec/core'
 require 'rspec/core/rake_task'
 
-RSpec::Core::RakeTask.new(:rcov) do |spec|
+desc "Run RSpec code examples with simplecov"
+RSpec::Core::RakeTask.new do |spec|
+  spec.rspec_opts = ["-c"]
   spec.pattern = FileList['spec/**/*_spec.rb']
-  spec.rcov = true
-  spec.rcov_opts = %w{-Ispec --exclude gems\/,spec\/,doc\/}
 end
 
-RSpec::Core::RakeTask.new(:simplecov) do |spec|
-  # Configured in spec_helper.rb
-end
+require 'right_support'
 
-# 'rake spec' should do the same as 'rake rcov'
-if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("1.9")
-  task :spec => :rcov
-else
-  task :spec => :simplecov
+if require_succeeds?('right_develop')
+  RightDevelop::CI::RakeTask.new
 end
 
 task :default => :spec

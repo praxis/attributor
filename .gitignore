@@ -1,6 +1,5 @@
-# rcov generated
+# simplecov generated
 coverage
-coverage.data
 
 # RConf
 .ruby-version
