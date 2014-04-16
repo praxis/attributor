@@ -67,10 +67,16 @@ module Attributor
     def self.example(context=nil, **values)
       result = self.new
 
-
-      context ||= "#{self.name}-#{result.object_id.to_s}"
-      example_depth = context.split('.').size
-
+      context = case context
+      when nil
+        ["#{self.name}-#{result.object_id.to_s}"]
+      when ::String
+        [context]
+      else
+        context
+      end
+            
+      example_depth = context.size
 
       self.attributes.each do |sub_attribute_name,sub_attribute|
         if sub_attribute.attributes
@@ -86,14 +92,14 @@ module Attributor
             sub_attribute.example(sub_context, parent: result)
           end
 
-          sub_attribute.load(value) 
+          sub_attribute.load(value,sub_context) 
         end
       end
 
       result
     end
 
-    def self.dump(value, opts=nil)
+    def self.dump(value, **opts)
       value.dump(opts)
     end
 
@@ -118,29 +124,31 @@ module Attributor
 
 
     # Model-specific decoding and coercion of the attribute.
-    def self.load(value)
+    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT)
       return value if value.nil?
       return value if value.kind_of?(self.native_type)
 
+      context = [context] if context.is_a? ::String
+      
       hash = case value
       when ::String
         # Strings are assumed to be JSON-serialized for now.
         begin
           JSON.parse(value)
         rescue 
-          raise DeserializationError, from: value.class, encoding: "JSON" , value: value            
+          raise DeserializationError, context: context, from: value.class, encoding: "JSON" , value: value            
         end
       when ::Hash
         value
       else
-        raise IncompatibleTypeError, value_type: value.class, type: self 
+        raise IncompatibleTypeError,  context: context, value_type: value.class, type: self 
       end
 
-      self.from_hash(hash)
+      self.from_hash(hash,context)
     end
 
 
-    def self.from_hash(hash)
+    def self.from_hash(hash,context)
       model = self.new
 
       self.attributes.each do |attribute_name, _|
@@ -153,7 +161,7 @@ module Attributor
       unknown_keys = hash.keys.collect {|k| k.to_sym} - self.attributes.keys
       
       if unknown_keys.any?
-        raise AttributorException, "Unknown attributes received: #{unknown_keys.inspect}"
+        raise AttributorException, "Unknown attributes received: #{unknown_keys.inspect} while loading #{Attributor.humanize_context(context)}"
       end
 
       model
@@ -182,9 +190,12 @@ module Attributor
     end
 
 
-    def self.validate(object,context,_attribute)
+    def self.validate(object,context=Attributor::DEFAULT_ROOT_CONTEXT,_attribute)
+      
+      context = [context] if context.is_a? ::String
+      
       unless object.kind_of?(self)
-        raise ArgumentError, "#{self.name} can not validate object of type #{object.class.name} for #{context}."
+        raise ArgumentError, "#{self.name} can not validate object of type #{object.class.name} for #{Attributor.humanize_context(context)}."
       end
 
       object.validate(context)
@@ -230,11 +241,13 @@ module Attributor
     # TODO: memoize validation results here, but only after rejiggering how we store the context.
     #       Two calls to validate() with different contexts should return get the same errors, 
     #       but with their respective contexts.
-    def validate(context=nil)
+    def validate(context=Attributor::DEFAULT_ROOT_CONTEXT)
+      
       raise AttributorException, "validation conflict" if @validating
-
       @validating = true
-
+      
+      context = [context] if context.is_a? ::String
+      
       self.class.attributes.each_with_object(Array.new) do |(sub_attribute_name, sub_attribute), errors|
         sub_context = self.class.generate_subcontext(context,sub_attribute_name)
   
@@ -281,14 +294,15 @@ module Attributor
     end
 
 
-    def dump(opts=nil)
+    def dump(context: Attributor::DEFAULT_ROOT_CONTEXT, **opts)
       return CIRCULAR_REFERENCE_MARKER if @dumping
 
       @dumping = true
 
       self.attributes.each_with_object({}) do |(name, value), result|
         attribute = self.class.attributes[name]
-        result[name.to_sym] = attribute.dump(value)
+                
+        result[name.to_sym] = attribute.dump(value, context: context + [name] )
       end
     ensure
       @dumping = false

@@ -19,32 +19,33 @@ module Attributor
     module ClassMethods
       
       # Generic decoding and coercion of the attribute.
-      def load(value)
+      def load(value,context=Attributor::DEFAULT_ROOT_CONTEXT)
         return nil if value.nil?
         unless value.is_a?(self.native_type)
-          raise Attributor::IncompatibleTypeError, value_type: value.class, type: self 
+          raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self 
         end
 
         value
       end
 
       # Generic encoding of the attribute
-      def dump(value,opts=nil)
+      def dump(value,**opts)
         value
       end
 
       # TODO: refactor this to take just the options instead of the full attribute?
       # TODO: delegate to subclass
-      def validate(value,context,attribute)
+      def validate(value,context=Attributor::DEFAULT_ROOT_CONTEXT,attribute)
+
         errors = []
         attribute.options.each do |option, opt_definition|
           case option
           when :max
-            errors << "#{context} value (#{value}) is larger than the allowed max (#{opt_definition.inspect})" unless value <= opt_definition
+            errors << "#{Attributor.humanize_context(context)} value (#{value}) is larger than the allowed max (#{opt_definition.inspect})" unless value <= opt_definition
           when :min
-            errors << "#{context} value (#{value}) is smaller than the allowed min (#{opt_definition.inspect})" unless value >= opt_definition
+            errors << "#{Attributor.humanize_context(context)} value (#{value}) is smaller than the allowed min (#{opt_definition.inspect})" unless value >= opt_definition
           when :regexp
-            errors << "#{context} value (#{value}) does not match regexp (#{opt_definition.inspect})"  unless value =~ opt_definition
+            errors << "#{Attributor.humanize_context(context)} value (#{value}) does not match regexp (#{opt_definition.inspect})"  unless value =~ opt_definition
           end
         end
         errors
@@ -91,8 +92,8 @@ module Attributor
 
 
       def generate_subcontext( context, subname )
-        return subname if context.nil? || context == ""
-        "#{context}#{Attributor::SEPARATOR}#{subname}"
+
+        context + [subname] 
       end
 
       def dsl_compiler

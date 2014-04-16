@@ -34,7 +34,8 @@ module Attributor
 
   # hierarchical separator string for composing human readable attributes
   SEPARATOR = '.'.freeze
-
+  DEFAULT_ROOT_CONTEXT = ['$'].freeze
+  
   # @param type [Class] The class of the type to resolve
   #
   def self.resolve_type(attr_type, options={}, constructor_block=nil)
@@ -57,7 +58,16 @@ module Attributor
     klass
   end
   
-
+  def self.humanize_context( context )
+    raise "NIL CONTEXT PASSED TO HUMANZE!!" unless context
+    raise "INVALID CONTEXT!!! (got: #{context.inspect})" unless context.is_a? Enumerable
+    begin
+      return context.join('.')
+    rescue Exception => e
+      raise "Error creating context string: #{e.message}"
+    end
+  end
+  
   MODULE_PREFIX       = "Attributor\:\:".freeze
   MODULE_PREFIX_REGEX = Regexp.new(MODULE_PREFIX)
 
