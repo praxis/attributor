@@ -41,7 +41,7 @@ module Attributor
     rescue AttributorException, NameError
       raise
     rescue => e
-      raise Attributor::LoadError, "Error loading attribute #{Attributor.humanize_context(context)} of type #{type.name} from value #{value.inspect}\n#{e.message}"
+      raise Attributor::LoadError, "Error loading attribute #{Attributor.humanize_context(context)} of type #{type.name} from value #{Attributor.errorize_value(value)}\n#{e.message}"
     end
 
     def dump(value, **opts)
@@ -52,7 +52,7 @@ module Attributor
     def validate_type(value, context)
       # delegate check to type subclass if it exists
       unless self.type.valid_type?(value)
-        return ["Attribute #{Attributor.humanize_context(context)} received value: #{value.inspect} is of the wrong type (got: #{value.class.name})"]
+        return ["Attribute #{Attributor.humanize_context(context)} received value: #{Attributor.errorize_value(value)} is of the wrong type (got: #{value.class.name})"]
       end
       []
     end
@@ -150,7 +150,7 @@ module Attributor
       return errors if errors.any?
 
       if self.options[:values] && !self.options[:values].include?(object)
-        errors << "Attribute #{Attributor.humanize_context(context)}: #{object.inspect} is not within the allowed values=#{self.options[:values].inspect} "
+        errors << "Attribute #{Attributor.humanize_context(context)}: #{Attributor.errorize_value(object)} is not within the allowed values=#{self.options[:values].inspect} "
       end
 
       errors + self.type.validate(object,context,self)

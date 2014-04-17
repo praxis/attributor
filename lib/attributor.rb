@@ -67,6 +67,10 @@ module Attributor
       raise "Error creating context string: #{e.message}"
     end
   end
+
+  def self.errorize_value( value )
+    value.inspect[0.500] + "...[truncated]"
+  end
   
   MODULE_PREFIX       = "Attributor\:\:".freeze
   MODULE_PREFIX_REGEX = Regexp.new(MODULE_PREFIX)

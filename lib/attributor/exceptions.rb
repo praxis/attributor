@@ -15,7 +15,7 @@ module Attributor
   class CoercionError < LoadError
     def initialize( context: , from: , to:, value: nil)
       msg = "Error coercing from #{from} to #{to} while loading #{Attributor.humanize_context(context)}."
-      msg += " Received value #{value.inspect}" if value
+      msg += " Received value #{Attributor.errorize_value(value)}" if value
       super msg
     end
   end
@@ -23,7 +23,7 @@ module Attributor
   class DeserializationError < LoadError
     def initialize( context: , from:, encoding: , value: nil)
       msg = "Error deserializing a #{from} using #{encoding} while loading #{Attributor.humanize_context(context)}."
-      msg += " Received value #{value.inspect}" if value
+      msg += " Received value #{Attributor.errorize_value(value)}" if value
       super msg
     end  
   end
