@@ -121,12 +121,10 @@ module Attributor
 
 
     def attributes
-      @attributes ||= begin
-        if type.respond_to?(:attributes)
-          type.attributes
-        else
-          nil
-        end
+      if (@type_has_attributes ||= type.respond_to?(:attributes))
+        type.attributes
+      else
+        nil
       end
     end
 

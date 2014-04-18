@@ -342,4 +342,61 @@ describe Attributor::Model do
 
 
   end
+
+  context 'extending' do
+    subject(:model) do
+      Class.new(Attributor::Model) do
+        attributes do
+          attribute :id, Integer
+          attribute :timestamps do
+            attribute :created_at, DateTime
+          end
+        end
+      end
+    end
+
+    context 'adding a top-level attribute' do
+      before do
+        model.attributes do
+          attribute :name, String
+        end
+      end
+
+      it 'adds the attribute' do
+        model.attributes.keys.should =~ [:id, :name, :timestamps]
+      end
+
+    end
+
+    context 'adding to an inner-Struct' do
+      before do
+        model.attributes do
+          attribute :timestamps, Struct do
+            attribute :updated_at, DateTime
+          end
+        end
+      end
+
+      it 'merges with sub-attributes' do
+        model.attributes[:timestamps].attributes.keys.should =~ [:created_at, :updated_at]
+      end
+    end
+
+
+    context 'redefining an attribute' do
+      before do
+        model.attributes do
+          attribute :id, String
+        end
+      end
+
+      it 'works' do
+        model.attributes[:id].type.should be(Attributor::String)
+      end
+
+    end
+
+  end
+
+
 end
