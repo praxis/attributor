@@ -16,6 +16,9 @@ next
     * `validate` takes a `context` argument that (instead of a string) is now an array of parent segments.
     * `dump` takes a `context:` option parameter of the same type
   * Enhanced error messages to report the correct context scope.
+  * Make Attribute assignments in models to report a special context (not the attributor root) 
+    * Instead of reporting "$." as the context , when doing model.field_name=value, they'll now report "assignment.of(field_name)" instead
+  * Truncate the lenght of values when reporting loading errors when they're long (i.e. >500 chars)
 
 
 2.0.0

@@ -69,7 +69,9 @@ module Attributor
   end
 
   def self.errorize_value( value )
-    value.inspect[0..500] + "...[truncated]"
+    inspection =value.inspect
+    inspection = inspection[0..500]+ "...[truncated]" if inspection.size>500
+    inspection
   end
   
   MODULE_PREFIX       = "Attributor\:\:".freeze

@@ -44,7 +44,9 @@ module Attributor
       #       the class's attributes hash on each write.
       module_eval do
         define_method(name.to_s + "=") do |value|
-          @attributes[name] = attribute.load(value)
+          # TODO: what type of context do we report with unscoped assignments? 
+          #  => for now this would report "assignment.of(field_name)" is that good?
+          @attributes[name] = attribute.load(value,["assignment","of(#{name})"]) 
         end
       end
     end
@@ -151,11 +153,11 @@ module Attributor
     def self.from_hash(hash,context)
       model = self.new
 
-      self.attributes.each do |attribute_name, _|
+      self.attributes.each do |attribute_name, attribute|
         # OPTIMIZE: deleting the keys as we go is mucho faster, but also very risky
-        model.send "#{attribute_name}=", (hash[attribute_name] || hash[attribute_name.to_s])
-        # TODO: profile vs the following:
-        #model.attributes[attribute_name] = attribute.load(hash[attribute_name] || hash[attribute_name.to_s])
+        # Note: use "load" vs. attribute assignment so we can propagate the right context down.
+        sub_context = self.generate_subcontext(context,attribute_name)
+        model.attributes[attribute_name] = attribute.load(hash[attribute_name] || hash[attribute_name.to_s], sub_context)
       end
       
       unknown_keys = hash.keys.collect {|k| k.to_sym} - self.attributes.keys
