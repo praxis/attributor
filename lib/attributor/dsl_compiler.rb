@@ -62,8 +62,14 @@ module Attributor
     #       attribute :state, String
     #     end
     def attribute(name, type_or_options=nil, opts={}, &block)
-      raise AttributorException.new("Attribute #{name} already defined") if attributes.has_key? name
       raise AttributorException, "Attribute names must be symbols, got: #{name.inspect}" unless name.kind_of? ::Symbol
+
+      if (existing_attribute = attributes[name])
+        if existing_attribute.attributes
+          existing_attribute.type.attributes(&block)
+          return existing_attribute
+        end
+      end
 
       attr_type, opts = self.parse_arguments(type_or_options, opts)
 

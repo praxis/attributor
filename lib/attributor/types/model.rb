@@ -7,6 +7,13 @@ module Attributor
     # FIXME: this is not the way to fix this. Really we should add finalize! to Models.
     undef :timeout
 
+    def self.inherited(klass)
+      klass.instance_eval do
+        @saved_dsl = []
+        @saved_options = {}
+      end
+    end
+
     # Define accessors for attribute of given name.
     #
     # @param name [::Symbol] attribute name
@@ -88,7 +95,6 @@ module Attributor
         end
 
         sub_context = self.generate_subcontext(context,sub_attribute_name)
-
         
         result.lazy_attributes[sub_attribute_name] = Proc.new do 
           value = values.fetch(sub_attribute_name) do
@@ -174,8 +180,9 @@ module Attributor
     # This will be a lazy definition. So we'll only save it in an instance class var for later.
     def self.attributes(opts={},&block)
       if block_given?
-        @saved_dsl = block
-        @saved_options = opts
+        @attributes = nil
+        @saved_dsl << block
+        @saved_options.merge!(opts)
       else
         @attributes ||= self.definition.attributes
       end
@@ -216,10 +223,12 @@ module Attributor
       raise AttributorException, "Blueprint structures cannot take extra block definitions" if block
       raise AttributorException, "Models cannot take additional attribute options (options already defined in the Model )" if options
 
-      unless @compiled_class_block
-        @compiled_class_block = dsl_class.new(@saved_options)
-        @compiled_class_block.parse(&@saved_dsl) if @saved_dsl
+      @compiled_class_block ||= dsl_class.new(@saved_options)
+      
+      while (dsl = @saved_dsl.shift)
+        @compiled_class_block.parse(&dsl)
       end
+
       @compiled_class_block
     end
 

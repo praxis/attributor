@@ -19,6 +19,7 @@ next
   * Make Attribute assignments in models to report a special context (not the attributor root) 
     * Instead of reporting "$." as the context , when doing model.field_name=value, they'll now report "assignment.of(field_name)" instead
   * Truncate the lenght of values when reporting loading errors when they're long (i.e. >500 chars)
+* `Model.attributes` may now be called more than once to set add or replace attributes. The exact behavior depends upon the types of the attributes being added or replaced. See [model_spec.rb](spec/types/model_spec.rb) for examples.
 
 
 2.0.0
