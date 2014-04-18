@@ -39,6 +39,7 @@ module Attributor
 
     def self.define_writer(name)
       attribute = self.attributes[name]
+      context = ["assignment","of(#{name})"]
       # note: paradoxically, using define_method ends up being faster for the writer
       #       attribute is captured by the block, saving us from having to retrieve it from
       #       the class's attributes hash on each write.
@@ -46,7 +47,7 @@ module Attributor
         define_method(name.to_s + "=") do |value|
           # TODO: what type of context do we report with unscoped assignments? 
           #  => for now this would report "assignment.of(field_name)" is that good?
-          @attributes[name] = attribute.load(value,["assignment","of(#{name})"]) 
+          @attributes[name] = attribute.load(value,context) 
         end
       end
     end
