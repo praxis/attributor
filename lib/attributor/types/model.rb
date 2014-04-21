@@ -6,6 +6,7 @@ module Attributor
 
     # FIXME: this is not the way to fix this. Really we should add finalize! to Models.
     undef :timeout
+    undef :format
 
     def self.inherited(klass)
       klass.instance_eval do
