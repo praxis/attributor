@@ -8,7 +8,7 @@ gem 'randexp'
 group :development do
   gem 'rspec'
   gem 'yard', '~> 0.8.7'
-  gem 'backports' # yardstick depends on this but doesn't declare it
+  gem 'backports' # yardstick depends on this, but doesn't declare it
   gem 'yardstick'
   gem 'redcarpet', '< 3.0'
   gem 'rdoc', '~> 3.12'
