@@ -37,8 +37,14 @@ describe Attributor::Attribute do
 
 
   context 'describe' do
-    let(:attribute_options) { {:required => true, :values => ["one"], :description => "something"} }
-    let(:expected) { {:type => {:name => type.name} }.merge(attribute_options) }
+    let(:attribute_options) { {:required => true, :values => ["one"], :description => "something", :min => 0} }
+    let(:expected) do 
+      h = {:type => {:name => type.name} }
+      common = attribute_options.select{|k,v| Attributor::Attribute::TOP_LEVEL_OPTIONS.include? k }
+      h.merge!( common )
+      h[:options] = {:min => 0 }
+      h
+    end
 
 
     its(:describe) { should == expected }
@@ -397,18 +403,20 @@ describe Attributor::Attribute do
         attribute.options.should == attribute_options.merge(type_options)
       end
 
-
-      #TODO: attribute now only gets describe from the type and adds options (move tests to the appropriate type classes)
       it 'describe handles sub-attributes nicely' do
         describe = attribute.describe(false)
 
         describe[:type][:name].should == type.name
-        attribute_options.each do |k,v|
+        common_options = attribute_options.select{|k,v| Attributor::Attribute.TOP_LEVEL_OPTIONS.include? k }
+        special_options = attribute_options.reject{|k,v| Attributor::Attribute.TOP_LEVEL_OPTIONS.include? k }
+        common_options.each do |k,v|
           describe[k].should == v
         end
-
+        special_options.each do |k,v|
+          describe[:options][k].should == v
+        end
         type_options.each do |k,v|
-          describe[k].should == v
+          describe[:options][k].should == v
         end
 
 
