@@ -59,6 +59,7 @@ module Attributor
 
 
     TOP_LEVEL_OPTIONS = [ :description, :values, :default, :example, :required, :required_if ]
+    INTERNAL_OPTIONS = [:dsl_compiler] # Options we don't want to expose when describing attributes
     def describe(shallow=true)
       description = { } 
       # Clone the common options
@@ -70,7 +71,7 @@ module Attributor
       if ( ex_def = description.delete(:example) )
         description[:example_definition] = ex_def
       end
-      special_options = self.options.keys - TOP_LEVEL_OPTIONS
+      special_options = self.options.keys - TOP_LEVEL_OPTIONS - INTERNAL_OPTIONS
       description[:options] = {} unless special_options.empty?
       special_options.each do |opt_name|
         description[:options][opt_name] = self.options[opt_name]
