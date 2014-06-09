@@ -58,15 +58,27 @@ module Attributor
     end
 
 
+    TOP_LEVEL_OPTIONS = [ :description, :values, :default, :example, :required, :required_if ]
+    INTERNAL_OPTIONS = [:dsl_compiler] # Options we don't want to expose when describing attributes
     def describe(shallow=true)
-      description = self.options.clone
+      description = { } 
+      # Clone the common options
+      TOP_LEVEL_OPTIONS.each do |option_name|
+        description[option_name] = self.options[option_name] if self.options.has_key? option_name
+      end
+
       # Make sure this option definition is not mistaken for the real generated example
       if ( ex_def = description.delete(:example) )
         description[:example_definition] = ex_def
       end
-
-      if (reference = description.delete :reference)
-        description[:reference] = reference.name
+      special_options = self.options.keys - TOP_LEVEL_OPTIONS - INTERNAL_OPTIONS
+      description[:options] = {} unless special_options.empty?
+      special_options.each do |opt_name|
+        description[:options][opt_name] = self.options[opt_name]
+      end
+      # Change the reference option to the actual class name.
+      if ( reference = self.options[:reference] )
+        description[:options][:reference] = reference.name
       end
 
       description[:type] = self.type.describe(shallow)
