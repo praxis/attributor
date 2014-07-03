@@ -21,6 +21,14 @@ module Attributor
       check_options!
     end
 
+    def ==(attribute)
+      raise ArgumentError, "can not compare Attribute with #{attribute.class.name}" unless attribute.kind_of?(Attribute)
+
+      self.type == attribute.type &&
+        self.options == attribute.options
+    end
+
+
     def parse(value, context=Attributor::DEFAULT_ROOT_CONTEXT)
       object = self.load(value,context)
 
@@ -236,7 +244,7 @@ module Attributor
       when :values
         raise AttributorException.new("Allowed set of values requires an array. Got (#{definition})") unless definition.is_a? ::Array
       when :default
-        raise AttributorException.new("Default value doesn't have the correct attribute type. Got (#{definition.inspect})") unless self.type.valid_type?(definition)
+        raise AttributorException.new("Default value doesn't have the correct attribute type. Got (#{definition.inspect})") unless self.type.valid_type?(definition) || definition.kind_of?(Proc)
       when :description
         raise AttributorException.new("Description value must be a string. Got (#{definition})") unless definition.is_a? ::String
       when :required

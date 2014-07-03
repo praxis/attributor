@@ -35,6 +35,10 @@ describe Attributor::Attribute do
 
   end
 
+  context '==' do
+    let(:other_attribute) { Attributor::Attribute.new(type, attribute_options) }
+    it { should == other_attribute}    
+  end
 
   context 'describe' do
     let(:attribute_options) { {:required => true, :values => ["one"], :description => "something", :min => 0} }
