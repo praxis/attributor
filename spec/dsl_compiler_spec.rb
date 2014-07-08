@@ -15,50 +15,6 @@ describe Attributor::DSLCompiler do
   let(:reference_attribute_options) { reference_attribute.options }
   let(:reference_attribute) {reference_attributes[attribute_name] }
 
-  context '#parse_arguments' do
-
-    let(:type_or_options) { nil }
-    let(:opts) { nil }
-
-    subject(:parsed_arguments) { dsl_compiler.parse_arguments(type_or_options, opts) }
-
-    context 'with nil and nil' do
-      its(:first) { should == nil } # type
-      its(:last)  { should == {}  } # opts
-    end
-
-    context 'with nil and {}' do
-      let(:opts) { Hash.new }
-
-      its(:first) { should == nil }   # type
-      its(:last)  { should be(opts) } # opts
-    end
-
-    context 'with hash and nil' do
-      let(:type_or_options) { Hash.new }
-
-      its(:first) { should == nil }              # type
-      its(:last)  { should be(type_or_options) } # opts
-    end
-
-    context 'with a class and hash' do
-      let(:type_or_options) { ::Object }
-      let(:opts) { Hash.new }
-
-      its(:first) { should == type_or_options } # type
-      its(:last)  { should be(opts)  }          # opts
-    end
-
-    context 'with a class and nil' do
-      let(:type_or_options) { ::Object }
-
-      its(:first) { should == type_or_options } # type
-      its(:last)  { should == {} }              # opts
-    end
-
-  end
-
-
   context '#attribute' do
     let(:attribute_options) { {} }
 
