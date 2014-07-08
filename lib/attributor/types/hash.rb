@@ -56,6 +56,17 @@ module Attributor
       result
     end
 
+    def self.dump( value, **opts)
+      return nil if value.nil?
+      return super if (@key_type == Object && @value_type == Object )
+      hash = ::Hash.new
+      value.each do |k,v|
+        k = key_type.dump(k,opts) if @key_type
+        v = value_type.dump(v,opts) if @value_type
+        hash[k] = v
+      end
+      hash
+    end
     def self.check_option!(name, definition)
       case name
       when :key_type

@@ -103,6 +103,46 @@ describe Attributor::Hash do
 
   end
 
+  context '.dump' do
+   
+    let(:value) { {one: 1, two: 2} }
+    let(:opts) { {} }
+    
+    context 'for a simple (untyped) hash' do
+      it 'should return the untouched hash value' do
+      type.dump(value, opts).should eq(value)
+      end
+    end
+    
+    context 'for a typed hash' do
+      let(:value1) { {first: "Joe", last: "Moe"} }
+      let(:value2) { {first: "Mary", last: "Foe"} }
+      let(:value) { { id1: subtype.new(value1), id2: subtype.new(value2) } }
+      let(:subtype) do
+        c = Class.new(Attributor::Model) do
+          attributes do
+            attribute :first, String
+            attribute :last, String
+          end
+        end
+        c
+      end
+      let(:type) { Attributor::Hash.of(key: String, value: subtype) }
+      
+      it 'should return a hash with the dumped values and keys' do
+        subtype.should_receive(:dump).exactly(2).times.and_call_original
+        dumped_value = type.dump( value, opts ) 
+        dumped_value.should be_kind_of( ::Hash )
+        dumped_value.keys.should =~ [:id1,:id2]
+        dumped_value.values.should have(2).items
+        value[:id1].should be_kind_of subtype
+        value[:id2].should be_kind_of subtype
+        dumped_value[:id1].should == value1
+        dumped_value[:id2].should == value2
+      end
+
+    end
+  end
   context 'in an Attribute' do
     let(:options) { {} }
     subject(:attribute) { Attributor::Attribute.new(Attributor::Hash, options)}
