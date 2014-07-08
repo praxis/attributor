@@ -8,9 +8,13 @@ module Attributor
 
     @key_type = Object
     @value_type = Object
-    # @example Collection.of(Integer)
-    #
-    def self.of( key: Object, value: Object )
+
+    class <<self
+       attr_reader :key_type, :value_type
+    end
+
+    # @example Hash.of(key: String, value: Integer)
+    def self.of(key: Object, value: Object)
       if key
         resolved_key_type = Attributor.resolve_type(key)
         unless resolved_key_type.ancestors.include?(Attributor::Type)
@@ -31,13 +35,7 @@ module Attributor
       end
     end
     
-    def self.key_type
-      @key_type
-    end
-
-    def self.value_type
-      @value_type 
-    end
+   
         
     def self.example(context=nil, options: {})
       result = ::Hash.new
@@ -56,25 +54,26 @@ module Attributor
       result
     end
 
-    def self.dump( value, **opts)
+    def self.dump(value, **opts)
       return nil if value.nil?
       return super if (@key_type == Object && @value_type == Object )
-      hash = ::Hash.new
-      value.each do |k,v|
+
+      value.each_with_object({}) do |(k,v),hash|
         k = key_type.dump(k,opts) if @key_type
         v = value_type.dump(v,opts) if @value_type
         hash[k] = v
       end
-      hash
     end
+
     def self.check_option!(name, definition)
       case name
       when :key_type
-      when :value_type  
+        :ok
+      when :value_type
+        :ok
       else
-        return :unknown
+        :unknown
       end
-      :ok
     end
     
     def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT)

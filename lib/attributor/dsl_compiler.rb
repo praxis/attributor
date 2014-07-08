@@ -14,7 +14,7 @@ module Attributor
 
     attr_accessor :attributes, :options
 
-    def initialize(options={})
+    def initialize(**options)
       @options = options
       @attributes={}
     end
@@ -25,19 +25,6 @@ module Attributor
       return self
     end
 
-
-    def parse_arguments(type_or_options, opts)
-      attr_type = nil
-
-      if type_or_options.kind_of? ::Class
-        attr_type = type_or_options
-      elsif type_or_options.kind_of? ::Hash
-        opts = type_or_options
-      end
-
-      opts ||= {}
-      return attr_type, opts
-    end
 
     # Creates an Attributor:Attribute with given definition.
     #
@@ -61,7 +48,7 @@ module Attributor
     #       attribute :city, String
     #       attribute :state, String
     #     end
-    def attribute(name, type_or_options=nil, opts={}, &block)
+    def attribute(name, attr_type=nil, **opts, &block)
       raise AttributorException, "Attribute names must be symbols, got: #{name.inspect}" unless name.kind_of? ::Symbol
 
       if (existing_attribute = attributes[name])
@@ -71,7 +58,6 @@ module Attributor
         end
       end
 
-      attr_type, opts = self.parse_arguments(type_or_options, opts)
 
       if (reference = self.options[:reference])
         inherited_attribute = reference.attributes[name]

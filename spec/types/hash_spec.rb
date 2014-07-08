@@ -5,22 +5,18 @@ describe Attributor::Hash do
 
   subject(:type) { Attributor::Hash }
 
-  context '.native_type' do
-    it 'should return Hash' do
-      type.native_type.should be(::Hash)
-    end
-  end
+  its(:native_type) { should be(::Hash) }
 
   context '.example' do
     context 'for a simple hash' do
-      it 'should return an empty Hash' do
+      it 'returns an empty Hash' do
         type.example.should eq(Hash.new)
       end
     end
     
     context 'for a typed hash' do
       subject(:example){ Attributor::Hash.of( value: Integer).example}
-      it 'should return a hash with keys and/or values of the right type' do
+      it 'returns a hash with keys and/or values of the right type' do
         example.should be_kind_of(::Hash)
         example.keys.size.should > 0
         example.values.all?{|v| v.kind_of? Integer}.should be(true)
@@ -49,14 +45,14 @@ describe Attributor::Hash do
       subject(:type){ Attributor::Hash.of(key: String, value: Integer)}
       context 'with good values' do
         let(:value) { {one: '1', 'three' => 3} }
-        it 'should coerce good values into the correct types' do
+        it 'coerces good values into the correct types' do
           type.load(value).should == {'one' => 1, 'three' => 3}
         end 
       end
 
       context 'with incompatible values' do
         let(:value) { {one: 'two', three: 4} }
-        it 'should fail' do
+        it 'fails' do
           expect{
             type.load(value)
           }.to raise_error(/invalid value for Integer/)
@@ -68,7 +64,7 @@ describe Attributor::Hash do
       subject(:type){ Attributor::Hash.of( value: Integer) }
       context 'with good values' do
         let(:value) { {one: '1', [1,2,3] => 3} }
-        it 'should coerce only values into the correct types (and leave keys alone)' do
+        it 'coerces only values into the correct types (and leave keys alone)' do
           type.load(value).should == {:one => 1,  [1,2,3] => 3 }
         end 
       end
@@ -109,8 +105,8 @@ describe Attributor::Hash do
     let(:opts) { {} }
     
     context 'for a simple (untyped) hash' do
-      it 'should return the untouched hash value' do
-      type.dump(value, opts).should eq(value)
+      it 'returns the untouched hash value' do
+        type.dump(value, opts).should eq(value)
       end
     end
     
@@ -119,20 +115,19 @@ describe Attributor::Hash do
       let(:value2) { {first: "Mary", last: "Foe"} }
       let(:value) { { id1: subtype.new(value1), id2: subtype.new(value2) } }
       let(:subtype) do
-        c = Class.new(Attributor::Model) do
+        Class.new(Attributor::Model) do
           attributes do
             attribute :first, String
             attribute :last, String
           end
         end
-        c
       end
       let(:type) { Attributor::Hash.of(key: String, value: subtype) }
       
-      it 'should return a hash with the dumped values and keys' do
+      it 'returns a hash with the dumped values and keys' do
         subtype.should_receive(:dump).exactly(2).times.and_call_original
-        dumped_value = type.dump( value, opts ) 
-        dumped_value.should be_kind_of( ::Hash )
+        dumped_value = type.dump(value, opts) 
+        dumped_value.should be_kind_of(::Hash)
         dumped_value.keys.should =~ [:id1,:id2]
         dumped_value.values.should have(2).items
         value[:id1].should be_kind_of subtype
