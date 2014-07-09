@@ -127,6 +127,8 @@ module Attributor
         :ok # FIXME ... actually do something smart
       when :dsl_compiler
         :ok # FIXME ... actually do something smart
+      when :dsl_compiler_options
+        :ok
       else
         super
       end
