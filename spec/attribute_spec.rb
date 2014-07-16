@@ -232,10 +232,14 @@ describe Attributor::Attribute do
     end
 
     it 'delegates to type.load' do
-      type.should_receive(:load).with(value,context)
+      type.should_receive(:load).with(value,context, {})
       attribute.load(value,context)
     end
 
+    it 'passes options to type.load' do
+      type.should_receive(:load).with(value, context, foo: 'bar')
+      attribute.load(value, context, foo: 'bar')
+    end
 
     context 'applying default values' do
       let(:default_value) { "default value" }

@@ -55,7 +55,7 @@ module Attributor
 
     # The incoming value should be an array here, so the only decoding that we need to do
     # is from the members (if there's an :member_type defined option).
-    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT)
+    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
       if value.nil?
         return nil
       elsif value.is_a?(Enumerable)

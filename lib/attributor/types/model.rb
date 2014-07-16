@@ -47,7 +47,7 @@ module Attributor
 
     def self.define_writer(name)
       attribute = self.attributes[name]
-      context = ["assignment","of(#{name})"]
+      context = ["assignment","of(#{name})"].freeze
       # note: paradoxically, using define_method ends up being faster for the writer
       #       attribute is captured by the block, saving us from having to retrieve it from
       #       the class's attributes hash on each write.
@@ -136,11 +136,11 @@ module Attributor
 
 
     # Model-specific decoding and coercion of the attribute.
-    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT)
+    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
       return value if value.nil?
       return value if value.kind_of?(self.native_type)
 
-      context = [context] if context.is_a? ::String
+      context = Array(context)
       
       hash = case value
       when ::String

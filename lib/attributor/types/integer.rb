@@ -34,11 +34,9 @@ module Attributor
       rand(max-min+1) + min
     end
 
-    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT)
-      if value.is_a?(::String)
-        return Integer(value)
-      end
-
+    def self.load(value, context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
+      Integer(value)
+    rescue TypeError
       super
     end
 

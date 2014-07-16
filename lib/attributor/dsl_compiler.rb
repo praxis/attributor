@@ -19,6 +19,9 @@ module Attributor
       @attributes={}
     end
 
+    def keys
+      @attributes
+    end
 
     def parse(&block)
       self.instance_eval(&block) if block
@@ -26,38 +29,13 @@ module Attributor
     end
 
 
-    # Creates an Attributor:Attribute with given definition.
-    #
-    # @overload attribute(name, type, opts, &block)
-    #   With an explicit type.
-    #   @param [symbol] name describe name param
-    #   @param [Attributor::Type] type describe type param
-    #   @param [Hash] opts describe opts param
-    #   @param [Block] block describe block param
-    #   @example
-    #     attribute :email, String, example: /[:email:]/
-    # @overload attribute(name, opts, &block)
-    #   Assume a type of Attributor::Struct
-    #   @param [symbol] name describe name param
-    #   @param [Hash] opts describe opts param
-    #   @param [Block] block describe block param
-    #   @example
-    #     attribute :address do
-    #       attribute :number, String
-    #       attribute :street, String
-    #       attribute :city, String
-    #       attribute :state, String
-    #     end
-    def attribute(name, attr_type=nil, **opts, &block)
-      raise AttributorException, "Attribute names must be symbols, got: #{name.inspect}" unless name.kind_of? ::Symbol
-
+    def define(name, attr_type=nil, **opts, &block)
       if (existing_attribute = attributes[name])
         if existing_attribute.attributes
           existing_attribute.type.attributes(&block)
           return existing_attribute
         end
       end
-
 
       if (reference = self.options[:reference])
         inherited_attribute = reference.attributes[name]
@@ -83,5 +61,40 @@ module Attributor
 
       return attributes[name] = Attributor::Attribute.new(attr_type, opts, &block)
     end
+
+    # Creates an Attributor:Attribute with given definition.
+    #
+    # @overload attribute(name, type, opts, &block)
+    #   With an explicit type.
+    #   @param [symbol] name describe name param
+    #   @param [Attributor::Type] type describe type param
+    #   @param [Hash] opts describe opts param
+    #   @param [Block] block describe block param
+    #   @example
+    #     attribute :email, String, example: /[:email:]/
+    # @overload attribute(name, opts, &block)
+    #   Assume a type of Attributor::Struct
+    #   @param [symbol] name describe name param
+    #   @param [Hash] opts describe opts param
+    #   @param [Block] block describe block param
+    #   @example
+    #     attribute :address do
+    #       attribute :number, String
+    #       attribute :street, String
+    #       attribute :city, String
+    #       attribute :state, String
+    #     end
+    def attribute(name, attr_type=nil, **opts, &block)
+      raise AttributorException, "Attribute names must be symbols, got: #{name.inspect}" unless name.kind_of? ::Symbol
+      define(name, attr_type, **opts, &block)
+    end
+
+    def key(name, attr_type=nil, **opts, &block)
+      unless name.kind_of?(options.fetch(:key_type, Attributor::Object).native_type)
+        raise "Invalid key: #{name.inspect}, must be instance of #{options[:key_type].native_type.name}"
+      end
+      define(name, attr_type, **opts, &block)
+    end
+
   end
 end

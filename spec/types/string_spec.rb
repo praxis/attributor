@@ -26,18 +26,12 @@ describe Attributor::String do
     context 'for incoming String values' do
 
       it 'returns the incoming value' do
-        ['', 'foo', '0.0', '-1.0', '1.0', '1e-10'].each do |value|
-          type.load(value).should be(value)
+        ['', 'foo', '0.0', '-1.0', '1.0', '1e-10', 1].each do |value|
+          type.load(value).should eq(String(value))
         end
       end
     end
 
-    context 'for incoming Integer values' do
-      let(:value) { 1 }
-      it 'raises an error' do
-        expect { type.load(value) }.to raise_error(/String cannot load value/)
-      end
-    end
   end
 
   context 'for incoming Symbol values' do

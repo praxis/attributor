@@ -16,7 +16,7 @@ module Attributor
         return self.load(/[:date:]/.gen, context)
       end
 
-      def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT)
+      def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
         # We assume that if the value is already in the right type, we've decoded it already
         return value if value.is_a?(self.native_type)
         return value.to_datetime if value.is_a?(::Time)

@@ -1,16 +1,29 @@
 module Attributor
   class Hash
-    include Container
+    extend Forwardable
 
-    def self.native_type
-      return ::Hash
-    end
+    include Container
+    include Enumerable
+
+    # def self.native_type
+    #   return ::Hash
+    # end
 
     @key_type = Object
     @value_type = Object
+    @saved_dsl = []
+    @saved_options = {}
 
     class <<self
-       attr_reader :key_type, :value_type
+      attr_reader :key_type, :value_type
+    end
+
+    def self.native_type
+      self
+    end
+
+    def self.valid_type?(type)
+      type.kind_of?(self) || type.kind_of?(::Hash)
     end
 
     # @example Hash.of(key: String, value: Integer)
@@ -28,20 +41,36 @@ module Attributor
           raise Attributor::AttributorException.new("Hashes only support value types that are Attributor::Types. Got #{resolved_value_type.name}")
         end
       end
-      
+
       Class.new(self) do
         @key_type = resolved_key_type
         @value_type = resolved_value_type
+        @keys = nil
       end
     end
-    
-   
-        
+
+
+    def self.construct(key_spec,  **options)
+      if options.key?(:value_type)
+        raise "Specifying :value_type option is not compatible with pre-defined keys."
+      end
+
+      klass = self.of(key: options.fetch(:key_type, Object))
+
+      if options.key? :key_type
+        options[:key_type] = klass.key_type
+      end
+            
+      klass.keys(options, &key_spec)
+      klass
+    end
+
+
     def self.example(context=nil, options: {})
       result = ::Hash.new
       # Let's not bother to generate any hash contents if there's absolutely no type defined
       return result if ( key_type == Object && value_type == Object )
-      
+
       size = rand(3) + 1
       context ||= ["#{Hash}-#{rand(10000000)}"]
 
@@ -53,6 +82,7 @@ module Attributor
 
       result
     end
+
 
     def self.dump(value, **opts)
       return nil if value.nil?
@@ -75,8 +105,9 @@ module Attributor
         :unknown
       end
     end
-    
-    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT)
+
+
+    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
       if value.nil?
         return nil
       elsif value.is_a?(::Hash)
@@ -84,19 +115,102 @@ module Attributor
       elsif value.is_a?(::String)
         loaded_value = decode_json(value,context)
       else
-        raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self 
+        raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self
       end
 
-      return loaded_value if ( key_type == Object && value_type == Object )
-      
-      loaded_value.each_with_object({}) do| (k, v), obj |
+      return self.from_hash(loaded_value,context) if self.keys.any?
+      return self.new(loaded_value) if (key_type == Object && value_type == Object)
+
+      loaded_value.each_with_object(self.new) do| (k, v), obj |
         obj[self.key_type.load(k,context)] = self.value_type.load(v,context)
+      end
+
+    end
+
+    def self.generate_subcontext(context, key_name)
+      context + ["get(#{key_name.inspect})"]
+    end
+
+    def self.from_hash(object,context)
+      hash = self.new
+
+      object.each do |k,v|
+        hash_key = @key_type.load(k)
+
+        hash_attribute = self.keys.fetch(hash_key) do
+          raise AttributorException, "Unknown key received: #{k.inspect} while loading #{Attributor.humanize_context(context)}"
+        end
+
+        sub_context = self.generate_subcontext(context,hash_key)
+        hash[hash_key] = hash_attribute.load(v, sub_context)
+      end
+
+
+      self.keys.each do |key_name, attribute|
+        next if hash.key?(key_name)
+        sub_context = self.generate_subcontext(context,key_name)
+        hash[key_name] = attribute.load(nil, sub_context)
+      end
+
+      hash
+    end
+
+
+    def self.keys(**options, &key_spec)
+      if block_given?
+        @keys = nil
+        @saved_dsl << key_spec
+        @saved_options.merge!(options)
+      else
+        @keys ||= self.definition.keys
+      end
+    end
+
+    def self.options
+      @saved_options
+    end
+
+    def self.definition(options=nil, block=nil)
+      @compiled_class_block ||= dsl_class.new(@saved_options)
+
+      while (dsl = @saved_dsl.shift)
+        @compiled_class_block.parse(&dsl)
+      end
+
+      @compiled_class_block
+    end
+
+    def self.dsl_class
+      @saved_options[:dsl_compiler] || DSLCompiler
+    end
+
+    def self.inherited(klass)
+      k = self.key_type
+      v = self.value_type
+
+      klass.instance_eval do
+        @saved_dsl = [] 
+        @saved_options = {}
+        @key_type = k
+        @value_type = v
       end
     end
 
     # TODO: chance value_type and key_type to be attributes?
-    # TODO: add a validate, which simply validates that the incoming keys and values are of the right type. 
+    # TODO: add a validate, which simply validates that the incoming keys and values are of the right type.
     #       Think about the format of the subcontexts to use: let's use .at(key.to_s)
-     
+
+    attr_reader :contents
+    def_delegators :@contents, :[], :[]=, :each, :size, :keys, :key?
+
+    def initialize(contents={})
+      @contents = contents
+    end
+
+    def ==(other)
+      contents == other || (other.respond_to?(:contents) ? contents == other.contents : false)
+    end
+
   end
+
 end
