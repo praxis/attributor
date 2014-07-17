@@ -15,7 +15,7 @@ describe Attributor::Hash do
     end
 
     context 'for a typed hash' do
-      subject(:example){ Attributor::Hash.of( value: Integer).example}
+      subject(:example){ Attributor::Hash.of(value: Integer).example}
       it 'returns a hash with keys and/or values of the right type' do
         example.should be_kind_of(::Hash)
         example.keys.size.should > 0
@@ -69,7 +69,7 @@ describe Attributor::Hash do
     end
 
     context 'for a partially typed hash' do
-      subject(:type){ Attributor::Hash.of( value: Integer) }
+      subject(:type){ Attributor::Hash.of(value: Integer) }
       context 'with good values' do
         let(:value) { {one: '1', [1,2,3] => 3} }
         it 'coerces only values into the correct types (and leave keys alone)' do
@@ -156,7 +156,7 @@ describe Attributor::Hash do
           end
         end
 
-        subject(:type) { Attributor::Hash.construct(block, key_type: String) }
+        subject(:type) { Attributor::Hash.of(key: String).construct(block) }
         let(:value) do
           {'a string' => 12, 1 => '2', :some_date => date.to_s}
         end
@@ -180,7 +180,7 @@ describe Attributor::Hash do
 
       it 'raises an error' do
         expect {
-          Attributor::Hash.construct(block, key_type: String).keys
+          Attributor::Hash.of(key:String).construct(block).keys
         }.to raise_error(/Invalid key: :some_date, must be instance of String/)
       end
 

@@ -50,19 +50,18 @@ module Attributor
     end
 
 
-    def self.construct(key_spec,  **options)
-      if options.key?(:value_type)
-        raise "Specifying :value_type option is not compatible with pre-defined keys."
-      end
+    def self.construct(constructor_block,  **options)
+      return self if constructor_block.nil?
 
-      klass = self.of(key: options.fetch(:key_type, Object))
+      #klass = self.of(key: options.fetch(:key_type, Object))
 
-      if options.key? :key_type
-        options[:key_type] = klass.key_type
-      end
-            
-      klass.keys(options, &key_spec)
-      klass
+      #if options.key? :key_type
+      #  options[:key_type] = self.key_type
+      #end
+
+      self.keys(options, &constructor_block)
+      self
+
     end
 
 
@@ -171,7 +170,13 @@ module Attributor
     end
 
     def self.definition(options=nil, block=nil)
-      @compiled_class_block ||= dsl_class.new(@saved_options)
+      opts = {
+        :key_type => @key_type,
+        :value_type => @value_type
+      }.merge(@saved_options)
+
+
+      @compiled_class_block ||= dsl_class.new(opts)
 
       while (dsl = @saved_dsl.shift)
         @compiled_class_block.parse(&dsl)
@@ -189,7 +194,7 @@ module Attributor
       v = self.value_type
 
       klass.instance_eval do
-        @saved_dsl = [] 
+        @saved_dsl = []
         @saved_options = {}
         @key_type = k
         @value_type = v
