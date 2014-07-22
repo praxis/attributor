@@ -8,7 +8,7 @@ module Attributor
     include Type
 
     def self.native_type
-      return ::Object
+      return ::BasicObject
     end
 
     def self.example(context=nil, options:{})

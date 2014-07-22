@@ -3,14 +3,15 @@ require File.join(File.dirname(__FILE__), 'spec_helper.rb')
 
 describe Attributor::DSLCompiler do
 
+  let(:target) { double("model", attributes: {}) }
 
   let(:dsl_compiler_options) { {} }
-  subject(:dsl_compiler) { Attributor::DSLCompiler.new(dsl_compiler_options) }
+  subject(:dsl_compiler) { Attributor::DSLCompiler.new(target, dsl_compiler_options) }
 
   let(:attribute_name) { :name }
   let(:type) { Attributor::String }
 
-  let!(:reference_attributes) { Turducken.definition.attributes }
+  let!(:reference_attributes) { Turducken.attributes }
   let(:reference_type) { reference_attribute.type }
   let(:reference_attribute_options) { reference_attribute.options }
   let(:reference_attribute) {reference_attributes[attribute_name] }
@@ -22,10 +23,7 @@ describe Attributor::DSLCompiler do
     let(:expected_type) { type }
 
     context 'when not not given a block for a sub-definition' do
-
-
       context 'without a reference' do
-
         it 'raises an error for a missing type' do
           expect {
             dsl_compiler.attribute(attribute_name)

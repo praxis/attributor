@@ -5,7 +5,7 @@ describe Attributor::Attribute do
 
   let(:attribute_options) { Hash.new }
   let(:type) { AttributeType }
-  
+
   subject(:attribute) { Attributor::Attribute.new(type, attribute_options) }
 
   let(:context) { ["context"] }
@@ -37,12 +37,12 @@ describe Attributor::Attribute do
 
   context '==' do
     let(:other_attribute) { Attributor::Attribute.new(type, attribute_options) }
-    it { should == other_attribute}    
+    it { should == other_attribute}
   end
 
   context 'describe' do
     let(:attribute_options) { {:required => true, :values => ["one"], :description => "something", :min => 0} }
-    let(:expected) do 
+    let(:expected) do
       h = {:type => {:name => type.name} }
       common = attribute_options.select{|k,v| Attributor::Attribute::TOP_LEVEL_OPTIONS.include? k }
       h.merge!( common )
@@ -394,12 +394,12 @@ describe Attributor::Attribute do
 
     context 'for an attribute for a subclass of Model' do
       let(:type) { Chicken }
-      let(:type_options) { Chicken.definition.options }
+      let(:type_options) { Chicken.options }
 
       subject(:attribute) { Attributor::Attribute.new(type, attribute_options) }
 
       it 'has attributes' do
-        attribute.attributes.should == type.definition.attributes
+        attribute.attributes.should == type.attributes
       end
 
       #it 'has compiled_definition' do
@@ -443,7 +443,7 @@ describe Attributor::Attribute do
 
       context '#validate' do
         let(:chicken) { Chicken.example }
-        let(:type_attributes) { type.definition.attributes }
+        let(:type_attributes) { type.attributes }
 
         it 'validates sub-attributes' do
           errors = attribute.validate(chicken)
@@ -467,7 +467,7 @@ describe Attributor::Attribute do
       context '#validate_missing_value' do
         let(:type) { Duck }
         let(:attribute_name) { nil }
-        let(:attribute) { Duck.definition.attributes[attribute_name] }
+        let(:attribute) { Duck.attributes[attribute_name] }
 
         let(:attribute_context) { ['$','duck',"#{attribute_name}"] }
         subject(:errors) { attribute.validate_missing_value(attribute_context) }
@@ -572,13 +572,13 @@ describe Attributor::Attribute do
 
     context 'of a Model (or Struct) type' do
       subject(:attribute) { Attributor::Attribute.new(type, attribute_options, &attribute_block)  }
-      
-      let(:attribute_block) { Proc.new{ attribute :angry , required: true } }  
+
+      let(:attribute_block) { Proc.new{ attribute :angry , required: true } }
       let(:attribute_options) { {reference: Chicken, member_options: member_options} }
       let(:member_type) { Attributor::Struct }
       let(:type) { Attributor::Collection.of(member_type) }
       let(:member_options) { {} }
-      
+
 
       context 'the member_attribute of that type' do
         subject(:member_attribute) { attribute.type.member_attribute }
@@ -590,7 +590,7 @@ describe Attributor::Attribute do
           member_attribute.attributes[:angry].options.should eq(Chicken.attributes[:angry].options.merge(required: true))
         end
       end
-      
+
     end
   end
 

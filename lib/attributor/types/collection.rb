@@ -120,7 +120,6 @@ module Attributor
 
     # @param values [Array] Array of values to validate
     def self.validate(values, context=Attributor::DEFAULT_ROOT_CONTEXT, attribute=nil)
-
       values.each_with_index.collect do |value, i|
         subcontext = context + ["at(#{i})"]
         self.member_attribute.validate(value, subcontext)

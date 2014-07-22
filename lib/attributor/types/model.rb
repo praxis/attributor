@@ -8,12 +8,19 @@ module Attributor
     undef :timeout
     undef :format
 
+
     def self.inherited(klass)
       klass.instance_eval do
-        @saved_dsl = []
-        @saved_options = {}
+        @saved_blocks = []
+        @options = {}
+        @attributes = {}
       end
     end
+
+    class << self
+      attr_reader :options
+    end
+
 
     # Define accessors for attribute of given name.
     #
@@ -53,9 +60,9 @@ module Attributor
       #       the class's attributes hash on each write.
       module_eval do
         define_method(name.to_s + "=") do |value|
-          # TODO: what type of context do we report with unscoped assignments? 
+          # TODO: what type of context do we report with unscoped assignments?
           #  => for now this would report "assignment.of(field_name)" is that good?
-          @attributes[name] = attribute.load(value,context) 
+          @attributes[name] = attribute.load(value,context)
         end
       end
     end
@@ -63,7 +70,7 @@ module Attributor
 
     def self.describe(shallow=false)
       hash = super
-      
+
       # Spit attributes if it's the root or if it's an anonymous structures
       if ( !shallow || self.name == nil) && self.attributes
         hash[:attributes] = self.attributes.each_with_object({}) do |(sub_name, sub_attribute), sub_attributes|
@@ -86,7 +93,7 @@ module Attributor
       else
         context
       end
-            
+
       example_depth = context.size
 
       self.attributes.each do |sub_attribute_name,sub_attribute|
@@ -96,13 +103,13 @@ module Attributor
         end
 
         sub_context = self.generate_subcontext(context,sub_attribute_name)
-        
-        result.lazy_attributes[sub_attribute_name] = Proc.new do 
+
+        result.lazy_attributes[sub_attribute_name] = Proc.new do
           value = values.fetch(sub_attribute_name) do
             sub_attribute.example(sub_context, parent: result)
           end
 
-          sub_attribute.load(value,sub_context) 
+          sub_attribute.load(value,sub_context)
         end
       end
 
@@ -116,7 +123,6 @@ module Attributor
     def self.native_type
       self
     end
-
 
     def self.check_option!(name, value)
       case name
@@ -141,19 +147,19 @@ module Attributor
       return value if value.kind_of?(self.native_type)
 
       context = Array(context)
-      
+
       hash = case value
       when ::String
         # Strings are assumed to be JSON-serialized for now.
         begin
           JSON.parse(value)
-        rescue 
-          raise DeserializationError, context: context, from: value.class, encoding: "JSON" , value: value            
+        rescue
+          raise DeserializationError, context: context, from: value.class, encoding: "JSON" , value: value
         end
       when ::Hash
         value
       else
-        raise IncompatibleTypeError,  context: context, value_type: value.class, type: self 
+        raise IncompatibleTypeError,  context: context, value_type: value.class, type: self
       end
 
       self.from_hash(hash,context)
@@ -169,9 +175,9 @@ module Attributor
         sub_context = self.generate_subcontext(context,attribute_name)
         model.attributes[attribute_name] = attribute.load(hash[attribute_name] || hash[attribute_name.to_s], sub_context)
       end
-      
+
       unknown_keys = hash.keys.collect {|k| k.to_sym} - self.attributes.keys
-      
+
       if unknown_keys.any?
         raise AttributorException, "Unknown attributes received: #{unknown_keys.inspect} while loading #{Attributor.humanize_context(context)}"
       end
@@ -183,30 +189,19 @@ module Attributor
     # This will be a lazy definition. So we'll only save it in an instance class var for later.
     def self.attributes(opts={},&block)
       if block_given?
-        @attributes = nil
-        @saved_dsl << block
-        @saved_options.merge!(opts)
-      else
-        @attributes ||= self.definition.attributes
+        @saved_blocks.push(block)
+        @options.merge!(opts)
+      elsif @saved_blocks.any?
+        self.definition
       end
-    end
 
-
-    def self.options
-      # FIXME: this seems like a really dumb way to do this. Needed because definition is lazy.
-      @saved_options
-      # if @compiled_class_block
-      #   @options ||= self.definition.options
-      # else
-      #   @saved_options
-      # end
+      @attributes
     end
 
 
     def self.validate(object,context=Attributor::DEFAULT_ROOT_CONTEXT,_attribute)
-      
       context = [context] if context.is_a? ::String
-      
+
       unless object.kind_of?(self)
         raise ArgumentError, "#{self.name} can not validate object of type #{object.class.name} for #{Attributor.humanize_context(context)}."
       end
@@ -216,31 +211,25 @@ module Attributor
 
 
     def self.dsl_class
-      @saved_options[:dsl_compiler] || DSLCompiler
+      @options[:dsl_compiler] || DSLCompiler
     end
-    
+
     # Returns the "compiled" definition for the model.
     # By "compiled" I mean that it will create a new Compiler object with the saved options and saved block that has been passed in the 'attributes' method. This compiled object is memoized (remember, there's one instance of a compiled definition PER MODEL CLASS).
     # TODO: rework this with Model.finalize! support.
-    def self.definition( options=nil, block=nil )
-      raise AttributorException, "Blueprint structures cannot take extra block definitions" if block
-      raise AttributorException, "Models cannot take additional attribute options (options already defined in the Model )" if options
+    def self.definition
+      blocks = @saved_blocks.shift(@saved_blocks.size)
 
-      @compiled_class_block ||= dsl_class.new(@saved_options)
-      
-      while (dsl = @saved_dsl.shift)
-        @compiled_class_block.parse(&dsl)
-      end
+      compiler = dsl_class.new(self, self.options)
+      compiler.parse(*blocks)
 
-      @compiled_class_block
+      nil
     end
-
 
     attr_reader :lazy_attributes, :validating, :dumping
 
 
     def initialize( data = nil)
-
       @lazy_attributes = ::Hash.new
       @validating = false
       @dumping = false
@@ -254,24 +243,24 @@ module Attributor
 
 
     # TODO: memoize validation results here, but only after rejiggering how we store the context.
-    #       Two calls to validate() with different contexts should return get the same errors, 
+    #       Two calls to validate() with different contexts should return get the same errors,
     #       but with their respective contexts.
     def validate(context=Attributor::DEFAULT_ROOT_CONTEXT)
-      
+
       raise AttributorException, "validation conflict" if @validating
       @validating = true
-      
+
       context = [context] if context.is_a? ::String
-      
+
       self.class.attributes.each_with_object(Array.new) do |(sub_attribute_name, sub_attribute), errors|
         sub_context = self.class.generate_subcontext(context,sub_attribute_name)
-  
+
         value = self.send(sub_attribute_name)
         if value.respond_to?(:validating) # really, it's a thing with sub-attributes
           next if value.validating
         end
 
-        errors.push *sub_attribute.validate(self.send(sub_attribute_name), sub_context)
+        errors.push *sub_attribute.validate(value, sub_context)
       end
     ensure
       @validating = false
@@ -280,7 +269,7 @@ module Attributor
 
     def attributes
       @lazy_attributes.keys.each do |name|
-        self.send(name)  
+        self.send(name)
       end
       @attributes
     end
@@ -290,7 +279,7 @@ module Attributor
       attribute_name = name.to_s
       attribute_name.chomp!('=')
 
-      return true if self.class.definition.attributes.key?(attribute_name.to_sym)
+      return true if self.class.attributes.key?(attribute_name.to_sym)
 
       super
     end
@@ -300,7 +289,7 @@ module Attributor
       attribute_name = name.to_s
       attribute_name.chomp!('=')
 
-      if self.class.definition.attributes.has_key?(attribute_name.to_sym)
+      if self.class.attributes.has_key?(attribute_name.to_sym)
         self.class.define_accessors(attribute_name)
         return self.send(name, *args)
       end
@@ -316,7 +305,7 @@ module Attributor
 
       self.attributes.each_with_object({}) do |(name, value), result|
         attribute = self.class.attributes[name]
-                
+
         result[name.to_sym] = attribute.dump(value, context: context + [name] )
       end
     ensure

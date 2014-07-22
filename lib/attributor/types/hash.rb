@@ -5,17 +5,53 @@ module Attributor
     include Container
     include Enumerable
 
-    # def self.native_type
-    #   return ::Hash
-    # end
+    class << self
+      attr_reader :key_type, :value_type, :options
+    end
 
     @key_type = Object
     @value_type = Object
-    @saved_dsl = []
-    @saved_options = {}
+    @saved_blocks = []
+    @options = {}
+    @keys = {}
 
-    class <<self
-      attr_reader :key_type, :value_type
+
+    def self.inherited(klass)
+      k = self.key_type
+      v = self.value_type
+
+      klass.instance_eval do
+        @saved_blocks = []
+        @options = {}
+        @keys = {}
+        @key_type = k
+        @value_type = v
+      end
+    end
+
+    def self.keys(**options, &key_spec)
+      if block_given?
+        @saved_blocks << key_spec
+        @options.merge!(options)
+      elsif @saved_blocks.any?
+        self.definition
+      end
+      @keys
+    end
+
+    def self.definition
+      opts = {
+        :key_type => @key_type,
+        :value_type => @value_type
+      }.merge(@options)
+
+      blocks = @saved_blocks.shift(@saved_blocks.size)
+      compiler = dsl_class.new(self, opts)
+      compiler.parse(*blocks)
+    end
+
+    def self.dsl_class
+      @options[:dsl_compiler] || DSLCompiler
     end
 
     def self.native_type
@@ -45,7 +81,8 @@ module Attributor
       Class.new(self) do
         @key_type = resolved_key_type
         @value_type = resolved_value_type
-        @keys = nil
+        @concrete = true
+        @keys = {}
       end
     end
 
@@ -53,15 +90,13 @@ module Attributor
     def self.construct(constructor_block,  **options)
       return self if constructor_block.nil?
 
-      #klass = self.of(key: options.fetch(:key_type, Object))
-
-      #if options.key? :key_type
-      #  options[:key_type] = self.key_type
-      #end
+      unless @concrete
+        return self.of(key:self.key_type, value: self.value_type)
+        .construct(constructor_block,**options)
+      end
 
       self.keys(options, &constructor_block)
       self
-
     end
 
 
@@ -100,6 +135,8 @@ module Attributor
         :ok
       when :value_type
         :ok
+      when :reference
+        :ok # FIXME ... actually do something smart
       else
         :unknown
       end
@@ -144,7 +181,6 @@ module Attributor
         hash[hash_key] = hash_attribute.load(v, sub_context)
       end
 
-
       self.keys.each do |key_name, attribute|
         next if hash.key?(key_name)
         sub_context = self.generate_subcontext(context,key_name)
@@ -155,51 +191,17 @@ module Attributor
     end
 
 
-    def self.keys(**options, &key_spec)
-      if block_given?
-        @keys = nil
-        @saved_dsl << key_spec
-        @saved_options.merge!(options)
-      else
-        @keys ||= self.definition.keys
-      end
-    end
+    def self.validate(object,context=Attributor::DEFAULT_ROOT_CONTEXT,_attribute)
+      context = [context] if context.is_a? ::String
 
-    def self.options
-      @saved_options
-    end
-
-    def self.definition(options=nil, block=nil)
-      opts = {
-        :key_type => @key_type,
-        :value_type => @value_type
-      }.merge(@saved_options)
-
-
-      @compiled_class_block ||= dsl_class.new(opts)
-
-      while (dsl = @saved_dsl.shift)
-        @compiled_class_block.parse(&dsl)
+      unless object.kind_of?(self)
+        raise ArgumentError, "#{self.name} can not validate object of type #{object.class.name} for #{Attributor.humanize_context(context)}."
       end
 
-      @compiled_class_block
+      object.validate(context)
     end
 
-    def self.dsl_class
-      @saved_options[:dsl_compiler] || DSLCompiler
-    end
 
-    def self.inherited(klass)
-      k = self.key_type
-      v = self.value_type
-
-      klass.instance_eval do
-        @saved_dsl = []
-        @saved_options = {}
-        @key_type = k
-        @value_type = v
-      end
-    end
 
     # TODO: chance value_type and key_type to be attributes?
     # TODO: add a validate, which simply validates that the incoming keys and values are of the right type.
@@ -214,6 +216,43 @@ module Attributor
 
     def ==(other)
       contents == other || (other.respond_to?(:contents) ? contents == other.contents : false)
+    end
+
+
+    def validate(context=Attributor::DEFAULT_ROOT_CONTEXT)
+      context = [context] if context.is_a? ::String
+
+
+      if self.class.keys.any?
+        extra_keys = @contents.keys - self.class.keys.keys
+        if extra_keys.any?
+          return extra_keys.collect do |k|
+            "#{Attributor.humanize_context(context)} can not have key: #{k.inspect}"
+          end
+        end
+
+        self.class.keys.each_with_object(Array.new) do |(key, attribute), errors|
+          sub_context = self.class.generate_subcontext(context,key)
+
+          value = @contents[key]
+
+          if value.respond_to?(:validating) # really, it's a thing with sub-attributes
+            next if value.validating
+          end
+
+          errors.push *attribute.validate(value, sub_context)
+        end
+      else
+        @contents.each_with_object(Array.new) do |(key, value), errors|
+          sub_context = self.class.generate_subcontext(context,key)
+          errors.push *@key_type.validate(key, sub_context) unless @key_type == Attributor::Object
+          errors.push *@value_type.validate(value, sub_context)  unless @value_type == Attributor::Object
+        end
+      end
+    end
+
+    def dump(*args)
+      # TODO
     end
 
   end

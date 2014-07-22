@@ -121,6 +121,8 @@ describe Attributor::Hash do
 
     subject(:type) { Attributor::Hash.construct(block) }
 
+    it { should_not be(Attributor::Hash)
+    }
 
     context 'loading' do
       let(:date) { DateTime.parse("2014-07-15") }
@@ -238,6 +240,10 @@ describe Attributor::Hash do
       end
 
     end
+  end
+
+  context '#validate' do
+    it 'has specs'
   end
 
   context 'in an Attribute' do

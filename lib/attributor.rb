@@ -27,8 +27,15 @@ module Attributor
   require_relative 'attributor/types/float'
   require_relative 'attributor/types/collection'
   require_relative 'attributor/types/hash'
+
+
   require_relative 'attributor/types/csv'
   require_relative 'attributor/types/ids'
+
+  # TODO: move these to 'optional types' or 'extra types'... location
+  require_relative 'attributor/types/tempfile'
+  require_relative 'attributor/types/file_upload'
+
 
   # List of all basic types (i.e. not collections, structs or models)
 

@@ -5,13 +5,13 @@ describe Attributor::Model do
   context 'class methods' do
     subject(:chicken) { Chicken }
     let(:context){ ["root","subattr"] }
-    
+
     its(:native_type) { should eq(Chicken) }
 
     context '.example'  do
       subject(:chicken) { Chicken.example }
 
-      let(:age_opts) { {options: Chicken.definition.attributes[:age].options } }
+      let(:age_opts) { {options: Chicken.attributes[:age].options } }
       let(:age) { /\d{2}/.gen.to_i }
 
       context 'for a simple model' do
@@ -86,7 +86,7 @@ describe Attributor::Model do
           # but simple attributes will be generated
           terminal_child.name.should_not be(nil)
         end
-        
+
 
       end
     end
@@ -96,7 +96,7 @@ describe Attributor::Model do
       subject(:definition) { Chicken.definition }
 
       context '#attributes' do
-        subject(:attributes) { definition.attributes }
+        subject(:attributes) { Chicken.attributes }
         it { should have_key :age }
         it { should have_key :email }
       end
@@ -202,7 +202,7 @@ describe Attributor::Model do
 
     context 'initialize' do
 
-      subject(:chicken) { Chicken.new( attributes_data ) } 
+      subject(:chicken) { Chicken.new( attributes_data ) }
       context 'supports passing an initial hash object for attribute values' do
         let(:attributes_data){ {age: '1', email:'rooster@coup.com'} }
         it 'and sets them in loaded format onto the instance attributes' do
@@ -213,7 +213,7 @@ describe Attributor::Model do
           subject.age.should be(1)
           subject.email.should be(attributes_data[:email])
         end
-      end 
+      end
       context 'supports passing a JSON encoded data object' do
         let(:attributes_hash){ {age: 1, email:'rooster@coup.com'} }
         let(:attributes_data){ JSON.dump(attributes_hash) }
@@ -326,7 +326,7 @@ describe Attributor::Model do
     context 'with circular references' do
       subject(:person) { Person.example }
       let(:output) { person.dump }
-      
+
       it 'terminates' do
         expect {
           Person.example.dump
@@ -336,10 +336,9 @@ describe Attributor::Model do
       it 'outputs "..." for circular references' do
         person.address.person.should be(person)
         output[:address][:person].should eq(Attributor::Model::CIRCULAR_REFERENCE_MARKER)
-      end 
+      end
 
     end
-
 
   end
 
