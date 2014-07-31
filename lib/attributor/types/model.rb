@@ -8,6 +8,13 @@ module Attributor
     undef :timeout
     undef :format
 
+    if defined?(:namespace)
+      # conflict with 'rake' gem < 10.0 DSL. the rescue is needed because
+      # rake v10 appears to define this in a better way than v9 and although it
+      # is defined?=true it doesn't need to be undef'd
+      undef :namespace rescue nil
+    end
+
     def self.inherited(klass)
       klass.instance_eval do
         @saved_dsl = []
