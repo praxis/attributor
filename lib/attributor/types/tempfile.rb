@@ -22,7 +22,7 @@ module Attributor
       when ::String
         name = Attributor.humanize_context(context)
 
-        file = Tempfile.new(name)
+        file = ::Tempfile.new(name)
         file.write(value)
         file.rewind
         return file
@@ -31,6 +31,6 @@ module Attributor
       super
     end
 
-    
+
   end
 end

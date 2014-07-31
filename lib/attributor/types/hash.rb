@@ -63,7 +63,7 @@ module Attributor
     end
 
     # @example Hash.of(key: String, value: Integer)
-    def self.of(key: Object, value: Object)
+    def self.of(key: @key_type, value: @value_type)
       if key
         resolved_key_type = Attributor.resolve_type(key)
         unless resolved_key_type.ancestors.include?(Attributor::Type)
@@ -92,7 +92,7 @@ module Attributor
 
       unless @concrete
         return self.of(key:self.key_type, value: self.value_type)
-        .construct(constructor_block,**options)
+                   .construct(constructor_block,**options)
       end
 
       self.keys(options, &constructor_block)
@@ -101,20 +101,31 @@ module Attributor
 
 
     def self.example(context=nil, options: {})
-      result = ::Hash.new
+      return self.new if ( key_type == Object && value_type == Object )
+
+      hash = ::Hash.new
       # Let's not bother to generate any hash contents if there's absolutely no type defined
-      return result if ( key_type == Object && value_type == Object )
 
-      size = rand(3) + 1
-      context ||= ["#{Hash}-#{rand(10000000)}"]
+      if self.keys.any?
+        self.keys.each do |sub_name, sub_attribute|
+          subcontext = context + ["at(#{sub_name})"]
+          hash[sub_name] = sub_attribute.example(subcontext)
+        end
+      else
 
-      size.times do |i|
-        example_key = key_type.example(context + ["at(#{i})"])
-        subcontext = context + ["at(#{example_key})"]
-        result[example_key] = value_type.example(subcontext)
+        size = rand(3) + 1
+
+        context ||= ["#{Hash}-#{rand(10000000)}"]
+        context = Array(context)
+
+        size.times do |i|
+          example_key = key_type.example(context + ["at(#{i})"])
+          subcontext = context + ["at(#{example_key})"]
+          hash[example_key] = value_type.example(subcontext)
+        end
       end
 
-      result
+      self.new(hash)
     end
 
 
@@ -201,14 +212,33 @@ module Attributor
       object.validate(context)
     end
 
+    def self.describe(shallow=false)
+      hash = super
 
+      if key_type
+        hash[:key] = {type: key_type.describe}
+      end
+
+      if self.keys.any?
+        # Spit keys if it's the root or if it's an anonymous structures
+        if ( !shallow || self.name == nil) && self.keys.any?
+          # FIXME: change to :keys when the praxis doc browser supports displaying those. or josep's demo is over.
+          hash[:attributes] = self.keys.each_with_object({}) do |(sub_name, sub_attribute), sub_attributes|
+            sub_attributes[sub_name] = sub_attribute.describe(true)
+          end
+        end
+      else
+        hash[:value] = {type: value_type.describe(true)}
+      end
+
+      hash
+    end
 
     # TODO: chance value_type and key_type to be attributes?
     # TODO: add a validate, which simply validates that the incoming keys and values are of the right type.
     #       Think about the format of the subcontexts to use: let's use .at(key.to_s)
-
     attr_reader :contents
-    def_delegators :@contents, :[], :[]=, :each, :size, :keys, :key?
+    def_delegators :@contents, :[], :[]=, :each, :size, :keys, :key?, :values, :empty?
 
     def initialize(contents={})
       @contents = contents
@@ -218,10 +248,8 @@ module Attributor
       contents == other || (other.respond_to?(:contents) ? contents == other.contents : false)
     end
 
-
     def validate(context=Attributor::DEFAULT_ROOT_CONTEXT)
       context = [context] if context.is_a? ::String
-
 
       if self.class.keys.any?
         extra_keys = @contents.keys - self.class.keys.keys
@@ -252,7 +280,9 @@ module Attributor
     end
 
     def dump(*args)
-      # TODO
+      @contents.each_with_object(::Hash.new) do |(k,v), hash|
+        hash[k] = self.class.value_type.dump(v)
+      end
     end
 
   end

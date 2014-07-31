@@ -9,17 +9,20 @@ describe Attributor::Hash do
 
   context '.example' do
     context 'for a simple hash' do
-      it 'returns an empty Hash' do
-        type.example.should eq(Hash.new)
-      end
+      subject(:example) { Attributor::Hash.example }
+
+      it { should be_kind_of(Attributor::Hash) }
+      it { should be_empty }
+      it { should eq(::Hash.new) }
     end
 
     context 'for a typed hash' do
       subject(:example){ Attributor::Hash.of(value: Integer).example}
+
       it 'returns a hash with keys and/or values of the right type' do
-        example.should be_kind_of(::Hash)
+        example.should be_kind_of(Attributor::Hash)
         example.keys.size.should > 0
-        example.values.all?{|v| v.kind_of? Integer}.should be(true)
+        example.values.all? {|v| v.kind_of? Integer}.should be(true)
       end
     end
   end
@@ -27,7 +30,6 @@ describe Attributor::Hash do
   context '.load' do
     let(:value) { {one: 'two', three: 4} }
     subject(:hash) { type.load(value) }
-
 
     context 'for a simple hash' do
       it { should eq(value) }
@@ -259,4 +261,74 @@ describe Attributor::Hash do
     end
 
   end
+
+  context '.describe' do
+    subject(:description) { type.describe }
+    context 'for hashes with key and value types' do
+      it 'describes the type correctly' do
+        description[:name].should eq('Hash')
+        description[:key].should eq(type:{name: 'Object'})
+        description[:value].should eq(type:{name: 'Object'})
+      end
+    end
+
+    context 'for hashes specific keys defined' do
+      let(:block) do
+        proc do
+          key 'a string', String
+          key '1', Integer, min: 1, max: 20
+          key 'some_date', DateTime
+          key 'defaulted', String, default: 'default value'
+        end
+      end
+
+      let(:type) { Attributor::Hash.of(key: String).construct(block) }
+
+      it 'describes the type correctly' do
+        description[:name].should eq('Hash')
+        description[:key].should eq(type:{name: 'String'})
+        description.should_not have_key(:value)
+
+        keys = description[:keys]
+
+        keys['a string'].should eq(type: {name: 'String'} )
+        keys['1'].should eq(type: {name: 'Integer'}, options: {min: 1, max: 20}  )
+        keys['some_date'].should eq(type: {name: 'DateTime' }) #
+        keys['defaulted'].should eq(type: {name: 'String'}, default: 'default value')
+      end
+    end
+  end
+
+  context '#dump' do
+    let(:key_type){ String }
+    let(:value_type){ Integer }
+    let(:hash) { {one: '2', 3 => 4} }
+    let(:type) { Attributor::Hash.of(key: key_type, value: value_type) }
+    let(:value) { type.load(hash) }
+
+    subject(:output) { value.dump }
+
+    it 'dumps the contents properly' do
+      output.should be_kind_of(::Hash)
+      output.should eq('one' => 2, '3' => 4)
+    end
+
+    context 'with a model as value type' do
+      let(:value_type) do
+        Class.new(Attributor::Model) do
+          attributes do
+            attribute :first, String
+            attribute :last, String
+          end
+        end
+      end
+      let(:hash) { {one: value_type.example} }
+
+      it 'works too' do
+        #pp output
+      end
+
+    end
+  end
+
 end
