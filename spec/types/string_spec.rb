@@ -5,7 +5,7 @@ describe Attributor::String do
   subject(:type) { Attributor::String }
 
   context '.native_type' do
-    it "should return String" do
+    it "returns String" do
       type.native_type.should be(::String)
     end
   end
@@ -18,6 +18,17 @@ describe Attributor::String do
     it "should return a valid String" do
       type.example.should be_a(::String)
     end
+
+    it 'handles regexps that Randexp can not' do
+      pending 'resolution of #72' do
+        regex = /\w+(,\w+)*/
+        expect {
+          val = Attributor::String.example(options:{regexp: regex})
+          val.should be_a(::String)
+        }.to_not raise_error
+      end
+    end
+
   end
 
   context '.load' do
