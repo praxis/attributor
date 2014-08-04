@@ -223,7 +223,7 @@ module Attributor
         # Spit keys if it's the root or if it's an anonymous structures
         if ( !shallow || self.name == nil) && self.keys.any?
           # FIXME: change to :keys when the praxis doc browser supports displaying those. or josep's demo is over.
-          hash[:attributes] = self.keys.each_with_object({}) do |(sub_name, sub_attribute), sub_attributes|
+          hash[:keys] = self.keys.each_with_object({}) do |(sub_name, sub_attribute), sub_attributes|
             sub_attributes[sub_name] = sub_attribute.describe(true)
           end
         end
