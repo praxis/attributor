@@ -7,10 +7,14 @@ module Attributor
 
     class << self
       attr_reader :key_type, :value_type, :options
+      attr_reader :value_attribute
+      attr_reader :key_attribute
     end
 
     @key_type = Object
     @value_type = Object
+    @value_attribute = Attribute.new(@key_type)
+    @key_attribute = Attribute.new(@value_type)
     @saved_blocks = []
     @options = {}
     @keys = {}
@@ -26,6 +30,8 @@ module Attributor
         @keys = {}
         @key_type = k
         @value_type = v
+        @value_attribute = Attribute.new(@key_type)
+        @key_attribute = Attribute.new(@value_type)
       end
     end
 
@@ -69,6 +75,7 @@ module Attributor
         unless resolved_key_type.ancestors.include?(Attributor::Type)
           raise Attributor::AttributorException.new("Hashes only support key types that are Attributor::Types. Got #{resolved_key_type.name}")
         end
+        
       end
 
       if value
@@ -78,9 +85,14 @@ module Attributor
         end
       end
 
+
+    
+
       Class.new(self) do
         @key_type = resolved_key_type
         @value_type = resolved_value_type
+        @value_attribute = Attribute.new(@key_type)
+        @key_attribute = Attribute.new(@value_type)
         @concrete = true
         @keys = {}
       end
@@ -101,7 +113,7 @@ module Attributor
 
 
     def self.example(context=nil, options: {})
-      return self.new if ( key_type == Object && value_type == Object )
+      return self.new if (key_type == Object && value_type == Object)
 
       hash = ::Hash.new
       # Let's not bother to generate any hash contents if there's absolutely no type defined
@@ -242,7 +254,27 @@ module Attributor
 
     def initialize(contents={})
       @contents = contents
+      
+      
     end
+
+    def key_type
+      self.class.key_type
+    end
+
+    def value_type
+      self.class.value_type
+    end
+
+
+    def key_attribute
+      self.class.key_attribute
+    end
+
+    def value_attribute
+      self.class.value_attribute
+    end
+
 
     def ==(other)
       contents == other || (other.respond_to?(:contents) ? contents == other.contents : false)
@@ -272,9 +304,12 @@ module Attributor
         end
       else
         @contents.each_with_object(Array.new) do |(key, value), errors|
+          # FIXME: the sub contexts and error messages don't really make sense here
           sub_context = self.class.generate_subcontext(context,key)
-          errors.push *@key_type.validate(key, sub_context) unless @key_type == Attributor::Object
-          errors.push *@value_type.validate(value, sub_context)  unless @value_type == Attributor::Object
+          errors.push *key_attribute.validate(key, sub_context) unless key_type == Attributor::Object
+          
+          sub_context = self.class.generate_subcontext(context,value)
+          errors.push *value_attribute.validate(value, sub_context)  unless value_type == Attributor::Object
         end
       end
     end

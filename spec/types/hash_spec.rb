@@ -245,7 +245,39 @@ describe Attributor::Hash do
   end
 
   context '#validate' do
-    it 'has specs'
+    context 'for a key and value typed hash' do
+      let(:key_type){ Integer }
+      let(:value_type){ DateTime }
+
+      let(:type) { Attributor::Hash.of(key: key_type, value: value_type) }
+      subject(:hash) { type.new('one' => 'now') }
+
+      it 'returns errors for key and value' do
+        errors = hash.validate
+        errors.should have(2).items
+      end
+    end
+
+    context 'for a hash with defined keys' do
+      let(:block) do
+        proc do
+          key 'integer', Integer
+          key 'datetime', DateTime
+        end
+      end
+
+      let(:type) { Attributor::Hash.construct(block) } 
+
+      let(:values) { {'integer' => 'one', 'datetime' => 'now' } }
+      subject(:hash) { type.new(values) }
+
+      it 'validates the keys' do
+        errors = hash.validate
+        errors.should have(2).items
+      end
+
+    end
+
   end
 
   context 'in an Attribute' do

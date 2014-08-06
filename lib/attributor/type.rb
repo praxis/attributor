@@ -36,7 +36,6 @@ module Attributor
       # TODO: refactor this to take just the options instead of the full attribute?
       # TODO: delegate to subclass
       def validate(value,context=Attributor::DEFAULT_ROOT_CONTEXT,attribute)
-
         errors = []
         attribute.options.each do |option, opt_definition|
           case option
