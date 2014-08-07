@@ -37,8 +37,8 @@ module Attributor
     end
 
 
-    def load(value,context=Attributor::DEFAULT_ROOT_CONTEXT)
-      value = type.load(value,context ) unless value.nil?
+    def load(value, context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
+      value = type.load(value,context,**options) unless value.nil?
 
       # just in case type.load(value) returned nil, even though value is not nil.
       if value.nil?

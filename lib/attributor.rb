@@ -13,29 +13,17 @@ module Attributor
   require_relative 'attributor/dsl_compiler'
   require_relative 'attributor/attribute_resolver'
 
-  
+
   require_relative 'attributor/extensions/randexp'
 
-  require_relative 'attributor/types/container'
-  require_relative 'attributor/types/object'
-  require_relative 'attributor/types/integer'
-  require_relative 'attributor/types/string'
-  require_relative 'attributor/types/model'
-  require_relative 'attributor/types/struct'
-  require_relative 'attributor/types/boolean'
-  require_relative 'attributor/types/date_time'
-  require_relative 'attributor/types/float'
-  require_relative 'attributor/types/collection'
-  require_relative 'attributor/types/hash'
-  require_relative 'attributor/types/csv'
-  require_relative 'attributor/types/ids'
+
 
   # List of all basic types (i.e. not collections, structs or models)
 
   # hierarchical separator string for composing human readable attributes
   SEPARATOR = '.'.freeze
   DEFAULT_ROOT_CONTEXT = ['$'].freeze
-  
+
   # @param type [Class] The class of the type to resolve
   #
   def self.resolve_type(attr_type, options={}, constructor_block=nil)
@@ -57,7 +45,7 @@ module Attributor
 
     klass
   end
-  
+
   def self.humanize_context( context )
     raise "NIL CONTEXT PASSED TO HUMANZE!!" unless context
     raise "INVALID CONTEXT!!! (got: #{context.inspect})" unless context.is_a? Enumerable
@@ -73,8 +61,29 @@ module Attributor
     inspection = inspection[0..500]+ "...[truncated]" if inspection.size>500
     inspection
   end
-  
+
   MODULE_PREFIX       = "Attributor\:\:".freeze
   MODULE_PREFIX_REGEX = Regexp.new(MODULE_PREFIX)
+
+  require_relative 'attributor/types/container'
+  require_relative 'attributor/types/object'
+  require_relative 'attributor/types/integer'
+  require_relative 'attributor/types/string'
+  require_relative 'attributor/types/model'
+  require_relative 'attributor/types/struct'
+  require_relative 'attributor/types/boolean'
+  require_relative 'attributor/types/date_time'
+  require_relative 'attributor/types/float'
+  require_relative 'attributor/types/collection'
+  require_relative 'attributor/types/hash'
+
+
+  require_relative 'attributor/types/csv'
+  require_relative 'attributor/types/ids'
+
+  # TODO: move these to 'optional types' or 'extra types'... location
+  require_relative 'attributor/types/tempfile'
+  require_relative 'attributor/types/file_upload'
+
 
 end

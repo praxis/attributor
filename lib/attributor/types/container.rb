@@ -25,7 +25,7 @@ module Attributor
         # attempt to parse as JSON
         parsed_value = JSON.parse(value)
 
-        if parsed_value.is_a? self.native_type
+        if self.valid_type?(parsed_value)
           value = parsed_value
         else
           raise Attributor::CoercionError, context: context, from: parsed_value.class, to: self.name, value: parsed_value

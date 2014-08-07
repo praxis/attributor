@@ -7,14 +7,10 @@ module Attributor
     end
 
 
-    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT)
-      # Special handling for Symbols. 
-      case value
-      when Symbol
-        return value.to_s
-      else
-        super
-      end
+    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
+      String(value)
+    rescue
+      super
     end
 
     def self.example(context=nil, options:{})
@@ -25,4 +21,5 @@ module Attributor
       end
     end
   end
+  
 end

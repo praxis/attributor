@@ -23,7 +23,7 @@ describe Attributor::Struct do
       it 'constructs a struct with no attributes' do
         empty_struct.should < Attributor::Struct
 
-        attributes = empty_struct.definition.attributes
+        attributes = empty_struct.attributes
         attributes.should be_empty
       end
     end
@@ -40,7 +40,7 @@ describe Attributor::Struct do
       it 'constructs a struct with one attribute' do
         simple_struct.should < Attributor::Struct
 
-        attributes = simple_struct.definition.attributes
+        attributes = simple_struct.attributes
         attributes.should have_key :age
       end
     end
@@ -61,7 +61,7 @@ describe Attributor::Struct do
       it 'constructs a struct with five attributes' do
         large_struct.should < Attributor::Struct
 
-        attributes = large_struct.definition.attributes
+        attributes = large_struct.attributes
         attributes.should have_key :age
         attributes.should have_key :name
         attributes.should have_key :employed?
@@ -82,7 +82,7 @@ describe Attributor::Struct do
       it 'constructs a struct with a model attribute' do
         struct_of_models.should < Attributor::Struct
 
-        attributes = struct_of_models.definition.attributes
+        attributes = struct_of_models.attributes
         attributes.should have_key :pet
       end
     end
@@ -102,7 +102,7 @@ describe Attributor::Struct do
       it 'constructs a struct with a named struct attribute' do
         struct_of_structs.should < Attributor::Struct
 
-        attributes = struct_of_structs.definition.attributes
+        attributes = struct_of_structs.attributes
         attributes.should have_key :stats
 
         stats = attributes[:stats].attributes
@@ -131,7 +131,7 @@ describe Attributor::Struct do
       it 'constructs a struct with multiple levels of named struct attributes' do
         multi_level_struct_of_structs.should < Attributor::Struct
 
-        root = multi_level_struct_of_structs.definition.attributes
+        root = multi_level_struct_of_structs.attributes
         root.should have_key :arthropods
 
         arthropods = root[:arthropods].attributes

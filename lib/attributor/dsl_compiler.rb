@@ -12,23 +12,42 @@ module Attributor
 
   class DSLCompiler
 
-    attr_accessor :attributes, :options
+    attr_accessor :options, :target
 
-    def initialize(**options)
+    def initialize(target, **options)
+      @target = target
       @options = options
-      @attributes={}
     end
 
-
-    def parse(&block)
-      self.instance_eval(&block) if block
-      return self
+    def parse(*blocks)
+      blocks.push(Proc.new) if block_given?
+      blocks.each { |block| self.instance_eval(&block) }
+      self
     end
 
+    def attributes
+      if target.respond_to?(:attributes)
+        target.attributes
+      else
+        target.keys
+      end
+    end
+
+    def attribute(name, attr_type=nil, **opts, &block)
+      raise AttributorException, "Attribute names must be symbols, got: #{name.inspect}" unless name.kind_of? ::Symbol
+      target.attributes[name] = define(name, attr_type, **opts, &block)
+    end
+
+    def key(name, attr_type=nil, **opts, &block)
+      unless name.kind_of?(options.fetch(:key_type, Attributor::Object).native_type)
+        raise "Invalid key: #{name.inspect}, must be instance of #{options[:key_type].native_type.name}"
+      end
+      target.keys[name] = define(name, attr_type, **opts, &block)
+    end
 
     # Creates an Attributor:Attribute with given definition.
     #
-    # @overload attribute(name, type, opts, &block)
+    # @overload define(name, type, opts, &block)
     #   With an explicit type.
     #   @param [symbol] name describe name param
     #   @param [Attributor::Type] type describe type param
@@ -36,7 +55,7 @@ module Attributor
     #   @param [Block] block describe block param
     #   @example
     #     attribute :email, String, example: /[:email:]/
-    # @overload attribute(name, opts, &block)
+    # @overload define(name, opts, &block)
     #   Assume a type of Attributor::Struct
     #   @param [symbol] name describe name param
     #   @param [Hash] opts describe opts param
@@ -48,16 +67,14 @@ module Attributor
     #       attribute :city, String
     #       attribute :state, String
     #     end
-    def attribute(name, attr_type=nil, **opts, &block)
-      raise AttributorException, "Attribute names must be symbols, got: #{name.inspect}" unless name.kind_of? ::Symbol
-
+    # @api semiprivate
+    def define(name, attr_type=nil, **opts, &block)
       if (existing_attribute = attributes[name])
         if existing_attribute.attributes
           existing_attribute.type.attributes(&block)
           return existing_attribute
         end
       end
-
 
       if (reference = self.options[:reference])
         inherited_attribute = reference.attributes[name]
@@ -81,7 +98,9 @@ module Attributor
         opts[:reference] = inherited_attribute.type
       end
 
-      return attributes[name] = Attributor::Attribute.new(attr_type, opts, &block)
+      Attributor::Attribute.new(attr_type, opts, &block)
     end
+
+
   end
 end

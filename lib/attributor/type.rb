@@ -19,7 +19,7 @@ module Attributor
     module ClassMethods
       
       # Generic decoding and coercion of the attribute.
-      def load(value,context=Attributor::DEFAULT_ROOT_CONTEXT)
+      def load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
         return nil if value.nil?
         unless value.is_a?(self.native_type)
           raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self 
@@ -36,7 +36,6 @@ module Attributor
       # TODO: refactor this to take just the options instead of the full attribute?
       # TODO: delegate to subclass
       def validate(value,context=Attributor::DEFAULT_ROOT_CONTEXT,attribute)
-
         errors = []
         attribute.options.each do |option, opt_definition|
           case option
@@ -91,8 +90,7 @@ module Attributor
       end
 
 
-      def generate_subcontext( context, subname )
-
+      def generate_subcontext(context, subname)
         context + [subname] 
       end
 

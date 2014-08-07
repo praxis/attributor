@@ -55,7 +55,7 @@ module Attributor
 
     # The incoming value should be an array here, so the only decoding that we need to do
     # is from the members (if there's an :member_type defined option).
-    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT)
+    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
       if value.nil?
         return nil
       elsif value.is_a?(Enumerable)
@@ -120,7 +120,6 @@ module Attributor
 
     # @param values [Array] Array of values to validate
     def self.validate(values, context=Attributor::DEFAULT_ROOT_CONTEXT, attribute=nil)
-
       values.each_with_index.collect do |value, i|
         subcontext = context + ["at(#{i})"]
         self.member_attribute.validate(value, subcontext)
