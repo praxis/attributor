@@ -13,8 +13,11 @@ module Attributor
 
     @key_type = Object
     @value_type = Object
-    @value_attribute = Attribute.new(@key_type)
-    @key_attribute = Attribute.new(@value_type)
+    
+
+    @key_attribute = Attribute.new(@key_type)
+    @value_attribute = Attribute.new(@value_type)
+
     @saved_blocks = []
     @options = {}
     @keys = {}
@@ -30,8 +33,8 @@ module Attributor
         @keys = {}
         @key_type = k
         @value_type = v
-        @value_attribute = Attribute.new(@key_type)
-        @key_attribute = Attribute.new(@value_type)
+        @key_attribute = Attribute.new(@key_type)
+        @value_attribute = Attribute.new(@value_type)
       end
     end
 
@@ -305,11 +308,15 @@ module Attributor
       else
         @contents.each_with_object(Array.new) do |(key, value), errors|
           # FIXME: the sub contexts and error messages don't really make sense here
-          sub_context = self.class.generate_subcontext(context,key)
-          errors.push *key_attribute.validate(key, sub_context) unless key_type == Attributor::Object
-          
-          sub_context = self.class.generate_subcontext(context,value)
-          errors.push *value_attribute.validate(value, sub_context)  unless value_type == Attributor::Object
+          unless key_type == Attributor::Object
+            sub_context = context + ["key(#{key.inspect})"]
+            errors.push *key_attribute.validate(key, sub_context) 
+          end            
+
+          unless value_type == Attributor::Object
+            sub_context = context + ["value(#{value.inspect})"]
+            errors.push *value_attribute.validate(value, sub_context)  
+          end
         end
       end
     end

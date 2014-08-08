@@ -250,11 +250,14 @@ describe Attributor::Hash do
       let(:value_type){ DateTime }
 
       let(:type) { Attributor::Hash.of(key: key_type, value: value_type) }
-      subject(:hash) { type.new('one' => 'now') }
+      subject(:hash) { type.new('one' => :two) }
 
       it 'returns errors for key and value' do
         errors = hash.validate
         errors.should have(2).items
+
+        errors[0].should match(/(got: String, expected: Attributor::DateTime)/)
+        errors[1].should match(/(got: Symbol, expected: Attributor::Integer)/)
       end
     end
 

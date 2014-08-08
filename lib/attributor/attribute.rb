@@ -60,7 +60,10 @@ module Attributor
     def validate_type(value, context)
       # delegate check to type subclass if it exists
       unless self.type.valid_type?(value)
-        return ["Attribute #{Attributor.humanize_context(context)} received value: #{Attributor.errorize_value(value)} is of the wrong type (got: #{value.class.name})"]
+        msg = "Attribute #{Attributor.humanize_context(context)} received value: "
+        msg += "#{Attributor.errorize_value(value)} is of the wrong type "
+        msg += "(got: #{value.class.name}, expected: #{self.type.name})"
+        return [msg]
       end
       []
     end
