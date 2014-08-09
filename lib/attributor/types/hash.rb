@@ -94,8 +94,9 @@ module Attributor
       Class.new(self) do
         @key_type = resolved_key_type
         @value_type = resolved_value_type
-        @value_attribute = Attribute.new(@key_type)
-        @key_attribute = Attribute.new(@value_type)
+        
+        @key_attribute = Attribute.new(@key_type)
+        @value_attribute = Attribute.new(@value_type)
         @concrete = true
         @keys = {}
       end
