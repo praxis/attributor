@@ -256,8 +256,9 @@ describe Attributor::Hash do
         errors = hash.validate
         errors.should have(2).items
 
-        errors[0].should match(/(got: String, expected: Attributor::DateTime)/)
-        errors[1].should match(/(got: Symbol, expected: Attributor::Integer)/)
+        errors.should include("Attribute $.key(\"one\") received value: \"one\" is of the wrong type (got: String, expected: Attributor::Integer)")
+        errors.should include("Attribute $.value(:two) received value: :two is of the wrong type (got: Symbol, expected: Attributor::DateTime)")
+
       end
     end
 
@@ -266,6 +267,7 @@ describe Attributor::Hash do
         proc do
           key 'integer', Integer
           key 'datetime', DateTime
+          key 'not-optional', String, required: true
         end
       end
 
@@ -276,7 +278,8 @@ describe Attributor::Hash do
 
       it 'validates the keys' do
         errors = hash.validate
-        errors.should have(2).items
+        errors.should have(3).items
+        errors.should include("Attribute $.get(\"not-optional\") is required")
       end
 
     end

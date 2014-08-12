@@ -173,6 +173,10 @@ module Attributor
     def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
       if value.nil?
         return nil
+      elsif value.is_a?(self)
+        return value
+      elsif value.kind_of?(Attributor::Hash)
+        loaded_value = value.contents
       elsif value.is_a?(::Hash)
         loaded_value = value
       elsif value.is_a?(::String)
