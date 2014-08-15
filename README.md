@@ -1,6 +1,6 @@
 # Attributor
 
-An Attribute management, self documenting framework, designed for getting rid of most of your parameter handling boylerplate.
+An Attribute management, self documenting framework, designed for getting rid of most of your parameter handling boilerplate.
 While initially designed to be the backbone for parameter handling in REST services, attribute management can be applied in many other areas.
 
 With Attributor you can:
