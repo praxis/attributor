@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.version       = Attributor::VERSION
   spec.authors = ["Josep M. Blanquer","Dane Jensen"]
   spec.date = "2014-08-15"
-  spec.summary = "Framework for building APIs the way you always wanted"
+  spec.summary = "A powerful attribute and type management library for Ruby"
   spec.email = ["blanquer@gmail.com","dane.jensen@gmail.com"]
   
   spec.homepage = "https://github.com/rightscale/attributor"
