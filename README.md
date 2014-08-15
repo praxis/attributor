@@ -54,7 +54,9 @@ Note: This should also compute code coverage. See below for details on viewing c
   but please isolate to its own commit so we can cherry-pick around it.
 
 
-## Copyright
 
-Copyright (c) 2013 RightScale. See LICENSE.txt for further details.
+## License
 
+This software is released under the [MIT License](http://www.opensource.org/licenses/MIT). Please see  [LICENSE](LICENSE) for further details.
+
+Copyright (c) 2014 RightScale
