@@ -4,113 +4,41 @@
 # -*- encoding: utf-8 -*-
 # stub: attributor 2.0.0 ruby lib
 
-Gem::Specification.new do |s|
-  s.name = "attributor"
-  s.version = "2.0.0"
+lib = File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
-  s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.require_paths = ["lib"]
-  s.authors = ["RightScale, Inc."]
-  s.date = "2014-04-10"
-  s.description = "makes building Resource-based Web APIs a walk in the park"
-  s.email = "salmon.sprint@rightscale.com"
-  s.extra_rdoc_files = [
-    "LICENSE.txt",
-    "README.md",
-  ]
-  s.files = [
-    ".document",
-    ".rspec",
-    "CHANGELOG.md",
-    "Gemfile",
-    "Guardfile",
-    "LICENSE.txt",
-    "README.md",
-    "Rakefile",
-    "VERSION",
-    "attributor.gemspec",
-    "attributor.rconf",
-    "lib/attributor.rb",
-    "lib/attributor/attribute.rb",
-    "lib/attributor/attribute_resolver.rb",
-    "lib/attributor/dsl_compiler.rb",
-    "lib/attributor/exceptions.rb",
-    "lib/attributor/extensions/randexp.rb",
-    "lib/attributor/type.rb",
-    "lib/attributor/types/boolean.rb",
-    "lib/attributor/types/collection.rb",
-    "lib/attributor/types/container.rb",
-    "lib/attributor/types/csv.rb",
-    "lib/attributor/types/date_time.rb",
-    "lib/attributor/types/float.rb",
-    "lib/attributor/types/hash.rb",
-    "lib/attributor/types/ids.rb",
-    "lib/attributor/types/integer.rb",
-    "lib/attributor/types/model.rb",
-    "lib/attributor/types/object.rb",
-    "lib/attributor/types/string.rb",
-    "lib/attributor/types/struct.rb"
-  ]
-  s.homepage = "https://github.com/rightscale/attributor"
-  s.licenses = ["RightScale, Inc."]
-  s.rubygems_version = "2.2.2"
-  s.summary = "Attributor is a component of RESTful Skeletor"
+require 'attributor/version'
 
-  if s.respond_to? :specification_version then
-    s.specification_version = 4
-
-    if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<hashie>, [">= 0"])
-      s.add_runtime_dependency(%q<randexp>, [">= 0"])
-      s.add_development_dependency(%q<rspec>, [">= 0"])
-      s.add_development_dependency(%q<yard>, ["~> 0.8.7"])
-      s.add_development_dependency(%q<backports>, [">= 0"])
-      s.add_development_dependency(%q<yardstick>, [">= 0"])
-      s.add_development_dependency(%q<redcarpet>, ["< 3.0"])
-      s.add_development_dependency(%q<rdoc>, ["~> 3.12"])
-      s.add_development_dependency(%q<bundler>, [">= 0"])
-      s.add_development_dependency(%q<jeweler>, ["~> 1.8.3"])
-      s.add_development_dependency(%q<right_develop>, [">= 0"])
-      s.add_development_dependency(%q<ruby-prof>, [">= 0"])
-      s.add_development_dependency(%q<rake-notes>, [">= 0"])
-      s.add_development_dependency(%q<simplecov>, [">= 0"])
-      s.add_development_dependency(%q<guard>, [">= 0"])
-      s.add_development_dependency(%q<guard-rspec>, [">= 0"])
-    else
-      s.add_dependency(%q<hashie>, [">= 0"])
-      s.add_dependency(%q<randexp>, [">= 0"])
-      s.add_dependency(%q<rspec>, [">= 0"])
-      s.add_dependency(%q<yard>, ["~> 0.8.7"])
-      s.add_dependency(%q<backports>, [">= 0"])
-      s.add_dependency(%q<yardstick>, [">= 0"])
-      s.add_dependency(%q<redcarpet>, ["< 3.0"])
-      s.add_dependency(%q<rdoc>, ["~> 3.12"])
-      s.add_dependency(%q<bundler>, [">= 0"])
-      s.add_dependency(%q<jeweler>, ["~> 1.8.3"])
-      s.add_dependency(%q<right_develop>, [">= 0"])
-      s.add_dependency(%q<ruby-prof>, [">= 0"])
-      s.add_dependency(%q<rake-notes>, [">= 0"])
-      s.add_dependency(%q<simplecov>, [">= 0"])
-      s.add_dependency(%q<guard>, [">= 0"])
-      s.add_dependency(%q<guard-rspec>, [">= 0"])
-    end
-  else
-    s.add_dependency(%q<hashie>, [">= 0"])
-    s.add_dependency(%q<randexp>, [">= 0"])
-    s.add_dependency(%q<rspec>, [">= 0"])
-    s.add_dependency(%q<yard>, ["~> 0.8.7"])
-    s.add_dependency(%q<backports>, [">= 0"])
-    s.add_dependency(%q<yardstick>, [">= 0"])
-    s.add_dependency(%q<redcarpet>, ["< 3.0"])
-    s.add_dependency(%q<rdoc>, ["~> 3.12"])
-    s.add_dependency(%q<bundler>, [">= 0"])
-    s.add_dependency(%q<jeweler>, ["~> 1.8.3"])
-    s.add_dependency(%q<right_develop>, [">= 0"])
-    s.add_dependency(%q<ruby-prof>, [">= 0"])
-    s.add_dependency(%q<rake-notes>, [">= 0"])
-    s.add_dependency(%q<simplecov>, [">= 0"])
-    s.add_dependency(%q<guard>, [">= 0"])
-    s.add_dependency(%q<guard-rspec>, [">= 0"])
-  end
+Gem::Specification.new do |spec|
+  spec.name = "attributor"
+  spec.version       = Attributor::VERSION
+  spec.authors = ["Josep M. Blanquer","Dane Jensen"]
+  spec.date = "2014-08-15"
+  spec.summary = "Framework for building APIs the way you always wanted"
+  spec.email = ["blanquer@gmail.com","dane.jensen@gmail.com"]
+  
+  spec.homepage = "https://github.com/rightscale/attributor"
+  spec.license = "MIT"
+  
+  spec.require_paths = ["lib"]
+  spec.files         = `git ls-files -z`.split("\x0")
+  spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
+  
+  spec.add_runtime_dependency(%q<hashie>, [">= 0"])
+  spec.add_runtime_dependency(%q<randexp>, [">= 0"])
+  spec.add_development_dependency(%q<rspec>, ["< 2.99"])
+  spec.add_development_dependency(%q<yard>, ["~> 0.8.7"])
+  spec.add_development_dependency(%q<backports>, [">= 0"])
+  spec.add_development_dependency(%q<yardstick>, [">= 0"])
+  spec.add_development_dependency(%q<redcarpet>, ["< 3.0"])
+  spec.add_development_dependency(%q<bundler>, [">= 0"])
+  spec.add_development_dependency(%q<rake-notes>, [">= 0"])
+  spec.add_development_dependency(%q<simplecov>, [">= 0"])
+  spec.add_development_dependency(%q<guard>, [">= 0"])
+  spec.add_development_dependency(%q<guard-rspec>, [">= 0"])
+  spec.add_development_dependency(%q<pry>, [">= 0"])
+  spec.add_development_dependency(%q<pry-byebug>, [">= 0"])
+  spec.add_development_dependency(%q<pry-stack_explorer>, [">= 0"])
+  spec.add_development_dependency(%q<fuubar>, [">= 0"])
 end
 
