@@ -4,6 +4,11 @@ Attributor Changelog
 next
 ------
 
+* First new feature here
+
+2.1.0
+------
+
 * Structs now inherit type-level options from their reference.
 * Add Collection subclasses for CSVs and Ids
   * CSV type for Collection of values serialized as comma-separated strings.
@@ -20,9 +25,11 @@ next
     * Instead of reporting "$." as the context , when doing model.field_name=value, they'll now report "assignment.of(field_name)" instead
   * Truncate the lenght of values when reporting loading errors when they're long (i.e. >500 chars)
 * `Model.attributes` may now be called more than once to set add or replace attributes. The exact behavior depends upon the types of the attributes being added or replaced. See [model_spec.rb](spec/types/model_spec.rb) for examples.
-* enhanced Hash type with individual key specification (and now return instances of the class rather than a simple Hash)
-* new FileUpload type
-* new Tempfile type
+* Greately enhanced Hash type with individual key specification (rather than
+  simply defining the types of keys)
+  * Loaded Hash types now return instances of the class rather than a simple Ruby Hash.
+* Introduced a new FileUpload type. This can be easily used in Web servers to map incoming multipart file uploads.
+* Introduced a new Tempfile type.
 
 2.0.0
 ------
