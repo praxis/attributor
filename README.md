@@ -1,4 +1,7 @@
-# Attributor
+# Attributor [![TravisCI][travis-img-url]][travis-ci-url] 
+
+[travis-img-url]: https://travis-ci.org/rightscale/attributor.svg?branch=master
+[travis-ci-url]:https://travis-ci.org/rightscale/attributor
 
 An Attribute management, self documenting framework, designed for getting rid of most of your parameter handling boilerplate.
 While initially designed to be the backbone for parameter handling in REST services, attribute management can be applied in many other areas.
