@@ -43,7 +43,8 @@ module Attributor
       result = []
       size = rand(3) + 1
       context ||= ["Collection-#{result.object_id}"]
-
+      context = Array(context)
+      
       size.times do |i|
         subcontext = context + ["at(#{i})"]
         result << self.member_attribute.example(subcontext)

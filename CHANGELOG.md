@@ -4,7 +4,7 @@ Attributor Changelog
 next
 ------
 
-* First new feature here
+* Fix example generation for Hash and Collection to handle a non-Array context parameter.
 
 2.1.0
 ------
