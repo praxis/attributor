@@ -25,6 +25,17 @@ describe Attributor::Hash do
         example.values.all? {|v| v.kind_of? Integer}.should be(true)
       end
     end
+    context 'using a non array context' do
+      it 'should work for hashes with key/value types' do
+        expect{ Attributor::Hash.of(key:String,value:String).example("Not an Array") }.to_not raise_error
+      end
+      it 'should work for hashes with keys defined' do
+        block = proc { key 'a string', String }
+        hash = Attributor::Hash.of(key:String).construct(block)
+
+        expect{ hash.example("Not an Array") }.to_not raise_error
+      end
+    end
   end
 
   context '.load' do

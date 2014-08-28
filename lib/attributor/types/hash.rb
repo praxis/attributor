@@ -120,7 +120,8 @@ module Attributor
       return self.new if (key_type == Object && value_type == Object)
 
       hash = ::Hash.new
-      # Let's not bother to generate any hash contents if there's absolutely no type defined
+      context ||= ["#{Hash}-#{rand(10000000)}"]
+      context = Array(context)
 
       if self.keys.any?
         self.keys.each do |sub_name, sub_attribute|
@@ -128,12 +129,8 @@ module Attributor
           hash[sub_name] = sub_attribute.example(subcontext)
         end
       else
-
         size = rand(3) + 1
-
-        context ||= ["#{Hash}-#{rand(10000000)}"]
-        context = Array(context)
-
+        
         size.times do |i|
           example_key = key_type.example(context + ["at(#{i})"])
           subcontext = context + ["at(#{example_key})"]

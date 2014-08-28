@@ -282,5 +282,13 @@ describe Attributor::Collection do
         value.all? { |element| member_type.valid_type?(element) }.should be_true
       end
     end
+    context "passing a non array context" do
+      it 'still is handled correctly ' do
+        expect{
+          type.example("SimpleString")
+        }.to_not raise_error
+      end
+    end
+    
   end
 end
