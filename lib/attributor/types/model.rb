@@ -117,7 +117,7 @@ module Attributor
     end
 
     def self.dump(value, **opts)
-      value.dump(opts)
+      self.load(value).dump(**opts)
     end
 
     def self.native_type
