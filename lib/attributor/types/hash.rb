@@ -38,6 +38,10 @@ module Attributor
       end
     end
 
+    def self.attributes(**options, &key_spec)
+      self.keys(options, &key_spec)
+    end
+    
     def self.keys(**options, &key_spec)
       if block_given?
         @saved_blocks << key_spec
@@ -161,6 +165,8 @@ module Attributor
         :ok
       when :reference
         :ok # FIXME ... actually do something smart
+      when :dsl_compiler
+        :ok
       else
         :unknown
       end
