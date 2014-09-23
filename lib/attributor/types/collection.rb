@@ -85,7 +85,7 @@ module Attributor
       #puts "Collection: #{self.type}"      
       hash = super(shallow)
       hash[:options] = {} unless hash[:options]
-      hash[:options][:member_attribute] = self.member_attribute.describe
+      hash[:member_attribute] = self.member_attribute.describe
       hash
     end
 

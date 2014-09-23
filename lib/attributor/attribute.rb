@@ -70,7 +70,7 @@ module Attributor
 
 
     TOP_LEVEL_OPTIONS = [ :description, :values, :default, :example, :required, :required_if ]
-    INTERNAL_OPTIONS = [:dsl_compiler] # Options we don't want to expose when describing attributes
+    INTERNAL_OPTIONS = [:dsl_compiler,:dsl_compiler_options] # Options we don't want to expose when describing attributes
     def describe(shallow=true)
       description = { } 
       # Clone the common options
