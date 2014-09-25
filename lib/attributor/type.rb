@@ -1,10 +1,3 @@
-# Will need eventually, but not right now:
-#   Hash
-#   Array
-#     CSV
-#     Ids
-
-
 module Attributor
 
   # It is the abstract base class to hold an attribute, both a leaf and a container (hash/Array...)

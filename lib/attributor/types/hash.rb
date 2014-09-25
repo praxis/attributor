@@ -9,19 +9,42 @@ module Attributor
       attr_reader :key_type, :value_type, :options
       attr_reader :value_attribute
       attr_reader :key_attribute
+      attr_reader :insensitive_map
+      attr_accessor :extra_keys
     end
 
     @key_type = Object
     @value_type = Object
-    
 
     @key_attribute = Attribute.new(@key_type)
     @value_attribute = Attribute.new(@value_type)
 
-    @saved_blocks = []
-    @options = {}
-    @keys = {}
+    def self.key_type=(key_type)
+      resolved_key_type = Attributor.resolve_type(key_type)
+      unless resolved_key_type.ancestors.include?(Attributor::Type)
+        raise Attributor::AttributorException.new("Hashes only support key types that are Attributor::Types. Got #{resolved_key_type.name}")
+      end
 
+      @key_type = resolved_key_type
+      @key_attribute = Attribute.new(@key_type)
+      @concrete=true
+    end
+
+    def self.value_type=(value_type)
+      resolved_value_type = Attributor.resolve_type(value_type)
+      unless resolved_value_type.ancestors.include?(Attributor::Type)
+        raise Attributor::AttributorException.new("Hashes only support value types that are Attributor::Types. Got #{resolved_value_type.name}")
+      end
+
+      @value_type = resolved_value_type
+      @value_attribute = Attribute.new(@value_type)
+      @concrete=true
+    end
+
+
+    @saved_blocks = []
+    @options = {allow_extra: false}
+    @keys = {}
 
     def self.inherited(klass)
       k = self.key_type
@@ -29,7 +52,7 @@ module Attributor
 
       klass.instance_eval do
         @saved_blocks = []
-        @options = {}
+        @options = {allow_extra: false}
         @keys = {}
         @key_type = k
         @value_type = v
@@ -41,7 +64,7 @@ module Attributor
     def self.attributes(**options, &key_spec)
       self.keys(options, &key_spec)
     end
-    
+
     def self.keys(**options, &key_spec)
       if block_given?
         @saved_blocks << key_spec
@@ -61,6 +84,12 @@ module Attributor
       blocks = @saved_blocks.shift(@saved_blocks.size)
       compiler = dsl_class.new(self, opts)
       compiler.parse(*blocks)
+
+      @insensitive_map = self.keys.keys.each_with_object({}) do |k, map|
+        map[k.downcase] = k
+      end
+
+      compiler
     end
 
     def self.dsl_class
@@ -77,42 +106,24 @@ module Attributor
 
     # @example Hash.of(key: String, value: Integer)
     def self.of(key: @key_type, value: @value_type)
-      if key
-        resolved_key_type = Attributor.resolve_type(key)
-        unless resolved_key_type.ancestors.include?(Attributor::Type)
-          raise Attributor::AttributorException.new("Hashes only support key types that are Attributor::Types. Got #{resolved_key_type.name}")
-        end
-        
-      end
-
-      if value
-        resolved_value_type = Attributor.resolve_type(value)
-        unless resolved_value_type.ancestors.include?(Attributor::Type)
-          raise Attributor::AttributorException.new("Hashes only support value types that are Attributor::Types. Got #{resolved_value_type.name}")
-        end
-      end
-
-
-    
-
       Class.new(self) do
-        @key_type = resolved_key_type
-        @value_type = resolved_value_type
-        
-        @key_attribute = Attribute.new(@key_type)
-        @value_attribute = Attribute.new(@value_type)
-        @concrete = true
+        self.key_type = key
+        self.value_type = value
         @keys = {}
       end
     end
 
 
-    def self.construct(constructor_block,  **options)
+    def self.construct(constructor_block, **options)
       return self if constructor_block.nil?
 
       unless @concrete
         return self.of(key:self.key_type, value: self.value_type)
-                   .construct(constructor_block,**options)
+          .construct(constructor_block,**options)
+      end
+
+      if options[:case_insensitive_load] && !(self.key_type <= String)
+        raise Attributor::AttributorException.new(":case_insensitive_load may not be used with keys of type #{self.key_type.name}")
       end
 
       self.keys(options, &constructor_block)
@@ -134,7 +145,7 @@ module Attributor
         end
       else
         size = rand(3) + 1
-        
+
         size.times do |i|
           example_key = key_type.example(context + ["at(#{i})"])
           subcontext = context + ["at(#{example_key})"]
@@ -159,13 +170,16 @@ module Attributor
 
     def self.check_option!(name, definition)
       case name
-      when :key_type
-        :ok
-      when :value_type
-        :ok
       when :reference
         :ok # FIXME ... actually do something smart
       when :dsl_compiler
+        :ok
+      when :case_insensitive_load
+        unless self.key_type <= String
+          raise Attributor::AttributorException, ":case_insensitive_load may not be used with keys of type #{self.key_type.name}"
+        end
+        :ok
+      when :allow_extra
         :ok
       else
         :unknown
@@ -198,23 +212,57 @@ module Attributor
     end
 
     def self.generate_subcontext(context, key_name)
-      context + ["get(#{key_name.inspect})"]
+      context + ["key(#{key_name.inspect})"]
+    end
+
+    def generate_subcontext(context, key_name)
+      self.class.generate_sub_context(context,key_name)
+    end
+
+    def set(key, value, context: self.generate_subcontext(Attributor::DEFAULT_ROOT_CONTEXT,key))
+      key = self.class.key_attribute.load(key, context)
+
+      if (attribute = self.class.keys[key])
+        return self[key] = attribute.load(value, context)
+      end
+
+      if self.class.options[:case_insensitive_load]
+        key = self.class.insensitive_map[key.downcase]
+        return self.set(key, value, context: context)
+      end
+
+      if self.class.options[:allow_extra]
+        if self.class.extra_keys.nil?
+          return self[key] = self.class.value_attribute.load(value, context)
+        else
+          return self[self.class.extra_keys].set(key, value, context: context)
+        end
+      end
+
+      raise AttributorException, "Unknown key received: #{key.inspect} while loading #{Attributor.humanize_context(context)}"
     end
 
     def self.from_hash(object,context)
       hash = self.new
 
-      object.each do |k,v|
-        hash_key = @key_type.load(k)
-
-        hash_attribute = self.keys.fetch(hash_key) do
-          raise AttributorException, "Unknown key received: #{k.inspect} while loading #{Attributor.humanize_context(context)}"
-        end
-
-        sub_context = self.generate_subcontext(context,hash_key)
-        hash[hash_key] = hash_attribute.load(v, sub_context)
+      # if the hash definition includes named extra keys, initialize
+      # its value from the object in case it provides some already.
+      # this is to ensure it exists when we handle any extra keys
+      # that may exist in the object later
+      if self.extra_keys
+        sub_context = self.generate_subcontext(context,self.extra_keys)
+        v = object.fetch(self.extra_keys, {})
+        hash.set(self.extra_keys, v, context: sub_context)
       end
 
+      object.each do |k,v|
+        next if k == self.extra_keys
+
+        sub_context = self.generate_subcontext(Attributor::DEFAULT_ROOT_CONTEXT,k)
+        hash.set(k, v, context: sub_context)
+      end
+
+      # handle default values for missing keys
       self.keys.each do |key_name, attribute|
         next if hash.key?(key_name)
         sub_context = self.generate_subcontext(context,key_name)
@@ -265,8 +313,6 @@ module Attributor
 
     def initialize(contents={})
       @contents = contents
-      
-      
     end
 
     def key_type
@@ -318,12 +364,12 @@ module Attributor
           # FIXME: the sub contexts and error messages don't really make sense here
           unless key_type == Attributor::Object
             sub_context = context + ["key(#{key.inspect})"]
-            errors.push *key_attribute.validate(key, sub_context) 
-          end            
+            errors.push *key_attribute.validate(key, sub_context)
+          end
 
           unless value_type == Attributor::Object
             sub_context = context + ["value(#{value.inspect})"]
-            errors.push *value_attribute.validate(value, sub_context)  
+            errors.push *value_attribute.validate(value, sub_context)
           end
         end
       end

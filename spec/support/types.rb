@@ -17,5 +17,3 @@ class IntegerAttributeType
   end
 
 end
-
-
