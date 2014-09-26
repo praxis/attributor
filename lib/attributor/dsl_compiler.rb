@@ -45,6 +45,17 @@ module Attributor
       target.keys[name] = define(name, attr_type, **opts, &block)
     end
 
+    def extra(name, attr_type=nil, **opts, &block)
+      if attr_type.nil?
+        attr_type = Attributor::Hash.of(key: target.key_type, value: target.value_type)
+      end
+      target.extra_keys = name
+      target.options[:allow_extra] = true
+      opts[:default] ||= {}
+      attr_type.options[:allow_extra] = true
+      key(name, attr_type, **opts, &block)
+    end
+
     # Creates an Attributor:Attribute with given definition.
     #
     # @overload define(name, type, opts, &block)

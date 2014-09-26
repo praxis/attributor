@@ -13,3 +13,5 @@ doc
 
 # For MacOS:
 .DS_Store
+
+Gemfile.lock

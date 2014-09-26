@@ -6,6 +6,16 @@ describe Attributor::Hash do
   subject(:type) { Attributor::Hash }
 
   its(:native_type) { should be(type) }
+  its(:key_type) { should be(Attributor::Object) }
+  its(:value_type) { should be(Attributor::Object) }
+
+  context 'default options' do
+    subject(:options) { type.options }
+    it 'has allow_extra false' do
+      options[:allow_extra].should be(false)
+    end
+  end
+
 
   context '.example' do
     context 'for a simple hash' do
@@ -135,7 +145,7 @@ describe Attributor::Hash do
     subject(:type) { Attributor::Hash.construct(block) }
 
     it { should_not be(Attributor::Hash)
-    }
+         }
 
     context 'loading' do
       let(:date) { DateTime.parse("2014-07-15") }
@@ -203,11 +213,18 @@ describe Attributor::Hash do
   end
 
   context '.check_option!' do
-    it 'accepts key_type:' do
-      subject.check_option!(:key_type, String).should == :ok
-    end
-    it 'accepts value_type'  do
-      subject.check_option!(:value_type, Object).should == :ok
+    context ':case_insensitive_load' do
+
+      it 'is valid when key_type is a string' do
+        Attributor::Hash.of(key:String).check_option!(:case_insensitive_load, true).should == :ok
+      end
+
+      it 'is invalid when key_type is non-string' do
+        expect {
+          Attributor::Hash.of(key:Integer).check_option!(:case_insensitive_load, true)
+        }.to raise_error(Attributor::AttributorException, /:case_insensitive_load may not be used/)
+      end
+
     end
     it 'rejects unknown options'  do
       subject.check_option!(:bad_option, Object).should == :unknown
@@ -282,7 +299,7 @@ describe Attributor::Hash do
         end
       end
 
-      let(:type) { Attributor::Hash.construct(block) } 
+      let(:type) { Attributor::Hash.construct(block) }
 
       let(:values) { {'integer' => 'one', 'datetime' => 'now' } }
       subject(:hash) { type.new(values) }
@@ -290,7 +307,7 @@ describe Attributor::Hash do
       it 'validates the keys' do
         errors = hash.validate
         errors.should have(3).items
-        errors.should include("Attribute $.get(\"not-optional\") is required")
+        errors.should include("Attribute $.key(\"not-optional\") is required")
       end
 
     end
@@ -378,6 +395,83 @@ describe Attributor::Hash do
       end
 
     end
+  end
+
+  context 'with case_insensitive_load option for string keys' do
+    let(:block) do
+      proc do
+        key 'downcase', Integer
+        key 'UPCASE', Integer
+        key 'CamelCase', Integer
+      end
+    end
+
+    let(:type) { Attributor::Hash.of(key: String).construct(block, case_insensitive_load: true) }
+
+    let(:input) { {'DOWNCASE' => 1, 'upcase' => 2, 'CamelCase' => 3} }
+
+    subject(:output) { type.load(input) }
+
+    it 'maps the incoming keys to defined keys, regardless of case' do
+      output['downcase'].should eq(1)
+      output['UPCASE'].should eq(2)
+      output['CamelCase'].should eq(3)
+    end
+
+  end
+
+  context 'with allow_extra keys option' do
+    let(:type) do
+      Class.new(Attributor::Hash) do
+        self.value_type = String
+
+        keys allow_extra: true do
+          key :one, String
+          key :two, String, default: 'two'
+        end
+      end
+    end
+
+    let(:input) { {one: 'one', three: 3} }
+    subject(:output) { type.load(input) }
+
+    context 'that should be saved at the top level' do
+      its(:keys) { should =~ [:one, :two, :three] }
+
+      it 'loads the extra keys' do
+        output[:one].should eq('one')
+        output[:two].should eq('two')
+        output[:three].should eq('3')
+      end
+    end
+
+    context 'that should be grouped into a sub-hash' do
+      before do
+        type.keys do
+          extra :options, Attributor::Hash.of(value: Integer)
+        end
+      end
+
+      its(:keys) { should =~ [:one, :two, :options] }
+      it 'loads the extra keys into :options sub-hash' do
+        output[:one].should eq('one')
+        output[:two].should eq('two')
+        output[:options].should eq({three: 3})
+      end
+
+      context 'with an options value already provided' do
+        its(:keys) { should =~ [:one, :two, :options] }
+        let(:input) { {one: 'one', three: 3, options: {four: 4}} }
+
+        it 'loads the extra keys into :options sub-hash' do
+          output[:one].should eq('one')
+          output[:two].should eq('two')
+          output[:options].should eq({three: 3, four: 4})
+        end
+
+      end
+    end
+
   end
 
 end

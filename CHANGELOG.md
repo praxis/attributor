@@ -5,6 +5,12 @@ next
 ------
 
 * Fix example generation for Hash and Collection to handle a non-Array context parameter.
+* Hash
+  * Added additional options:
+    * `:case_insensitive_load` for string-keyed hashes. This allows loading hashes with keys that do not exactly match the case defined in the hash.
+    * Added `:allow_extras` option to allow handling of undefined keys when loading.
+  * Added `Hash#set` to encapsulate the above options and attribute loading.
+  * Added `extra` command in the `keys` DSL, which lets you define a key (whose value should be a Hash), to group any unspecified keys during load. 
 
 2.1.0
 ------
@@ -23,7 +29,7 @@ next
   * Enhanced error messages to report the correct context scope.
   * Make Attribute assignments in models to report a special context (not the attributor root) 
     * Instead of reporting "$." as the context , when doing model.field_name=value, they'll now report "assignment.of(field_name)" instead
-  * Truncate the lenght of values when reporting loading errors when they're long (i.e. >500 chars)
+  * Truncate the length of values when reporting loading errors when they're long (i.e. >500 chars)
 * `Model.attributes` may now be called more than once to set add or replace attributes. The exact behavior depends upon the types of the attributes being added or replaced. See [model_spec.rb](spec/types/model_spec.rb) for examples.
 * Greately enhanced Hash type with individual key specification (rather than
   simply defining the types of keys)
