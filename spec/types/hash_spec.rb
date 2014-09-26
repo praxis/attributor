@@ -443,6 +443,8 @@ describe Attributor::Hash do
         output[:two].should eq('two')
         output[:three].should eq('3')
       end
+      
+      its( :validate ){ should be_empty }
     end
 
     context 'that should be grouped into a sub-hash' do
@@ -458,6 +460,7 @@ describe Attributor::Hash do
         output[:two].should eq('two')
         output[:options].should eq({three: 3})
       end
+      its( :validate ){ should be_empty }
 
       context 'with an options value already provided' do
         its(:keys) { should =~ [:one, :two, :options] }
@@ -468,6 +471,7 @@ describe Attributor::Hash do
           output[:two].should eq('two')
           output[:options].should eq({three: 3, four: 4})
         end
+        its( :validate ){ should be_empty }
 
       end
     end

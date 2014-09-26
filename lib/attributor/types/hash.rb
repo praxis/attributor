@@ -342,7 +342,7 @@ module Attributor
 
       if self.class.keys.any?
         extra_keys = @contents.keys - self.class.keys.keys
-        if extra_keys.any?
+        if extra_keys.any? && !self.class.options[:allow_extra]
           return extra_keys.collect do |k|
             "#{Attributor.humanize_context(context)} can not have key: #{k.inspect}"
           end
