@@ -4,8 +4,13 @@ Attributor Changelog
 next
 ------
 
+* next thing here
+
+2.2.0
+------
+
 * Fix example generation for Hash and Collection to handle a non-Array context parameter.
-* Hash
+* Hash:
   * Added additional options:
     * `:case_insensitive_load` for string-keyed hashes. This allows loading hashes with keys that do not exactly match the case defined in the hash.
     * Added `:allow_extras` option to allow handling of undefined keys when loading.
