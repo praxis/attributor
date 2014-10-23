@@ -117,7 +117,7 @@ module Attributor
     end
 
     def self.dump(value, **opts)
-      value.dump(opts)
+      self.load(value).dump(**opts)
     end
 
     def self.native_type
@@ -209,6 +209,9 @@ module Attributor
       object.validate(context)
     end
 
+    def self.valid_type?(type)
+      type.kind_of?(self) || type.kind_of?(::Hash)
+    end
 
     def self.dsl_class
       @options[:dsl_compiler] || DSLCompiler
@@ -255,7 +258,7 @@ module Attributor
       self.class.attributes.each_with_object(Array.new) do |(sub_attribute_name, sub_attribute), errors|
         sub_context = self.class.generate_subcontext(context,sub_attribute_name)
 
-        value = self.send(sub_attribute_name)
+        value = self.__send__(sub_attribute_name)
         if value.respond_to?(:validating) # really, it's a thing with sub-attributes
           next if value.validating
         end
@@ -269,7 +272,7 @@ module Attributor
 
     def attributes
       @lazy_attributes.keys.each do |name|
-        self.send(name)
+        self.__send__(name)
       end
       @attributes
     end
@@ -291,7 +294,7 @@ module Attributor
 
       if self.class.attributes.has_key?(attribute_name.to_sym)
         self.class.define_accessors(attribute_name)
-        return self.send(name, *args)
+        return self.__send__(name, *args)
       end
 
       super
