@@ -395,6 +395,16 @@ describe Attributor::Hash do
       end
 
     end
+    context 'will always return a top level hash' do
+      subject(:type_dump){ type.dump(value) }
+      let(:key_type){ Attributor::Object }
+      let(:value_type){ Attributor::Object }
+           
+      it 'even when key/types are object' do
+        subject.should be_kind_of(::Hash)
+        subject.should eq( hash )
+      end
+    end
   end
 
   context 'with case_insensitive_load option for string keys' do

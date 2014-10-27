@@ -159,7 +159,6 @@ module Attributor
 
     def self.dump(value, **opts)
       return nil if value.nil?
-      return super if (@key_type == Object && @value_type == Object )
 
       value.each_with_object({}) do |(k,v),hash|
         k = key_type.dump(k,opts) if @key_type
