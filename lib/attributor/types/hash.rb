@@ -308,7 +308,7 @@ module Attributor
     # TODO: add a validate, which simply validates that the incoming keys and values are of the right type.
     #       Think about the format of the subcontexts to use: let's use .at(key.to_s)
     attr_reader :contents
-    def_delegators :@contents, :[], :[]=, :each, :size, :keys, :key?, :values, :empty?
+    def_delegators :@contents, :[], :[]=, :each, :size, :keys, :key?, :values, :empty?, :has_key?
 
     def initialize(contents={})
       @contents = contents
