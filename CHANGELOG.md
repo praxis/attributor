@@ -6,6 +6,8 @@ next
 
 * Dumping attributes will now load the values if they're not in the native type.
 * `Model.valid_type?` now accepts hashes.
+* `Hash`:
+  * Added `:has_key?` to delegation
 
 2.2.0
 ------
