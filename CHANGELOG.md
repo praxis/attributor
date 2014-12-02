@@ -4,6 +4,10 @@ Attributor Changelog
 next
 ------
 
+
+2.2.1
+------
+
 * Dumping attributes will now load the values if they're not in the native type.
 * `Model.valid_type?` now accepts hashes.
 * `Hash`:
