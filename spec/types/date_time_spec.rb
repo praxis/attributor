@@ -14,8 +14,12 @@ describe Attributor::DateTime do
 
   context '.load' do
 
+    it 'returns nil for nil' do
+      type.load(nil).should be(nil)
+    end
+
     context 'for incoming objects' do
-     
+      
       it "returns correct DateTime for Time objects" do
         object = Time.now
         loaded = type.load(object)

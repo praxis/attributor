@@ -226,11 +226,6 @@ describe Attributor::Attribute do
     let(:context){ ['context'] }
     let(:value) { '1' }
 
-    it 'does not call type.load for nil values' do
-      type.should_not_receive(:load)
-      attribute.load(nil)
-    end
-
     it 'delegates to type.load' do
       type.should_receive(:load).with(value,context, {})
       attribute.load(value,context)
@@ -249,15 +244,6 @@ describe Attributor::Attribute do
 
       context 'for nil' do
         let(:value) { nil }
-        it { should == default_value}
-      end
-
-
-      context 'for a value that the type loads as nil' do
-        let(:value) { "not nil"}
-        before do
-          type.should_receive(:load).and_return(nil)
-        end
         it { should == default_value}
       end
 

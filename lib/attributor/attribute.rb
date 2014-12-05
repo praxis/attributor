@@ -38,9 +38,8 @@ module Attributor
 
 
     def load(value, context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
-      value = type.load(value,context,**options) unless value.nil?
+      value = type.load(value,context,**options)
 
-      # just in case type.load(value) returned nil, even though value is not nil.
       if value.nil?
         value = self.options[:default] if self.options[:default]
       end
@@ -72,7 +71,7 @@ module Attributor
     TOP_LEVEL_OPTIONS = [ :description, :values, :default, :example, :required, :required_if ]
     INTERNAL_OPTIONS = [:dsl_compiler,:dsl_compiler_options] # Options we don't want to expose when describing attributes
     def describe(shallow=true)
-      description = { } 
+      description = { }
       # Clone the common options
       TOP_LEVEL_OPTIONS.each do |option_name|
         description[option_name] = self.options[option_name] if self.options.has_key? option_name
@@ -100,13 +99,13 @@ module Attributor
     def example(context=nil, parent: nil, values:{})
       raise ArgumentError, "attribute example cannot take a context of type String" if (context.is_a? ::String )
       if context
-        ctx = Attributor.humanize_context(context)            
+        ctx = Attributor.humanize_context(context)
         seed, _ = Digest::SHA1.digest(ctx).unpack("QQ")
         Random.srand(seed)
       end
 
       if self.options.has_key? :example
-        val = self.options[:example] 
+        val = self.options[:example]
         case val
         when ::String
           # FIXME: spec this properly to use self.type.native_type
@@ -180,7 +179,7 @@ module Attributor
 
     def validate_missing_value(context)
       raise "INVALID CONTEXT!!! (got: #{context.inspect})" unless context.is_a? Enumerable
-      
+
       # Missing attribute was required if :required option was set
       return ["Attribute #{Attributor.humanize_context(context)} is required"] if self.options[:required]
 
@@ -201,7 +200,7 @@ module Attributor
         # should never get here if the option validation worked...
         raise AttributorException.new("unknown type of dependency: #{requirement.inspect} for #{Attributor.humanize_context(context)}")
       end
-      
+
       # chop off the last part
       requirement_context = context[0..-2]
       requirement_context_string = requirement_context.join(Attributor::SEPARATOR)
@@ -257,7 +256,7 @@ module Attributor
         raise AttributorException.new("Required_if must be a String, a Hash definition or a Proc") unless definition.is_a?(::String) || definition.is_a?(::Hash) || definition.is_a?(::Proc)
         raise AttributorException.new("Required_if cannot be specified together with :required") if self.options[:required]
       when :example
-        unless definition.is_a?(::Regexp) || definition.is_a?(::String) || definition.is_a?(::Array) || definition.is_a?(::Proc) || definition.nil? || self.type.valid_type?(definition) 
+        unless definition.is_a?(::Regexp) || definition.is_a?(::String) || definition.is_a?(::Array) || definition.is_a?(::Proc) || definition.nil? || self.type.valid_type?(definition)
           raise AttributorException.new("Invalid example type (got: #{definition.class.name}). It must always match the type of the attribute (except if passing Regex that is allowed for some types)")
         end
       else
