@@ -16,8 +16,8 @@ describe Attributor::Ids do
       ids.load(value).should eq(emails)
     end
 
-    it 'generates valid examples' do
-      ids.validate(ids.example).should be_empty
+    it 'generates valid, loadable examples' do
+      ids.validate(ids.load(ids.example)).should be_empty
     end
 
   end

@@ -14,4 +14,19 @@ describe Attributor::CSV do
 
   end
 
+  context '.example' do
+    let!(:example) { csv.example }
+    let!(:loaded_example) { csv.load(example) }
+
+    it 'generates a String example' do
+      example.should be_a(String)
+    end
+
+    it 'generates a comma-separated list of Integer values' do
+      loaded_example.should be_a(Array)
+      loaded_example.size.should be > 1
+      loaded_example.each { |e| e.should be_a(Integer) }
+    end
+  end
+
 end
