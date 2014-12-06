@@ -8,7 +8,7 @@ module Attributor
 
 
     def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
-      String(value)
+      value && String(value)
     rescue
       super
     end

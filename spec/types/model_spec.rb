@@ -66,7 +66,7 @@ describe Attributor::Model do
       context 'with infinitely-expanding sub-attributes' do
         let(:model_class) do
           Class.new(Attributor::Model) do
-            this = self
+            this = self 
             attributes do
               attribute :name, String
               attribute :child, this
@@ -120,6 +120,16 @@ describe Attributor::Model do
         it 'returns nil' do
           Chicken.load(nil).should be_nil
         end
+
+        context 'with recurse: true' do
+          subject(:turducken) { Turducken.load(nil, [], recurse: true) }
+
+          it 'loads with default values' do
+            turducken.name.should eq("Turkey McDucken")
+            turducken.chicken.age.should be(1)
+          end
+
+        end
       end
 
       context 'with a JSON-serialized hash' do
@@ -128,7 +138,7 @@ describe Attributor::Model do
         let(:json) { hash.to_json }
         before do
           Chicken.should_receive(:from_hash).
-            with(expected_hash,context)
+            with(expected_hash,context, recurse: false)
           JSON.should_receive(:parse).with(json).and_call_original
         end
 
@@ -186,6 +196,7 @@ describe Attributor::Model do
       end
 
 
+
     end
 
   end
@@ -208,7 +219,7 @@ describe Attributor::Model do
         it 'and sets them in loaded format onto the instance attributes' do
           Chicken.should_receive(:load).with(attributes_data).and_call_original
           attributes_data.keys.each do |attr_name|
-            Chicken.attributes[attr_name].should_receive(:load).with(attributes_data[attr_name],instance_of(Array)).and_call_original
+            Chicken.attributes[attr_name].should_receive(:load).with(attributes_data[attr_name],instance_of(Array), recurse: false).and_call_original
           end
           subject.age.should be(1)
           subject.email.should be(attributes_data[:email])
@@ -220,7 +231,7 @@ describe Attributor::Model do
           it 'and sets them in loaded format onto the instance attributes' do
             Chicken.should_receive(:load).with(attributes_data).and_call_original
             attributes_hash.keys.each do |attr_name|
-              Chicken.attributes[attr_name].should_receive(:load).with(attributes_hash[attr_name],instance_of(Array)).and_call_original
+              Chicken.attributes[attr_name].should_receive(:load).with(attributes_hash[attr_name],instance_of(Array), recurse: false).and_call_original
             end
             subject.age.should be(1)
             subject.email.should == attributes_hash[:email]
@@ -396,6 +407,7 @@ describe Attributor::Model do
     end
 
   end
+
 
 
 end

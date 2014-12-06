@@ -142,8 +142,15 @@ module Attributor
 
 
     # Model-specific decoding and coercion of the attribute.
-    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
-      return value if value.nil?
+    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, recurse: false, **options)
+      if value.nil?
+        if recurse
+          value = {}
+        else
+          return value
+        end
+      end
+
       return value if value.kind_of?(self.native_type)
 
       context = Array(context)
@@ -162,18 +169,19 @@ module Attributor
         raise IncompatibleTypeError,  context: context, value_type: value.class, type: self
       end
 
-      self.from_hash(hash,context)
+      self.from_hash(hash,context, recurse: recurse)
     end
 
 
-    def self.from_hash(hash,context)
+    def self.from_hash(hash,context, recurse: false)
       model = self.new
 
       self.attributes.each do |attribute_name, attribute|
+        # p [attribute_name, attribute]
         # OPTIMIZE: deleting the keys as we go is mucho faster, but also very risky
         # Note: use "load" vs. attribute assignment so we can propagate the right context down.
         sub_context = self.generate_subcontext(context,attribute_name)
-        model.attributes[attribute_name] = attribute.load(hash[attribute_name] || hash[attribute_name.to_s], sub_context)
+        model.attributes[attribute_name] = attribute.load(hash[attribute_name] || hash[attribute_name.to_s], sub_context, recurse: recurse)
       end
 
       unknown_keys = hash.keys.collect {|k| k.to_sym} - self.attributes.keys
@@ -237,7 +245,7 @@ module Attributor
       @validating = false
       @dumping = false
       if data
-        loaded = self.class.load( data )
+        loaded = self.class.load(data)
         @attributes = loaded.attributes
       else
         @attributes = ::Hash.new

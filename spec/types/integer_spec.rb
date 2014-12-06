@@ -107,6 +107,9 @@ describe Attributor::Integer do
   context '.load' do
     let(:value) { nil }
 
+    it 'returns nil for nil' do
+      type.load(nil).should be(nil)
+    end
 
     context 'for incoming integer values' do
       let(:value) { 1 }

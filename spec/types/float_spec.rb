@@ -25,6 +25,10 @@ describe Attributor::Float do
   context '.load' do
     let(:value) { nil }
 
+    it 'returns nil for nil' do
+      type.load(nil).should be(nil)
+    end
+
     context 'for incoming Float values' do
 
       it 'returns the incoming value' do

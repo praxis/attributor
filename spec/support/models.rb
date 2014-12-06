@@ -33,7 +33,7 @@ end
 
 class Turducken < Attributor::Model
   attributes do
-    attribute :name, String, :description => "Turducken name", :example => /[:name:]/
+    attribute :name, String, :default => "Turkey McDucken", :description => "Turducken name", :example => /[:name:]/
     attribute :chicken, Chicken
     attribute :duck, Duck
     attribute :turkey, Turkey, :description => "The turkey"
@@ -79,3 +79,5 @@ class Address < Attributor::Model
     attribute :person, Person, example: proc { |address, context| Person.example(context, address: address) }
   end
 end
+
+
