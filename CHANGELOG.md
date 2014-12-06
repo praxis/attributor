@@ -5,6 +5,7 @@ next
 ------
 
 * Added `recurse` option to `Type.load` that is used by `Model` and `Hash` to force the loading of values (specifically, so that default values are assigned) even if the loaded value is `nil`.
+* Fix `Attributor::CSV` to dump `String` values and generate `String` examples.
 
 2.2.1
 ------
@@ -23,7 +24,7 @@ next
     * `:case_insensitive_load` for string-keyed hashes. This allows loading hashes with keys that do not exactly match the case defined in the hash.
     * Added `:allow_extras` option to allow handling of undefined keys when loading.
   * Added `Hash#set` to encapsulate the above options and attribute loading.
-  * Added `extra` command in the `keys` DSL, which lets you define a key (whose value should be a Hash), to group any unspecified keys during load. 
+  * Added `extra` command in the `keys` DSL, which lets you define a key (whose value should be a Hash), to group any unspecified keys during load.
 
 2.1.0
 ------
@@ -32,7 +33,7 @@ next
 * Add Collection subclasses for CSVs and Ids
   * CSV type for Collection of values serialized as comma-separated strings.
   * Ids type. A helper for creating CSVs with members matching a given a type's :identity option.
-* Allow instances of Models to be initialized with initial data. 
+* Allow instances of Models to be initialized with initial data.
   * Supported formats for the data are equivalent to the loading formats (i.e. ruby Hash, a JSON string or another instance of the same model type).
 * Improved context reporting in errors
   * Added contextual information while loading and dumping attributes.
@@ -40,7 +41,7 @@ next
     * `validate` takes a `context` argument that (instead of a string) is now an array of parent segments.
     * `dump` takes a `context:` option parameter of the same type
   * Enhanced error messages to report the correct context scope.
-  * Make Attribute assignments in models to report a special context (not the attributor root) 
+  * Make Attribute assignments in models to report a special context (not the attributor root)
     * Instead of reporting "$." as the context , when doing model.field_name=value, they'll now report "assignment.of(field_name)" instead
   * Truncate the length of values when reporting loading errors when they're long (i.e. >500 chars)
 * `Model.attributes` may now be called more than once to set add or replace attributes. The exact behavior depends upon the types of the attributes being added or replaced. See [model_spec.rb](spec/types/model_spec.rb) for examples.
