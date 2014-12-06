@@ -282,6 +282,17 @@ describe Attributor::Collection do
         value.all? { |element| member_type.valid_type?(element) }.should be_true
       end
     end
+
+    it "returns an Array with size specified" do
+      type.example(options: {size: 5}).size.should eq(5)
+    end
+
+    it "returns an Array with size within a range" do
+      5.times do
+        type.example(options: {size: (2..4)}).size.should be_within(1).of(3)
+      end
+    end
+
     context "passing a non array context" do
       it 'still is handled correctly ' do
         expect{
@@ -289,6 +300,6 @@ describe Attributor::Collection do
         }.to_not raise_error
       end
     end
-    
+
   end
 end

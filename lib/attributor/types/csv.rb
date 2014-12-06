@@ -23,10 +23,7 @@ module Attributor
     end
 
     def self.example(context=nil, options: {})
-      collection = []
-      while collection.size < 2
-        collection = super(context, options)
-      end
+      collection = super(context, options: options.merge(size: (2..4)))
       return collection.join(',')
     end
 

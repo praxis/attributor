@@ -41,10 +41,12 @@ module Attributor
     # @return An Array of native type objects conforming to the specified member_type
     def self.example(context=nil, options: {})
       result = []
-      size = rand(3) + 1
+      size = options[:size] || (rand(3) + 1)
+      size = [*size].sample if size.is_a?(Range)
+
       context ||= ["Collection-#{result.object_id}"]
       context = Array(context)
-      
+
       size.times do |i|
         subcontext = context + ["at(#{i})"]
         result << self.member_attribute.example(subcontext)
@@ -64,7 +66,7 @@ module Attributor
       elsif value.is_a?(::String)
         loaded_value = decode_string(value,context)
       else
-        raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self 
+        raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self
       end
 
       return loaded_value.collect { |member| self.member_attribute.load(member,context) }
@@ -82,7 +84,6 @@ module Attributor
     end
 
     def self.describe(shallow=false)
-      #puts "Collection: #{self.type}"      
       hash = super(shallow)
       hash[:options] = {} unless hash[:options]
       hash[:member_attribute] = self.member_attribute.describe
@@ -95,7 +96,7 @@ module Attributor
       if options.has_key?(:reference) && !member_options.has_key?(:reference)
         member_options[:reference] = options[:reference]
       end
-      
+
       # create the member_attribute, passing in our member_type and whatever constructor_block is.
       # that in turn will call construct on the type if applicable.
       @member_attribute = Attributor::Attribute.new self.member_type, member_options, &constructor_block
