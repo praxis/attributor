@@ -4,7 +4,7 @@ Attributor Changelog
 next
 ------
 
-* Added `recurse` option to `Type.load`, that if true is used by `Model` to force the loading of attributes (specifically, so that default values are assigned) even if the loaded value is `nil`.
+* Added `recurse` option to `Type.load` that is used by `Model` and `Hash` to force the loading of values (specifically, so that default values are assigned) even if the loaded value is `nil`.
 
 2.2.1
 ------

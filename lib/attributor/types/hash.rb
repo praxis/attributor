@@ -186,9 +186,13 @@ module Attributor
     end
 
 
-    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
+    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, recurse: false, **options)
       if value.nil?
-        return nil
+        if recurse
+          loaded_value = {}
+        else
+          return nil
+        end
       elsif value.is_a?(self)
         return value
       elsif value.kind_of?(Attributor::Hash)
@@ -201,7 +205,7 @@ module Attributor
         raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self
       end
 
-      return self.from_hash(loaded_value,context) if self.keys.any?
+      return self.from_hash(loaded_value,context, recurse: recurse) if self.keys.any?
       return self.new(loaded_value) if (key_type == Object && value_type == Object)
 
       loaded_value.each_with_object(self.new) do| (k, v), obj |
@@ -241,7 +245,7 @@ module Attributor
       raise AttributorException, "Unknown key received: #{key.inspect} while loading #{Attributor.humanize_context(context)}"
     end
 
-    def self.from_hash(object,context)
+    def self.from_hash(object,context, recurse: false)
       hash = self.new
 
       # if the hash definition includes named extra keys, initialize
@@ -265,7 +269,7 @@ module Attributor
       self.keys.each do |key_name, attribute|
         next if hash.key?(key_name)
         sub_context = self.generate_subcontext(context,key_name)
-        hash[key_name] = attribute.load(nil, sub_context)
+        hash[key_name] = attribute.load(nil, sub_context, recurse: recurse)
       end
 
       hash

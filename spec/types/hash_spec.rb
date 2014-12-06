@@ -52,6 +52,16 @@ describe Attributor::Hash do
     let(:value) { {one: 'two', three: 4} }
     subject(:hash) { type.load(value) }
 
+    context 'for nil with recurse: true' do
+      let(:value) { nil }
+      subject(:hash) { HashWithModel.load(value, recurse:true) }
+
+      it 'works' do
+        hash[:name].should eq('Turkey McDucken')
+        hash[:chicken].age.should eq(1)
+      end
+    end
+
     context 'for a simple hash' do
       it { should eq(value) }
       it 'equals the hash' do
@@ -399,7 +409,7 @@ describe Attributor::Hash do
       subject(:type_dump){ type.dump(value) }
       let(:key_type){ Attributor::Object }
       let(:value_type){ Attributor::Object }
-           
+
       it 'even when key/types are object' do
         subject.should be_kind_of(::Hash)
         subject.should eq( hash )
@@ -453,7 +463,7 @@ describe Attributor::Hash do
         output[:two].should eq('two')
         output[:three].should eq('3')
       end
-      
+
       its( :validate ){ should be_empty }
     end
 
