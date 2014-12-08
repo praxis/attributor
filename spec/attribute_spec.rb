@@ -247,6 +247,13 @@ describe Attributor::Attribute do
         it { should == default_value}
       end
 
+      context 'for false' do
+        let(:type) { Attributor::Boolean }
+        let(:default_value) { false }
+        let(:value) { nil }
+        it { should == default_value}
+
+      end
     end
 
     context 'validating a value' do

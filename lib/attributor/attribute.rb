@@ -41,7 +41,7 @@ module Attributor
       value = type.load(value,context,**options)
 
       if value.nil?
-        value = self.options[:default] if self.options[:default]
+        value = self.options[:default] if self.options.key?(:default)
       end
 
       value
