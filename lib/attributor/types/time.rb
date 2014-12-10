@@ -14,11 +14,10 @@ module Attributor
     end
 
     def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
-      # We assume that if the value is already in the right type, we've decoded it already
       return value if value.is_a?(self.native_type)
-      if value.respond_to?(:to_time)
-        return value.to_time
-      end
+      return nil if value.nil?
+
+      return value.to_time if value.respond_to?(:to_time)
 
       case value
       when ::Integer
@@ -29,6 +28,8 @@ module Attributor
         rescue ArgumentError => e
           raise Attributor::DeserializationError, context: context, from: value.class, encoding: "Time" , value: value
         end
+      else
+        raise CoercionError, context: context, from: value.class, to: self, value: value
       end
     end
 

@@ -8,6 +8,7 @@ next
 * Fix `Attributor::CSV` to dump `String` values and generate `String` examples.
 * Default values of `false` now work correctly.
 * Added `BigDecimal`, `Date` and `Time` types
+* `DateTime.load` now raises `CoercionError` (instead of returning `nil`) if given values that can not coerced properly.
 
 2.2.1
 ------
