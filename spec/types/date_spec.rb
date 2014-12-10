@@ -1,15 +1,15 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper.rb')
 
-describe Attributor::DateTime do
+describe Attributor::Date do
 
-  subject(:type) { Attributor::DateTime }
+  subject(:type) { Attributor::Date }
 
   context '.native_type' do
-    its(:native_type) { should be(::DateTime) }
+    its(:native_type) { should be(::Date) }
   end
 
   context '.example' do
-    its(:example) { should be_a(::DateTime) }
+    its(:example) { should be_a(::Date) }
   end
 
   context '.load' do
@@ -20,18 +20,18 @@ describe Attributor::DateTime do
 
     context 'for incoming objects' do
       
-      it "returns correct DateTime for Time objects" do
+      it "returns correct Date for Time objects" do
         object = Time.now
         loaded = type.load(object)
-        loaded.should be_a(::DateTime)
-        loaded.to_time.should == object
+        loaded.should be_a(::Date)
+        loaded.to_date.should == object.to_date
       end
      
-      it "returns correct DateTime for DateTime objects" do
+      it "returns correct Date for DateTime objects" do
         object = DateTime.now
         loaded = type.load(object)
-        loaded.should be_a(::DateTime)
-        loaded.should be( object )
+        loaded.should be_a(::Date)
+        loaded.should be(object)
       end
 
     end    
@@ -50,8 +50,8 @@ describe Attributor::DateTime do
         '2001-02-03T04:05:06+07:00.123456', # custom format with microseconds
       ].each do |value|
 
-        it "returns correct DateTime for #{value.inspect}" do
-          type.load(value).should == DateTime.parse(value)
+        it "returns correct Date for #{value.inspect}" do
+          type.load(value).should == Date.parse(value)
         end
 
       end
@@ -66,7 +66,7 @@ describe Attributor::DateTime do
         it "raises Attributor::AttributorException for #{value.inspect}" do
           expect {
             type.load(value)
-          }.to raise_error(Attributor::DeserializationError, /Error deserializing a String using DateTime/)
+          }.to raise_error(Attributor::DeserializationError, /Error deserializing a String using Date/)
         end
 
       end
@@ -80,7 +80,7 @@ describe Attributor::DateTime do
         it "raises Attributor::AttributorException for #{value.inspect}" do
           expect {
             type.load(value)
-          }.to raise_error(Attributor::DeserializationError, /Error deserializing a String using DateTime/)
+          }.to raise_error(Attributor::DeserializationError, /Error deserializing a String using Date/)
         end
 
       end

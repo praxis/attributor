@@ -67,16 +67,19 @@ module Attributor
 
   require_relative 'attributor/types/container'
   require_relative 'attributor/types/object'
+  require_relative 'attributor/types/bigdecimal'
   require_relative 'attributor/types/integer'
   require_relative 'attributor/types/string'
   require_relative 'attributor/types/model'
   require_relative 'attributor/types/struct'
   require_relative 'attributor/types/boolean'
+  require_relative 'attributor/types/date'
   require_relative 'attributor/types/date_time'
+  require_relative 'attributor/types/time'
   require_relative 'attributor/types/float'
   require_relative 'attributor/types/collection'
   require_relative 'attributor/types/hash'
-
+  
 
   require_relative 'attributor/types/csv'
   require_relative 'attributor/types/ids'
@@ -84,6 +87,5 @@ module Attributor
   # TODO: move these to 'optional types' or 'extra types'... location
   require_relative 'attributor/types/tempfile'
   require_relative 'attributor/types/file_upload'
-
 
 end
