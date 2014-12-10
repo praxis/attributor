@@ -119,7 +119,7 @@ module Attributor
 
       unless @concrete
         return self.of(key:self.key_type, value: self.value_type)
-          .construct(constructor_block,**options)
+        .construct(constructor_block,**options)
       end
 
       if options[:case_insensitive_load] && !(self.key_type <= String)
@@ -158,14 +158,9 @@ module Attributor
 
 
     def self.dump(value, **opts)
-      return nil if value.nil?
-
-      value.each_with_object({}) do |(k,v),hash|
-        k = key_type.dump(k,opts) if @key_type
-        v = value_type.dump(v,opts) if @value_type
-        hash[k] = v
-      end
+      self.load(value).dump(**opts)
     end
+
 
     def self.check_option!(name, definition)
       case name
@@ -219,8 +214,40 @@ module Attributor
     end
 
     def generate_subcontext(context, key_name)
-      self.class.generate_sub_context(context,key_name)
+      self.class.generate_subcontext(context,key_name)
     end
+
+    def get(key, context: self.generate_subcontext(Attributor::DEFAULT_ROOT_CONTEXT,key))
+      key = self.class.key_attribute.load(key, context)
+      value = @contents[key]
+      
+      if (attribute = self.class.keys[key])
+        return self[key] = attribute.load(value, context)
+      end
+
+      if self.class.options[:case_insensitive_load]
+        key = self.class.insensitive_map[key.downcase]
+        return self.get(key, context: context)
+      end
+
+      if self.class.options[:allow_extra]
+        if self.class.extra_keys.nil?
+          return @contents[key] = self.class.value_attribute.load(value, context)
+        else
+          extra_keys_key = self.class.extra_keys
+
+          unless @contents.key? extra_keys_key
+            extra_keys_value = self.class.keys[extra_keys_key].load({})
+            @contents[extra_keys_key] = extra_keys_value
+          end
+
+          return @contents[extra_keys_key].get(key, context: context)
+        end
+      end
+
+      raise AttributorException, "Unknown key received: #{key.inspect} for #{Attributor.humanize_context(context)}"
+    end
+
 
     def set(key, value, context: self.generate_subcontext(Attributor::DEFAULT_ROOT_CONTEXT,key))
       key = self.class.key_attribute.load(key, context)
@@ -238,7 +265,14 @@ module Attributor
         if self.class.extra_keys.nil?
           return self[key] = self.class.value_attribute.load(value, context)
         else
-          return self[self.class.extra_keys].set(key, value, context: context)
+          extra_keys_key = self.class.extra_keys
+
+          unless @contents.key? extra_keys_key
+            extra_keys_value = self.class.keys[extra_keys_key].load({})
+            @contents[extra_keys_key] = extra_keys_value
+          end
+
+          return self[extra_keys_key].set(key, value, context: context)
         end
       end
 
@@ -378,9 +412,17 @@ module Attributor
       end
     end
 
-    def dump(*args)
-      @contents.each_with_object(::Hash.new) do |(k,v), hash|
-        hash[k] = self.class.value_type.dump(v)
+    def dump(**opts)
+      @contents.each_with_object({}) do |(k,v),hash|
+        k = self.key_attribute.dump(k,opts)
+        
+        if (attribute_for_value = self.class.keys[k])
+          v = attribute_for_value.dump(v,opts)
+        else
+          v = self.value_attribute.dump(v,opts)
+        end
+
+        hash[k] = v
       end
     end
 
