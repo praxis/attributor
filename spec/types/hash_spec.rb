@@ -269,17 +269,17 @@ describe Attributor::Hash do
 
       it 'returns a hash with the dumped values and keys' do
         subtype.should_receive(:dump).exactly(2).times.and_call_original
+
         dumped_value = type.dump(value, opts)
         dumped_value.should be_kind_of(::Hash)
-        dumped_value.keys.should =~ [:id1,:id2]
+        dumped_value.keys.should =~ ['id1','id2']
         dumped_value.values.should have(2).items
-        value[:id1].should be_kind_of subtype
-        value[:id2].should be_kind_of subtype
-        dumped_value[:id1].should == value1
-        dumped_value[:id2].should == value2
+        dumped_value['id1'].should == value1
+        dumped_value['id2'].should == value2
       end
 
     end
+
   end
 
   context '#validate' do
@@ -400,10 +400,6 @@ describe Attributor::Hash do
       end
       let(:hash) { {one: value_type.example} }
 
-      it 'works too' do
-        #pp output
-      end
-
     end
     context 'will always return a top level hash' do
       subject(:type_dump){ type.dump(value) }
@@ -413,6 +409,60 @@ describe Attributor::Hash do
       it 'even when key/types are object' do
         subject.should be_kind_of(::Hash)
         subject.should eq( hash )
+      end
+    end
+
+    context 'for a hash with defined keys' do
+      let(:type) do
+        Class.new(Attributor::Hash) do
+          keys do
+            key 'id', Integer
+            key 'chicken', Chicken
+          end
+        end
+      end
+
+      let(:chicken) { {'name' => 'bob'} }
+
+      let(:value) { {'id' => '1', 'chicken' => chicken  } }
+      let(:expected) { {'id' => 1, 'chicken' => Chicken.dump(chicken) } }
+
+      it 'properly dumps the values' do
+        type.dump(value).should eq(expected)
+      end
+
+      context 'with allow_extra: true' do
+        let(:type) do
+          Class.new(Attributor::Hash) do
+            keys allow_extra: true do
+              key 'id', Integer
+              key 'chicken', Chicken
+            end
+          end
+        end
+
+        let(:value) { {'id' => '1', 'chicken' => chicken, 'rank' => 'bob rank'} }
+        let(:expected) { {'id' => 1, 'chicken' => Chicken.dump(chicken), 'rank' => 'bob rank' } }
+        it 'preserves the extra keys at the top level' do
+          type.dump(value).should eq(expected)
+        end
+
+        context 'with extra option' do
+          let(:type) do
+            Class.new(Attributor::Hash) do
+              keys allow_extra: true do
+                key 'id', Integer
+                key 'chicken', Chicken
+                extra 'other', Attributor::Hash
+              end
+            end
+          end
+
+          let(:expected) { {'id' => 1, 'chicken' => Chicken.dump(chicken), 'other' => {'rank' => 'bob rank' }} }
+          it 'dumps the extra keys inside the subhash' do
+            type.dump(value).should eq(expected)
+          end
+        end
       end
     end
   end
@@ -494,6 +544,57 @@ describe Attributor::Hash do
         its( :validate ){ should be_empty }
 
       end
+    end
+
+    context '#get and #set' do
+      let(:type) do
+        Class.new(Attributor::Hash) do
+          keys do
+            key 'id', Integer
+            key 'chicken', Chicken
+            extra 'others', Attributor::Hash, default: {}
+          end
+        end
+      end
+
+      let(:chicken) { {name: 'bob'} }
+      subject(:hash) { type.new }
+
+      context '#set' do
+        it 'sets values into "extra" keys if appplicable' do
+          hash.should_not have_key('others')
+          hash.set 'foo', 'bar'
+          hash['others'].should have_key('foo')
+          hash.should have_key('others')
+          hash['others']['foo'].should eq('bar')
+        end
+
+        it 'loads values before saving into the contents' do
+          hash.set 'chicken', chicken
+          hash['chicken'].should be_a(Chicken)
+        end
+      end
+
+      context '#get' do
+        before do
+          hash['chicken'] = chicken
+          hash['chicken'].should eq(chicken)
+        end
+
+        it 'loads and updates the saved value' do
+          hash.get('chicken').should be_a(Chicken)
+          hash['chicken'].should be_a(Chicken)
+        end
+
+        it 'retrieves values from an "extra" key' do
+          bar = double('bar')
+          hash.set 'foo', bar
+          hash.get('others').get('foo').should be(bar)
+
+          hash.get('foo').should be(bar)
+        end
+      end
+
     end
 
   end
