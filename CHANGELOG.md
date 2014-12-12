@@ -1,7 +1,7 @@
 Attributor Changelog
 ============================
 
-next
+2.3.0
 ------
 
 * Added `recurse` option to `Type.load` that is used by `Model` and `Hash` to force the loading of values (specifically, so that default values are assigned) even if the loaded value is `nil`.
@@ -11,6 +11,7 @@ next
 * `DateTime.load` now raises `CoercionError` (instead of returning `nil`) if given values that can not coerced properly.
 * `Hash.dump` now first calls `Hash.load`, and correctly uses defined value types for dumping.
 * Added `Hash#get`, for retrieving keys using the same logic the `case_insensitive_load` and `allow_extra` with defined `extra` key.
+
 
 2.2.1
 ------
