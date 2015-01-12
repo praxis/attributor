@@ -147,16 +147,14 @@ describe Attributor::Collection do
       end
 
       context 'for invalid values' do
-        {
-          # FIXME: https://github.com/rightscale/attributor/issues/24
-          #::String  => ["foo", "bar"],
-          #::Object  => [::Object.new]
-          ::Chicken => [::Turkey.new]
-        }.each do |member_type, value|
-          it "raises error when member_type is #{member_type} and value is #{value.inspect}" do
-            expect { type.of(member_type).load(value).should == value }.to raise_error(Attributor::AttributorException)
-          end
+        let(:member_type) { ::Chicken }
+        let(:value) { [::Turducken.example!] }
+        it "raises error when incoming value is not of member_type" do
+          expect {
+            val = type.of(member_type).load(value)
+          }.to raise_error(Attributor::AttributorException)
         end
+
       end
     end
 

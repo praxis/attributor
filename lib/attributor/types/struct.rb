@@ -2,6 +2,9 @@
 module Attributor
   class Struct < Attributor::Model
     
+    def self.constructable? 
+      true
+    end
 
     # Construct a new subclass, using attribute_definition to define attributes.
     def self.construct(attribute_definition, options={})

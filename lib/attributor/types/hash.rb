@@ -2,6 +2,9 @@ module Attributor
   class Hash
     extend Forwardable
 
+    MAX_EXAMPLE_DEPTH = 5
+    CIRCULAR_REFERENCE_MARKER = '...'.freeze
+
     include Container
     include Enumerable
 
@@ -19,24 +22,15 @@ module Attributor
     @key_attribute = Attribute.new(@key_type)
     @value_attribute = Attribute.new(@value_type)
 
-    def self.key_type=(key_type)
-      resolved_key_type = Attributor.resolve_type(key_type)
-      unless resolved_key_type.ancestors.include?(Attributor::Type)
-        raise Attributor::AttributorException.new("Hashes only support key types that are Attributor::Types. Got #{resolved_key_type.name}")
-      end
 
-      @key_type = resolved_key_type
+    def self.key_type=(key_type)
+      @key_type = Attributor.resolve_type(key_type)
       @key_attribute = Attribute.new(@key_type)
       @concrete=true
     end
 
     def self.value_type=(value_type)
-      resolved_value_type = Attributor.resolve_type(value_type)
-      unless resolved_value_type.ancestors.include?(Attributor::Type)
-        raise Attributor::AttributorException.new("Hashes only support value types that are Attributor::Types. Got #{resolved_value_type.name}")
-      end
-
-      @value_type = resolved_value_type
+      @value_type = Attributor.resolve_type(value_type)
       @value_attribute = Attribute.new(@value_type)
       @concrete=true
     end
@@ -113,6 +107,10 @@ module Attributor
       end
     end
 
+    def self.constructable?
+      true
+    end
+
 
     def self.construct(constructor_block, **options)
       return self if constructor_block.nil?
@@ -131,34 +129,64 @@ module Attributor
     end
 
 
-    def self.example(context=nil, options: {})
-      return self.new if (key_type == Object && value_type == Object)
-
+    def self.example_contents(context, parent, **values)
       hash = ::Hash.new
+      example_depth = context.size
+
+      self.keys.each do |sub_attribute_name, sub_attribute|
+        if sub_attribute.attributes
+          # TODO: add option to raise an exception in this case?
+          next if example_depth > MAX_EXAMPLE_DEPTH
+        end
+
+        sub_context = self.generate_subcontext(context,sub_attribute_name)
+        block = Proc.new do
+          value = values.fetch(sub_attribute_name) do
+            sub_attribute.example(sub_context, parent: parent)
+          end
+
+          sub_attribute.load(value,sub_context)
+        end
+
+
+        hash[sub_attribute_name] = block
+      end
+
+      hash
+    end
+
+    def self.example(context=nil, **values)
+      if (key_type == Object && value_type == Object && self.keys.empty?)
+        return self.new 
+      end
+
       context ||= ["#{Hash}-#{rand(10000000)}"]
       context = Array(context)
 
       if self.keys.any?
-        self.keys.each do |sub_name, sub_attribute|
-          subcontext = context + ["at(#{sub_name})"]
-          hash[sub_name] = sub_attribute.example(subcontext)
-        end
-      else
-        size = rand(3) + 1
+        result = self.new
+        result.extend(ExampleMixin)
 
-        size.times do |i|
+        result.lazy_attributes = self.example_contents(context, result, values)
+      else
+        hash = ::Hash.new
+
+        (rand(3) + 1).times do |i|
           example_key = key_type.example(context + ["at(#{i})"])
           subcontext = context + ["at(#{example_key})"]
           hash[example_key] = value_type.example(subcontext)
         end
+
+        result = self.new(hash)
       end
 
-      self.new(hash)
+      result
     end
 
 
     def self.dump(value, **opts)
-      self.load(value).dump(**opts)
+      self.load(value).
+        dump(**opts)
     end
 
 
@@ -182,6 +210,7 @@ module Attributor
 
 
     def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, recurse: false, **options)
+
       if value.nil?
         if recurse
           loaded_value = {}
@@ -191,6 +220,10 @@ module Attributor
       elsif value.is_a?(self)
         return value
       elsif value.kind_of?(Attributor::Hash)
+        if (value.contents.keys - self.attributes.keys).any?
+          raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self
+        end
+
         loaded_value = value.contents
       elsif value.is_a?(::Hash)
         loaded_value = value
@@ -219,8 +252,9 @@ module Attributor
 
     def get(key, context: self.generate_subcontext(Attributor::DEFAULT_ROOT_CONTEXT,key))
       key = self.class.key_attribute.load(key, context)
-      value = @contents[key]
       
+      value = @contents[key]
+
       if (attribute = self.class.keys[key])
         return self[key] = attribute.load(value, context)
       end
@@ -236,12 +270,10 @@ module Attributor
         else
           extra_keys_key = self.class.extra_keys
 
-          unless @contents.key? extra_keys_key
-            extra_keys_value = self.class.keys[extra_keys_key].load({})
-            @contents[extra_keys_key] = extra_keys_value
+          if @contents.key? extra_keys_key
+            return @contents[extra_keys_key].get(key, context: context)
           end
 
-          return @contents[extra_keys_key].get(key, context: context)
         end
       end
 
@@ -249,11 +281,11 @@ module Attributor
     end
 
 
-    def set(key, value, context: self.generate_subcontext(Attributor::DEFAULT_ROOT_CONTEXT,key))
+    def set(key, value, context: self.generate_subcontext(Attributor::DEFAULT_ROOT_CONTEXT,key), recurse: false)
       key = self.class.key_attribute.load(key, context)
 
       if (attribute = self.class.keys[key])
-        return self[key] = attribute.load(value, context)
+        return self[key] = attribute.load(value, context, recurse: recurse)
       end
 
       if self.class.options[:case_insensitive_load]
@@ -289,14 +321,14 @@ module Attributor
       if self.extra_keys
         sub_context = self.generate_subcontext(context,self.extra_keys)
         v = object.fetch(self.extra_keys, {})
-        hash.set(self.extra_keys, v, context: sub_context)
+        hash.set(self.extra_keys, v, context: sub_context, recurse: recurse)
       end
 
       object.each do |k,v|
         next if k == self.extra_keys
 
         sub_context = self.generate_subcontext(Attributor::DEFAULT_ROOT_CONTEXT,k)
-        hash.set(k, v, context: sub_context)
+        hash.set(k, v, context: sub_context, recurse: recurse)
       end
 
       # handle default values for missing keys
@@ -342,13 +374,26 @@ module Attributor
       hash
     end
 
-    # TODO: chance value_type and key_type to be attributes?
-    # TODO: add a validate, which simply validates that the incoming keys and values are of the right type.
-    #       Think about the format of the subcontexts to use: let's use .at(key.to_s)
+    # TODO: Think about the format of the subcontexts to use: let's use .at(key.to_s)
     attr_reader :contents
-    def_delegators :@contents, :[], :[]=, :each, :size, :keys, :key?, :values, :empty?, :has_key?
+    
+    def_delegators :@contents, 
+      :[], 
+      :[]=, 
+      :each, 
+      :size, 
+      :keys, 
+      :key?, 
+      :values, 
+      :empty?, 
+      :has_key?
+
+    attr_reader :validating, :dumping
 
     def initialize(contents={})
+      @validating = false
+      @dumping = false
+
       @contents = contents
     end
 
@@ -359,7 +404,6 @@ module Attributor
     def value_type
       self.class.value_type
     end
-
 
     def key_attribute
       self.class.key_attribute
@@ -412,10 +456,15 @@ module Attributor
       end
     end
 
+
     def dump(**opts)
+      return CIRCULAR_REFERENCE_MARKER if @dumping
+
+      @dumping = true
+
       @contents.each_with_object({}) do |(k,v),hash|
         k = self.key_attribute.dump(k,opts)
-        
+
         if (attribute_for_value = self.class.keys[k])
           v = attribute_for_value.dump(v,opts)
         else
@@ -424,6 +473,8 @@ module Attributor
 
         hash[k] = v
       end
+    ensure
+      @dumping = false
     end
 
   end

@@ -5,3 +5,10 @@ class HashWithModel < Attributor::Hash
   end
 end
 
+
+class HashWithStrings < Attributor::Hash
+  keys do
+    key :name, String
+    key :something, String
+  end
+end

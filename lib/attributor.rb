@@ -13,7 +13,8 @@ module Attributor
   require_relative 'attributor/dsl_compiler'
   require_relative 'attributor/attribute_resolver'
 
-
+  require_relative 'attributor/example_mixin'
+  
   require_relative 'attributor/extensions/randexp'
 
 
@@ -37,7 +38,7 @@ module Attributor
       raise AttributorException.new("Could not find attribute type for: #{name} [klass: #{klass.name}]")  unless  klass < Attributor::Type
     end
 
-    if klass.respond_to?(:construct)
+    if klass.constructable?
       return klass.construct(constructor_block, options)
     end
 
@@ -70,8 +71,7 @@ module Attributor
   require_relative 'attributor/types/bigdecimal'
   require_relative 'attributor/types/integer'
   require_relative 'attributor/types/string'
-  require_relative 'attributor/types/model'
-  require_relative 'attributor/types/struct'
+  require_relative 'attributor/types/symbol'
   require_relative 'attributor/types/boolean'
   require_relative 'attributor/types/date'
   require_relative 'attributor/types/date_time'
@@ -79,6 +79,8 @@ module Attributor
   require_relative 'attributor/types/float'
   require_relative 'attributor/types/collection'
   require_relative 'attributor/types/hash'
+  require_relative 'attributor/types/model'
+  require_relative 'attributor/types/struct'
   
 
   require_relative 'attributor/types/csv'

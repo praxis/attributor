@@ -111,7 +111,9 @@ describe Attributor::DSLCompiler do
         end
 
         it 'is unhappy from somewhere else if you do not specify a type' do
+          pending
           expect {
+
             dsl_compiler.attribute(attribute_name, attribute_options, &attribute_block)
           }.to raise_error(/does not support anonymous generation/)
         end

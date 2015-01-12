@@ -6,8 +6,11 @@ module Attributor
       return ::String
     end
 
-
     def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
+      if value.kind_of?(Enumerable)
+        raise IncompatibleTypeError,  context: context, value_type: value.class, type: self
+      end
+
       value && String(value)
     rescue
       super

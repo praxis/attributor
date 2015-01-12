@@ -10,7 +10,12 @@ module Attributor
 
 
     module ClassMethods
-      
+  
+      # Does this type support the generation of subtypes? 
+      def constructable? 
+        false
+      end
+
       # Generic decoding and coercion of the attribute.
       def load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
         return nil if value.nil?

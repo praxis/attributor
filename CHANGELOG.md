@@ -1,6 +1,12 @@
 Attributor Changelog
 ============================
 
+next
+------
+
+* `Model` is now a subclass of `Hash`... expect things to break
+* `String.load` now raises `IncompatibleTypeError` for `Enumerable` values.
+
 2.3.0
 ------
 
