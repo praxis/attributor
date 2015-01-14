@@ -6,6 +6,13 @@ module Attributor
     undef :format
     undef :test rescue nil
 
+    # Remove undesired methods inherited from Hash
+    undef :size
+    undef :keys
+    undef :values
+    undef :empty? 
+    undef :has_key?
+
     @key_type = Symbol
     @value_type = Object
 

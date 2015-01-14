@@ -210,6 +210,7 @@ module Attributor
 
 
     def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, recurse: false, **options)
+      context = Array(context)
 
       if value.nil?
         if recurse
