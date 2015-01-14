@@ -49,7 +49,15 @@ module Attributor
 
   def self.humanize_context( context )
     raise "NIL CONTEXT PASSED TO HUMANZE!!" unless context
-    raise "INVALID CONTEXT!!! (got: #{context.inspect})" unless context.is_a? Enumerable
+
+    if context.kind_of? ::String
+      context = Array(context)
+    end
+
+    unless context.is_a? Enumerable
+      raise "INVALID CONTEXT!!! (got: #{context.inspect})" 
+    end
+    
     begin
       return context.join('.')
     rescue Exception => e
