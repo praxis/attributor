@@ -4,8 +4,11 @@ Attributor Changelog
 next
 ------
 
-* `Model` is now a subclass of `Hash`... expect things to break
+* `Model` is now a subclass of `Hash`. 
+  * The interface for `Model` instances is almost entirely unchanged, except for the addition of `Hash`-like methods (i.e., you can now do `some_model[:key]` to access attributes).
+  * This fixes numerous incompatabilities between models and hashes, as well as confusing differences between the behavior when loading a model vs a hash.
 * `String.load` now raises `IncompatibleTypeError` for `Enumerable` values.
+* Added `Symbol` type, use with caution as it will automatically call `#to_sym` on anything loaded. 
 
 2.3.0
 ------
