@@ -148,7 +148,7 @@ describe Attributor::Collection do
 
       context 'for invalid values' do
         let(:member_type) { ::Chicken }
-        let(:value) { [::Turducken.example!] }
+        let(:value) { [::Turducken.example] }
         it "raises error when incoming value is not of member_type" do
           expect {
             val = type.of(member_type).load(value)

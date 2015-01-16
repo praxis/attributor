@@ -221,7 +221,7 @@ module Attributor
       elsif value.is_a?(self)
         return value
       elsif value.kind_of?(Attributor::Hash)
-        if (value.contents.keys - self.attributes.keys).any?
+        if (value.keys - self.attributes.keys).any?
           raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self
         end
 

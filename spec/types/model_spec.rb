@@ -170,7 +170,7 @@ describe Attributor::Model do
       context 'with an instance of different model' do
         it 'raises some sort of error' do
           expect {
-            turducken = Turducken.example!
+            turducken = Turducken.example
             chicken = Chicken.load(turducken,context)
           }.to raise_error(Attributor::IncompatibleTypeError, /Type Chicken cannot load values of type Turducken.*#{context.join('.')}/)
         end

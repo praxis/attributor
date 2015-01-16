@@ -80,6 +80,7 @@ module Attributor
     #     end
     # @api semiprivate
     def define(name, attr_type=nil, **opts, &block)
+      # add to existing attribute if present
       if (existing_attribute = attributes[name])
         if existing_attribute.attributes
           existing_attribute.type.attributes(&block)
@@ -87,26 +88,24 @@ module Attributor
         end
       end
 
+      # determine inherited attribute
+      inherited_attribute = nil      
       if (reference = self.options[:reference])
-        inherited_attribute = reference.attributes[name]
-      else
-        inherited_attribute = nil
-      end
-
-      if attr_type.nil?
-        if inherited_attribute
-          attr_type = inherited_attribute.type
-          # Only inherit opts if no explicit attr_type was given.
-          opts = inherited_attribute.options.merge(opts)
-        elsif block_given?
-          attr_type = Attributor::Struct
-        else
-          raise AttributorException, "type for attribute with name: #{name} could not be determined"
+        if (inherited_attribute = reference.attributes[name])
+          opts = inherited_attribute.options.merge(opts) unless attr_type
+          opts[:reference] = inherited_attribute.type if block_given?
         end
       end
 
-      if block_given? && inherited_attribute
-        opts[:reference] = inherited_attribute.type
+      # determine attribute type to use
+      if attr_type.nil?
+        if block_given?
+          attr_type = Attributor::Struct
+        elsif inherited_attribute
+          attr_type = inherited_attribute.type
+        else
+          raise AttributorException, "type for attribute with name: #{name} could not be determined"
+        end
       end
 
       Attributor::Attribute.new(attr_type, opts, &block)

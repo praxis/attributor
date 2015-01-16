@@ -72,17 +72,6 @@ module Attributor
       hash
     end
 
-
-    # an example, but with forced evaluation of lazy attributes
-    def self.example!(context=nil, **values)
-      result = self.example(context, **values)
-      result.lazy_attributes.keys.each do |k|
-        result.send(k)
-      end
-      result
-    end
-
-
     def self.check_option!(name, value)
       case name
       when :identity
