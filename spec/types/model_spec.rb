@@ -66,7 +66,7 @@ describe Attributor::Model do
       context 'with infinitely-expanding sub-attributes' do
         let(:model_class) do
           Class.new(Attributor::Model) do
-            this = self 
+            this = self
             attributes do
               attribute :name, String
               attribute :child, this
@@ -167,6 +167,15 @@ describe Attributor::Model do
         end
       end
 
+      context 'with an instance of different model' do
+        it 'raises some sort of error' do
+          expect {
+            turducken = Turducken.example
+            chicken = Chicken.load(turducken,context)
+          }.to raise_error(Attributor::IncompatibleTypeError, /Type Chicken cannot load values of type Turducken.*#{context.join('.')}/)
+        end
+      end
+
       context "with a hash" do
         context 'for a complete set of attributes' do
           it 'loads the given attributes' do
@@ -190,12 +199,11 @@ describe Attributor::Model do
           it 'raises an error' do
             expect {
               Chicken.load(hash, context)
-            }.to raise_error(Attributor::AttributorException, /Unknown attributes.*#{context.join('.')}/)
+            }.to raise_error(Attributor::AttributorException, /Unknown key received/)
+            #raise_error(Attributor::AttributorException, /Unknown attributes.*#{context.join('.')}/)
           end
         end
       end
-
-
 
     end
 
@@ -213,7 +221,7 @@ describe Attributor::Model do
 
     context 'initialize' do
 
-      subject(:chicken) { Chicken.new( attributes_data ) }
+      subject(:chicken) { Chicken.new(attributes_data) }
       context 'supports passing an initial hash object for attribute values' do
         let(:attributes_data){ {age: '1', email:'rooster@coup.com'} }
         it 'and sets them in loaded format onto the instance attributes' do
@@ -228,23 +236,23 @@ describe Attributor::Model do
       context 'supports passing a JSON encoded data object' do
         let(:attributes_hash){ {age: 1, email:'rooster@coup.com'} }
         let(:attributes_data){ JSON.dump(attributes_hash) }
-          it 'and sets them in loaded format onto the instance attributes' do
-            Chicken.should_receive(:load).with(attributes_data).and_call_original
-            attributes_hash.keys.each do |attr_name|
-              Chicken.attributes[attr_name].should_receive(:load).with(attributes_hash[attr_name],instance_of(Array), recurse: false).and_call_original
-            end
-            subject.age.should be(1)
-            subject.email.should == attributes_hash[:email]
+        it 'and sets them in loaded format onto the instance attributes' do
+          Chicken.should_receive(:load).with(attributes_data).and_call_original
+          attributes_hash.keys.each do |attr_name|
+            Chicken.attributes[attr_name].should_receive(:load).with(attributes_hash[attr_name],instance_of(Array), recurse: false).and_call_original
+          end
+          subject.age.should be(1)
+          subject.email.should == attributes_hash[:email]
+        end
+      end
+      context 'supports passing a native model for the data object' do
+        let(:attributes_data){ Chicken.example }
+        it 'sets a new instance pointing to the exact same attributes (careful about modifications!)' do
+          attributes_data.attributes.each do |attr_name, attr_value|
+            subject.send(attr_name).should be(attr_value)
           end
         end
-        context 'supports passing a native model for the data object' do
-          let(:attributes_data){ Chicken.example }
-          it 'sets a new instance pointing to the exact same attributes (careful about modifications!)' do
-            attributes_data.attributes.each do |attr_name, attr_value|
-              subject.send(attr_name).should be(attr_value)
-            end
-          end
-        end
+      end
     end
 
     context 'getting and setting attributes' do

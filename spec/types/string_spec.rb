@@ -56,4 +56,13 @@ describe Attributor::String do
     end
   end
 
+  context 'for Enumerable values' do
+    let(:value) { [1] }
+
+    it 'raises IncompatibleTypeError' do
+      expect {
+        type.load(value)
+      }.to raise_error(Attributor::IncompatibleTypeError)
+    end
+  end
 end

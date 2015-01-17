@@ -90,6 +90,11 @@ module Attributor
       hash
     end
 
+
+    def self.constructable? 
+      true
+    end
+
     def self.construct(constructor_block, options)
 
       member_options =  (options[:member_options]  || {} ).clone

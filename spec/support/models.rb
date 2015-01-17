@@ -42,6 +42,7 @@ end
 
 
 # http://en.wikipedia.org/wiki/Cormorant
+
 class Cormorant < Attributor::Model
   attributes do
     # This will be a collection of arbitrary Ruby Objects

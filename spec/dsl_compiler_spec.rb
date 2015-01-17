@@ -110,10 +110,10 @@ describe Attributor::DSLCompiler do
           attribute_options.merge(:reference => reference_type)
         end
 
-        it 'is unhappy from somewhere else if you do not specify a type' do
-          expect {
-            dsl_compiler.attribute(attribute_name, attribute_options, &attribute_block)
-          }.to raise_error(/does not support anonymous generation/)
+        it 'sets the type of the attribute to Struct' do
+          Attributor::Attribute.should_receive(:new).
+            with(expected_type, {:description=>"The turkey", :reference=>Turkey})
+          dsl_compiler.attribute(attribute_name, attribute_options, &attribute_block)
         end
 
         it 'passes the correct reference to the created attribute' do
