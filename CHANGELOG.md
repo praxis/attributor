@@ -1,7 +1,7 @@
 Attributor Changelog
 ============================
 
-next
+2.4.0
 ------
 
 * `Model` is now a subclass of `Hash`. 
