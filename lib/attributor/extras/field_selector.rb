@@ -12,6 +12,10 @@ module Attributor
 
     include Attributor::Type
 
+    def self.json_schema_type
+      :string
+    end
+
     def self.native_type
       ::Hash
     end

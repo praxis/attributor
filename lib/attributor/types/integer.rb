@@ -1,7 +1,9 @@
 
 
 module Attributor
-  class Integer < Numeric
+  class Integer
+    include Attributor::Numeric
+
     EXAMPLE_RANGE = 1000
 
     def self.native_type
@@ -52,6 +54,10 @@ module Attributor
         # Neither :min nor :max were given, noop
       end
       true
+    end
+
+    def self.json_schema_type
+      :integer
     end
   end
 end

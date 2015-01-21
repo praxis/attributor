@@ -7,6 +7,7 @@ describe Attributor::Hash do
   its(:key_type) { should be(Attributor::Object) }
   its(:value_type) { should be(Attributor::Object) }
   its(:dsl_class) { should be(Attributor::HashDSLCompiler) }
+  its(:json_schema_type) { should be(:object) }
 
   context 'attributes' do
     context 'with an exception from the definition block' do
@@ -1171,5 +1172,122 @@ describe Attributor::Hash do
   end
 
   context Attributor::InvalidDefinition do
+  end
+
+
+  context '.as_json_hash' do
+    let(:example){ nil }
+    subject(:description) { type.as_json_schema(example: example) }
+    its([:type]){ should eq(:object)}
+    its([:'x-type_name']){ should eq('Hash')}
+
+    context 'for hashes with explicit key and value types' do
+      let(:key_type){ String }
+      let(:value_type){ Integer }
+
+      subject(:type) { Attributor::Hash.of(key: key_type, value: value_type) }
+
+      it 'describes the key type correctly' do
+        expect(description.keys).to include( :'x-key_type' )
+        expect(description[:'x-key_type']).to be_kind_of(::Hash)
+        expect(description[:'x-key_type'][:type]).to eq( :string )
+      end
+
+      it 'describes the value type correctly' do
+        expect(description.keys).to include( :'x-value_type' )
+        expect(description[:'x-value_type']).to be_kind_of(::Hash)
+        expect(description[:'x-value_type'][:type]).to eq( :integer )
+      end
+
+    end
+
+
+    context 'for hashes with specific keys defined' do
+      let(:block) do
+        proc do
+          key 'a string', String
+          key '1', Integer, min: 1, max: 20
+          key 'some_date', DateTime
+          key 'defaulted', String, default: 'default value'
+          requires do
+            all.of '1','some_date'
+            exclusive 'some_date', 'defaulted'
+            at_least(1).of 'a string', 'some_date'
+            at_most(2).of 'a string', 'some_date'
+            exactly(1).of 'a string', 'some_date'
+          end
+        end
+      end
+
+      let(:type) { Attributor::Hash.of(key: String).construct(block) }
+
+      it 'describes the basic type options correctly' do
+        expect(description[:type]).to eq(:object)
+        expect(description[:'x-key_type']).to eq( type: :string , 'x-type_name': 'String')
+        expect(description).to_not have_key(:'x-value_type')
+      end
+
+      it 'describes the type attributes correctly' do
+        props = description[:properties]
+
+        expect(props['a string']).to eq(type: :string, 'x-type_name': 'String')
+        expect(props['1']).to eq(type: :integer, 'x-type_name': 'Integer', minimum: 1, maximum: 20)
+        expect(props['some_date']).to eq(type: :string, 'x-type_name': 'DateTime', format: :'date-time')
+        expect(props['defaulted']).to eq(type: :string, 'x-type_name': 'String', default: 'default value')
+      end
+
+      it 'describes the attribute requirements correctly' do
+        reqs = description[:required]
+        expect(reqs).to be_kind_of(Array)
+        expect(reqs).to eq( ['1','some_date'] )
+      end
+
+      it 'describes the extended requirements correctly' do
+        reqs = description[:'x-requirements']
+        expect(reqs).to be_kind_of(Array)
+        expect(reqs.size).to be(5)
+        expect(reqs).to include( type: :all, attributes: ['1','some_date'] )
+        expect(reqs).to include( type: :exclusive, attributes: ['some_date','defaulted'] )
+        expect(reqs).to include( type: :at_least, attributes: ['a string','some_date'], count: 1 )
+        expect(reqs).to include( type: :at_most, attributes: ['a string','some_date'], count: 2 )
+        expect(reqs).to include( type: :exactly, attributes: ['a string','some_date'], count: 1 )
+      end
+
+      context 'merging requires.all with attribute required: true' do
+        let(:block) do
+          proc do
+            key 'required string', String, required: true
+            key '1', Integer
+            key 'some_date', DateTime
+            requires do
+              all.of 'some_date'
+            end
+          end
+        end
+        it 'includes attributes with required: true into :required' do
+          expect(description[:required].size).to eq(2)
+          expect(description[:required]).to include( 'required string','some_date' )
+        end
+
+        it 'includes attributes with required: true into the :all requirements' do
+          req_all = description[:'x-requirements'].select{|r| r[:type] == :all}.first
+          expect(req_all[:attributes]).to include( 'required string','some_date' )
+        end
+      end
+
+
+      context 'with an example' do
+        let(:example){ type.example }
+
+        it 'should have the matching example for each leaf key' do
+          expect(description[:properties].keys).to include(*type.keys.keys)
+          description[:properties].each do |name,sub_description|
+            expect(sub_description).to have_key(:example)
+            val = type.attributes[name].dump(example[name])
+            expect(sub_description[:example]).to eq val
+          end
+        end
+      end
+    end
   end
 end

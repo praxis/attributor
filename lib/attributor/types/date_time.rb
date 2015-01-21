@@ -5,7 +5,9 @@ require_relative '../exceptions'
 require 'date'
 
 module Attributor
-  class DateTime < Temporal
+  class DateTime
+    include Temporal
+
     def self.native_type
       ::DateTime
     end
@@ -26,6 +28,10 @@ module Attributor
       rescue ArgumentError
         raise Attributor::DeserializationError.new(context: context, from: value.class, encoding: 'DateTime', value: value)
       end
+    end
+
+    def self.json_schema_string_format
+      :'date-time'
     end
   end
 end

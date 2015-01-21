@@ -64,4 +64,14 @@ describe Attributor::String do
       end.to raise_error(Attributor::IncompatibleTypeError)
     end
   end
+
+  context '.as_json_schema' do
+    subject(:js){ type.as_json_schema(attribute_options: { regexp: /^Foobar$/ }) }
+    it 'adds the right attributes' do
+      expect(js.keys).to include(:type, :'x-type_name')
+      expect(js[:type]).to eq(:string)
+      expect(js[:'x-type_name']).to eq('String')
+      expect(js[:pattern]).to eq('^Foobar$')
+    end
+  end
 end

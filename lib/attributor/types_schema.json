@@ -1,0 +1,24 @@
+{
+  "title": "A JSON Schema for Attributor types and attributes",
+  "id": "http://somewhere/attributor/schema.json#",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  
+  "definitions": {
+    "AttributorStringType": {
+      "type": "object",
+      "description": "A String type",
+      "properties": {
+        "name": { "type": "string" , "enum": ["String"] },
+        "options": {
+          "type": "object" , 
+          "properties": {
+            "regexp": { "$ref": "#/definitions/regexp"}  // Is it easy to define a regexp?
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+  
+}

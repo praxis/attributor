@@ -1,19 +1,26 @@
 # Abstract type for the 'temporal' family
 
 module Attributor
-  class Temporal
+  module Temporal
+    extend ActiveSupport::Concern
     include Type
 
-    def self.native_type
-      raise NotImplementedError
-    end
+    module ClassMethods
+      def native_type
+        raise NotImplementedError
+      end
 
-    def self.family
-      'temporal'
-    end
+      def family
+        'temporal'
+      end
 
-    def self.dump(value, **_opts)
-      value && value.iso8601
+      def dump(value, **_opts)
+        value && value.iso8601
+      end
+
+      def json_schema_type
+        :string
+      end
     end
   end
 end

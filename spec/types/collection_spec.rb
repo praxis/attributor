@@ -344,4 +344,20 @@ describe Attributor::Collection do
       end.to_not raise_error
     end
   end
+
+  context '.as_json_schema' do
+    let(:member_type) { Attributor::String }
+    let(:type) { Attributor::Collection.of(member_type) }
+    let(:attribute_options) do
+       {}
+    end
+    subject(:js){ type.as_json_schema(attribute_options: attribute_options) }
+
+    it 'adds the right attributes' do
+      expect(js.keys).to include(:type, :'x-type_name', :items)
+      expect(js[:type]).to eq(:array)
+      expect(js[:'x-type_name']).to eq('Collection')
+      expect(js[:items]).to eq(member_type.as_json_schema)
+    end
+  end
 end

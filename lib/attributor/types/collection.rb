@@ -117,6 +117,22 @@ module Attributor
       hash
     end
 
+    def self.json_schema_type
+      :array
+    end
+
+    def self.as_json_schema( shallow: false, example: nil, attribute_options: {} )
+      hash = super
+      opts = self.options.merge( attribute_options )
+      hash[:description] = opts[:description] if opts[:description]
+      hash[:default] = opts[:default] if opts[:default]
+
+      #hash[:examples] = [ example.dump ] if example
+      member_example = example && example.first
+      hash[:items] = member_attribute.as_json_schema(example: member_example)
+      hash
+    end
+
     def self.constructable?
       true
     end
