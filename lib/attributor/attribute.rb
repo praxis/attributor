@@ -2,6 +2,19 @@
 
 module Attributor
 
+  class FakeParent < ::BasicObject
+    
+    def method_missing(name, *args)
+      ::Kernel.warn "Warning, you have tried to access the '#{name}' method of the 'parent' argument of a Proc-defined :default values." +
+                    "Those Procs should completely ignore the 'parent' attribute for the moment as it will be set to an " +
+                    "instance of a useless class (until the framework can provide such functionality)"
+      nil
+    end
+    
+    def class
+      FakeParent
+    end
+  end
   # It is the abstract base class to hold an attribute, both a leaf and a container (hash/Array...)
   # TODO: should this be a mixin since it is an abstract class?
   class Attribute
@@ -40,8 +53,23 @@ module Attributor
     def load(value, context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
       value = type.load(value,context,**options)
 
-      if value.nil?
-        value = self.options[:default] if self.options.key?(:default)
+      if value.nil? && self.options.has_key?(:default)
+        defined_val = self.options[:default]
+        val = case defined_val
+        when ::Proc
+          fake_parent = FakeParent.new
+          # TODO: we can only support "context" as a parameter to the proc for now, since we don't have the parent...
+          if defined_val.arity == 2
+            defined_val.call(fake_parent, context)
+          elsif defined_val.arity == 1
+            defined_val.call(fake_parent)
+          else
+            defined_val.call
+          end
+        else
+            defined_val
+        end
+        value = val #Need to load?
       end
 
       value

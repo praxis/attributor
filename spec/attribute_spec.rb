@@ -237,22 +237,55 @@ describe Attributor::Attribute do
     end
 
     context 'applying default values' do
+      let(:value) { nil }
       let(:default_value) { "default value" }
       let(:attribute_options) { {:default => default_value} }
 
       subject(:result) { attribute.load(value) }
 
       context 'for nil' do
-        let(:value) { nil }
         it { should == default_value}
       end
 
       context 'for false' do
         let(:type) { Attributor::Boolean }
         let(:default_value) { false }
-        let(:value) { nil }
         it { should == default_value}
 
+      end
+      
+      context 'for a Proc-based default value' do
+        let(:context){ ["$"] }
+        subject(:result){ attribute.load(value,context) }
+
+
+        context 'with no arguments arguments' do
+          let(:default_value) { proc { "no_params" } }
+          it { should == default_value.call }
+        end
+        
+        context 'with 1 argument (the parent)' do
+          let(:default_value) { proc {|parent| "parent is fake: #{parent.class}" } }
+          it { should == "parent is fake: Attributor::FakeParent" }
+        end
+        
+        context 'with 2 argument (the parent and the contents)' do
+          let(:default_value) { proc {|parent,context| "parent is fake: #{parent.class} and context is: #{context}" } }
+          it { should == "parent is fake: Attributor::FakeParent and context is: [\"$\"]"}
+        end
+        
+        context 'which attempts to use the parent (which is not supported for the moment)' do
+          let(:default_value) { proc {|parent| "any parent method should spit out warning: [#{parent.something}]" } }
+          it "should output a warning" do
+            begin 
+              old_verbose, $VERBOSE = $VERBOSE, nil
+              Kernel.should_receive(:warn).and_call_original
+              attribute.load(value,context).should == "any parent method should spit out warning: []"
+            ensure
+              $VERBOSE = old_verbose
+            end
+          end
+        end
       end
     end
 

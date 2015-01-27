@@ -1,6 +1,12 @@
 Attributor Changelog
 ============================
 
+next
+----
+
+* Partial support for defining `:default` values through Procs.
+  * Note: this is only "partially" supported the `parent` argument of the Proc will NOT contain the correct attribute parent yet. It will contain a fake class, that will loudly complain about any attempt to use any of its methods.
+  
 2.4.0
 ------
 
