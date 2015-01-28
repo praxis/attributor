@@ -416,6 +416,22 @@ describe Attributor::Model do
 
   end
 
+  context 'with no defined attributes' do
+    let(:model_class) do
+      Class.new(Attributor::Model) do
+        attributes do
+        end
+      end
+    end
 
+    subject(:example) { model_class.example }
+
+    its(:attributes) { should be_empty }
+    
+    it 'dumps as an empty hash' do 
+      example.dump.should eq({})
+    end
+
+  end
 
 end
