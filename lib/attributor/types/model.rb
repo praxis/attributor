@@ -92,6 +92,21 @@ module Attributor
       context + [subname] 
     end
 
+    def self.example(context=nil, **values)
+      context ||= ["#{self.name || 'Struct'}-#{rand(10000000)}"]
+      context = Array(context)
+
+      if self.keys.any?
+        result = self.new
+        result.extend(ExampleMixin)
+
+        result.lazy_attributes = self.example_contents(context, result, values)
+      else
+        result = self.new
+      end
+      result
+    end
+
     def initialize(data = nil)
       if data
         loaded = self.class.load(data)
@@ -161,6 +176,13 @@ module Attributor
 
       self.attributes.each_with_object({}) do |(name, value), result|
         attribute = self.class.attributes[name]
+        
+        # skip dumping undefined attributes
+        unless attribute
+          warn "WARNING: Trying to dump unknown attribute: #{name.inspect} with context: #{context.inspect}"
+          next
+        end
+
         result[name.to_sym] = attribute.dump(value, context: context + [name] )
       end
     ensure
