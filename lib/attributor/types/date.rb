@@ -31,6 +31,10 @@ module Attributor
         end
       end
 
+      def self.dump(value,**opts)
+        value.iso8601
+      end
+
     end
 
   end
