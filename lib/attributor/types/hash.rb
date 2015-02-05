@@ -230,6 +230,8 @@ module Attributor
         loaded_value = value
       elsif value.is_a?(::String)
         loaded_value = decode_json(value,context)
+      elsif value.respond_to?(:to_hash)
+        loaded_value = value.to_hash
       else
         raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self
       end
