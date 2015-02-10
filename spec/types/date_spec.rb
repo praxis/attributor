@@ -12,6 +12,15 @@ describe Attributor::Date do
     its(:example) { should be_a(::Date) }
   end
 
+  context '.dump' do
+    let(:example) { type.example}
+    subject(:value) { type.dump(example) }
+    it 'is formatted correctly' do
+      value.should match(/\d{4}-\d{2}-\d{2}T00:00:00\+00:00/)
+    end
+  end
+
+
   context '.load' do
 
     it 'returns nil for nil' do

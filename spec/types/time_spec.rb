@@ -12,6 +12,15 @@ describe Attributor::Time do
     its(:example) { should be_a(::Time) }
   end
 
+  context '.dump' do
+    let(:example) { type.example}
+    subject(:value) { type.dump(example) }
+    it 'is formatted correctly' do
+      value.should match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[\+-]\d{2}:\d{2}/)
+    end
+  end
+
+
   context '.load' do
 
     it 'returns nil for nil' do
