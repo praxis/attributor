@@ -43,7 +43,7 @@ describe Attributor::Attribute do
   context 'describe' do
     let(:attribute_options) { {:required => true, :values => ["one"], :description => "something", :min => 0} }
     let(:expected) do
-      h = {:type => {:name => type.name} }
+      h = {type: {name: type.name, id: type.id}}
       common = attribute_options.select{|k,v| Attributor::Attribute::TOP_LEVEL_OPTIONS.include? k }
       h.merge!( common )
       h[:options] = {:min => 0 }

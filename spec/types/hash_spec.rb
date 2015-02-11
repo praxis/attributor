@@ -343,8 +343,8 @@ describe Attributor::Hash do
     context 'for hashes with key and value types' do
       it 'describes the type correctly' do
         description[:name].should eq('Hash')
-        description[:key].should eq(type:{name: 'Object'})
-        description[:value].should eq(type:{name: 'Object'})
+        description[:key].should eq(type:{name: 'Object', id: 'Attributor-Object'})
+        description[:value].should eq(type:{name: 'Object', id: 'Attributor-Object'})
       end
     end
 
@@ -362,15 +362,15 @@ describe Attributor::Hash do
 
       it 'describes the type correctly' do
         description[:name].should eq('Hash')
-        description[:key].should eq(type:{name: 'String'})
+        description[:key].should eq(type:{name: 'String', id: 'Attributor-String'})
         description.should_not have_key(:value)
 
         keys = description[:keys]
 
-        keys['a string'].should eq(type: {name: 'String'} )
-        keys['1'].should eq(type: {name: 'Integer'}, options: {min: 1, max: 20}  )
-        keys['some_date'].should eq(type: {name: 'DateTime' }) #
-        keys['defaulted'].should eq(type: {name: 'String'}, default: 'default value')
+        keys['a string'].should eq(type: {name: 'String', id: 'Attributor-String'} )
+        keys['1'].should eq(type: {name: 'Integer', id: 'Attributor-Integer'}, options: {min: 1, max: 20}  )
+        keys['some_date'].should eq(type: {name: 'DateTime', id: 'Attributor-DateTime'})
+        keys['defaulted'].should eq(type: {name: 'String', id: 'Attributor-String'}, default: 'default value')
       end
     end
   end
