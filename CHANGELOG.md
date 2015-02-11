@@ -4,6 +4,9 @@ Attributor Changelog
 next
 ----
 
+2.5.0
+----
+
 * Partial support for defining `:default` values through Procs.
   * Note: this is only "partially" supported the `parent` argument of the Proc will NOT contain the correct attribute parent yet. It will contain a fake class, that will loudly complain about any attempt to use any of its methods.
 * Fixed `Model.example` to properly handle the case when no attributes are defined on the class.
