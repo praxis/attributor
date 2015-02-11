@@ -10,6 +10,7 @@ next
 * `Model#dump` now issues a warning if its contents have keys for attributes not present on the class. The unknown contents are not dumped.
 * `Hash.load` now supports loading any value that responds to `to_hash`.
 * `Time`, `DateTime`, and `Date` now all return ISO 8601 formatted values from `.dump` (via calling `iso8601` on the value).
+* Added `Type.id`, a unique value based on the type's class name.
 
 2.4.0
 ------

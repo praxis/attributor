@@ -107,9 +107,17 @@ module Attributor
       # Default describe for simple types...only their name (stripping the base attributor module)
       def describe(root=false)
         type_name = self.ancestors.find { |k| k.name && !k.name.empty? }.name
-        { :name => type_name.gsub( Attributor::MODULE_PREFIX_REGEX, '' ) }        
+        {
+          name: type_name.gsub(Attributor::MODULE_PREFIX_REGEX, ''),
+          id: self.id
+        }
       end
       
+      def id
+        return nil if self.name.nil?
+        self.name.gsub('::'.freeze,'-'.freeze)
+      end
+
     end
   end
 end

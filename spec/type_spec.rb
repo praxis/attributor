@@ -3,7 +3,6 @@ require File.join(File.dirname(__FILE__), 'spec_helper.rb')
 
 describe Attributor::Type do
 
-
   subject(:test_type) { AttributeType }
 
   let(:attribute_options) { Hash.new }
@@ -17,6 +16,7 @@ describe Attributor::Type do
 
 
   its(:native_type) { should be(::String) }
+  its(:id) { should eq('AttributeType')}
 
 
   context 'load' do
@@ -123,12 +123,25 @@ describe Attributor::Type do
 
   end
 
+  context 'id' do
+    it 'works for built-in types' do
+      Attributor::String.id.should eq('Attributor-String')
+    end
+
+    it 'returns nil for anonymous types' do
+      type = Class.new(Attributor::Model)
+      type.id.should eq(nil)
+    end
+  end
+
   context 'describe' do
     subject(:description) { test_type.describe }
     it 'outputs the type name' do
-      description[:name].should == test_type.name
+      description[:name].should eq(test_type.name)
     end
-
+    it 'outputs the type id' do
+      description[:id].should eq(test_type.name)
+    end
   end
 
 end
