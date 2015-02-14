@@ -51,7 +51,7 @@ module Attributor
     end
 
     def contents
-      lazy_attributes.keys do |key|
+      lazy_attributes.keys.each do |key|
         proc = lazy_attributes.delete(key)
         @contents[key] = proc.call(self)
       end

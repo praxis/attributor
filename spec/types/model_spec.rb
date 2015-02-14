@@ -172,7 +172,7 @@ describe Attributor::Model do
           expect {
             turducken = Turducken.example
             chicken = Chicken.load(turducken,context)
-          }.to raise_error(Attributor::IncompatibleTypeError, /Type Chicken cannot load values of type Turducken.*#{context.join('.')}/)
+          }.to raise_error(Attributor::AttributorException, /Unknown key received/)
         end
       end
 

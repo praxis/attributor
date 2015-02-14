@@ -152,7 +152,7 @@ describe Attributor::Collection do
         it "raises error when incoming value is not of member_type" do
           expect {
             val = type.of(member_type).load(value)
-          }.to raise_error(Attributor::AttributorException)
+          }.to raise_error(Attributor::AttributorException,/Unknown key received/)
         end
 
       end

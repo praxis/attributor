@@ -110,6 +110,60 @@ describe Attributor::Hash do
         end
       end
     end
+
+    context 'for another Attributor Hash with a compatible type definition' do
+      let(:other_hash) do
+        Attributor::Hash.of(key: Integer, value: Integer)
+      end
+      let(:value) { other_hash.example }
+      it 'succeeds' do
+        type.load(value)
+      end
+    end
+
+    context 'for a different Attributor Hash' do
+      let(:loader_hash) do
+        Class.new(Attributor::Hash) do
+          keys do
+            key :id, String
+            key :name, String
+          end
+        end
+      end
+      let(:value) { value_hash.example }
+      context 'with compatible key definitions' do
+        let(:value_hash) do
+          Class.new(Attributor::Hash) do
+            keys do
+              key :id, String
+            end
+          end
+        end      
+
+        it 'succeeds' do
+          loader_hash.load(value)
+        end
+        
+        context 'with a not compatible key definition' do
+          let(:value_hash) do
+            Class.new(Attributor::Hash) do
+              keys do
+                key :id, String
+                key :weird_key, String
+              end
+            end
+          end      
+
+          it 'complains about an unknown key' do
+            expect { 
+              loader_hash.load(value)
+            }.to raise_error(Attributor::AttributorException,/Unknown key received: :weird_key/)
+          end
+        end
+      end
+    end
+    
+        
   end
 
 

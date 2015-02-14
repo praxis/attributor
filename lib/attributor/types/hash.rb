@@ -220,11 +220,7 @@ module Attributor
         end
       elsif value.is_a?(self)
         return value
-      elsif value.kind_of?(Attributor::Hash)
-        if (value.keys - self.attributes.keys).any?
-          raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self
-        end
-
+      elsif value.kind_of?(Attributor::Hash)        
         loaded_value = value.contents
       elsif value.is_a?(::Hash)
         loaded_value = value
