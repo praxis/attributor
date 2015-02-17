@@ -66,6 +66,37 @@ describe Attributor::AttributeResolver do
     end
   end
 
+  context 'querying collection indices from models' do
+    let(:instances) { [instance1, instance2] }
+    let(:instance1) { double('instance1', :ssh_key => ssh_key1) }
+    let(:instance2) { double('instance2', :ssh_key => ssh_key2) }
+    let(:ssh_key1) { double('ssh_key', :name => value) }
+    let(:ssh_key2) { double('ssh_key', :name => 'second') }
+    let(:args) { [path, prefix].compact }
+
+    before { subject.register('instances', instances) }
+
+    it 'resolves the index to the correct member of the collection' do
+      subject.query('instances').should be instances
+      subject.query('instances.at(1).ssh_key').should be ssh_key2
+      subject.query('instances.at(0).ssh_key.name').should be value
+    end
+
+    it 'returns nil for index out of range' do
+      subject.query('instances.at(2)').should be(nil)
+      subject.query('instances.at(-1)').should be(nil)
+    end
+
+    context 'with a prefix' do
+      let(:key) { 'name' }
+      let(:prefix) { '$.instances.at(0).ssh_key'}
+      let(:value) { 'some_name' }
+
+      it 'resolves the index to the correct member of the collection' do
+        subject.query(key, prefix).should be(value)
+      end
+    end
+  end
 
   context 'checking attribute conditions' do
     let(:key) { "instance.ssh_key.name" }
