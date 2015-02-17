@@ -154,7 +154,7 @@ describe Attributor::AttributeResolver do
       end
     end
     
-    context 'with a hash condition' do
+    pending 'with a hash condition' do
     end
 
     context 'with a proc condition' do
