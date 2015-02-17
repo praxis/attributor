@@ -185,8 +185,11 @@ module Attributor
 
 
     def self.dump(value, **opts)
-      self.load(value).
-        dump(**opts)
+      if loaded = self.load(value)
+        loaded.dump(**opts) 
+      else
+        nil
+      end
     end
 
 

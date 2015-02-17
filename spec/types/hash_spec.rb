@@ -308,6 +308,9 @@ describe Attributor::Hash do
     end
 
     context 'for a typed hash' do
+      before do
+        subtype.should_receive(:dump).exactly(2).times.and_call_original
+      end
       let(:value1) { {first: "Joe", last: "Moe"} }
       let(:value2) { {first: "Mary", last: "Foe"} }
       let(:value) { { id1: subtype.new(value1), id2: subtype.new(value2) } }
@@ -322,8 +325,6 @@ describe Attributor::Hash do
       let(:type) { Attributor::Hash.of(key: String, value: subtype) }
 
       it 'returns a hash with the dumped values and keys' do
-        subtype.should_receive(:dump).exactly(2).times.and_call_original
-
         dumped_value = type.dump(value, opts)
         dumped_value.should be_kind_of(::Hash)
         dumped_value.keys.should =~ ['id1','id2']
@@ -331,7 +332,18 @@ describe Attributor::Hash do
         dumped_value['id1'].should == value1
         dumped_value['id2'].should == value2
       end
-
+      
+      context 'that has nil attribute values' do
+        let(:value) { { id1: nil, id2: subtype.new(value2) } }
+        
+        it 'correctly returns nil rather than trying to dump their contents' do
+          dumped_value = type.dump(value, opts)
+          dumped_value.should be_kind_of(::Hash)
+          dumped_value.keys.should =~ ['id1','id2']
+          dumped_value['id1'].should == nil
+          dumped_value['id2'].should == value2
+        end
+      end
     end
 
   end

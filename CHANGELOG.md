@@ -6,6 +6,7 @@ next
 
 * Fixed bug in `example_mixin` where lazy_attributes were not evaluated.
 * Fixed bug in `Hash` where the class would refuse to load from another `Attributor::Hash` when there were no keys defined and they were seemingly compatible.
+* Fixed a `Hash.dump` bug where nil attribute values would transitively be `dumpe`d therefore causing a nil dereference.
 
 2.5.0
 ----
