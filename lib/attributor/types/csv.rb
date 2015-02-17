@@ -12,9 +12,11 @@ module Attributor
         values
       when ::Array
         values.collect { |value| member_attribute.dump(value,opts).to_s }.join(',')
+      when nil
+        nil
       else
-        context = opts[:context]
-        name =  opts[:context].last.to_s
+        context = opts[:context] || DEFAULT_ROOT_CONTEXT
+        name =  context.last.to_s
         type = values.class.name
         reason = "Attributor::CSV only supports dumping values of type " +
                  "Array or String, not #{values.class.name}."

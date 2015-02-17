@@ -13,7 +13,7 @@ module Attributor
     end
 
     def self.dump(value, **opts)
-      value.path
+      value && value.path
     end
 
     def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)

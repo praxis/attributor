@@ -43,6 +43,10 @@ describe Attributor::CSV do
     it 'dumps non-Integer values also' do
       csv.dump(str_vals).should eq(str_vals.join(','))
     end
+    
+    it 'dumps nil values as nil' do
+      csv.dump(nil).should eq(nil)
+    end
   end
 
 end

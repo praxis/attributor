@@ -32,7 +32,7 @@ module Attributor
       end
 
       def self.dump(value,**opts)
-        value.iso8601
+        value && value.iso8601
       end
 
     end

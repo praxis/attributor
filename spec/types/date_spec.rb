@@ -18,6 +18,11 @@ describe Attributor::Date do
     it 'is formatted correctly' do
       value.should match(/\d{4}-\d{2}-\d{2}T00:00:00\+00:00/)
     end
+    context 'nil values' do
+      it 'should be nil' do
+        type.dump(nil).should be_nil 
+      end
+    end
   end
 
 
