@@ -22,23 +22,23 @@ With Attributor you can:
 
 ### Running specs:
 
-    `bundle exec rake spec`
+    bundle exec rake spec
 
 Note: This should also compute code coverage. See below for details on viewing code coverage.
 
 ### Generating documentation:
 
-    `bundle exec yard`
+    bundle exec yard
 
 ### Computing documentation coverage:
 
-    `bundle exec yardstick 'lib/**/*.rb'`
+    bundle exec yardstick 'lib/**/*.rb'
 
 ### Computing code coverage:
 
-    `bundle exec rake spec`
+    bundle exec rake spec
 
-    `open coverage/index.html`
+    open coverage/index.html
 
 
 ## Contributing to attributor
