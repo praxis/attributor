@@ -8,6 +8,7 @@ next
 * Fixed bug in `Hash` where the class would refuse to load from another `Attributor::Hash` when there were no keys defined and they were seemingly compatible.
 * Fixed a `Hash.dump` bug where nil attribute values would transitively be `dumpe`d therefore causing a nil dereference.
 * Hardened the `dump`ing of types to support nil values.
+* Fix `attribute.example` to actually accept native types (that are not only Strings)
 
 2.5.0
 ----

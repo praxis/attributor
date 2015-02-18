@@ -146,12 +146,21 @@ describe Attributor::Attribute do
 
       context 'for a type with a non-String native_type' do
         let(:type) { IntegerAttributeType}
-        let(:example) { /\d{5}/ }
-        it 'coerces the example value properly' do
-          example.should_receive(:gen).and_call_original
-          type.should_receive(:load).and_call_original
-
-          subject.example.should be_kind_of(type.native_type)
+        context 'using a regexp' do
+          let(:example) { /\d{5}/ }
+          it 'coerces the example value properly' do
+            example.should_receive(:gen).and_call_original
+            type.should_receive(:load).and_call_original
+  
+            subject.example.should be_kind_of(type.native_type)
+          end
+        end
+        context 'usign a native Integer type' do
+          let(:example) { 5 }
+          it 'coerces the example value properly' do
+            type.should_receive(:load).and_call_original
+            subject.example.should be_kind_of(type.native_type)
+          end          
         end
       end
     end
