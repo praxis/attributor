@@ -5,6 +5,7 @@ module Attributor
 
   class AttributeResolver
     ROOT_PREFIX = '$'.freeze
+    COLLECTION_INDEX_KEY = /^at\((\d+)\)$/.freeze
 
     class Data < ::Hash
       include Hashie::Extensions::MethodReader
@@ -17,7 +18,6 @@ module Attributor
     end
 
 
-    # TODO: support collection queries
     def query!(key_path, path_prefix=ROOT_PREFIX)
       # If the incoming key_path is not an absolute path, append the given prefix
       # NOTE: Need to index key_path by range here because Ruby 1.8 returns a
@@ -30,12 +30,21 @@ module Attributor
       # Discard the initial element, which should always be ROOT_PREFIX at this point
       _root, *path = key_path.split(SEPARATOR)
 
-      # Follow the hierarchy path to the requested node and return it
+      # Follow the hierarchy path to the requested node and return it:
       # Example path => ["instance", "ssh_key", "name"]
       # Example @data => {"instance" => { "ssh_key" => { "name" => "foobar" } }}
+      #
+      # at(n) is a collection index:
+      # Example path => ["filters", "at(0)", "type"]
+      # Example data => {"filters" => [{ "type" => "instance:tag" }]}
+      #
       result = path.inject(@data) do |hash, key|
         return nil if hash.nil?
-        hash.send key
+        if (match = key.match(COLLECTION_INDEX_KEY))
+          hash[match[1].to_i]
+        else
+          hash.send key
+        end
       end
       result
     end
