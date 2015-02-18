@@ -135,9 +135,6 @@ module Attributor
       if self.options.has_key? :example
         val = self.options[:example]
         case val
-        when ::String
-          # FIXME: spec this properly to use self.type.native_type
-          val
         when ::Regexp
           self.load(val.gen,context)
         when ::Array
@@ -154,7 +151,7 @@ module Attributor
         when nil
           nil
         else
-          raise AttributorException, "unknown example attribute type, got: #{val}"
+          self.load(val)
         end
       else
         if (option_values = self.options[:values])
