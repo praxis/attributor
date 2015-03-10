@@ -9,6 +9,9 @@ next
 * Fixed a `Hash.dump` bug where nil attribute values would transitively be `dumpe`d therefore causing a nil dereference.
 * Hardened the `dump`ing of types to support nil values.
 * Fix `attribute.example` to actually accept native types (that are not only Strings)
+* Fixed bug where `Hash#get` would insert a nil value if asked for a key that was not present in the hash.
+* Fixed bug in `Hash.from_hash` where it would add nil values for keys that are defined on the type but not present in the input.
+
 
 2.5.0
 ----
