@@ -157,7 +157,7 @@ module Attributor
 
     def self.example(context=nil, **values)
       if (key_type == Object && value_type == Object && self.keys.empty?)
-        return self.new 
+        return self.new
       end
 
       context ||= ["#{Hash}-#{rand(10000000)}"]
@@ -186,7 +186,7 @@ module Attributor
 
     def self.dump(value, **opts)
       if loaded = self.load(value)
-        loaded.dump(**opts) 
+        loaded.dump(**opts)
       else
         nil
       end
@@ -223,7 +223,7 @@ module Attributor
         end
       elsif value.is_a?(self)
         return value
-      elsif value.kind_of?(Attributor::Hash)        
+      elsif value.kind_of?(Attributor::Hash)
         loaded_value = value.contents
       elsif value.is_a?(::Hash)
         loaded_value = value
@@ -254,11 +254,17 @@ module Attributor
 
     def get(key, context: self.generate_subcontext(Attributor::DEFAULT_ROOT_CONTEXT,key))
       key = self.class.key_attribute.load(key, context)
-      
+
       value = @contents[key]
 
+      # FIXME: getting an unset value here should not force it in the hash
       if (attribute = self.class.keys[key])
-        return self[key] = attribute.load(value, context)
+        loaded_value = attribute.load(value, context)
+        if loaded_value.nil?
+          return nil
+        else
+          return self[key] = loaded_value
+        end
       end
 
       if self.class.options[:case_insensitive_load]
@@ -337,7 +343,8 @@ module Attributor
       self.keys.each do |key_name, attribute|
         next if hash.key?(key_name)
         sub_context = self.generate_subcontext(context,key_name)
-        hash[key_name] = attribute.load(nil, sub_context, recurse: recurse)
+        default = attribute.load(nil, sub_context, recurse: recurse)
+        hash[key_name] = default unless default.nil?
       end
 
       hash
@@ -378,16 +385,16 @@ module Attributor
 
     # TODO: Think about the format of the subcontexts to use: let's use .at(key.to_s)
     attr_reader :contents
-    
-    def_delegators :@contents, 
-      :[], 
-      :[]=, 
-      :each, 
-      :size, 
-      :keys, 
-      :key?, 
-      :values, 
-      :empty?, 
+
+    def_delegators :@contents,
+      :[],
+      :[]=,
+      :each,
+      :size,
+      :keys,
+      :key?,
+      :values,
+      :empty?,
       :has_key?
 
     attr_reader :validating, :dumping

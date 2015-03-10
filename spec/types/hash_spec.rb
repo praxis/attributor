@@ -121,6 +121,28 @@ describe Attributor::Hash do
       end
     end
 
+    context 'for Hash with defined keys' do
+      let(:type) do
+        Class.new(Attributor::Hash) do
+          keys do
+            key 'id', Integer
+            key 'name', String, default: "unnamed"
+            key 'chicken', Chicken
+          end
+        end
+      end
+
+      let(:value) { {'chicken' => Chicken.example} }
+
+      subject(:hash) { type.load(value) }
+
+      it { should_not have_key('id') }
+      it 'has the defaulted key' do
+        hash.should have_key('name')
+        hash['name'].should eq('unnamed')
+      end
+    end
+
     context 'for a different Attributor Hash' do
       let(:loader_hash) do
         Class.new(Attributor::Hash) do
@@ -138,12 +160,12 @@ describe Attributor::Hash do
               key :id, String
             end
           end
-        end      
+        end
 
         it 'succeeds' do
           loader_hash.load(value)
         end
-        
+
         context 'with a not compatible key definition' do
           let(:value_hash) do
             Class.new(Attributor::Hash) do
@@ -152,18 +174,18 @@ describe Attributor::Hash do
                 key :weird_key, String
               end
             end
-          end      
+          end
 
           it 'complains about an unknown key' do
-            expect { 
+            expect {
               loader_hash.load(value)
             }.to raise_error(Attributor::AttributorException,/Unknown key received: :weird_key/)
           end
         end
       end
     end
-    
-        
+
+
   end
 
 
@@ -332,10 +354,10 @@ describe Attributor::Hash do
         dumped_value['id1'].should == value1
         dumped_value['id2'].should == value2
       end
-      
+
       context 'that has nil attribute values' do
         let(:value) { { id1: nil, id2: subtype.new(value2) } }
-        
+
         it 'correctly returns nil rather than trying to dump their contents' do
           dumped_value = type.dump(value, opts)
           dumped_value.should be_kind_of(::Hash)
@@ -659,6 +681,13 @@ describe Attributor::Hash do
 
           hash.get('foo').should be(bar)
         end
+
+        it 'does not set a key that is unset' do
+          hash.should_not have_key('id')
+          hash.get('id').should be(nil)
+          hash.should_not have_key('id')
+        end
+
       end
 
     end
