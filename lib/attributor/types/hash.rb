@@ -397,6 +397,10 @@ module Attributor
       @contents.each(&block)
     end
 
+    def each_pair(&block)
+      @contents.each_pair(&block)
+    end
+
     def size
       @contents.size
     end
@@ -418,6 +422,9 @@ module Attributor
     end
     alias_method :has_key?, :key?
 
+    def merge(h)
+      self.class.load(@contents.merge(h))
+    end
 
     attr_reader :validating, :dumping
 
