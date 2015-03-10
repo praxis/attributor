@@ -1,6 +1,5 @@
 module Attributor
   class Hash
-    extend Forwardable
 
     MAX_EXAMPLE_DEPTH = 5
     CIRCULAR_REFERENCE_MARKER = '...'.freeze
@@ -386,16 +385,39 @@ module Attributor
     # TODO: Think about the format of the subcontexts to use: let's use .at(key.to_s)
     attr_reader :contents
 
-    def_delegators :@contents,
-      :[],
-      :[]=,
-      :each,
-      :size,
-      :keys,
-      :key?,
-      :values,
-      :empty?,
-      :has_key?
+    def [](k)
+      @contents[k]
+    end
+
+    def []=(k,v)
+      @contents[k] = v
+    end
+
+    def each(&block)
+      @contents.each(&block)
+    end
+
+    def size
+      @contents.size
+    end
+
+    def keys
+      @contents.keys
+    end
+
+    def values
+      @contents.values
+    end
+
+    def empty?
+      @contents.empty?
+    end
+
+    def key?(k)
+      @contents.key?(k)
+    end
+    alias_method :has_key?, :key?
+
 
     attr_reader :validating, :dumping
 
