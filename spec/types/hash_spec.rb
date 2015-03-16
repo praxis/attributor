@@ -705,6 +705,8 @@ describe Attributor::Hash do
 
     it 'validates that the mergee is of like type' do
       expect { merger.merge(bad_mergee) }.to raise_error(ArgumentError)
+      expect { merger.merge({}) }.to raise_error(TypeError)
+      expect { merger.merge(nil) }.to raise_error(TypeError)
     end
 
     it 'returns a like-typed result' do
