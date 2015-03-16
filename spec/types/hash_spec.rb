@@ -694,4 +694,26 @@ describe Attributor::Hash do
 
   end
 
+  context '#merge' do
+    let(:hash_of_strings) { Attributor::Hash.of(key: String) }
+    let(:hash_of_symbols) { Attributor::Hash.of(key: Symbol) }
+
+    let(:merger) { hash_of_strings.load('a' => 1) }
+    let(:good_mergee) { hash_of_strings.load('b' => 2) }
+    let(:bad_mergee) { hash_of_symbols.load(c: 3) }
+    let(:result) { hash_of_strings.load('a' => 1, 'b' => 2) }
+
+    it 'validates that the mergee is of like type' do
+      expect { merger.merge(bad_mergee) }.to raise_error(ArgumentError)
+    end
+
+    it 'returns a like-typed result' do
+      expect(merger.merge(good_mergee)).to be_a(hash_of_strings)
+    end
+
+    it 'merges' do
+      expect(merger.merge(good_mergee)).to eq(result)
+    end
+
+  end
 end

@@ -423,7 +423,8 @@ module Attributor
     alias_method :has_key?, :key?
 
     def merge(h)
-      self.class.load(@contents.merge(h))
+      raise ArgumentError, "Cannot merge Attributor hashes of different types" unless h.is_a?(self.class)
+      self.class.new(@contents.merge(h.contents))
     end
 
     attr_reader :validating, :dumping
