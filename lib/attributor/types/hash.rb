@@ -397,6 +397,10 @@ module Attributor
       @contents.each(&block)
     end
 
+    def each_pair(&block)
+      @contents.each_pair(&block)
+    end
+
     def size
       @contents.size
     end
@@ -418,6 +422,16 @@ module Attributor
     end
     alias_method :has_key?, :key?
 
+    def merge(h)
+      case h
+      when self.class
+        self.class.new(@contents.merge(h.contents))
+      when Attributor::Hash
+        raise ArgumentError, "cannot merge Attributor::Hash instances of different types" unless h.is_a?(self.class)
+      else
+        raise TypeError, "no implicit conversion of #{h.class} into Attributor::Hash"
+      end
+    end
 
     attr_reader :validating, :dumping
 

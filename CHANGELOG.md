@@ -11,7 +11,8 @@ next
 * Fix `attribute.example` to actually accept native types (that are not only Strings)
 * Fixed bug where `Hash#get` would insert a nil value if asked for a key that was not present in the hash.
 * Fixed bug in `Hash.from_hash` where it would add nil values for keys that are defined on the type but not present in the input.
-
+* Added `Hash#merge` that works with two identically-typed hashes
+* Added `Hash#each_pair` for better duck-type compatibility with ::Hash.
 
 2.5.0
 ----
