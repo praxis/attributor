@@ -1,8 +1,8 @@
 Attributor Changelog
 ============================
 
-next
-----
+2.6.0
+-----
 
 * Fixed bug in `example_mixin` where lazy_attributes were not evaluated.
 * Fixed bug in `Hash` where the class would refuse to load from another `Attributor::Hash` when there were no keys defined and they were seemingly compatible.
