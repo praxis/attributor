@@ -96,7 +96,7 @@ module Attributor
     end
 
 
-    TOP_LEVEL_OPTIONS = [ :description, :values, :default, :example, :required, :required_if ]
+    TOP_LEVEL_OPTIONS = [ :description, :values, :default, :example, :required, :required_if, :custom_data ]
     INTERNAL_OPTIONS = [:dsl_compiler,:dsl_compiler_options] # Options we don't want to expose when describing attributes
     def describe(shallow=true)
       description = { }
@@ -284,6 +284,8 @@ module Attributor
         unless definition.is_a?(::Regexp) || definition.is_a?(::String) || definition.is_a?(::Array) || definition.is_a?(::Proc) || definition.nil? || self.type.valid_type?(definition)
           raise AttributorException.new("Invalid example type (got: #{definition.class.name}). It must always match the type of the attribute (except if passing Regex that is allowed for some types)")
         end
+      when :custom_data
+        raise AttributorException.new("custom_data must be a Hash. Got (#{definition})") unless definition.is_a?(::Hash)
       else
         return :unknown # unknown option
       end
