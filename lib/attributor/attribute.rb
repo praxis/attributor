@@ -221,6 +221,9 @@ module Attributor
         # TODO: support multiple dependencies?
         key_path = requirement.keys.first
         predicate = requirement.values.first
+      when ::Proc
+        key_path = ''
+        predicate = requirement
       else
         # should never get here if the option validation worked...
         raise AttributorException.new("unknown type of dependency: #{requirement.inspect} for #{Attributor.humanize_context(context)}")
@@ -232,6 +235,8 @@ module Attributor
 
       # FIXME: we're having to reconstruct a string context just to use the resolver...smell.
       if AttributeResolver.current.check(requirement_context_string, key_path, predicate)
+        key_path = requirement_context_string if key_path == ''
+
         message = "Attribute #{Attributor.humanize_context(context)} is required when #{key_path} "
 
         # give a hint about what the full path for a relative key_path would be
@@ -240,7 +245,9 @@ module Attributor
         end
 
         if predicate
-          message << "matches #{predicate.inspect}."
+          predicate_display = predicate.is_a?(::Proc) ? "the proc" : predicate.inspect
+
+          message << "matches #{predicate_display}."
         else
           message << "is present."
         end
