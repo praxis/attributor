@@ -381,7 +381,7 @@ describe Attributor::Attribute do
 
         before { Attributor::AttributeResolver.current.register('instance', instance) }
 
-        let(:attribute_context) { ['$','params','key_material'] }
+        let(:attribute_context) { ['$', 'instance', 'ssh_key'] }
         subject(:errors) { attribute.validate_missing_value(attribute_context) }
 
 
@@ -422,6 +422,29 @@ describe Attributor::Attribute do
           end
         end
 
+        context 'with a proc dependency' do
+          let(:attribute_options) { {:required_if => lambda { |val| val.ssh_key.name == 'default_ssh_key_name' }} }
+
+          context 'where the target attribute exists, and matches the predicate' do
+            let(:value) { 'default_ssh_key_name' }
+
+            it { should_not be_empty }
+
+            its(:first) { should =~ /Attribute #{Regexp.quote(Attributor.humanize_context( attribute_context ))} is required when \$\.instance matches/ }
+          end
+
+          context 'where the target attribute exists, but does not match the predicate' do
+            let(:value) { 'non_default_ssh_key_name' }
+
+            it { should be_empty }
+          end
+
+          context 'where the target attribute does not exist' do
+            let(:ssh_key) { double("ssh_key", :name => nil) }
+
+            it { should be_empty }
+          end
+        end
       end
 
     end
