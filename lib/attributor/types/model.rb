@@ -176,14 +176,22 @@ module Attributor
 
       self.attributes.each_with_object({}) do |(name, value), result|
         attribute = self.class.attributes[name]
-        
+        current_context = context + [name]
+
         # skip dumping undefined attributes
         unless attribute
           warn "WARNING: Trying to dump unknown attribute: #{name.inspect} with context: #{context.inspect}"
           next
         end
 
-        result[name.to_sym] = attribute.dump(value, context: context + [name] )
+        # If the present_if condition is not met, set the value to nil so that renderers
+        # can choose how to handle that.
+        #
+        if attribute.options[:present_if] && !attribute.present_in_object?(self, current_context)
+          result[name.to_sym] = nil
+        else
+          result[name.to_sym] = attribute.dump(value, context: current_context)
+        end
       end
     ensure
       @dumping = false

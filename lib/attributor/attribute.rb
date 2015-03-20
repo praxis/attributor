@@ -83,6 +83,12 @@ module Attributor
       type.dump(value, opts)
     end
 
+    def present_in_object?(object, context=Attributor::DEFAULT_ROOT_CONTEXT)
+      return true unless self.options.has_key?(:present_if)
+
+      AttributeResolver.current.register('present_if', object)
+      check_requirement(self.options[:present_if], Attributor::DEFAULT_ROOT_CONTEXT + ['present_if'] + context[1..-1])
+    end
 
     def validate_type(value, context)
       # delegate check to type subclass if it exists
@@ -96,7 +102,7 @@ module Attributor
     end
 
 
-    TOP_LEVEL_OPTIONS = [ :description, :values, :default, :example, :required, :required_if ]
+    TOP_LEVEL_OPTIONS = [ :description, :values, :default, :example, :required, :required_if, :present_if ]
     INTERNAL_OPTIONS = [:dsl_compiler,:dsl_compiler_options] # Options we don't want to expose when describing attributes
     def describe(shallow=true)
       description = { }
@@ -213,38 +219,18 @@ module Attributor
       requirement = self.options[:required_if]
       return [] unless requirement
 
-      case requirement
-      when ::String
-        key_path = requirement
-        predicate = nil
-      when ::Hash
-        # TODO: support multiple dependencies?
-        key_path = requirement.keys.first
-        predicate = requirement.values.first
-      when ::Proc
-        key_path = ''
-        predicate = requirement
-      else
-        # should never get here if the option validation worked...
-        raise AttributorException.new("unknown type of dependency: #{requirement.inspect} for #{Attributor.humanize_context(context)}")
-      end
-
-      # chop off the last part
-      requirement_context = context[0..-2]
-      requirement_context_string = requirement_context.join(Attributor::SEPARATOR)
-
-      # FIXME: we're having to reconstruct a string context just to use the resolver...smell.
-      if AttributeResolver.current.check(requirement_context_string, key_path, predicate)
-        key_path = requirement_context_string if key_path == ''
+      if (required = check_requirement(requirement, context))
+        key_path = required[:key_path]
+        key_path = required[:requirement_context_string] if key_path == ''
 
         message = "Attribute #{Attributor.humanize_context(context)} is required when #{key_path} "
 
         # give a hint about what the full path for a relative key_path would be
         unless key_path[0..0] == Attributor::AttributeResolver::ROOT_PREFIX
-          message << "(for #{Attributor.humanize_context(requirement_context)}) "
+          message << "(for #{Attributor.humanize_context(required[:requirement_context])}) "
         end
 
-        if predicate
+        if (predicate = required[:predicate])
           predicate_display = predicate.is_a?(::Proc) ? "the proc" : predicate.inspect
 
           message << "matches #{predicate_display}."
@@ -284,9 +270,9 @@ module Attributor
       when :required
         raise AttributorException.new("Required must be a boolean") unless !!definition == definition # Boolean check
         raise AttributorException.new("Required cannot be enabled in combination with :default") if definition == true && options.has_key?(:default)
-      when :required_if
-        raise AttributorException.new("Required_if must be a String, a Hash definition or a Proc") unless definition.is_a?(::String) || definition.is_a?(::Hash) || definition.is_a?(::Proc)
-        raise AttributorException.new("Required_if cannot be specified together with :required") if self.options[:required]
+      when :required_if, :present_if
+        raise AttributorException.new("#{name} must be a String, a Hash definition or a Proc") unless definition.is_a?(::String) || definition.is_a?(::Hash) || definition.is_a?(::Proc)
+        raise AttributorException.new("#{name} cannot be specified together with :required") if self.options[:required]
       when :example
         unless definition.is_a?(::Regexp) || definition.is_a?(::String) || definition.is_a?(::Array) || definition.is_a?(::Proc) || definition.nil? || self.type.valid_type?(definition)
           raise AttributorException.new("Invalid example type (got: #{definition.class.name}). It must always match the type of the attribute (except if passing Regex that is allowed for some types)")
@@ -298,5 +284,38 @@ module Attributor
       :ok # passes
     end
 
+    private
+
+    def check_requirement(requirement, context)
+      case requirement
+      when ::String
+        key_path = requirement
+        predicate = nil
+      when ::Hash
+        # TODO: support multiple dependencies?
+        key_path = requirement.keys.first
+        predicate = requirement.values.first
+      when ::Proc
+        key_path = ''
+        predicate = requirement
+      else
+        # should never get here if the option validation worked...
+        raise AttributorException.new("unknown type of dependency: #{requirement.inspect} for #{Attributor.humanize_context(context)}")
+      end
+
+      # chop off the last part
+      requirement_context = context[0..-2]
+      requirement_context_string = requirement_context.join(Attributor::SEPARATOR)
+
+      # FIXME: we're having to reconstruct a string context just to use the resolver...smell.
+      if AttributeResolver.current.check(requirement_context_string, key_path, predicate)
+        {
+          :key_path => key_path,
+          :predicate => predicate,
+          :requirement_context => requirement_context,
+          :requirement_context_string => requirement_context_string
+        }
+      end
+    end
   end
 end

@@ -89,6 +89,79 @@ describe Attributor::Model do
 
 
       end
+
+      context 'with attributes which have present_if set' do
+        let(:type_example) { default_type_example }
+        let(:default_type_example) { 'example type' }
+
+        let(:model_class) do
+          type_example_binding = type_example
+          present_if_binding = present_if
+
+          Class.new(Attributor::Model) do
+            attributes do
+              attribute :type, String, :example => type_example_binding
+              attribute :length, Integer, :present_if => present_if_binding
+            end
+          end
+        end
+
+        subject(:example) { model_class.example.dump }
+
+        context 'a key condition' do
+          let(:present_if) { 'type' }
+
+          context 'the condition is met' do
+            it 'keeps the attribute' do
+              example[:length].should_not be(nil)
+            end
+          end
+
+          context 'the condition is not met' do
+            let(:type_example) { nil }
+
+            it 'sets the attribute to nil' do
+              example[:length].should be(nil)
+            end
+          end
+        end
+
+        context 'a hash condition' do
+          let(:present_if) { {'type' => default_type_example} }
+
+          context 'the condition is met' do
+            it 'keeps the attribute' do
+              example[:length].should_not be(nil)
+            end
+          end
+
+          context 'the condition is not met' do
+            let(:type_example) { 'not the example' }
+
+            it 'sets the attribute to nil' do
+              example[:length].should be(nil)
+            end
+          end
+        end
+
+        context 'a proc condition' do
+          let(:present_if) { lambda { |val| val.type == default_type_example } }
+
+          context 'the condition is met' do
+            it 'keeps the attribute' do
+              example[:length].should_not be(nil)
+            end
+          end
+
+          context 'the condition is not met' do
+            let(:type_example) { 'not the example' }
+
+            it 'sets the attribute to nil' do
+              example[:length].should be(nil)
+            end
+          end
+        end
+      end
     end
 
 
