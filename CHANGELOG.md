@@ -1,6 +1,12 @@
 Attributor Changelog
 ============================
 
+next
+----
+
+* Add the `:custom_data` option for attributes. This is a hash that is passed through to `describe` - Attributor does no processing or handling of this option.
+
+
 2.6.0
 -----
 

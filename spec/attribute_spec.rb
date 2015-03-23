@@ -62,6 +62,16 @@ describe Attributor::Attribute do
       end
     end
 
+    context 'with custom_data' do
+      let(:custom_data) { {loggable: true, visible_in_ui: false} }
+      let(:attribute_options) { {custom_data: custom_data} }
+      its(:describe) { should have_key(:custom_data) }
+
+      it 'keep the custom data attribute' do
+        subject.describe[:custom_data].should == custom_data
+      end
+    end
+
     context 'for an anonymous type (aka: Struct)' do
       let(:attribute_options) { Hash.new }
       let(:attribute) do
@@ -110,6 +120,19 @@ describe Attributor::Attribute do
       }.to raise_error(/Default value doesn't have the correct attribute type/)
     end
 
+    context 'custom_data' do
+      it 'raises when not a hash' do
+        expect {
+          Attributor::Attribute.new(Integer, custom_data: 1)
+        }.to raise_error(/custom_data must be a Hash/)
+      end
+
+      it 'does not raise for hashes' do
+        expect {
+          Attributor::Attribute.new(Integer, custom_data: {loggable: true})
+        }.not_to raise_error
+      end
+    end
   end
 
 
