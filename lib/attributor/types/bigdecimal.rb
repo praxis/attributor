@@ -2,8 +2,7 @@ require 'bigdecimal'
 
 module Attributor
 
-  class BigDecimal
-    include Type
+  class BigDecimal < Numeric
 
     def self.native_type
       return ::BigDecimal

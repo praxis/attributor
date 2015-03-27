@@ -16,6 +16,11 @@ module Attributor
     def self.example(context=nil, options:{})
       :example
     end
+
+    def self.family
+      String.family
+    end
+    
   end
 
 end

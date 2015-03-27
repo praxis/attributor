@@ -18,9 +18,6 @@ module Attributor
   require_relative 'attributor/extensions/randexp'
 
 
-
-  # List of all basic types (i.e. not collections, structs or models)
-
   # hierarchical separator string for composing human readable attributes
   SEPARATOR = '.'.freeze
   DEFAULT_ROOT_CONTEXT = ['$'].freeze
@@ -74,16 +71,20 @@ module Attributor
   MODULE_PREFIX       = "Attributor\:\:".freeze
   MODULE_PREFIX_REGEX = Regexp.new(MODULE_PREFIX)
 
+  require_relative 'attributor/families/numeric'
+  require_relative 'attributor/families/temporal'
+  
   require_relative 'attributor/types/container'
   require_relative 'attributor/types/object'
+  
   require_relative 'attributor/types/bigdecimal'
   require_relative 'attributor/types/integer'
   require_relative 'attributor/types/string'
   require_relative 'attributor/types/symbol'
   require_relative 'attributor/types/boolean'
+  require_relative 'attributor/types/time'
   require_relative 'attributor/types/date'
   require_relative 'attributor/types/date_time'
-  require_relative 'attributor/types/time'
   require_relative 'attributor/types/float'
   require_relative 'attributor/types/collection'
   require_relative 'attributor/types/hash'

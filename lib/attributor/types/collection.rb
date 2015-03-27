@@ -25,6 +25,10 @@ module Attributor
       return ::Array
     end
 
+    def self.family
+      'array'
+    end
+    
     def self.member_type
       @member_type ||= Attributor::Object
     end

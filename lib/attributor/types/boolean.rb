@@ -23,6 +23,11 @@ module Attributor
       return true if [ true, 'true', 'TRUE', '1', 1, 't', 'T' ].include?(value)
       raise CoercionError, context: context, from: value.class, to: self
     end
+
+    def self.family
+      'boolean'
+    end
+
   end
 end
 

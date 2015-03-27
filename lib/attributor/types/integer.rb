@@ -2,8 +2,7 @@
 
 module Attributor
 
-  class Integer
-    include Type
+  class Integer < Numeric
 
     EXAMPLE_RANGE = 1000.freeze
 

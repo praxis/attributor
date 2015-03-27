@@ -34,7 +34,10 @@ module Attributor
       @concrete=true
     end
 
-
+    def self.family
+      'hash'
+    end
+    
     @saved_blocks = []
     @options = {allow_extra: false}
     @keys = {}

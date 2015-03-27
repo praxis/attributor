@@ -109,6 +109,7 @@ module Attributor
         type_name = self.ancestors.find { |k| k.name && !k.name.empty? }.name
         {
           name: type_name.gsub(Attributor::MODULE_PREFIX_REGEX, ''),
+          family: self.family,
           id: self.id
         }
       end
@@ -116,6 +117,10 @@ module Attributor
       def id
         return nil if self.name.nil?
         self.name.gsub('::'.freeze,'-'.freeze)
+      end
+
+      def family
+        'attributor'
       end
 
     end
