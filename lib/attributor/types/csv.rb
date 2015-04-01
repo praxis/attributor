@@ -30,7 +30,7 @@ module Attributor
     end
 
     def self.family
-      'string'
+      Collection.family
     end
     
   end

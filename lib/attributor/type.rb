@@ -120,7 +120,7 @@ module Attributor
       end
 
       def family
-        'attributor'
+        'any'
       end
 
     end

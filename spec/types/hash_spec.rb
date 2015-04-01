@@ -431,8 +431,8 @@ describe Attributor::Hash do
     context 'for hashes with key and value types' do
       it 'describes the type correctly' do
         description[:name].should eq('Hash')
-        description[:key].should eq(type:{name: 'Object', id: 'Attributor-Object', family: 'attributor'})
-        description[:value].should eq(type:{name: 'Object', id: 'Attributor-Object', family: 'attributor'})
+        description[:key].should eq(type:{name: 'Object', id: 'Attributor-Object', family: 'any'})
+        description[:value].should eq(type:{name: 'Object', id: 'Attributor-Object', family: 'any'})
       end
     end
 
