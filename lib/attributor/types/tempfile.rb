@@ -31,6 +31,9 @@ module Attributor
       super
     end
 
+    def self.family
+      String.family
+    end
 
   end
 end

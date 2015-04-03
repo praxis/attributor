@@ -23,6 +23,11 @@ module Attributor
         return /\w+/.gen
       end
     end
+
+    def self.family
+      'string'
+    end
+    
   end
   
 end

@@ -22,4 +22,21 @@ describe Attributor do
       end
     end
   end
+
+  context '.humanize_context' do
+    let(:context) { [] }
+
+    subject(:humanized) { Attributor.humanize_context(context) }
+
+    context 'with string value' do
+      let(:context) { 'some-context'}
+      it { should eq('some-context')}
+    end
+
+    context 'with array value' do
+      let(:context) { ['a', 'b'] }
+      it { should eq('a.b') }
+    end
+
+  end
 end

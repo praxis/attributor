@@ -28,3 +28,9 @@ RSpec.configure do |config|
   end
 
 end
+
+RSpec::Matchers.define :be_in_family do |expected|
+  match do |actual|
+    actual.family == expected
+  end
+end

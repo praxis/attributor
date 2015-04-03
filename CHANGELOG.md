@@ -5,7 +5,7 @@ next
 ----
 
 * Add the `:custom_data` option for attributes. This is a hash that is passed through to `describe` - Attributor does no processing or handling of this option.
-
+* Added `Type.family` which returns a more-generic "family name". It's defined for all built-in types, and is included in `Type.describe`.
 
 2.6.0
 -----

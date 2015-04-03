@@ -1,12 +1,12 @@
 # Represents a plain old boolean type. TBD: can be nil?
 #
 require_relative '../exceptions'
+
 require 'date'
 
 module Attributor
 
-  class DateTime
-    include Type
+  class DateTime < Temporal
 
     def self.native_type
       return ::DateTime
@@ -30,9 +30,7 @@ module Attributor
       end
     end
 
-    def self.dump(value,**opts)
-      value && value.iso8601
-    end
+    
 
 
   end

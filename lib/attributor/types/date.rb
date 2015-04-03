@@ -2,8 +2,7 @@ require 'date'
 
 module Attributor
 
-    class Date
-      include Type
+    class Date < Temporal
 
       def self.native_type
         return ::Date
@@ -29,10 +28,6 @@ module Attributor
         else
           raise CoercionError, context: context, from: value.class, to: self, value: value
         end
-      end
-
-      def self.dump(value,**opts)
-        value && value.iso8601
       end
 
     end

@@ -2,7 +2,7 @@ require 'date'
 
 module Attributor
 
-  class Time
+  class Time < Temporal
     include Type
 
     def self.native_type
@@ -33,11 +33,7 @@ module Attributor
       end
     end
 
-    def self.dump(value,**opts)
-      value && value.iso8601
-    end
-
-
+    
   end
 
 end

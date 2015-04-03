@@ -4,7 +4,7 @@ require File.join(File.dirname(__FILE__), 'spec_helper.rb')
 describe Attributor::Attribute do
 
   let(:attribute_options) { Hash.new }
-  let(:type) { AttributeType }
+  let(:type) { Attributor::String }
 
   subject(:attribute) { Attributor::Attribute.new(type, attribute_options) }
 
@@ -43,7 +43,7 @@ describe Attributor::Attribute do
   context 'describe' do
     let(:attribute_options) { {:required => true, :values => ["one"], :description => "something", :min => 0} }
     let(:expected) do
-      h = {type: {name: type.name, id: type.id}}
+      h = {type: {name: 'String', id: type.id, family: type.family}}
       common = attribute_options.select{|k,v| Attributor::Attribute::TOP_LEVEL_OPTIONS.include? k }
       h.merge!( common )
       h[:options] = {:min => 0 }
@@ -168,7 +168,7 @@ describe Attributor::Attribute do
       end
 
       context 'for a type with a non-String native_type' do
-        let(:type) { IntegerAttributeType}
+        let(:type) { Attributor::Integer }
         context 'using a regexp' do
           let(:example) { /\d{5}/ }
           it 'coerces the example value properly' do
@@ -251,6 +251,7 @@ describe Attributor::Attribute do
         example_1.should_not eq example_2
       end
 
+      
     end
   end
 

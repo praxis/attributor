@@ -29,5 +29,9 @@ module Attributor
       return collection.join(',')
     end
 
+    def self.family
+      Collection.family
+    end
+    
   end
 end

@@ -3,7 +3,22 @@ require File.join(File.dirname(__FILE__), 'spec_helper.rb')
 
 describe Attributor::Type do
 
-  subject(:test_type) { AttributeType }
+  subject(:test_type) do 
+    Class.new do
+      include Attributor::Type
+      def self.native_type
+        ::String
+      end
+
+      def self.name
+        'Testing'
+      end
+
+      def self.family
+        'testing'
+      end
+    end
+  end
 
   let(:attribute_options) { Hash.new }
   let(:attribute_attributes) { Hash.new }
@@ -16,8 +31,7 @@ describe Attributor::Type do
 
 
   its(:native_type) { should be(::String) }
-  its(:id) { should eq('AttributeType')}
-
+  its(:id) { should eq('Testing')}
 
   context 'load' do
     let(:value) { nil }
@@ -41,7 +55,7 @@ describe Attributor::Type do
       let(:context) { ['top','sub'] }
       
       it 'raises an exception' do
-        expect { test_type.load(value,context) }.to raise_error( Attributor::IncompatibleTypeError, /AttributeType cannot load values of type Fixnum.*while loading top.sub/)
+        expect { test_type.load(value,context) }.to raise_error( Attributor::IncompatibleTypeError, /cannot load values of type Fixnum.*while loading top.sub/)
       end
 
 
