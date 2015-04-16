@@ -81,10 +81,12 @@ module Attributor
       compiler = dsl_class.new(self, opts)
       compiler.parse(*blocks)
 
-      @insensitive_map = self.keys.keys.each_with_object({}) do |k, map|
-        map[k.downcase] = k
+      if opts[:case_insensitive_load] == true
+        @insensitive_map = self.keys.keys.each_with_object({}) do |k, map|
+          map[k.downcase] = k
+        end
       end
-
+      
       compiler
     end
 
@@ -400,9 +402,7 @@ module Attributor
       @contents.each(&block)
     end
 
-    def each_pair(&block)
-      @contents.each_pair(&block)
-    end
+    alias_method :each_pair, :each
 
     def size
       @contents.size
@@ -428,7 +428,7 @@ module Attributor
     def merge(h)
       case h
       when self.class
-        self.class.new(@contents.merge(h.contents))
+        self.class.new(contents.merge(h.contents))
       when Attributor::Hash
         raise ArgumentError, "cannot merge Attributor::Hash instances of different types" unless h.is_a?(self.class)
       else

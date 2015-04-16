@@ -35,6 +35,64 @@ describe Attributor::Hash do
         example.values.all? {|v| v.kind_of? Integer}.should be(true)
       end
     end
+
+    context 'for a Hash with defined keys' do
+      let(:name) { 'bob' }
+      let(:something) { 'else' }
+
+      subject(:example) { HashWithStrings.example(name: name, something: something) }
+
+      context 'resolves a lazy attributes on demand' do
+        before { example.lazy_attributes.keys.should eq [:name, :something] }
+        after { example.lazy_attributes.keys.should eq [:something] }
+
+        it 'using get' do
+          example.get(:name).should be name
+        end
+        it 'using []' do
+          example[:name].should be name
+        end
+
+        it 'using set' do
+          example.set :name, 'not bob'
+          example.get(:name).should == 'not bob'
+        end
+        it 'using []=' do
+          example[:name] = 'not bob'
+          example[:name].should == 'not bob'
+        end
+      end
+
+      its(:size) { should eq 2 }
+      its(:values) { should =~ [name, something] }
+      its(:keys) { should =~ [:name, :something] }
+      it do
+        should_not be_empty
+      end
+
+      it 'responds to key? correctly' do
+        example.key?(:name).should be(true)
+        example.key?(:something).should be(true)
+      end
+
+      it 'enumerates the contents' do
+        example.collect {|k,v| k }.should eq [:name, :something ]
+      end
+
+      it 'enumerates the contents using each_pair' do
+        pairs = []
+        example.each_pair {|pair| pairs << pair }
+        pairs.should =~ [ [:name, name], [:something, something] ]
+      end
+
+      its(:contents){ should eq ({name: name, something: something}) }
+      it 'does not create methods for the keys' do
+        example.should_not respond_to(:name)
+        example.should_not respond_to(:something)
+      end
+
+    end
+
     context 'using a non array context' do
       it 'should work for hashes with key/value types' do
         expect{ Attributor::Hash.of(key:String,value:String).example("Not an Array") }.to_not raise_error
@@ -555,7 +613,9 @@ describe Attributor::Hash do
     end
   end
 
-  context 'with case_insensitive_load option for string keys' do
+  context 'case_insensitive_load option' do
+    let(:case_insensitive) { true }
+    let(:type) { Attributor::Hash.of(key: String).construct(block, case_insensitive_load: case_insensitive) }
     let(:block) do
       proc do
         key 'downcase', Integer
@@ -563,19 +623,31 @@ describe Attributor::Hash do
         key 'CamelCase', Integer
       end
     end
-
-    let(:type) { Attributor::Hash.of(key: String).construct(block, case_insensitive_load: true) }
-
     let(:input) { {'DOWNCASE' => 1, 'upcase' => 2, 'CamelCase' => 3} }
-
     subject(:output) { type.load(input) }
 
-    it 'maps the incoming keys to defined keys, regardless of case' do
-      output['downcase'].should eq(1)
-      output['UPCASE'].should eq(2)
-      output['CamelCase'].should eq(3)
-    end
+    context 'when defined' do
 
+      it 'maps the incoming keys to defined keys, regardless of case' do
+        output['downcase'].should eq(1)
+        output['UPCASE'].should eq(2)
+        output['CamelCase'].should eq(3)
+      end
+      it 'has loaded the (internal) insensitive_map upon building the definition' do
+        type.definition 
+        type.insensitive_map.should be_kind_of(::Hash)
+        type.insensitive_map.keys.should =~ ["downcase","upcase","camelcase"]
+      end
+    end
+  
+    context 'when not defined' do
+      let(:case_insensitive) { false }
+
+      it 'skips the loading of the (internal) insensitive_map' do
+        type.definition 
+        type.insensitive_map.should be_nil
+      end
+    end
   end
 
   context 'with allow_extra keys option' do
