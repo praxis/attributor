@@ -6,6 +6,10 @@ next
 
 * Add the `:custom_data` option for attributes. This is a hash that is passed through to `describe` - Attributor does no processing or handling of this option.
 * Added `Type.family` which returns a more-generic "family name". It's defined for all built-in types, and is included in `Type.describe`.
+* Cleanup and bug fixes around example generation for `Model`, `Struct` and `Hash`.
+  * Avoid creating method accessors for true `Hash` types (only `[]` accessors)
+  * Fix common hash methods created for example instances (to play well with lazy attributes)
+  * Avoid storing the `Hash#insensitive_map` unless insensitivity enabled
 
 2.6.0
 -----
