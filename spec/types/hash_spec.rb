@@ -91,10 +91,6 @@ describe Attributor::Hash do
         example.should_not respond_to(:something)
       end
 
-      it 'understands lazy attributes when setting' do
-
-      end
-
     end
 
     context 'using a non array context' do
