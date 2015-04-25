@@ -37,7 +37,7 @@ module Attributor
     def self.family
       'hash'
     end
-    
+
     @saved_blocks = []
     @options = {allow_extra: false}
     @keys = {}
@@ -86,7 +86,7 @@ module Attributor
           map[k.downcase] = k
         end
       end
-      
+
       compiler
     end
 
@@ -369,7 +369,7 @@ module Attributor
       hash = super
 
       if key_type
-        hash[:key] = {type: key_type.describe}
+        hash[:key] = {type: key_type.describe(true)}
       end
 
       if self.keys.any?

@@ -10,7 +10,7 @@ module Attributor
     undef :size
     undef :keys
     undef :values
-    undef :empty? 
+    undef :empty?
     undef :has_key?
 
     @key_type = Symbol
@@ -21,7 +21,7 @@ module Attributor
 
     def self.inherited(klass)
       k = self.key_type
-      ka = self.key_attribute 
+      ka = self.key_attribute
 
       v = self.value_type
       va = self.value_attribute
@@ -68,7 +68,7 @@ module Attributor
 
     def self.describe(shallow=false)
       hash = super
-      hash[:attributes] = hash.delete :keys
+      hash[:attributes] = hash.delete :keys if hash.key? :keys
       hash
     end
 
@@ -89,7 +89,7 @@ module Attributor
     end
 
     def self.generate_subcontext(context, subname)
-      context + [subname] 
+      context + [subname]
     end
 
     def self.example(context=nil, **values)
@@ -176,7 +176,7 @@ module Attributor
 
       self.attributes.each_with_object({}) do |(name, value), result|
         attribute = self.class.attributes[name]
-        
+
         # skip dumping undefined attributes
         unless attribute
           warn "WARNING: Trying to dump unknown attribute: #{name.inspect} with context: #{context.inspect}"
