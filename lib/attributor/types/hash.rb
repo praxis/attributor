@@ -436,6 +436,10 @@ module Attributor
       end
     end
 
+    def delete(key)
+      @contents.delete(key)
+    end
+
     attr_reader :validating, :dumping
 
     def initialize(contents={})

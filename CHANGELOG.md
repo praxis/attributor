@@ -7,6 +7,7 @@ next
 * Small enhancements on `describe` for types
   * avoid creating empty `:attributes` key for `Model`
   * ensure embedding `key_type` in `Hash` using `shallow` mode
+* Added `Hash#delete`.
 
 2.6.1
 -----
