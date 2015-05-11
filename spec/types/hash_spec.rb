@@ -511,12 +511,12 @@ describe Attributor::Hash do
         description[:key].should eq(type:{name: 'String', id: 'Attributor-String', family: 'string'})
         description.should_not have_key(:value)
 
-        keys = description[:keys]
+        attrs = description[:attributes]
 
-        keys['a string'].should eq(type: {name: 'String', id: 'Attributor-String', family: 'string'} )
-        keys['1'].should eq(type: {name: 'Integer', id: 'Attributor-Integer', family: 'numeric'}, options: {min: 1, max: 20}  )
-        keys['some_date'].should eq(type: {name: 'DateTime', id: 'Attributor-DateTime', family: 'temporal'})
-        keys['defaulted'].should eq(type: {name: 'String', id: 'Attributor-String', family: 'string'}, default: 'default value')
+        attrs['a string'].should eq(type: {name: 'String', id: 'Attributor-String', family: 'string'} )
+        attrs['1'].should eq(type: {name: 'Integer', id: 'Attributor-Integer', family: 'numeric'}, options: {min: 1, max: 20}  )
+        attrs['some_date'].should eq(type: {name: 'DateTime', id: 'Attributor-DateTime', family: 'temporal'})
+        attrs['defaulted'].should eq(type: {name: 'String', id: 'Attributor-String', family: 'string'}, default: 'default value')
       end
     end
   end
@@ -634,17 +634,17 @@ describe Attributor::Hash do
         output['CamelCase'].should eq(3)
       end
       it 'has loaded the (internal) insensitive_map upon building the definition' do
-        type.definition 
+        type.definition
         type.insensitive_map.should be_kind_of(::Hash)
         type.insensitive_map.keys.should =~ ["downcase","upcase","camelcase"]
       end
     end
-  
+
     context 'when not defined' do
       let(:case_insensitive) { false }
 
       it 'skips the loading of the (internal) insensitive_map' do
-        type.definition 
+        type.definition
         type.insensitive_map.should be_nil
       end
     end

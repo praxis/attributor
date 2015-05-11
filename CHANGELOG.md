@@ -8,6 +8,8 @@ next
   * avoid creating empty `:attributes` key for `Model`
   * ensure embedding `key_type` in `Hash` using `shallow` mode
 * Added `Hash#delete`.
+* Changed the schema for describing `Hash` to use `attributes` instead of `keys`
+  * It makes more sense, and it is compatible with Model and Structs too.
 
 2.6.1
 -----
