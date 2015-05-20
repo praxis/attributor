@@ -10,6 +10,7 @@ next
 * Added `Hash#delete`.
 * Changed the schema for describing `Hash` to use `attributes` instead of `keys`
   * It makes more sense, and it is compatible with Model and Structs too.
+* Undefine JRuby package helper methods in `Model` (org, java...)
 
 2.6.1
 -----

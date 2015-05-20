@@ -6,6 +6,13 @@ module Attributor
     undef :format
     undef :test rescue nil
 
+    if RUBY_ENGINE =~ /^jruby/
+      # We are "forced" to require it here (in case hasn't been yet) to make sure the added methods have been applied
+      require 'java'
+      # Only to then delete them, to make sure we don't have them clashing with any attributes
+      undef java, javax, org, com
+    end
+
     # Remove undesired methods inherited from Hash
     undef :size
     undef :keys
