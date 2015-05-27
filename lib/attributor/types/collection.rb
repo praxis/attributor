@@ -60,7 +60,7 @@ module Attributor
     end
 
 
-    # The incoming value should be an array here, so the only decoding that we need to do
+    # The incoming value should be array-like here, so the only decoding that we need to do
     # is from the members (if there's an :member_type defined option).
     def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
       if value.nil?
@@ -69,6 +69,8 @@ module Attributor
         loaded_value = value
       elsif value.is_a?(::String)
         loaded_value = decode_string(value,context)
+      elsif value.respond_to?(:to_a)
+        loaded_value = value.to_a
       else
         raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self
       end
