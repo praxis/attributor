@@ -11,6 +11,7 @@ next
 * Changed the schema for describing `Hash` to use `attributes` instead of `keys`
   * It makes more sense, and it is compatible with Model and Structs too.
 * Undefine JRuby package helper methods in `Model` (org, java...)
+* Added support to `Collection.load` for any value that responds to `to_a`/
 
 2.6.1
 -----
