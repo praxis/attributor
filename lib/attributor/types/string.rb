@@ -18,16 +18,16 @@ module Attributor
 
     def self.example(context=nil, options:{})
       if options[:regexp]
-        return options[:regexp].gen
+        # It may fail to generate an example, see bug #72.
+        options[:regexp].gen rescue ('Failed to generate example for %s' % options[:regexp].inspect)
       else
-        return /\w+/.gen
+        /\w+/.gen
       end
     end
 
     def self.family
       'string'
     end
-    
+
   end
-  
 end

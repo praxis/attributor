@@ -19,14 +19,12 @@ describe Attributor::String do
       type.example.should be_a(::String)
     end
 
-    it 'handles regexps that Randexp can not' do
-      pending 'resolution of #72' do
-        regex = /\w+(,\w+)*/
-        expect {
-          val = Attributor::String.example(options:{regexp: regex})
-          val.should be_a(::String)
-        }.to_not raise_error
-      end
+    it 'handles regexps that Randexp can not (#72)' do
+      regex = /\w+(,\w+)*/
+      expect {
+        val = Attributor::String.example(options:{regexp: regex})
+        val.should be_a(::String)
+      }.to_not raise_error
     end
 
   end
