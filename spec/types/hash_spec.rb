@@ -613,6 +613,79 @@ describe Attributor::Hash do
     end
   end
 
+  context '.from_hash' do
+
+    context 'without allowing extra keys' do
+      let(:type) do
+        Class.new(Attributor::Hash) do
+          self.value_type = String
+
+          keys do
+            key :one, String
+            key :two, String, default: 'two'
+          end
+        end
+      end
+      subject(:input){ {} }
+      subject(:output) { type.load(input) }
+
+      its(:class){ should be(type) }
+
+      let(:load_context) { "$.some_root" }
+      it 'complains about the extra, with the right context' do
+        expect{
+          type.load( {one: 'one', three: 3} , load_context )
+        }.to raise_error(Attributor::AttributorException,/Unknown key received: :three while loading \$\.some_root.key\(:three\)/)
+      end
+      context 'properly sets them (and loads them) in the created instance' do
+        let(:input){ {one: 'one', two: 2 } }
+
+        its(:keys){ should eq([:one, :two])}
+        its([:one]){ should eq('one') }
+        its([:two]){ should eq('2') } #loaded as a string
+      end
+      context 'properly sets the default values when not passed in' do
+        let(:input){ {one: 'one'} }
+
+        its([:one]){ should eq('one') }
+        its([:two]){ should eq('two') }
+      end
+    end
+
+    context ' allowing extra keys' do
+      context 'at the top level' do
+        let(:type) do
+          Class.new(Attributor::Hash) do
+            keys allow_extra: true do
+              key :one, String
+            end
+          end
+        end
+        let(:input){ {one: 'one', three: 'tres' } }
+        subject(:output) { type.load(input) }
+
+        its(:keys){ should eq([:one,:three])}
+      end
+      context 'inside an :other subkey' do
+        let(:type) do
+          Class.new(Attributor::Hash) do
+            keys allow_extra: true do
+              key :one, String
+              extra :other
+            end
+          end
+        end
+        let(:input){ {one: 'one', three: 'tres' } }
+        subject(:output) { type.load(input) }
+
+        its(:keys){ should =~ [:one,:other] }
+        it 'has the key inside the :other hash' do
+          expect(output[:other]).to eq({three: 'tres'})
+        end
+      end
+    end
+  end
+
   context 'case_insensitive_load option' do
     let(:case_insensitive) { true }
     let(:type) { Attributor::Hash.of(key: String).construct(block, case_insensitive_load: case_insensitive) }
