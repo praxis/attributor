@@ -339,7 +339,7 @@ module Attributor
       object.each do |k,v|
         next if k == self.extra_keys
 
-        sub_context = self.generate_subcontext(Attributor::DEFAULT_ROOT_CONTEXT,k)
+        sub_context = self.generate_subcontext(context,k)
         hash.set(k, v, context: sub_context, recurse: recurse)
       end
 
