@@ -44,8 +44,12 @@ end
 
 class Cormorant < Attributor::Model
   attributes do
-    attribute :id, Integer, :description => "ID of the Cormorant"
-    attribute :name, String, :description => "Name of the Cormorant"
+    attribute :name, String, :default => "Mr. Cormor", :description => "Cormorant name", :example => /[:name:]/
+    attribute :timestamps do
+      attribute :born_at, DateTime
+      attribute :died_at, DateTime, example: Proc.new {|timestamps| timestamps.born_at + 10}
+    end
+
     # This will be a collection of arbitrary Ruby Objects
     attribute :fish, Attributor::Collection, :description => "All kinds of fish for feeding the babies"
 

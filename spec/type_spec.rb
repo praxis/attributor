@@ -3,7 +3,7 @@ require File.join(File.dirname(__FILE__), 'spec_helper.rb')
 
 describe Attributor::Type do
 
-  subject(:test_type) do 
+  subject(:test_type) do
     Class.new do
       include Attributor::Type
       def self.native_type
@@ -42,7 +42,7 @@ describe Attributor::Type do
         test_type.load(value).should be(value)
       end
     end
-    
+
     context "when given a value that is of native_type" do
       let(:value) { "one" }
       it 'returns the value' do
@@ -53,7 +53,7 @@ describe Attributor::Type do
     context "when given a value that is not of native_type" do
       let(:value) { 1 }
       let(:context) { ['top','sub'] }
-      
+
       it 'raises an exception' do
         expect { test_type.load(value,context) }.to raise_error( Attributor::IncompatibleTypeError, /cannot load values of type Fixnum.*while loading top.sub/)
       end
@@ -149,6 +149,7 @@ describe Attributor::Type do
   end
 
   context 'describe' do
+    let(:example){ "Foo" }
     subject(:description) { test_type.describe }
     it 'outputs the type name' do
       description[:name].should eq(test_type.name)
@@ -156,6 +157,15 @@ describe Attributor::Type do
     it 'outputs the type id' do
       description[:id].should eq(test_type.name)
     end
+
+    context 'with an example' do
+      subject(:description) { test_type.describe(example: example) }
+      it 'includes it in the :example key' do
+        description.should have_key(:example)
+        description[:example].should be(example)
+      end
+    end
+
   end
 
 end

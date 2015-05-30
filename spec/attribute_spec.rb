@@ -93,6 +93,48 @@ describe Attributor::Attribute do
       end
 
     end
+
+    context 'with an example' do
+
+      let(:attribute_options){ {} }
+      let(:example){ attribute.example }
+      subject(:described){ attribute.describe(false, example: example) }
+
+      context 'using a simple terminal type' do
+        let(:type) { String }
+        its(:keys){ should include(:example) }
+        it 'should have the passed example value' do
+          described.should have_key(:example)
+          described[:example].should eq(example)
+        end
+        it 'should have removed the example from the :type' do
+          described[:type].should_not have_key(:example)
+        end
+
+      end
+
+      context 'using a complex type' do
+        let(:type) { Cormorant }
+        its(:keys){ should_not include(:example) }
+
+        it 'Should see examples in the right places, depending on leaf/no-leaf types' do
+          # String, a leaf attribute type: should have example
+          name_attr =  described[:type][:attributes][:name]
+          name_attr.should include(:example)
+          name_attr[:type].should_not include(:example)
+
+          # Struct, a non-leaf attribute type: shouldn't have example
+          ts_attr =  described[:type][:attributes][:timestamps]
+          ts_attr.should_not include(:example)
+          ts_attr[:type].should_not include(:example)
+
+          # DateTime inside a Struct, a nested leaf attribute type: should have example
+          born_attr =  ts_attr[:type][:attributes][:born_at]
+          born_attr.should include(:example)
+          born_attr[:type].should_not include(:example)
+        end
+      end
+    end
   end
 
 
@@ -174,7 +216,7 @@ describe Attributor::Attribute do
           it 'coerces the example value properly' do
             example.should_receive(:gen).and_call_original
             type.should_receive(:load).and_call_original
-  
+
             subject.example.should be_kind_of(type.native_type)
           end
         end
@@ -183,7 +225,7 @@ describe Attributor::Attribute do
           it 'coerces the example value properly' do
             type.should_receive(:load).and_call_original
             subject.example.should be_kind_of(type.native_type)
-          end          
+          end
         end
       end
     end
@@ -251,7 +293,7 @@ describe Attributor::Attribute do
         example_1.should_not eq example_2
       end
 
-      
+
     end
   end
 
@@ -286,7 +328,7 @@ describe Attributor::Attribute do
         it { should == default_value}
 
       end
-      
+
       context 'for a Proc-based default value' do
         let(:context){ ["$"] }
         subject(:result){ attribute.load(value,context) }
@@ -296,21 +338,21 @@ describe Attributor::Attribute do
           let(:default_value) { proc { "no_params" } }
           it { should == default_value.call }
         end
-        
+
         context 'with 1 argument (the parent)' do
           let(:default_value) { proc {|parent| "parent is fake: #{parent.class}" } }
           it { should == "parent is fake: Attributor::FakeParent" }
         end
-        
+
         context 'with 2 argument (the parent and the contents)' do
           let(:default_value) { proc {|parent,context| "parent is fake: #{parent.class} and context is: #{context}" } }
           it { should == "parent is fake: Attributor::FakeParent and context is: [\"$\"]"}
         end
-        
+
         context 'which attempts to use the parent (which is not supported for the moment)' do
           let(:default_value) { proc {|parent| "any parent method should spit out warning: [#{parent.something}]" } }
           it "should output a warning" do
-            begin 
+            begin
               old_verbose, $VERBOSE = $VERBOSE, nil
               Kernel.should_receive(:warn).and_call_original
               attribute.load(value,context).should == "any parent method should spit out warning: []"
