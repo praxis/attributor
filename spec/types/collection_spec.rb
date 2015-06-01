@@ -244,19 +244,29 @@ describe Attributor::Collection do
   end
 
   context '.validate' do
-    let(:collection_members) { [1, 2, 'three'] }
-    let(:expected_errors) { ["error 1", "error 2", "error 3"]}
+    context 'compatible type values' do
+      let(:collection_members) { [1, 2, 'three'] }
+      let(:expected_errors) { ["error 1", "error 2", "error 3"]}
 
-    before do
-      collection_members.zip(expected_errors).each do |member, expected_error|
-        type.member_attribute.should_receive(:validate).
-          with(member,an_instance_of(Array)). # we don't care about the exact context here
-          and_return([expected_error])
+      before do
+        collection_members.zip(expected_errors).each do |member, expected_error|
+          type.member_attribute.should_receive(:validate).
+            with(member,an_instance_of(Array)). # we don't care about the exact context here
+            and_return([expected_error])
+        end
+      end
+
+      it 'validates members' do
+        type.validate(collection_members).should =~ expected_errors
       end
     end
-
-    it 'validates members' do
-      type.validate(collection_members).should =~ expected_errors
+    context 'invalid incoming types' do
+      subject(:type) { Attributor::Collection.of(Integer) }
+      it 'raise an exception' do
+        expect{
+          type.validate( {one: :two} )
+        }.to raise_error(Attributor::IncompatibleTypeError, /cannot load values of type Hash/)
+      end
     end
   end
 
