@@ -14,7 +14,7 @@ module Attributor
   require_relative 'attributor/attribute_resolver'
 
   require_relative 'attributor/example_mixin'
-  
+
   require_relative 'attributor/extensions/randexp'
 
 
@@ -45,16 +45,16 @@ module Attributor
   end
 
   def self.humanize_context( context )
-    raise "NIL CONTEXT PASSED TO HUMANZE!!" unless context
+    return "" unless context
 
     if context.kind_of? ::String
       context = Array(context)
     end
 
     unless context.is_a? Enumerable
-      raise "INVALID CONTEXT!!! (got: #{context.inspect})" 
+      raise "INVALID CONTEXT!!! (got: #{context.inspect})"
     end
-    
+
     begin
       return context.join('.')
     rescue Exception => e
@@ -73,10 +73,10 @@ module Attributor
 
   require_relative 'attributor/families/numeric'
   require_relative 'attributor/families/temporal'
-  
+
   require_relative 'attributor/types/container'
   require_relative 'attributor/types/object'
-  
+
   require_relative 'attributor/types/bigdecimal'
   require_relative 'attributor/types/integer'
   require_relative 'attributor/types/string'
@@ -90,7 +90,7 @@ module Attributor
   require_relative 'attributor/types/hash'
   require_relative 'attributor/types/model'
   require_relative 'attributor/types/struct'
-  
+
 
   require_relative 'attributor/types/csv'
   require_relative 'attributor/types/ids'

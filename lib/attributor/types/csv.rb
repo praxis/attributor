@@ -29,9 +29,16 @@ module Attributor
       return collection.join(',')
     end
 
+    def self.describe(shallow=false, example: nil)
+      hash = super(shallow)
+      hash.delete(:member_attribute)
+      hash[:example] = example if example
+      hash
+    end
+
     def self.family
       Collection.family
     end
-    
+
   end
 end

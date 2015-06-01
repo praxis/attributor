@@ -80,7 +80,7 @@ module Attributor
     end
 
     def dump(value, **opts)
-      type.dump(value, opts)
+      type.dump(value, **opts)
     end
 
 
@@ -123,7 +123,7 @@ module Attributor
       description[:type] = self.type.describe(shallow, example: example )
       # Move over any example from the type, into the attribute itself
       if ( ex = description[:type].delete(:example) )
-        description[:example] = ex
+        description[:example] = self.dump( ex ).to_s
       end
 
       description
@@ -136,6 +136,8 @@ module Attributor
         ctx = Attributor.humanize_context(context)
         seed, _ = Digest::SHA1.digest(ctx).unpack("QQ")
         Random.srand(seed)
+      else
+        context = Attributor::DEFAULT_ROOT_CONTEXT
       end
 
       if self.options.has_key? :example

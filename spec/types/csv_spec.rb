@@ -43,10 +43,21 @@ describe Attributor::CSV do
     it 'dumps non-Integer values also' do
       csv.dump(str_vals).should eq(str_vals.join(','))
     end
-    
+
     it 'dumps nil values as nil' do
       csv.dump(nil).should eq(nil)
     end
   end
 
+  context '.describe' do
+    let(:example){ csv.example }
+    subject(:described){ csv.describe(example: example)}
+    it 'adds a string example if an example is passed' do
+      described.should have_key(:example)
+      described[:example].should eq(csv.dump(example))
+    end
+    it 'ensures no member_attribute key exists from underlying Collection' do
+      described.should_not have_key(:member_attribute)
+    end
+  end
 end
