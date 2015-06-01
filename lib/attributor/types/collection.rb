@@ -28,7 +28,7 @@ module Attributor
     def self.family
       'array'
     end
-    
+
     def self.member_type
       @member_type ||= Attributor::Object
     end
@@ -97,7 +97,7 @@ module Attributor
     end
 
 
-    def self.constructable? 
+    def self.constructable?
       true
     end
 
@@ -133,6 +133,16 @@ module Attributor
 
     # @param values [Array] Array of values to validate
     def self.validate(values, context=Attributor::DEFAULT_ROOT_CONTEXT, attribute=nil)
+
+      unless self.valid_type?(values)
+        descriptive_type =if self.member_type != Object
+          "Collection.of(#{self.member_type})"
+        else
+           self
+        end
+        raise Attributor::IncompatibleTypeError, context: context, value_type: values.class, type: descriptive_type
+      end
+
       values.each_with_index.collect do |value, i|
         subcontext = context + ["at(#{i})"]
         self.member_attribute.validate(value, subcontext)
