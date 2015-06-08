@@ -638,7 +638,6 @@ describe Attributor::Attribute do
       let(:type) { Attributor::Collection.of(member_type) }
       let(:member_options) { {} }
 
-
       context 'the member_attribute of that type' do
         subject(:member_attribute) { attribute.type.member_attribute }
         it { should be_kind_of(Attributor::Attribute)}
