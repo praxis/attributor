@@ -40,11 +40,12 @@ class Turducken < Attributor::Model
   end
 end
 
-
 # http://en.wikipedia.org/wiki/Cormorant
 
 class Cormorant < Attributor::Model
   attributes do
+    attribute :id, Integer, :description => "ID of the Cormorant"
+    attribute :name, String, :description => "Name of the Cormorant"
     # This will be a collection of arbitrary Ruby Objects
     attribute :fish, Attributor::Collection, :description => "All kinds of fish for feeding the babies"
 
@@ -53,7 +54,7 @@ class Cormorant < Attributor::Model
 
     # This will be a collection of instances of an anonymous Struct class, each having two well-defined attributes
 
-    attribute :babies, Attributor::Collection.of(Attributor::Struct), :description => "All the babies", :member_options => {:identity => 'name'} do
+    attribute :babies, Attributor::Collection.of(Attributor::Struct), :description => "All the babies", :member_options => {:identity => :name} do
       attribute :name, Attributor::String, :example => /[:name]/, :description => "The name of the baby cormorant"
       attribute :months, Attributor::Integer, :default => 0, :min => 0, :description => "The age in months of the baby cormorant"
       attribute :weight, Attributor::Float, :example => /\d{1,2}\.\d{3}/, :description => "The weight in kg of the baby cormorant"

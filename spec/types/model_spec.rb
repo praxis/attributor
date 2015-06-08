@@ -400,17 +400,41 @@ describe Attributor::Model do
       end
     end
 
-
-    context 'redefining an attribute' do
-      before do
-        model.attributes do
-          attribute :id, String
+    context 'for collections of models' do
+      let(:attributes_block) do
+        proc do
+          attribute :neighbors, required: true do
+            attribute :name, required: true
+            attribute :age, Integer
+          end
         end
       end
+      subject(:struct) { Attributor::Struct.construct(attributes_block, reference: Cormorant) }
 
-      it 'works' do
-        model.attributes[:id].type.should be(Attributor::String)
+      it 'supports defining sub-attributes using the proper reference' do
+        struct.attributes[:neighbors].options[:required].should be true
+        struct.attributes[:neighbors].type.member_attribute.type.attributes.keys.should =~ [:name, :age]
+        
+        name_options = struct.attributes[:neighbors].type.member_attribute.type.attributes[:name].options
+        name_options[:required].should be true
+        name_options[:description].should eq 'Name of the Cormorant'
       end
+    end
+
+    context 'redefining an attribute' do
+      context 'for simple types' do
+        before do
+          model.attributes do
+            attribute :id, String
+          end
+        end
+
+        it 'updates the type properly' do
+          model.attributes[:id].type.should be(Attributor::String)
+        end
+
+      end
+
 
     end
 
@@ -427,8 +451,8 @@ describe Attributor::Model do
     subject(:example) { model_class.example }
 
     its(:attributes) { should be_empty }
-    
-    it 'dumps as an empty hash' do 
+
+    it 'dumps as an empty hash' do
       example.dump.should eq({})
     end
 

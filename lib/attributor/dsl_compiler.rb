@@ -100,7 +100,13 @@ module Attributor
       # determine attribute type to use
       if attr_type.nil?
         if block_given?
-          attr_type = Attributor::Struct
+          attr_type = if inherited_attribute && inherited_attribute.type < Attributor::Collection
+            # override the reference to be the member_attribute's type for collections
+            opts[:reference] = inherited_attribute.type.member_attribute.type
+            Attributor::Collection.of(Struct)
+          else
+            Attributor::Struct
+          end
         elsif inherited_attribute
           attr_type = inherited_attribute.type
         else

@@ -13,6 +13,8 @@ next
 * Undefine JRuby package helper methods in `Model` (org, java...)
 * Added support to `Collection.load` for any value that responds to `to_a`
 * Fixed `Collection.validate` to complain when value object is not a valida type
+* Fixed bug where defining an attribute that references a `Collection` would not properly support defining sub-attributes in a provided block.
+
 
 2.6.1
 -----

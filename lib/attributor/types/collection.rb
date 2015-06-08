@@ -21,6 +21,18 @@ module Attributor
       end
     end
 
+    @options = {}
+
+    def self.inherited(klass)
+      klass.instance_eval do
+        @options = {}
+      end
+    end
+
+    def self.options
+      @options
+    end
+
     def self.native_type
       return ::Array
     end
@@ -101,8 +113,8 @@ module Attributor
       true
     end
 
-    def self.construct(constructor_block, options)
 
+    def self.construct(constructor_block, options)
       member_options =  (options[:member_options]  || {} ).clone
       if options.has_key?(:reference) && !member_options.has_key?(:reference)
         member_options[:reference] = options[:reference]
@@ -138,7 +150,7 @@ module Attributor
         descriptive_type =if self.member_type != Object
           "Collection.of(#{self.member_type})"
         else
-           self
+          self
         end
         raise Attributor::IncompatibleTypeError, context: context, value_type: values.class, type: descriptive_type
       end
