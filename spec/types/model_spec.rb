@@ -414,7 +414,7 @@ describe Attributor::Model do
       it 'supports defining sub-attributes using the proper reference' do
         struct.attributes[:neighbors].options[:required].should be true
         struct.attributes[:neighbors].type.member_attribute.type.attributes.keys.should =~ [:name, :age]
-        
+
         name_options = struct.attributes[:neighbors].type.member_attribute.type.attributes[:name].options
         name_options[:required].should be true
         name_options[:description].should eq 'Name of the Cormorant'

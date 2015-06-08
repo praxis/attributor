@@ -14,6 +14,8 @@ next
 * Added support to `Collection.load` for any value that responds to `to_a`
 * Fixed `Collection.validate` to complain when value object is not a valida type
 * Fixed bug where defining an attribute that references a `Collection` would not properly support defining sub-attributes in a provided block.
+* Enhanced the type/attribute `describe` methods of types so that they generate an example if an `example` argument is passed in.
+  * Complex (sub-structured) types will not output examples, only 'leaf' ones.
 
 
 2.6.1
