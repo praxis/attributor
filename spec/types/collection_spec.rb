@@ -310,4 +310,23 @@ describe Attributor::Collection do
     end
 
   end
+
+  context '.describe' do
+    let(:type){ Attributor::Collection.of(Attributor::String)}
+    let(:example){ nil }
+    subject(:described){ type.describe(example: example)}
+    it 'includes the member_attribute' do
+      described.should have_key(:member_attribute)
+      described[:member_attribute].should_not have_key(:example)
+    end
+
+    context 'with an example' do
+      let(:example){ type.example }
+      it 'includes the member_attribute with an example from the first member' do
+        described.should have_key(:member_attribute)
+        described[:member_attribute].should have_key(:example)
+        described[:member_attribute].should eq( type.member_attribute.describe(example: example.first ) )
+      end
+    end
+  end
 end

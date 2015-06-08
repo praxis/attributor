@@ -485,7 +485,8 @@ describe Attributor::Hash do
   end
 
   context '.describe' do
-    subject(:description) { type.describe }
+    let(:example){ nil }
+    subject(:description) { type.describe(example: example) }
     context 'for hashes with key and value types' do
       it 'describes the type correctly' do
         description[:name].should eq('Hash')
@@ -517,6 +518,19 @@ describe Attributor::Hash do
         attrs['1'].should eq(type: {name: 'Integer', id: 'Attributor-Integer', family: 'numeric'}, options: {min: 1, max: 20}  )
         attrs['some_date'].should eq(type: {name: 'DateTime', id: 'Attributor-DateTime', family: 'temporal'})
         attrs['defaulted'].should eq(type: {name: 'String', id: 'Attributor-String', family: 'string'}, default: 'default value')
+      end
+
+      context 'with an example' do
+        let(:example){ type.example }
+
+        it 'should have the matching example for each leaf key' do
+          description[:attributes].keys.should =~ type.keys.keys
+          description[:attributes].each do |name,sub_description|
+            sub_description.should have_key(:example)
+            val = type.attributes[name].dump( example[name] ).to_s
+            sub_description[:example].should eq( val )
+          end
+        end
       end
     end
   end

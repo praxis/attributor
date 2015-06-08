@@ -10,9 +10,9 @@ module Attributor
 
 
     module ClassMethods
-  
-      # Does this type support the generation of subtypes? 
-      def constructable? 
+
+      # Does this type support the generation of subtypes?
+      def constructable?
         false
       end
 
@@ -20,7 +20,7 @@ module Attributor
       def load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
         return nil if value.nil?
         unless value.is_a?(self.native_type)
-          raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self 
+          raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self
         end
 
         value
@@ -89,7 +89,7 @@ module Attributor
 
 
       def generate_subcontext(context, subname)
-        context + [subname] 
+        context + [subname]
       end
 
       def dsl_compiler
@@ -105,15 +105,17 @@ module Attributor
       end
 
       # Default describe for simple types...only their name (stripping the base attributor module)
-      def describe(root=false)
+      def describe(root=false, example: nil)
         type_name = self.ancestors.find { |k| k.name && !k.name.empty? }.name
-        {
+        hash = {
           name: type_name.gsub(Attributor::MODULE_PREFIX_REGEX, ''),
           family: self.family,
           id: self.id
         }
+        hash[:example] = example if example
+        hash
       end
-      
+
       def id
         return nil if self.name.nil?
         self.name.gsub('::'.freeze,'-'.freeze)

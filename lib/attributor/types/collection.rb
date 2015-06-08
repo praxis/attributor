@@ -101,10 +101,11 @@ module Attributor
       values.collect { |value| member_attribute.dump(value,opts) }
     end
 
-    def self.describe(shallow=false)
+    def self.describe(shallow=false, example: nil)
       hash = super(shallow)
       hash[:options] = {} unless hash[:options]
-      hash[:member_attribute] = self.member_attribute.describe
+      member_example = example.first if example
+      hash[:member_attribute] = self.member_attribute.describe(true, example: member_example )
       hash
     end
 

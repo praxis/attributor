@@ -148,8 +148,8 @@ module Attributor
           value = values.fetch(sub_attribute_name) do
             sub_attribute.example(sub_context, parent: parent)
           end
-
           sub_attribute.load(value,sub_context)
+
         end
 
 
@@ -365,8 +365,8 @@ module Attributor
       object.validate(context)
     end
 
-    def self.describe(shallow=false)
-      hash = super
+    def self.describe(shallow=false, example: nil)
+      hash = super(shallow)
 
       if key_type
         hash[:key] = {type: key_type.describe(true)}
@@ -374,10 +374,11 @@ module Attributor
 
       if self.keys.any?
         # Spit keys if it's the root or if it's an anonymous structures
-        if ( !shallow || self.name == nil) && self.keys.any?
+        if ( !shallow || self.name == nil)
           # FIXME: change to :keys when the praxis doc browser supports displaying those. or josep's demo is over.
           hash[:attributes] = self.keys.each_with_object({}) do |(sub_name, sub_attribute), sub_attributes|
-            sub_attributes[sub_name] = sub_attribute.describe(true)
+            sub_example = example.get(sub_name) if example
+            sub_attributes[sub_name] = sub_attribute.describe(true, example: sub_example)
           end
         end
       else

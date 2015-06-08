@@ -3,14 +3,14 @@
 module Attributor
 
   class FakeParent < ::BasicObject
-    
+
     def method_missing(name, *args)
       ::Kernel.warn "Warning, you have tried to access the '#{name}' method of the 'parent' argument of a Proc-defined :default values." +
                     "Those Procs should completely ignore the 'parent' attribute for the moment as it will be set to an " +
                     "instance of a useless class (until the framework can provide such functionality)"
       nil
     end
-    
+
     def class
       FakeParent
     end
@@ -80,7 +80,7 @@ module Attributor
     end
 
     def dump(value, **opts)
-      type.dump(value, opts)
+      type.dump(value, **opts)
     end
 
 
@@ -98,7 +98,7 @@ module Attributor
 
     TOP_LEVEL_OPTIONS = [ :description, :values, :default, :example, :required, :required_if, :custom_data ]
     INTERNAL_OPTIONS = [:dsl_compiler,:dsl_compiler_options] # Options we don't want to expose when describing attributes
-    def describe(shallow=true)
+    def describe(shallow=true, example: nil )
       description = { }
       # Clone the common options
       TOP_LEVEL_OPTIONS.each do |option_name|
@@ -109,6 +109,7 @@ module Attributor
       if ( ex_def = description.delete(:example) )
         description[:example_definition] = ex_def
       end
+
       special_options = self.options.keys - TOP_LEVEL_OPTIONS - INTERNAL_OPTIONS
       description[:options] = {} unless special_options.empty?
       special_options.each do |opt_name|
@@ -119,7 +120,12 @@ module Attributor
         description[:options][:reference] = reference.name
       end
 
-      description[:type] = self.type.describe(shallow)
+      description[:type] = self.type.describe(shallow, example: example )
+      # Move over any example from the type, into the attribute itself
+      if ( ex = description[:type].delete(:example) )
+        description[:example] = self.dump( ex ).to_s
+      end
+
       description
     end
 
@@ -130,6 +136,8 @@ module Attributor
         ctx = Attributor.humanize_context(context)
         seed, _ = Digest::SHA1.digest(ctx).unpack("QQ")
         Random.srand(seed)
+      else
+        context = Attributor::DEFAULT_ROOT_CONTEXT
       end
 
       if self.options.has_key? :example
