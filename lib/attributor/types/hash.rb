@@ -1,4 +1,20 @@
 module Attributor
+  class InvalidDefinition < StandardError
+    def initialize(type, cause)
+      type_name = if type.name
+        type.name
+      else
+        type.inspect
+      end
+
+      msg = "Structure definition for type #{type_name} is invalid. The following exception has occurred: #{cause.inspect}"
+      super(msg)
+      @cause = cause
+    end
+
+    attr_reader :cause
+  end
+
   class Hash
 
     MAX_EXAMPLE_DEPTH = 5
@@ -20,6 +36,8 @@ module Attributor
 
     @key_attribute = Attribute.new(@key_type)
     @value_attribute = Attribute.new(@value_type)
+
+    @error = false
 
 
     def self.key_type=(key_type)
@@ -54,14 +72,20 @@ module Attributor
         @value_type = v
         @key_attribute = Attribute.new(@key_type)
         @value_attribute = Attribute.new(@value_type)
+
+        @error = false
       end
     end
 
     def self.attributes(**options, &key_spec)
+      raise @error if @error
+
       self.keys(options, &key_spec)
     end
 
     def self.keys(**options, &key_spec)
+      raise @error if @error
+
       if block_given?
         @saved_blocks << key_spec
         @options.merge!(options)
@@ -86,8 +110,9 @@ module Attributor
           map[k.downcase] = k
         end
       end
-
-      compiler
+    rescue => e
+      @error = InvalidDefinition.new(self, e)
+      raise
     end
 
     def self.dsl_class

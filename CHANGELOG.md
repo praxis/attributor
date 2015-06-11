@@ -16,7 +16,7 @@ next
 * Fixed bug where defining an attribute that references a `Collection` would not properly support defining sub-attributes in a provided block.
 * Enhanced the type/attribute `describe` methods of types so that they generate an example if an `example` argument is passed in.
   * Complex (sub-structured) types will not output examples, only 'leaf' ones.
-
+* Improved handling of exceptions during attribute definitions for `Hash`/`Model` that would previously leave the set of attributes in an undefined state. Now, any attempts to use the type will throw an `InvalidDefinition` exception and include the original exception. (#127)
 
 2.6.1
 -----
