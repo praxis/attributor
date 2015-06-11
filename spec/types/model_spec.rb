@@ -1,9 +1,48 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper.rb')
 
 describe Attributor::Model do
+  subject(:chicken) { Chicken }
+
+  # TODO: should move most of these specs to hash spec
+
+  context 'attributes' do
+    context 'with an exception from the definition block' do
+      subject(:broken_model) do
+        Class.new(Attributor::Model) do
+          attributes do
+            raise 'sorry :('
+            attribute :name, String
+          end
+        end
+      end
+
+      it 'throws original exception upon first run' do
+        lambda {
+          broken_model.attributes
+        }.should raise_error(RuntimeError, 'sorry :(')
+      end
+
+      it 'throws InvalidDefinition for subsequent access' do
+        broken_model.attributes rescue nil
+
+        lambda { 
+          broken_model.attributes
+        }.should raise_error(Attributor::InvalidDefinition)
+      end
+
+      it 'throws for any attempts at using of an instance of it' do
+        broken_model.attributes rescue nil
+
+        instance = broken_model.new
+        lambda {
+          instance.name
+        }.should raise_error(Attributor::InvalidDefinition)
+      end
+
+    end
+  end
 
   context 'class methods' do
-    subject(:chicken) { Chicken }
     let(:context){ ["root","subattr"] }
 
     its(:native_type) { should eq(Chicken) }

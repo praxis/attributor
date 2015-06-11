@@ -26,6 +26,7 @@ module Attributor
     @key_attribute = Attribute.new(@key_type)
     @value_attribute = Attribute.new(@value_type)
 
+
     def self.inherited(klass)
       k = self.key_type
       ka = self.key_attribute
@@ -42,6 +43,8 @@ module Attributor
 
         @key_attribute = ka
         @value_attribute = va
+
+        @error = false
       end
     end
 
