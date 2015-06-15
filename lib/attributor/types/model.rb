@@ -17,7 +17,6 @@ module Attributor
     undef :size
     undef :keys
     undef :values
-    undef :empty?
     undef :has_key?
 
     @key_type = Symbol
