@@ -3,7 +3,7 @@
 
 module Attributor
 
-  class Collection
+  class Collection < Array
     include Container
 
     # @param type [Attributor::Type] optional, defines the type of all collection members
@@ -33,8 +33,13 @@ module Attributor
       @options
     end
 
+
     def self.native_type
-      return ::Array
+      self
+    end
+
+    def self.valid_type?(type)
+      type.kind_of?(self) || type.kind_of?(::Enumerable)
     end
 
     def self.family
@@ -63,12 +68,16 @@ module Attributor
       context ||= ["Collection-#{result.object_id}"]
       context = Array(context)
 
+      # avoid infinite recursion in example generation
+      example_depth = context.size
+      size = 0 if example_depth > Hash::MAX_EXAMPLE_DEPTH
+
       size.times do |i|
         subcontext = context + ["at(#{i})"]
         result << self.member_attribute.example(subcontext)
       end
 
-      result
+      self.new(result)
     end
 
 
@@ -87,7 +96,7 @@ module Attributor
         raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self
       end
 
-      return loaded_value.collect { |member| self.member_attribute.load(member,context) }
+      self.new(loaded_value.collect { |member| self.member_attribute.load(member,context) })
     end
 
 
@@ -165,6 +174,11 @@ module Attributor
     def self.validate_options( value, context, attribute )
       errors = []
       errors
+    end
+
+
+    def dump(**opts)
+      self.collect { |value| self.class.member_attribute.dump(value,opts) }
     end
 
   end

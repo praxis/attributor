@@ -9,7 +9,7 @@ describe Attributor::CSV do
     let!(:value) { array.join(',') }
 
     it 'parses the value and returns an array with the right types' do
-      csv.load(value).should eq(array)
+      csv.load(value).should =~ array
     end
   end
 
@@ -22,7 +22,7 @@ describe Attributor::CSV do
     end
 
     it 'generates a comma-separated list of Integer values' do
-      loaded_example.should be_a(Array)
+      loaded_example.should be_a(csv)
       loaded_example.size.should be > 1
       loaded_example.each { |e| e.should be_a(Integer) }
     end

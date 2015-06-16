@@ -59,7 +59,7 @@ describe Attributor::Collection do
 
   context '.native_type' do
     it "returns Array" do
-      type.native_type.should be(::Array)
+      type.native_type.should be(type)
     end
   end
 
@@ -79,7 +79,6 @@ describe Attributor::Collection do
 
     context 'for invalid JSON strings' do
       [
-        '{}',
         'foobar',
         '2',
         '',
@@ -107,15 +106,21 @@ describe Attributor::Collection do
     end
 
     context 'with unspecified element type' do
+      context 'for nil values' do
+        it 'returns nil' do
+          type.load(nil).should be nil
+        end
+      end
+
       context 'for valid values' do
         [
-          nil,
           [],
           [1,2,3],
           [Object.new, [1,2], nil, true]
         ].each do |value|
           it "returns value when incoming value is #{value.inspect}" do
-            type.load(value).should == value
+
+            type.load(value).should =~ value
           end
         end
       end
@@ -141,7 +146,7 @@ describe Attributor::Collection do
         }.each do |member_type, value|
           it "returns loaded value when member_type is #{member_type} and value is #{value.inspect}" do
             expected_result = value.map {|v| member_type.load(v)}
-            type.of(member_type).load(value).should == expected_result
+            type.of(member_type).load(value).should =~ expected_result
           end
         end
       end
@@ -221,7 +226,7 @@ describe Attributor::Collection do
           ].each do |value|
             it "returns value when incoming value is #{value.inspect}" do
               expected_value = value.map {|v| simple_struct.load(v.clone)}
-              type.of(simple_struct).load(value).should == expected_value
+              type.of(simple_struct).load(value).should =~ expected_value
             end
           end
         end
@@ -263,18 +268,18 @@ describe Attributor::Collection do
     context 'invalid incoming types' do
       subject(:type) { Attributor::Collection.of(Integer) }
       it 'raise an exception' do
-        expect{
-          type.validate( {one: :two} )
-        }.to raise_error(Attributor::IncompatibleTypeError, /cannot load values of type Hash/)
+        expect {
+          type.validate('invalid_value')
+        }.to raise_error(Attributor::IncompatibleTypeError, /cannot load values of type String/)
       end
     end
   end
 
 
   context '.example' do
-    it "returns an Array" do
+    it "returns an instance of the type" do
       value = type.example
-      value.should be_a(::Array)
+      value.should be_a(type)
     end
 
     [
@@ -287,6 +292,7 @@ describe Attributor::Collection do
     ].each do |member_type|
       it "returns an Array of native types of #{member_type}" do
         value = Attributor::Collection.of(member_type).example
+        value.should_not be_empty
         value.all? { |element| member_type.valid_type?(element) }.should be_true
       end
     end
@@ -329,4 +335,16 @@ describe Attributor::Collection do
       end
     end
   end
+
+  context 'dumping' do
+    let(:type) { Attributor::Collection.of(Cormorant) }
+
+    subject(:example) { type.example }
+    it 'dumps' do
+      expect {
+        example.dump
+      }.to_not raise_error
+    end
+  end
+
 end

@@ -13,7 +13,7 @@ describe Attributor::Ids do
     its(:member_attribute) { should be(Chicken.attributes[:email]) }
 
     it 'loads' do
-      ids.load(value).should eq(emails)
+      ids.load(value).should =~ emails
     end
 
     it 'generates valid, loadable examples' do
