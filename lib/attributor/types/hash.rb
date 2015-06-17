@@ -159,10 +159,13 @@ module Attributor
 
 
     def self.example_contents(context, parent, **values)
+
       hash = ::Hash.new
       example_depth = context.size
 
       self.keys.each do |sub_attribute_name, sub_attribute|
+        
+        
         if sub_attribute.attributes
           # TODO: add option to raise an exception in this case?
           next if example_depth > MAX_EXAMPLE_DEPTH
@@ -185,6 +188,7 @@ module Attributor
     end
 
     def self.example(context=nil, **values)
+
       if (key_type == Object && value_type == Object && self.keys.empty?)
         return self.new
       end

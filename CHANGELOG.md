@@ -18,6 +18,7 @@ next
   * Complex (sub-structured) types will not output examples, only 'leaf' ones.
 * Improved handling of exceptions during attribute definitions for `Hash`/`Model` that would previously leave the set of attributes in an undefined state. Now, any attempts to use the type will throw an `InvalidDefinition` exception and include the original exception. (#127)
 * Removed `undef :empty?` from `Model`
+* Made `Collection` a subclass of Array, and `load` create new instances of it. 
 
 2.6.1
 -----
