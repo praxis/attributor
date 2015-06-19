@@ -98,5 +98,6 @@ module Attributor
   # TODO: move these to 'optional types' or 'extra types'... location
   require_relative 'attributor/types/tempfile'
   require_relative 'attributor/types/file_upload'
+  require_relative 'attributor/types/uri'
 
 end
