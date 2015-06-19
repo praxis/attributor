@@ -167,7 +167,7 @@ module Attributor
       if self.options.has_key? :example
         loaded = example_from_options(parent, context)
         errors = self.validate(loaded, context)
-        raise AttributorException, "Error generating example for #{Attributor.humanize_context(context)}: #{errors.inspect}" if errors.any?
+        raise AttributorException, "Error generating example for #{Attributor.humanize_context(context)}. Errors: #{errors.inspect}" if errors.any?
         loaded
       else
         if (option_values = self.options[:values])
