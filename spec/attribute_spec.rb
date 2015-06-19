@@ -177,10 +177,8 @@ describe Attributor::Attribute do
     end
   end
 
-
   context 'example' do
     let(:example) { nil }
-    let(:attribute_options) { {:example => example} }
 
     context 'with nothing specified' do
       let(:attribute_options) { {} }
@@ -190,81 +188,6 @@ describe Attributor::Attribute do
 
       it 'defers to the type' do
         attribute.example.should be example
-      end
-    end
-
-
-    context 'with a string' do
-      let(:example) { "example" }
-
-      its(:example) { should be example }
-    end
-
-    context 'with a regexp' do
-      let(:example) { /\w+/ }
-
-
-      it 'calls #gen on the regexp' do
-        example.should_receive(:gen).and_call_original
-        subject.example.should =~ example
-      end
-
-      context 'for a type with a non-String native_type' do
-        let(:type) { Attributor::Integer }
-        context 'using a regexp' do
-          let(:example) { /\d{5}/ }
-          it 'coerces the example value properly' do
-            example.should_receive(:gen).and_call_original
-            type.should_receive(:load).and_call_original
-
-            subject.example.should be_kind_of(type.native_type)
-          end
-        end
-        context 'usign a native Integer type' do
-          let(:example) { 5 }
-          it 'coerces the example value properly' do
-            type.should_receive(:load).and_call_original
-            subject.example.should be_kind_of(type.native_type)
-          end
-        end
-      end
-    end
-
-
-    context 'with a proc' do
-      context 'with one argument' do
-        let(:example) { lambda { |obj| 'ok' } }
-        let(:some_object) { Object.new }
-
-        before do
-          example.should_receive(:call).with(some_object).and_call_original
-        end
-
-        it 'passes any given parent through to the example proc' do
-          subject.example(nil, parent: some_object).should == 'ok'
-        end
-      end
-
-      context 'with two arguments' do
-        let(:example) { lambda { |obj, context| "#{context} ok" } }
-        let(:some_object) { Object.new }
-        let(:some_context) { ['some_context'] }
-
-        before do
-          example.should_receive(:call).with(some_object, some_context).and_call_original
-        end
-
-        it 'passes any given parent through to the example proc' do
-          subject.example(some_context, parent: some_object).should == "#{some_context} ok"
-        end
-      end
-
-    end
-
-    context 'with an array' do
-      let(:example) { ["one", "two"] }
-      it 'picks a random value' do
-        example.should include subject.example
       end
     end
 
@@ -279,6 +202,8 @@ describe Attributor::Attribute do
 
     context 'deterministic examples' do
       let(:example) { /\w+/ }
+      let(:attribute_options) { {:example => example} }
+
       it 'can take a context to pre-seed the random number generator' do
         example_1 = subject.example(['context'])
         example_2 = subject.example(['context'])
@@ -292,9 +217,115 @@ describe Attributor::Attribute do
 
         example_1.should_not eq example_2
       end
+    end
 
+    context 'with an example option' do
+      let(:example){ "Bob" }
+      let(:attribute_options) { {example: example , regexp: /Bob/ } }
+
+      its(:example){ should == example }
+
+      context 'that is not valid' do
+        let(:example){ "Frank" }
+        it 'raises a validation error' do
+          expect{
+            subject.example
+          }.to raise_error(Attributor::AttributorException, /Error generating example/)
+        end
+      end
+    end
+  end
+
+  context 'example_from_options' do
+    let(:example) { nil }
+    let(:generated_example) { example }
+    let(:attribute_options) { {:example => example} }
+    let(:parent){ nil }
+    let(:context){ Attributor::DEFAULT_ROOT_CONTEXT}
+
+    subject(:example_result) { attribute.example_from_options( parent, context ) }
+    before do
+      attribute.should_receive(:load).with( generated_example , an_instance_of(Array) ).and_call_original
+    end
+
+    context 'with a string' do
+      let(:example) { "example" }
+
+      it { should be example }
+    end
+
+    context 'with an integer' do
+      let(:type) { Attributor::Integer }
+      let(:example) { 5 }
+      it { should be example }
+    end
+
+    context 'with a regexp' do
+      let(:example) { /\w+/ }
+      let(:generated_example) { /\w+/.gen }
+
+      it 'calls #gen on the regexp' do
+        example.should_receive(:gen).and_return(generated_example)
+
+        example_result.should =~ example
+      end
+
+      context 'for a type with a non-String native_type' do
+        let(:type) { Attributor::Integer }
+        let(:example) { /\d{5}/ }
+        let(:generated_example) { /\d{5}/.gen }
+
+        it 'coerces the example value properly' do
+          example.should_receive(:gen).and_return(generated_example)
+          type.should_receive(:load).and_call_original
+
+          example_result.should be_kind_of(type.native_type)
+        end
+      end
 
     end
+
+    context 'with a proc' do
+      let(:parent){ Object.new }
+
+      context 'with one argument' do
+        let(:example) { lambda { |obj| 'ok' } }
+        let(:generated_example) { 'ok' }
+
+        before do
+          example.should_receive(:call).with(parent).and_return(generated_example)
+        end
+
+        it 'passes any given parent through to the example proc' do
+          example_result.should == 'ok'
+        end
+      end
+
+      context 'with two arguments' do
+        let(:example) { lambda { |obj, context| "#{context} ok" } }
+        let(:generated_example) { "#{context} ok" }
+        let(:context){ ['some_context'] }
+        before do
+          example.should_receive(:call).with(parent, context).and_return(generated_example)
+        end
+
+        it 'passes any given parent through to the example proc' do
+          example_result.should == "#{context} ok"
+        end
+      end
+
+    end
+
+    context 'with an array' do
+      let(:example) { ["one"] }
+      let(:generated_example) { "one" }
+      it 'picks a random value' do
+        example.should_receive(:pick).and_call_original
+        example.should include example_result
+      end
+
+    end
+
   end
 
   context 'load' do
