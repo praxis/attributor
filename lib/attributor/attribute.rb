@@ -130,6 +130,30 @@ module Attributor
     end
 
 
+    def example_from_options(parent, context)
+      val = self.options[:example]
+      generated = case val
+      when ::Regexp
+        val.gen
+      when ::Array
+        # TODO: handle arrays of non native types, i.e. arrays of regexps.... ?
+        val.pick
+      when ::Proc
+        if val.arity == 2
+          val.call(parent, context)
+        elsif val.arity == 1
+          val.call(parent)
+        else
+          val.call
+        end
+      when nil
+        nil
+      else
+        val
+      end
+      self.load( generated, context )
+    end
+
     def example(context=nil, parent: nil, values:{})
       raise ArgumentError, "attribute example cannot take a context of type String" if (context.is_a? ::String )
       if context
@@ -141,26 +165,10 @@ module Attributor
       end
 
       if self.options.has_key? :example
-        val = self.options[:example]
-        case val
-        when ::Regexp
-          self.load(val.gen,context)
-        when ::Array
-          # TODO: handle arrays of non native types, i.e. arrays of regexps.... ?
-          val.pick
-        when ::Proc
-          if val.arity == 2
-            val.call(parent, context)
-          elsif val.arity == 1
-            val.call(parent)
-          else
-            val.call
-          end
-        when nil
-          nil
-        else
-          self.load(val)
-        end
+        loaded = example_from_options(parent, context)
+        errors = self.validate(loaded, context)
+        raise AttributorException, "Error generating example for #{Attributor.humanize_context(context)}: #{errors.inspect}" if errors.any?
+        loaded
       else
         if (option_values = self.options[:values])
           option_values.pick

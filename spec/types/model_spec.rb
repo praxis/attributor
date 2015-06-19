@@ -25,7 +25,7 @@ describe Attributor::Model do
       it 'throws InvalidDefinition for subsequent access' do
         broken_model.attributes rescue nil
 
-        lambda { 
+        lambda {
           broken_model.attributes
         }.should raise_error(Attributor::InvalidDefinition)
       end
@@ -354,13 +354,12 @@ describe Attributor::Model do
         its(:validate) { should be_empty}
       end
 
-      context 'that are invalid' do
-        subject(:person) do
-          # TODO: support this? Person.example(title: 'dude', address: {name: 'ME'} )
-
-          obj = Person.example(title: 'dude')
-          obj.address.state = 'ME'
-          obj
+      context 'that are both invalid' do
+        subject(:person){ Person.load( name: 'Joe', title: 'dude', okay: true )}
+        let(:address){ Address.load( name: '1 Main St', state: 'ME' )}
+        before do
+          person.address = address
+          address.person = person
         end
 
         its(:validate) { should have(2).items }
@@ -370,9 +369,7 @@ describe Attributor::Model do
           title_error.should =~ /^Attribute person\.title:/
           state_error.should =~ /^Attribute person\.address\.state:/
         end
-
       end
-
 
     end
   end

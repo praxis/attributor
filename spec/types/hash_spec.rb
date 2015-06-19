@@ -29,7 +29,7 @@ context 'attributes' do
       it 'throws InvalidDefinition for subsequent access' do
         broken_model.attributes rescue nil
 
-        lambda { 
+        lambda {
           broken_model.attributes
         }.should raise_error(Attributor::InvalidDefinition)
       end
@@ -45,7 +45,7 @@ context 'attributes' do
 
     end
   end
-  
+
   context 'default options' do
     subject(:options) { type.options }
     it 'has allow_extra false' do
@@ -515,7 +515,7 @@ context 'attributes' do
       let(:example_hash) { {:key => "value"} }
       let(:options) { { example: proc { example_hash } } }
       it 'uses the hash' do
-        attribute.example.should be(example_hash)
+        attribute.example.should eq(example_hash)
       end
     end
 
