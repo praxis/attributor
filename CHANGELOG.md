@@ -1,8 +1,6 @@
-Attributor Changelog
-============================
+# Attributor Changelog
 
-next
-----
+## 3.0.0
 
 * Small enhancements on `describe` for types
   * avoid creating empty `:attributes` key for `Model`
@@ -21,8 +19,8 @@ next
 * Made `Collection` a subclass of Array, and `load` create new instances of it.
 * Built in proper loading and validation of any `Attribute#example` when the `:example` option is used.
 
-2.6.1
------
+
+## 2.6.1
 
 * Add the `:custom_data` option for attributes. This is a hash that is passed through to `describe` - Attributor does no processing or handling of this option.
 * Added `Type.family` which returns a more-generic "family name". It's defined for all built-in types, and is included in `Type.describe`.
@@ -31,8 +29,7 @@ next
   * Fix common hash methods created for example instances (to play well with lazy attributes)
   * Avoid storing the `Hash#insensitive_map` unless insensitivity enabled
 
-2.6.0
------
+## 2.6.0
 
 * Fixed bug in `example_mixin` where lazy_attributes were not evaluated.
 * Fixed bug in `Hash` where the class would refuse to load from another `Attributor::Hash` when there were no keys defined and they were seemingly compatible.
@@ -44,8 +41,8 @@ next
 * Added `Hash#merge` that works with two identically-typed hashes
 * Added `Hash#each_pair` for better duck-type compatibility with ::Hash.
 
-2.5.0
-----
+
+## 2.5.0
 
 * Partial support for defining `:default` values through Procs.
   * Note: this is only "partially" supported the `parent` argument of the Proc will NOT contain the correct attribute parent yet. It will contain a fake class, that will loudly complain about any attempt to use any of its methods.
@@ -55,8 +52,8 @@ next
 * `Time`, `DateTime`, and `Date` now all return ISO 8601 formatted values from `.dump` (via calling `iso8601` on the value).
 * Added `Type.id`, a unique value based on the type's class name.
 
-2.4.0
-------
+
+## 2.4.0
 
 * `Model` is now a subclass of `Hash`.
   * The interface for `Model` instances is almost entirely unchanged, except for the addition of `Hash`-like methods (i.e., you can now do `some_model[:key]` to access attributes).
@@ -64,8 +61,7 @@ next
 * `String.load` now raises `IncompatibleTypeError` for `Enumerable` values.
 * Added `Symbol` type, use with caution as it will automatically call `#to_sym` on anything loaded.
 
-2.3.0
-------
+## 2.3.0
 
 * Added `recurse` option to `Type.load` that is used by `Model` and `Hash` to force the loading of values (specifically, so that default values are assigned) even if the loaded value is `nil`.
 * Fix `Attributor::CSV` to dump `String` values and generate `String` examples.
@@ -76,16 +72,15 @@ next
 * Added `Hash#get`, for retrieving keys using the same logic the `case_insensitive_load` and `allow_extra` with defined `extra` key.
 
 
-2.2.1
-------
+## 2.2.1
 
 * Dumping attributes will now load the values if they're not in the native type.
 * `Model.valid_type?` now accepts hashes.
 * `Hash`:
   * Added `:has_key?` to delegation
 
-2.2.0
-------
+
+## 2.2.0
 
 * Fix example generation for Hash and Collection to handle a non-Array context parameter.
 * Hash:
@@ -95,8 +90,8 @@ next
   * Added `Hash#set` to encapsulate the above options and attribute loading.
   * Added `extra` command in the `keys` DSL, which lets you define a key (whose value should be a Hash), to group any unspecified keys during load.
 
-2.1.0
-------
+
+## 2.1.0
 
 * Structs now inherit type-level options from their reference.
 * Add Collection subclasses for CSVs and Ids
@@ -120,8 +115,8 @@ next
 * Introduced a new FileUpload type. This can be easily used in Web servers to map incoming multipart file uploads.
 * Introduced a new Tempfile type.
 
-2.0.0
-------
+
+## 2.0.0
 
 * Added new exception subtypes (load methods return more precise errors now)
 * Changed ```Attributor::Model``` to be a class instead of module.
