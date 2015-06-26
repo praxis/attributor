@@ -245,7 +245,7 @@ module Attributor
     end
 
 
-    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, recurse: false, **options)
+    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, recurse: false,  **options)
       context = Array(context)
 
       if value.nil?
@@ -288,6 +288,24 @@ module Attributor
     def get(key, context: self.generate_subcontext(Attributor::DEFAULT_ROOT_CONTEXT,key))
       key = self.class.key_attribute.load(key, context)
 
+      if self.class.keys.empty?
+        if @contents.key? key
+          value = @contents[key]
+          loaded_value = value_attribute.load(value, context)
+          return self[key] = loaded_value
+        else
+          if self.class.options[:case_insensitive_load]
+            key = key.downcase
+            @contents.each do |k,v|
+              if key == k.downcase
+                return self.get(key, context: context)
+              end
+            end
+          end
+        end
+        return nil
+      end
+
       value = @contents[key]
 
       # FIXME: getting an unset value here should not force it in the hash
@@ -318,12 +336,17 @@ module Attributor
         end
       end
 
+
       raise AttributorException, "Unknown key received: #{key.inspect} for #{Attributor.humanize_context(context)}"
     end
 
 
     def set(key, value, context: self.generate_subcontext(Attributor::DEFAULT_ROOT_CONTEXT,key), recurse: false)
       key = self.class.key_attribute.load(key, context)
+
+      if self.class.keys.empty?
+        return self[key] = self.class.value_attribute.load(value, context)
+      end
 
       if (attribute = self.class.keys[key])
         return self[key] = attribute.load(value, context, recurse: recurse)
@@ -541,10 +564,9 @@ module Attributor
 
     def dump(**opts)
       return CIRCULAR_REFERENCE_MARKER if @dumping
-
       @dumping = true
 
-      @contents.each_with_object({}) do |(k,v),hash|
+      contents.each_with_object({}) do |(k,v),hash|
         k = self.key_attribute.dump(k,opts)
 
         if (attribute_for_value = self.class.keys[k])

@@ -106,7 +106,7 @@ module Attributor
 
       # Default describe for simple types...only their name (stripping the base attributor module)
       def describe(root=false, example: nil)
-        type_name = self.ancestors.find { |k| k.name && !k.name.empty? }.name
+        type_name = Attributor.type_name(self)
         hash = {
           name: type_name.gsub(Attributor::MODULE_PREFIX_REGEX, ''),
           family: self.family,

@@ -1,5 +1,11 @@
 # Attributor Changelog
 
+## next
+
+* Fixed bug with example Hashes where `[]` with a key not in the hash would throw a `NoMethodError`.
+* Fixed bug in `Hash#get` for Hashes without predefined keys. It would throw an error if given a key not present in the hash's contents.
+
+
 ## 3.0.0
 
 * Small enhancements on `describe` for types

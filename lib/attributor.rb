@@ -44,6 +44,12 @@ module Attributor
     klass
   end
 
+  def self.type_name(type)
+    return self.type_name(type.class) unless type.kind_of?(Class)
+
+    type.ancestors.find { |k| k.name && !k.name.empty? }.name
+  end
+
   def self.humanize_context( context )
     return "" unless context
 
