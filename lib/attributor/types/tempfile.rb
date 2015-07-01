@@ -9,11 +9,15 @@ module Attributor
     end
 
     def self.example(context=Attributor::DEFAULT_ROOT_CONTEXT, options:{})
-      ::Tempfile.new(Attributor.humanize_context(context))
+      file = ::Tempfile.new(Attributor.humanize_context(context))
+      file.write /[:sentence:]/.gen
+      file.write '.'
+      file.rewind
+      file
     end
 
     def self.dump(value, **opts)
-      value && value.path
+      value && value.read
     end
 
     def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)

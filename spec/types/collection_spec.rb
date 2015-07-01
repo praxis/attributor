@@ -253,6 +253,8 @@ describe Attributor::Collection do
       let(:collection_members) { [1, 2, 'three'] }
       let(:expected_errors) { ["error 1", "error 2", "error 3"]}
 
+      let(:value) { type.load(collection_members) }
+
       before do
         collection_members.zip(expected_errors).each do |member, expected_error|
           type.member_attribute.should_receive(:validate).
@@ -262,7 +264,7 @@ describe Attributor::Collection do
       end
 
       it 'validates members' do
-        type.validate(collection_members).should =~ expected_errors
+        type.validate(value).should =~ expected_errors
       end
     end
     context 'invalid incoming types' do
@@ -270,7 +272,7 @@ describe Attributor::Collection do
       it 'raise an exception' do
         expect {
           type.validate('invalid_value')
-        }.to raise_error(Attributor::IncompatibleTypeError, /cannot load values of type String/)
+        }.to raise_error(ArgumentError, /can not validate object of type String/)
       end
     end
   end

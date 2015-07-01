@@ -53,6 +53,7 @@ module Attributor
     def self.member_attribute
       @member_attribute ||= begin
         self.construct(nil,{})
+        
         @member_attribute
       end
     end
@@ -153,27 +154,28 @@ module Attributor
       :ok
     end
 
-    # @param values [Array] Array of values to validate
-    def self.validate(values, context=Attributor::DEFAULT_ROOT_CONTEXT, attribute=nil)
+    # @param object [Collection] Collection instance to validate.
+    def self.validate(object, context=Attributor::DEFAULT_ROOT_CONTEXT, attribute=nil)
+      context = [context] if context.is_a? ::String
 
-      unless self.valid_type?(values)
-        descriptive_type =if self.member_type != Object
-          "Collection.of(#{self.member_type})"
-        else
-          self
-        end
-        raise Attributor::IncompatibleTypeError, context: context, value_type: values.class, type: descriptive_type
+      unless object.kind_of?(self)
+        raise ArgumentError, "#{self.name} can not validate object of type #{object.class.name} for #{Attributor.humanize_context(context)}."
       end
 
-      values.each_with_index.collect do |value, i|
-        subcontext = context + ["at(#{i})"]
-        self.member_attribute.validate(value, subcontext)
-      end.flatten.compact
+      object.validate(context)
     end
 
     def self.validate_options( value, context, attribute )
       errors = []
       errors
+    end
+
+
+    def validate(context=Attributor::DEFAULT_ROOT_CONTEXT)
+      self.each_with_index.collect do |value, i|
+        subcontext = context + ["at(#{i})"]
+        self.class.member_attribute.validate(value, subcontext)
+      end.flatten.compact
     end
 
 

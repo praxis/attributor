@@ -177,7 +177,7 @@ module Attributor
       return CIRCULAR_REFERENCE_MARKER if @dumping
       @dumping = true
 
-      self.attributes.each_with_object({}) do |(name, value), result|
+      self.attributes.each_with_object({}) do |(name, value), hash|
         attribute = self.class.attributes[name]
 
         # skip dumping undefined attributes
@@ -186,7 +186,7 @@ module Attributor
           next
         end
 
-        result[name.to_sym] = attribute.dump(value, context: context + [name] )
+        hash[name.to_sym] = attribute.dump(value, context: context + [name] )
       end
     ensure
       @dumping = false

@@ -39,4 +39,25 @@ describe Attributor do
     end
 
   end
+
+
+  context '.type_name' do
+    it 'accepts arbtirary classes' do
+      Attributor.type_name(File).should eq 'File'
+    end
+
+    it 'accepts instances' do
+      Attributor.type_name('a string').should eq 'String'
+    end
+
+    it 'accepts instances of anonymous types' do
+      type = Class.new(Attributor::Struct) 
+      Attributor.type_name(type).should eq 'Attributor::Struct'
+    end
+
+    it 'accepts Attributor types' do
+      Attributor.type_name(Attributor::String).should eq 'Attributor::String'
+    end
+    
+  end
 end

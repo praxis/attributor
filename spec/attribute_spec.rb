@@ -690,13 +690,12 @@ describe Attributor::Attribute do
         end
 
         it 'validates' do
-          errors = attribute.validate(values)
-          errors.should_not be_empty
-          errors[0].should =~ /of the wrong type/
-          errors[1].should =~ /value \(12\) is larger/
+          object = attribute.load(values)
+          errors = attribute.validate(object)
+
+          errors.should have(1).item
+          errors[0].should =~ /value \(12\) is larger/
         end
-
-
       end
 
 

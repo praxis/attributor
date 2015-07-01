@@ -42,15 +42,15 @@ module Attributor
     end
 
 
-    def parse(value, context=Attributor::DEFAULT_ROOT_CONTEXT)
-      object = self.load(value,context)
+   def parse(value, context=Attributor::DEFAULT_ROOT_CONTEXT)
+     object = self.load(value,context)
 
-      errors = self.validate(object,context)
-      [ object, errors ]
-    end
+     errors = self.validate(object,context)
+     [ object, errors ]
+   end
 
 
-    def load(value, context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
+    def load(value, context=Attributor::DEFAULT_ROOT_CONTEXT,  **options)
       value = type.load(value,context,**options)
 
       if value.nil? && self.options.has_key?(:default)
@@ -98,7 +98,8 @@ module Attributor
 
     TOP_LEVEL_OPTIONS = [ :description, :values, :default, :example, :required, :required_if, :custom_data ]
     INTERNAL_OPTIONS = [:dsl_compiler,:dsl_compiler_options] # Options we don't want to expose when describing attributes
-    def describe(shallow=true, example: nil )
+
+    def describe(shallow=true, example: nil)
       description = { }
       # Clone the common options
       TOP_LEVEL_OPTIONS.each do |option_name|

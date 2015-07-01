@@ -25,8 +25,9 @@ module Attributor
 
     def [](k)
       unless @contents.key?(k)
-        proc = lazy_attributes.delete k
-        @contents[k] = proc.call
+        if (proc = lazy_attributes.delete k)
+          @contents[k] = proc.call
+        end
       end
       @contents[k]
     end
