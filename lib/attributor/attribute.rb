@@ -136,8 +136,6 @@ module Attributor
       generated = case val
       when ::Regexp
         val.gen
-      when ::Array
-        val
       when ::Proc
         if val.arity == 2
           val.call(parent, context)
