@@ -316,14 +316,10 @@ describe Attributor::Attribute do
 
     end
 
-    context 'with an array' do
+    context 'with an Collection (of Strings)' do
+      let(:type) { Attributor::Collection.of(String) }
       let(:example) { ["one"] }
-      let(:generated_example) { "one" }
-      it 'picks a random value' do
-        example.should_receive(:pick).and_call_original
-        example.should include example_result
-      end
-
+      it { should == example }
     end
 
   end
