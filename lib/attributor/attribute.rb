@@ -136,9 +136,6 @@ module Attributor
       generated = case val
       when ::Regexp
         val.gen
-      when ::Array
-        # TODO: handle arrays of non native types, i.e. arrays of regexps.... ?
-        val.pick
       when ::Proc
         if val.arity == 2
           val.call(parent, context)
