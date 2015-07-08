@@ -2,6 +2,9 @@
 
 ## next
 
+
+## 4.0.0 next
+
 * Changed the expectation of the value for an `:example` option of an attribute:
   * Before, passing an array of values would indicate that those were a few possible examples for it.
   * Now, any value (except the already existing special regexp or a proc) for an example will need to be of a native type (or coercible to it). This means that an attribute of type `Collection` can take an array example (and be taken as the whole thing)
