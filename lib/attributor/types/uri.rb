@@ -23,7 +23,11 @@ module Attributor
     end
 
     def self.example(context=nil, options={})
-      URI(/[:uri:]/.gen)
+      if options[:path]
+        URI(/[:uri:]/.gen).path
+      else
+        URI(/[:uri:]/.gen)
+      end
     end
 
     def self.load(value, context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
@@ -39,12 +43,28 @@ module Attributor
     end
 
     def self.validate(value,context=Attributor::DEFAULT_ROOT_CONTEXT,attribute)
-      []
+      errors = []
+      attribute.options.each do |option, opt_definition|
+        case option
+        when :path
+          unless value.to_s =~ opt_definition
+            errors << "#{Attributor.humanize_context(context)} value (#{value}) does not match path (#{opt_definition.inspect})"
+          end
+        end
+      end
+      errors
     end
 
-    def check_option!(name, definition)
-      # No options are supported
-      :unknown
+    def self.check_option!(name, definition)
+      case name
+      when :path
+        unless definition.is_a? ::Regexp
+          raise AttributorException.new("Value for option :path is not a Regexp object. Got (#{definition.inspect})")
+        end
+        :ok
+      else
+        :unknown
+      end
     end
 
   end
