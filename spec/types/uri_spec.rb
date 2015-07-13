@@ -8,7 +8,7 @@ describe Attributor::URI do
 
   context '.example' do
     it 'returns a valid URI' do
-      expect(type.example).to_be kind_of(URI)
+      expect(type.example).to be_kind_of(URI)
     end
 
     context 'when path option specified' do
