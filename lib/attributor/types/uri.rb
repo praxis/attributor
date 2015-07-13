@@ -45,14 +45,9 @@ module Attributor
     def self.validate(value,context=Attributor::DEFAULT_ROOT_CONTEXT,attribute)
       errors = []
 
-      if attribute
-        attribute.options.each do |option, opt_definition|
-          case option
-          when :path
-            unless value.to_s =~ opt_definition
-              errors << "#{Attributor.humanize_context(context)} value (#{value}) does not match path (#{opt_definition.inspect})"
-            end
-          end
+      if attribute && (definition = attribute.options[:path])
+        unless value.to_s =~ attribute.options[:path]
+          errors << "#{Attributor.humanize_context(context)} value (#{value}) does not match path (#{definition.inspect})"
         end
       end
       errors
