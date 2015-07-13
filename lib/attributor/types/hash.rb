@@ -129,7 +129,7 @@ module Attributor
 
     # @example Hash.of(key: String, value: Integer)
     def self.of(key: @key_type, value: @value_type)
-      Class.new(self) do
+      ::Class.new(self) do
         self.key_type = key
         self.value_type = value
         @keys = {}
@@ -164,8 +164,8 @@ module Attributor
       example_depth = context.size
 
       self.keys.each do |sub_attribute_name, sub_attribute|
-        
-        
+
+
         if sub_attribute.attributes
           # TODO: add option to raise an exception in this case?
           next if example_depth > MAX_EXAMPLE_DEPTH

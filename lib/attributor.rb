@@ -45,7 +45,7 @@ module Attributor
   end
 
   def self.type_name(type)
-    return self.type_name(type.class) unless type.kind_of?(Class)
+    return self.type_name(type.class) unless type.kind_of?(::Class)
 
     type.ancestors.find { |k| k.name && !k.name.empty? }.name
   end
@@ -75,7 +75,7 @@ module Attributor
   end
 
   MODULE_PREFIX       = "Attributor\:\:".freeze
-  MODULE_PREFIX_REGEX = Regexp.new(MODULE_PREFIX)
+  MODULE_PREFIX_REGEX = ::Regexp.new(MODULE_PREFIX)
 
   require_relative 'attributor/families/numeric'
   require_relative 'attributor/families/temporal'
@@ -91,11 +91,13 @@ module Attributor
   require_relative 'attributor/types/time'
   require_relative 'attributor/types/date'
   require_relative 'attributor/types/date_time'
+  require_relative 'attributor/types/regexp'
   require_relative 'attributor/types/float'
   require_relative 'attributor/types/collection'
   require_relative 'attributor/types/hash'
   require_relative 'attributor/types/model'
   require_relative 'attributor/types/struct'
+  require_relative 'attributor/types/class'
 
 
   require_relative 'attributor/types/csv'
