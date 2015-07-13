@@ -10,12 +10,6 @@ describe Attributor::URI do
     it 'returns a valid URI' do
       expect(type.example).to be_kind_of(URI)
     end
-
-    context 'when path option specified' do
-      it 'returns a generic URI conforming to the regex in path' do
-        expect(type.example(nil, path: /^\//).to_s).to match(/^\//)
-      end
-    end
   end
 
   context '.load' do
@@ -51,11 +45,11 @@ describe Attributor::URI do
   end
 
   context '.validate' do
-    let(:string) { 'http://www.example.com' }
+    let(:uri) { URI.parse('http://www.example.com/something/foo') }
     let(:attribute) { nil }
-    subject(:validate) { type.validate(string, ['root'], attribute) }
+    subject(:validate) { type.validate(uri, ['root'], attribute) }
 
-    context 'when given a string' do
+    context 'when given a valid URI' do
       it 'does not return any errors' do
         expect(subject).to be_empty
       end
@@ -63,14 +57,14 @@ describe Attributor::URI do
       context 'when given a path option' do
         let(:attribute) { Attributor::Attribute.new(type, path: /^\//) }
 
-        context 'given a string that matches the regex' do
-          let(:string) { '/path/to/something' }
+        context 'given a URI that matches the path regex' do
           it 'does not return any errors' do
             expect(subject).to be_empty
           end
         end
 
-        context 'given a string that does not match the regex' do
+        context 'given a URI that does not match the path regex' do
+          let(:uri) { URI.parse('www.example.com/something/foo') }
           it 'returns an errors array' do
             expect(subject).to_not be_empty
           end

@@ -23,11 +23,7 @@ module Attributor
     end
 
     def self.example(context=nil, options={})
-      if options[:path]
-        URI(/[:uri:]/.gen).path
-      else
-        URI(/[:uri:]/.gen)
-      end
+      URI(/[:uri:]/.gen)
     end
 
     def self.load(value, context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
@@ -46,7 +42,7 @@ module Attributor
       errors = []
 
       if attribute && (definition = attribute.options[:path])
-        unless value.to_s =~ attribute.options[:path]
+        unless value.path =~ attribute.options[:path]
           errors << "#{Attributor.humanize_context(context)} value (#{value}) does not match path (#{definition.inspect})"
         end
       end
