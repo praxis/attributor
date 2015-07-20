@@ -31,15 +31,6 @@ describe Attributor::Regexp do
         end
       end
 
-      context 'given options' do
-        it 'loads String with a single option' do
-          type.load('foobar',{regexp_opts: Regexp::IGNORECASE}).should eq(/foobar/i)
-        end
-
-        it 'loads String with multiple options' do
-          type.load('foobar',{regexp_opts: Regexp::MULTILINE | Regexp::EXTENDED}).should eq(/foobar/mx)
-        end
-      end
     end
   end
 

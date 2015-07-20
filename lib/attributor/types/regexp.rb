@@ -13,7 +13,7 @@ module Attributor
         raise IncompatibleTypeError,  context: context, value_type: value.class, type: self
       end
 
-      value && ::Regexp.new(value, options[:regexp_opts])
+      value && ::Regexp.new(value)
     rescue
       super
     end
