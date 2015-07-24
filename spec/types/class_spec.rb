@@ -5,24 +5,17 @@ describe Attributor::Class do
 
   subject(:type) { Attributor::Class }
 
-  context '.native_type' do
-    it "returns Regexp" do
-      type.native_type.should be(::Class)
-    end
-  end
+  its(:native_type) { should be(::Class) }
+  its(:family) { should == 'string' }
 
   context '.example' do
-    it "returns a valid String" do
-      type.example.should be_a(::String)
-    end
+    its(:example) { should be_a(::String) }
 
     context 'when created using .of method' do
       let(:klass) { Integer }
       subject(:type) { Attributor::Class.of(klass) }
 
-      it "returns the class specified" do
-        type.example.should eq(klass.to_s)
-      end
+      its(:example) { should eq(klass.to_s) }
     end
   end
 
@@ -59,12 +52,7 @@ describe Attributor::Class do
     end
 
     it 'raises when given a non-String' do
-    end
-  end
-
-  context '.family' do
-    it 'returns "string" as the family' do
-      type.family.should == 'string'
+      expect {type.load(1)}.to raise_exception(Attributor::IncompatibleTypeError)
     end
   end
 end

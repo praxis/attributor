@@ -4,17 +4,9 @@ describe Attributor::Regexp do
 
   subject(:type) { Attributor::Regexp }
 
-  context '.native_type' do
-    it "returns Regexp" do
-      type.native_type.should be(::Regexp)
-    end
-  end
-
-  context '.example' do
-    it "should return a valid String" do
-      type.example.should be_a(::String)
-    end
-  end
+  its(:native_type) { should be(::Regexp) }
+  its(:example) { should be_a(::String) }
+  its(:family) { should == 'string' }
 
   context '.load' do
     let(:value) { nil }
@@ -31,12 +23,6 @@ describe Attributor::Regexp do
         end
       end
 
-    end
-  end
-
-  context '.family' do
-    it 'returns "string" as the family' do
-      type.family.should == 'string'
     end
   end
 end
