@@ -14,6 +14,14 @@ RSpec::Core::RakeTask.new do |spec|
   spec.pattern = FileList['spec/**/*_spec.rb']
 end
 
+desc "console"
+task :console do
+  require 'bundler'
+  Bundler.require(:default, :development, :test)
+  require_relative 'lib/attributor'
+  pry
+end
+
 task :default => :spec
 
 require 'yard'

@@ -16,7 +16,7 @@ module Attributor
       unless resolved_type.ancestors.include?(Attributor::Type)
         raise Attributor::AttributorException.new("Collections can only have members that are Attributor::Types")
       end
-      Class.new(self) do
+      ::Class.new(self) do
         @member_type = resolved_type
       end
     end
@@ -53,7 +53,7 @@ module Attributor
     def self.member_attribute
       @member_attribute ||= begin
         self.construct(nil,{})
-        
+
         @member_attribute
       end
     end

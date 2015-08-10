@@ -12,7 +12,7 @@ module Attributor
         raise AttributorException, "#{type.name} does not have attribute with name '#{identity_name}'"
       end
 
-      Class.new(self) do
+      ::Class.new(self) do
         @member_attribute = identity_attribute
         @member_type = identity_attribute.type
       end

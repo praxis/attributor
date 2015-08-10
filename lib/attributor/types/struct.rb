@@ -1,8 +1,8 @@
 
 module Attributor
   class Struct < Attributor::Model
-    
-    def self.constructable? 
+
+    def self.constructable?
       true
     end
 
@@ -26,7 +26,7 @@ module Attributor
         end
       end
 
-      Class.new(self) do
+      ::Class.new(self) do
         attributes options, &attribute_definition
       end
 

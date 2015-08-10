@@ -10,17 +10,18 @@ Gem::Specification.new do |spec|
   spec.authors = ["Josep M. Blanquer","Dane Jensen"]
   spec.summary = "A powerful attribute and type management library for Ruby"
   spec.email = ["blanquer@gmail.com","dane.jensen@gmail.com"]
-  
+
   spec.homepage = "https://github.com/rightscale/attributor"
   spec.license = "MIT"
   spec.required_ruby_version = ">=2.1"
-  
+
   spec.require_paths = ["lib"]
   spec.files         = `git ls-files -z`.split("\x0")
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
-  
+
   spec.add_runtime_dependency(%q<hashie>, ["~> 3"])
   spec.add_runtime_dependency(%q<randexp>, ["~> 0"])
+  spec.add_runtime_dependency(%q<activesupport>, ['>= 3'])
   spec.add_development_dependency(%q<rspec>, ["< 2.99"])
   spec.add_development_dependency(%q<yard>, ["~> 0.8.7"])
   spec.add_development_dependency(%q<backports>, ["~> 3"])
