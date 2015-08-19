@@ -87,3 +87,10 @@ class Address < Attributor::Model
 end
 
 
+class Post < Attributor::Model
+  attributes do
+    attribute :title, String
+    attribute :tags, Attributor::Collection.of(String)
+  end
+end
+

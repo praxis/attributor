@@ -67,7 +67,7 @@ module Attributor
             defined_val.call
           end
         else
-            defined_val
+          defined_val
         end
         value = val #Need to load?
       end
@@ -124,7 +124,7 @@ module Attributor
       description[:type] = self.type.describe(shallow, example: example )
       # Move over any example from the type, into the attribute itself
       if ( ex = description[:type].delete(:example) )
-        description[:example] = self.dump( ex ).to_s
+        description[:example] = self.dump(ex)
       end
 
       description
@@ -286,6 +286,7 @@ module Attributor
         raise AttributorException.new("Allowed set of values requires an array. Got (#{definition})") unless definition.is_a? ::Array
       when :default
         raise AttributorException.new("Default value doesn't have the correct attribute type. Got (#{definition.inspect})") unless self.type.valid_type?(definition) || definition.kind_of?(Proc)
+        self.options[:default] = self.load(definition) unless definition.kind_of?(Proc)
       when :description
         raise AttributorException.new("Description value must be a string. Got (#{definition})") unless definition.is_a? ::String
       when :required

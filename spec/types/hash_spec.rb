@@ -564,8 +564,8 @@ context 'attributes' do
           description[:attributes].keys.should =~ type.keys.keys
           description[:attributes].each do |name,sub_description|
             sub_description.should have_key(:example)
-            val = type.attributes[name].dump( example[name] ).to_s
-            sub_description[:example].should eq( val )
+            val = type.attributes[name].dump(example[name])
+            sub_description[:example].should eq val
           end
         end
       end
