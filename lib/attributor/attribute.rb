@@ -67,7 +67,7 @@ module Attributor
             defined_val.call
           end
         else
-            defined_val
+          defined_val
         end
         value = val #Need to load?
       end
@@ -286,6 +286,7 @@ module Attributor
         raise AttributorException.new("Allowed set of values requires an array. Got (#{definition})") unless definition.is_a? ::Array
       when :default
         raise AttributorException.new("Default value doesn't have the correct attribute type. Got (#{definition.inspect})") unless self.type.valid_type?(definition) || definition.kind_of?(Proc)
+        self.options[:default] = self.load(definition) unless definition.kind_of?(Proc)
       when :description
         raise AttributorException.new("Description value must be a string. Got (#{definition})") unless definition.is_a? ::String
       when :required

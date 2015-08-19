@@ -242,6 +242,30 @@ describe Attributor::Model do
             #raise_error(Attributor::AttributorException, /Unknown attributes.*#{context.join('.')}/)
           end
         end
+
+        context 'loading with default values' do
+          let(:reference) { Post }
+          let(:options) { {reference: reference} }
+          
+          let(:attribute_definition) do
+            proc do
+              attribute :title
+              attribute :tags, default: ['stuff', 'things']
+            end
+          end
+
+          let(:struct) { Attributor::Struct.construct(attribute_definition, options)}
+          
+          let(:data) { {title: 'my post'} }
+          
+          subject(:loaded)  { struct.load(data) }    
+
+
+          it 'validates' do
+            expect(loaded.validate).to be_empty
+          end
+
+        end
       end
 
     end
