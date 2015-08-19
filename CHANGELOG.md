@@ -9,6 +9,7 @@
   * Before, passing an array of values would indicate that those were a few possible examples for it.
   * Now, any value (except the already existing special regexp or a proc) for an example will need to be of a native type (or coercible to it). This means that an attribute of type `Collection` can take an array example (and be taken as the whole thing)
   * If anybody wants to provide multiple examples for an attribute they can write a proc, and make it return the different ones.
+* `Attribute#check_option!` now calls `load` on any provided value.
 
 ## 3.0.1
 
