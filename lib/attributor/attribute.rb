@@ -124,7 +124,7 @@ module Attributor
       description[:type] = self.type.describe(shallow, example: example )
       # Move over any example from the type, into the attribute itself
       if ( ex = description[:type].delete(:example) )
-        description[:example] = self.dump( ex ).to_s
+        description[:example] = self.dump(ex)
       end
 
       description
