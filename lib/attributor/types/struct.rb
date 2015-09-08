@@ -45,7 +45,7 @@ module Attributor
 
     # Two structs are equal if their attributes are equal
     def ==(other_object)
-      return false if other_object == nil
+      return false if other_object == nil || !other_object.respond_to?(:attributes)
       self.attributes == other_object.attributes
     end
 
