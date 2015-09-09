@@ -18,8 +18,12 @@ module Attributor
 
     def self.example(context=nil, options:{})
       if options[:regexp]
-        # It may fail to generate an example, see bug #72.
-        options[:regexp].gen rescue ('Failed to generate example for %s' % options[:regexp].inspect)
+        begin
+          # It may fail to generate an example, see bug #72.
+          options[:regexp].gen
+        rescue => e
+          'Failed to generate example for %s : %s' % [ options[:regexp].inspect, e.message]
+        end
       else
         /\w+/.gen
       end

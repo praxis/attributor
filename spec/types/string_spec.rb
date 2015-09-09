@@ -24,6 +24,7 @@ describe Attributor::String do
       expect {
         val = Attributor::String.example(options:{regexp: regex})
         val.should be_a(::String)
+        val.should =~ /Failed to generate.+is too vague/
       }.to_not raise_error
     end
 
