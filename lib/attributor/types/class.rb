@@ -12,6 +12,7 @@ module Attributor
     end
 
     def self.load(value, context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
+      return value if value.is_a?(self.native_type)
       return @klass || nil if value.nil?
 
       # Must be given a String object or nil
