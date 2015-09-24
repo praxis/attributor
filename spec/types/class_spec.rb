@@ -30,6 +30,14 @@ describe Attributor::Class do
       end
     end
 
+    context 'for incoming Class values' do
+      [Object, ::Object, ::Hash, Attributor::Struct].each do |value|
+        it "loads '#{value}' as #{value}" do
+          type.load(value).should eq(value)
+        end
+      end
+    end
+
     context 'when created using .of method' do
       let(:klass) { Integer }
       subject(:type) { Attributor::Class.of(klass) }
