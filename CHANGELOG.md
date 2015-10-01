@@ -8,7 +8,7 @@
 * `Attribute#check_option!` now calls `load` on any provided value.
 
 
-## 4.0.0 next
+## 4.0.0
 
 * Changed the expectation of the value for an `:example` option of an attribute:
   * Before, passing an array of values would indicate that those were a few possible examples for it.
