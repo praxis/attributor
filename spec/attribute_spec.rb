@@ -234,6 +234,24 @@ describe Attributor::Attribute do
         end
       end
     end
+
+    context 'with an array of examples' do
+      let(:example){ ["Bob", "Sally"] }
+      let(:attribute_options) { {example: example} }
+
+      it 'self.example should sample examples' do
+        example.should include subject.example
+      end
+
+      context 'for Attributor::Collection' do
+        let(:example){ [ ["Bob", "Sally"], ["Harry", "Johnson"] ] }
+        let(:type) { Attributor::Collection.of(String) }
+
+        it 'self.example should sample examples' do
+          example.should include subject.example
+        end
+      end
+    end
   end
 
   context 'example_from_options' do
