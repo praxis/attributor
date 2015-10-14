@@ -38,6 +38,10 @@ module Attributor
       end
     end
 
+    def self.dump(value, **opts)
+      value.to_s
+    end
+
     def self.validate(value,context=Attributor::DEFAULT_ROOT_CONTEXT,attribute)
       errors = []
 
