@@ -12,6 +12,12 @@ describe Attributor::URI do
     end
   end
 
+  context '.dump' do
+    let(:example){ type.example }
+    it 'uses the underlying URI to_s' do
+      expect(type.dump(example)).to eq(example.to_s)
+    end
+  end
   context '.load' do
     subject(:load) { type.load(value) }
 
