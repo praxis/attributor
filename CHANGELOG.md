@@ -1,7 +1,18 @@
 # Attributor Changelog
 
-## next 
+## next
 
+* Added `Attributor::FieldSelector` type for parsing hierarchical field
+  selection hashes from a string. This is similar to the partial `fields`
+  parameter in Google APIs, or the `fields` parameter in the Facebook's Graph
+  API.
+    * For example: the string `'one,two(a,b)'` would select two top-level fields
+      named 'one' and 'two', retrieving the entire contents of 'one', and only
+      the 'a' and 'b' sub-fields for 'two'. The type will parse the above string
+      into the hash: `{one: true, two: {a: true, b: true}}`.
+    * This type is not automatically required by Attributor. To require it use:
+      `require 'attributor/extras/field_selector'.
+    * This type also depends upon the 'parslet' gem.
 
 ## 4.0.1
 
@@ -154,4 +165,3 @@
   * procs that take 2 arguments now receive the context as the second argument.
 * Circular references are now detected and handled in validation and dumping.
 * Fixed bug with Model attribute accessors when using false values.
-
