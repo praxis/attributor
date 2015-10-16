@@ -388,11 +388,11 @@ module Attributor
         hash.set(self.extra_keys, v, context: sub_context, recurse: recurse)
       end
 
-      object.each do |k,v|
+      object.each do |k,val|
         next if k == self.extra_keys
 
         sub_context = self.generate_subcontext(context,k)
-        hash.set(k, v, context: sub_context, recurse: recurse)
+        hash.set(k, val, context: sub_context, recurse: recurse)
       end
 
       # handle default values for missing keys
@@ -445,6 +445,10 @@ module Attributor
 
     def [](k)
       @contents[k]
+    end
+
+    def _get_attr(k)
+      self[k]
     end
 
     def []=(k,v)
