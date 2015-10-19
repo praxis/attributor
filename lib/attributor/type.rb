@@ -4,10 +4,9 @@ module Attributor
   # TODO: should this be a mixin since it is an abstract class?
   module Type
 
-    def self.included( klass )
+    def self.included(klass)
       klass.extend(ClassMethods)
     end
-
 
     module ClassMethods
 
@@ -58,13 +57,6 @@ module Attributor
       # Default, overridable example function
       def example(context=nil, options:{})
         raise AttributorException.new("#{self} must implement #example")
-        # return options[:example] if options.has_key? :example
-        # return options[:default] if options.has_key? :default
-        # if options.has_key? :values
-        #   vals = options[:values]
-        #   return vals[rand(vals.size)]
-        # end
-        # return  nil
       end
 
 
