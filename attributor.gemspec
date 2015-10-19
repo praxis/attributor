@@ -30,7 +30,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency(%q<redcarpet>, ["< 3.0"])
   spec.add_development_dependency(%q<bundler>, [">= 0"])
   spec.add_development_dependency(%q<rake-notes>, ["~> 0"])
-  spec.add_development_dependency(%q<simplecov>, ["~> 0"])
+  spec.add_development_dependency(%q<coveralls>)
   spec.add_development_dependency(%q<guard>, ["~> 2"])
   spec.add_development_dependency(%q<guard-rspec>, ["~> 4"])
   spec.add_development_dependency(%q<pry>, ["~> 0"])
