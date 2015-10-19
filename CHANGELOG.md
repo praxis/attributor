@@ -2,6 +2,9 @@
 
 ## next
 
+## 4.1.0
+
+* Added a `Class` type (useful to avoid demodulization coercions etc...)
 * Added `Attributor::FieldSelector` type for parsing hierarchical field
   selection hashes from a string. This is similar to the partial `fields`
   parameter in Google APIs, or the `fields` parameter in the Facebook's Graph
