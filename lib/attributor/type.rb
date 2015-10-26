@@ -15,6 +15,20 @@ module Attributor
         false
       end
 
+      # Allow a type to be marked as if it was anonymous (i.e. not referenceable by name)
+      def anonymous_type(val=true)
+        @_anonymous = val
+      end
+
+      def anonymous?
+        if @_anonymous == nil
+          self.name == nil # if nothing is set, consider it anonymous if the class does not have a name
+        else
+          @_anonymous
+        end
+      end
+
+
       # Generic decoding and coercion of the attribute.
       def load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
         return nil if value.nil?
@@ -104,6 +118,7 @@ module Attributor
           family: self.family,
           id: self.id
         }
+        hash[:anonymous] = @_anonymous unless @_anonymous.nil?
         hash[:example] = example if example
         hash
       end

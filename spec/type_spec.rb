@@ -33,6 +33,22 @@ describe Attributor::Type do
   its(:native_type) { should be(::String) }
   its(:id) { should eq('Testing')}
 
+  context 'anonymous' do
+    its(:anonymous?) { should be(false) }
+    it 'is true for nameless-types' do
+      klass = Class.new do
+        include Attributor::Type
+      end
+      expect( klass.anonymous? ).to be(true)
+    end
+    it 'can be set to true explicitly' do
+      klass = Class.new(test_type) do
+        anonymous_type
+      end
+      expect( klass.anonymous? ).to be(true)
+    end
+  end
+
   context 'load' do
     let(:value) { nil }
     let(:context) { nil }
@@ -166,6 +182,20 @@ describe Attributor::Type do
       end
     end
 
+    context 'when anonymous' do
+
+      it 'reports true in the output when set (to true default)' do
+        anon_type = Class.new(test_type) { anonymous_type }
+        anon_type.describe.should have_key(:anonymous)
+        anon_type.describe[:anonymous].should be(true)
+      end
+      it 'reports false in the output when set false explicitly' do
+        anon_type = Class.new(test_type) { anonymous_type false }
+        anon_type.describe.should have_key(:anonymous)
+        anon_type.describe[:anonymous].should be(false)
+      end
+
+    end
   end
 
 end
