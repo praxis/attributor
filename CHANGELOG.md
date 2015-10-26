@@ -2,6 +2,9 @@
 
 ## next
 
+* Added an "anonymous" DSL for base `Attributor::Type` which is reported in its `.describe` call.
+  * This is a simple documentation bit, that might help the clients to document the type properly (i.e. treat it as if the type was anonymously defined whenever is used, rather than reachable by id/name from anywhere)
+
 ## 4.1.0
 
 * Added a `Class` type (useful to avoid demodulization coercions etc...)
