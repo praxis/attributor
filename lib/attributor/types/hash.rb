@@ -29,6 +29,7 @@ module Attributor
       attr_reader :key_attribute
       attr_reader :insensitive_map
       attr_accessor :extra_keys
+      attr_reader :requirements
     end
 
     @key_type = Object
@@ -38,7 +39,7 @@ module Attributor
     @value_attribute = Attribute.new(@value_type)
 
     @error = false
-
+    @requirements = []
 
     def self.key_type=(key_type)
       @key_type = Attributor.resolve_type(key_type)
@@ -72,6 +73,7 @@ module Attributor
         @value_type = v
         @key_attribute = Attribute.new(@key_type)
         @value_attribute = Attribute.new(@value_type)
+        @requirements = []
 
         @error = false
       end
@@ -116,7 +118,7 @@ module Attributor
     end
 
     def self.dsl_class
-      @options[:dsl_compiler] || DSLCompiler
+      @options[:dsl_compiler] || HashDSLCompiler
     end
 
     def self.native_type
@@ -140,6 +142,9 @@ module Attributor
       true
     end
 
+    def self.add_requirement(req)
+      @requirements << req
+    end
 
     def self.construct(constructor_block, **options)
       return self if constructor_block.nil?
@@ -538,7 +543,7 @@ module Attributor
           end
         end
 
-        self.class.keys.each_with_object(Array.new) do |(key, attribute), errors|
+        ret = self.class.keys.each_with_object(Array.new) do |(key, attribute), errors|
           sub_context = self.class.generate_subcontext(context,key)
 
           value = @contents[key]
@@ -550,7 +555,7 @@ module Attributor
           errors.push *attribute.validate(value, sub_context)
         end
       else
-        @contents.each_with_object(Array.new) do |(key, value), errors|
+        ret = @contents.each_with_object(Array.new) do |(key, value), errors|
           # FIXME: the sub contexts and error messages don't really make sense here
           unless key_type == Attributor::Object
             sub_context = context + ["key(#{key.inspect})"]
@@ -563,6 +568,13 @@ module Attributor
           end
         end
       end
+      unless self.class.requirements.empty?
+        self.class.requirements.each_with_object(ret) do |req, errors|
+          validation_errors = req.validate( @contents , context)
+          errors.push *validation_errors unless validation_errors.empty?
+        end
+      end
+      ret
     end
 
 

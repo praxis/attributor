@@ -8,8 +8,9 @@ describe Attributor::Hash do
   its(:native_type) { should be(type) }
   its(:key_type) { should be(Attributor::Object) }
   its(:value_type) { should be(Attributor::Object) }
+  its(:dsl_class) { should be(Attributor::HashDSLCompiler) }
 
-context 'attributes' do
+  context 'attributes' do
     context 'with an exception from the definition block' do
       subject(:broken_model) do
         Class.new(Attributor::Model) do
@@ -503,6 +504,137 @@ context 'attributes' do
         errors.should include("Attribute $.key(\"not-optional\") is required")
       end
 
+    end
+
+
+    context 'with requirements defined' do
+      let(:type) { Attributor::Hash.construct(block) }
+
+      context 'using requires' do
+        let(:block) do
+          proc do
+            key 'name', String
+            key 'consistency', Attributor::Boolean
+            key 'availability', Attributor::Boolean
+            key 'partitioning', Attributor::Boolean
+            requires 'consistency', 'availability'
+            requires.all 'name' # Just to show that it is equivalent to 'requires'
+          end
+        end
+
+        it 'complains not all the listed elements are set (false or true)' do
+          errors = type.new('name' => 'CAP').validate
+          errors.should have(2).items
+          ['consistency','availability'].each do |name|
+            errors.should include("Key #{name} is required for $.")
+          end
+        end
+      end
+
+      context 'using at_least(n)' do
+        let(:block) do
+          proc do
+            key 'name', String
+            key 'consistency', Attributor::Boolean
+            key 'availability', Attributor::Boolean
+            key 'partitioning', Attributor::Boolean
+            requires.at_least(2).of 'consistency', 'availability', 'partitioning'
+          end
+        end
+
+        it 'complains if less than 2 in the group are set (false or true)' do
+          errors = type.new('name' => 'CAP', 'consistency' => false).validate
+          errors.should have(1).items
+          errors.should include(
+            "At least 2 keys out of [\"consistency\", \"availability\", \"partitioning\"] are required to be passed in for $. Found [\"consistency\"]"
+          )
+        end
+      end
+
+      context 'using at_most(n)' do
+        let(:block) do
+          proc do
+            key 'name', String
+            key 'consistency', Attributor::Boolean
+            key 'availability', Attributor::Boolean
+            key 'partitioning', Attributor::Boolean
+            requires.at_most(2).of 'consistency', 'availability', 'partitioning'
+          end
+        end
+
+        it 'complains if more than 2 in the group are set (false or true)' do
+          errors = type.new('name' => 'CAP', 'consistency' => false, 'availability' => true, 'partitioning' => false).validate
+          errors.should have(1).items
+          errors.should include("At most 2 keys out of [\"consistency\", \"availability\", \"partitioning\"] can be passed in for $. Found [\"consistency\", \"availability\", \"partitioning\"]")
+        end
+      end
+
+      context 'using exactly(n)' do
+        let(:block) do
+          proc do
+            key 'name', String
+            key 'consistency', Attributor::Boolean
+            key 'availability', Attributor::Boolean
+            key 'partitioning', Attributor::Boolean
+            requires.exactly(1).of 'consistency', 'availability', 'partitioning'
+          end
+        end
+
+        it 'complains if less than 1 in the group are set (false or true)' do
+          errors = type.new('name' => 'CAP').validate
+          errors.should have(1).items
+          errors.should include("Exactly 1 of the following keys [\"consistency\", \"availability\", \"partitioning\"] are required for $. Found 0 instead: []")
+        end
+        it 'complains if more than 1 in the group are set (false or true)' do
+          errors = type.new('name' => 'CAP', 'consistency' => false, 'availability' => true).validate
+          errors.should have(1).items
+          errors.should include("Exactly 1 of the following keys [\"consistency\", \"availability\", \"partitioning\"] are required for $. Found 2 instead: [\"consistency\", \"availability\"]")
+        end
+      end
+
+      context 'using exclusive' do
+        let(:block) do
+          proc do
+            key 'name', String
+            key 'consistency', Attributor::Boolean
+            key 'availability', Attributor::Boolean
+            key 'partitioning', Attributor::Boolean
+            requires.exclusive 'consistency', 'availability', 'partitioning'
+          end
+        end
+
+        it 'complains if two or more in the group are set (false or true)' do
+          errors = type.new('name' => 'CAP', 'consistency' => false, 'availability' => true).validate
+          errors.should have(1).items
+          errors.should include("keys [\"consistency\", \"availability\"] are mutually exclusive for $.")
+        end
+      end
+
+      context 'through a block' do
+        let(:block) do
+          proc do
+            key 'name', String
+            key 'consistency', Attributor::Boolean
+            key 'availability', Attributor::Boolean
+            key 'partitioning', Attributor::Boolean
+            requires do
+              all 'name'
+              all.of 'name' # Equivalent to .all
+              at_least(1).of 'consistency', 'availability', 'partitioning'
+            end
+            # Silly example, just to show that block and inline requires can be combined
+            requires.at_most(3).of 'consistency', 'availability', 'partitioning'
+          end
+        end
+
+        it 'complains not all the listed elements are set (false or true)' do
+          errors = type.new('name' => 'CAP').validate
+          errors.should have(1).items
+          errors.should include(
+            "At least 1 keys out of [\"consistency\", \"availability\", \"partitioning\"] are required to be passed in for $. Found none"
+          )
+        end
+      end
     end
 
   end
