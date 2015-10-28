@@ -671,6 +671,13 @@ describe Attributor::Hash do
           key '1', Integer, min: 1, max: 20
           key 'some_date', DateTime
           key 'defaulted', String, default: 'default value'
+          requires do
+            all.of '1','some_date'
+            exclusive 'some_date', 'defaulted'
+            at_least(1).of 'a string', 'some_date'
+            at_most(2).of 'a string', 'some_date'
+            exactly(1).of 'a string', 'some_date'
+          end
         end
       end
 
@@ -680,13 +687,27 @@ describe Attributor::Hash do
         description[:name].should eq('Hash')
         description[:key].should eq(type:{name: 'String', id: 'Attributor-String', family: 'string'})
         description.should_not have_key(:value)
+      end
 
+      it 'describes the type attributes correctly' do
         attrs = description[:attributes]
 
         attrs['a string'].should eq(type: {name: 'String', id: 'Attributor-String', family: 'string'} )
         attrs['1'].should eq(type: {name: 'Integer', id: 'Attributor-Integer', family: 'numeric'}, options: {min: 1, max: 20}  )
         attrs['some_date'].should eq(type: {name: 'DateTime', id: 'Attributor-DateTime', family: 'temporal'})
         attrs['defaulted'].should eq(type: {name: 'String', id: 'Attributor-String', family: 'string'}, default: 'default value')
+      end
+
+      it 'describes the type requirements correctly' do
+
+        reqs = description[:requirements]
+        reqs.should be_kind_of(Array)
+        reqs.size.should be(5)
+        reqs.should include( type: :all, attributes: ['1','some_date'] )
+        reqs.should include( type: :exclusive, attributes: ['some_date','defaulted'] )
+        reqs.should include( type: :at_least, attributes: ['a string','some_date'], count: 1 )
+        reqs.should include( type: :at_most, attributes: ['a string','some_date'], count: 2 )
+        reqs.should include( type: :exactly, attributes: ['a string','some_date'], count: 1 )
       end
 
       context 'with an example' do

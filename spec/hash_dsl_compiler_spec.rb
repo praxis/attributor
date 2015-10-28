@@ -104,7 +104,7 @@ describe Attributor::HashDSLCompiler do
       end
     end
 
-    context '#validate' do
+    context 'Requirement#validate' do
       let(:requirement){ req_class.new(arguments) }
       let(:subject){ requirement.validate(value,["$"],nil)}
 
@@ -137,6 +137,30 @@ describe Attributor::HashDSLCompiler do
         let(:value){ {one: 1, two: 2}}
         let(:validation_error){ "keys [:one, :two] are mutually exclusive for $." }
         it { subject.should include(validation_error) }
+      end
+    end
+
+    context 'Requirement#describe' do
+
+      it 'should work for :all' do
+        req = req_class.new(all: attr_names).describe
+        req.should eq( type: :all, attributes: [:one, :two, :tree] )
+      end
+      it 'should work for :exclusive n' do
+        req = req_class.new(exclusive: attr_names).describe
+        req.should eq( type: :exclusive, attributes: [:one, :two, :tree] )
+      end
+      it 'should work for :exactly' do
+        req = req_class.new(exactly: 1).of(*attr_names).describe
+        req.should include( type: :exactly,  count: 1, attributes: [:one, :two, :tree] )
+      end
+      it 'should work for :at_most n' do
+        req = req_class.new(at_most: 1).of(*attr_names).describe
+        req.should include( type: :at_most,  count: 1, attributes: [:one, :two, :tree] )
+      end
+      it 'should work for :at_least n' do
+        req = req_class.new(at_least: 1).of(*attr_names).describe
+        req.should include( type: :at_least,  count: 1, attributes: [:one, :two, :tree] )
       end
     end
   end

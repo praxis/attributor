@@ -437,6 +437,9 @@ module Attributor
             sub_example = example.get(sub_name) if example
             sub_attributes[sub_name] = sub_attribute.describe(true, example: sub_example)
           end
+          hash[:requirements] = self.requirements.each_with_object([]) do |req, list|
+            list << req.describe(shallow)
+          end
         end
       else
         hash[:value] = {type: value_type.describe(true)}
