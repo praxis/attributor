@@ -414,6 +414,26 @@ describe Attributor::Hash do
 
   end
 
+  context '.add_requirement' do
+    let(:req_type){ :all }
+    let(:req){ double("requirement", type: req_type, attr_names: req_attributes)}
+    context 'with valid attributes' do
+      let(:req_attributes){ [:name] }
+      it 'successfully saves it in the class' do
+        HashWithStrings.add_requirement(req)
+        HashWithStrings.requirements.should include(req)
+      end
+    end
+    context 'with attributes not defined in the class' do
+      let(:req_attributes){ [:name, :invalid, :notgood] }
+      it 'it complains loudly' do
+        expect{
+          HashWithStrings.add_requirement(req)
+        }.to raise_error("Invalid attribute name/s found (invalid, notgood) when defining a requirement of type all for HashWithStrings .The only existing attributes are [:name, :something]")
+      end
+    end
+  end
+
   context '.dump' do
 
     let(:value) { {one: 1, two: 2} }
@@ -708,6 +728,37 @@ describe Attributor::Hash do
         reqs.should include( type: :at_least, attributes: ['a string','some_date'], count: 1 )
         reqs.should include( type: :at_most, attributes: ['a string','some_date'], count: 2 )
         reqs.should include( type: :exactly, attributes: ['a string','some_date'], count: 1 )
+      end
+
+      context 'merging requires.all with attribute required: true' do
+        let(:block) do
+          proc do
+            key 'required string', String, required: true
+            key '1', Integer
+            key 'some_date', DateTime
+            requires do
+              all.of 'some_date'
+            end
+          end
+        end
+        it 'includes attributes with required: true into the :all requirements' do
+          req_all = description[:requirements].select{|r| r[:type] == :all}.first
+          req_all[:attributes].should include( 'required string','some_date' )
+        end
+      end
+
+      context 'creates the :all requirement when any attribute has required: true' do
+        let(:block) do
+          proc do
+            key 'required string', String, required: true
+            key 'required integer', Integer, required: true
+          end
+        end
+        it 'includes attributes with required: true into the :all requirements' do
+          req_all = description[:requirements].select{|r| r[:type] == :all}.first
+          req_all.should_not be(nil)
+          req_all[:attributes].should include( 'required string','required integer' )
+        end
       end
 
       context 'with an example' do

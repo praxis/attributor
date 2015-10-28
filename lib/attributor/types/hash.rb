@@ -144,6 +144,13 @@ module Attributor
 
     def self.add_requirement(req)
       @requirements << req
+      return unless req.attr_names
+      non_existing = req.attr_names - self.attributes.keys
+      unless non_existing.empty?
+        raise "Invalid attribute name/s found (#{non_existing.join(', ')}) when defining a requirement of type #{req.type} for #{Attributor.type_name(self)} ." +
+        "The only existing attributes are #{self.attributes.keys}"
+      end
+
     end
 
     def self.construct(constructor_block, **options)
@@ -432,13 +439,25 @@ module Attributor
       if self.keys.any?
         # Spit keys if it's the root or if it's an anonymous structures
         if ( !shallow || self.name == nil)
-          # FIXME: change to :keys when the praxis doc browser supports displaying those. or josep's demo is over.
+          required_names = []
+          # FIXME: change to :keys when the praxis doc browser supports displaying those
           hash[:attributes] = self.keys.each_with_object({}) do |(sub_name, sub_attribute), sub_attributes|
+            required_names << sub_name if sub_attribute.options[:required] == true
             sub_example = example.get(sub_name) if example
             sub_attributes[sub_name] = sub_attribute.describe(true, example: sub_example)
           end
           hash[:requirements] = self.requirements.each_with_object([]) do |req, list|
-            list << req.describe(shallow)
+            described_req = req.describe(shallow)
+            if described_req[:type] == :all
+              # Add the names of the attributes that have the required flag too
+              described_req[:attributes] |= required_names
+              required_names = []
+            end
+            list << described_req
+          end
+          # Make sure we create an :all requirement, if there wasn't one so we can add the required: true attributes
+          unless required_names.empty?
+            hash[:requirements] << {type: :all, attributes: required_names }
           end
         end
       else
