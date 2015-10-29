@@ -32,7 +32,6 @@ module Attributor
 
       v = self.value_type
       va = self.value_attribute
-      re = self.requirements
 
       klass.instance_eval do
         @saved_blocks = []
@@ -44,7 +43,7 @@ module Attributor
         @key_attribute = ka
         @value_attribute = va
 
-        @requirements = re
+        @requirements = []
         @error = false
       end
     end

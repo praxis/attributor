@@ -147,7 +147,7 @@ module Attributor
       return unless req.attr_names
       non_existing = req.attr_names - self.attributes.keys
       unless non_existing.empty?
-        raise "Invalid attribute name/s found (#{non_existing.join(', ')}) when defining a requirement of type #{req.type} for #{Attributor.type_name(self)} ." +
+        raise "Invalid attribute name(s) found (#{non_existing.join(', ')}) when defining a requirement of type #{req.type} for #{Attributor.type_name(self)} ." +
         "The only existing attributes are #{self.attributes.keys}"
       end
 

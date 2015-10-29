@@ -429,7 +429,7 @@ describe Attributor::Hash do
       it 'it complains loudly' do
         expect{
           HashWithStrings.add_requirement(req)
-        }.to raise_error("Invalid attribute name/s found (invalid, notgood) when defining a requirement of type all for HashWithStrings .The only existing attributes are [:name, :something]")
+        }.to raise_error("Invalid attribute name(s) found (invalid, notgood) when defining a requirement of type all for HashWithStrings .The only existing attributes are [:name, :something]")
       end
     end
   end

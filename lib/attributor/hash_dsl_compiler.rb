@@ -13,8 +13,8 @@ module Attributor
       attr_reader :attr_names
       attr_reader :description
 
-      def initialize(spec)
-        @description = spec.delete(:description)
+      def initialize(description: nil, **spec)
+        @description = description
         @type = spec.keys.first
         case type
         when :all
