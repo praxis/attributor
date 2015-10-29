@@ -5,6 +5,30 @@
 * Added an "anonymous" DSL for base `Attributor::Type` which is reported in its `.describe` call.
   * This is a simple documentation bit, that might help the clients to document the type properly (i.e. treat it as if the type was anonymously defined whenever is used, rather than reachable by id/name from anywhere)
 
+* Built advanced attribute requirements for `Struct`,`Model` and `Hash` types. Those requirements allow you to define things like:
+  * A list of attributes that are required (equivalent to defining the required: true bit at each of the attributes)
+  * At most (n) attributes from a group can be passed in
+  * At least (n) attributes from a group are required
+  * Exactly (n) attributes from a group are required
+  * Example:
+  ```
+  requires ‘id’, ‘name’
+  requires.all ‘id’, ‘name’  # Equivalent to above
+  requires.all.of ‘id’, ‘name’  # Equivalent to above again
+  requires.at_most(2).of 'consistency', 'availability', 'partitioning'
+  requires.at_least(1).of ‘rock’, ‘pop’
+  requires.exactly(2).of ‘one’, ‘two’, ’three’
+  ```
+  * Same example expressed inside a block if so desired
+  ```
+  requires do
+    all 'id', 'name
+    all.of 'id', 'name # Equivalent
+    at_most(2).of 'consistency', 'availability', 'partitioning'
+    …
+  end
+  ```
+
 ## 4.1.0
 
 * Added a `Class` type (useful to avoid demodulization coercions etc...)

@@ -43,6 +43,7 @@ module Attributor
         @key_attribute = ka
         @value_attribute = va
 
+        @requirements = []
         @error = false
       end
     end

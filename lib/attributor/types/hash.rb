@@ -29,6 +29,7 @@ module Attributor
       attr_reader :key_attribute
       attr_reader :insensitive_map
       attr_accessor :extra_keys
+      attr_reader :requirements
     end
 
     @key_type = Object
@@ -38,7 +39,7 @@ module Attributor
     @value_attribute = Attribute.new(@value_type)
 
     @error = false
-
+    @requirements = []
 
     def self.key_type=(key_type)
       @key_type = Attributor.resolve_type(key_type)
@@ -72,6 +73,7 @@ module Attributor
         @value_type = v
         @key_attribute = Attribute.new(@key_type)
         @value_attribute = Attribute.new(@value_type)
+        @requirements = []
 
         @error = false
       end
@@ -116,7 +118,7 @@ module Attributor
     end
 
     def self.dsl_class
-      @options[:dsl_compiler] || DSLCompiler
+      @options[:dsl_compiler] || HashDSLCompiler
     end
 
     def self.native_type
@@ -140,6 +142,16 @@ module Attributor
       true
     end
 
+    def self.add_requirement(req)
+      @requirements << req
+      return unless req.attr_names
+      non_existing = req.attr_names - self.attributes.keys
+      unless non_existing.empty?
+        raise "Invalid attribute name(s) found (#{non_existing.join(', ')}) when defining a requirement of type #{req.type} for #{Attributor.type_name(self)} ." +
+        "The only existing attributes are #{self.attributes.keys}"
+      end
+
+    end
 
     def self.construct(constructor_block, **options)
       return self if constructor_block.nil?
@@ -427,10 +439,25 @@ module Attributor
       if self.keys.any?
         # Spit keys if it's the root or if it's an anonymous structures
         if ( !shallow || self.name == nil)
-          # FIXME: change to :keys when the praxis doc browser supports displaying those. or josep's demo is over.
+          required_names = []
+          # FIXME: change to :keys when the praxis doc browser supports displaying those
           hash[:attributes] = self.keys.each_with_object({}) do |(sub_name, sub_attribute), sub_attributes|
+            required_names << sub_name if sub_attribute.options[:required] == true
             sub_example = example.get(sub_name) if example
             sub_attributes[sub_name] = sub_attribute.describe(true, example: sub_example)
+          end
+          hash[:requirements] = self.requirements.each_with_object([]) do |req, list|
+            described_req = req.describe(shallow)
+            if described_req[:type] == :all
+              # Add the names of the attributes that have the required flag too
+              described_req[:attributes] |= required_names
+              required_names = []
+            end
+            list << described_req
+          end
+          # Make sure we create an :all requirement, if there wasn't one so we can add the required: true attributes
+          unless required_names.empty?
+            hash[:requirements] << {type: :all, attributes: required_names }
           end
         end
       else
@@ -538,7 +565,7 @@ module Attributor
           end
         end
 
-        self.class.keys.each_with_object(Array.new) do |(key, attribute), errors|
+        ret = self.class.keys.each_with_object(Array.new) do |(key, attribute), errors|
           sub_context = self.class.generate_subcontext(context,key)
 
           value = @contents[key]
@@ -550,7 +577,7 @@ module Attributor
           errors.push *attribute.validate(value, sub_context)
         end
       else
-        @contents.each_with_object(Array.new) do |(key, value), errors|
+        ret = @contents.each_with_object(Array.new) do |(key, value), errors|
           # FIXME: the sub contexts and error messages don't really make sense here
           unless key_type == Attributor::Object
             sub_context = context + ["key(#{key.inspect})"]
@@ -563,6 +590,13 @@ module Attributor
           end
         end
       end
+      unless self.class.requirements.empty?
+        self.class.requirements.each_with_object(ret) do |req, errors|
+          validation_errors = req.validate( @contents , context)
+          errors.push *validation_errors unless validation_errors.empty?
+        end
+      end
+      ret
     end
 
 

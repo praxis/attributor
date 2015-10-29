@@ -11,6 +11,7 @@ module Attributor
   require_relative 'attributor/attribute'
   require_relative 'attributor/type'
   require_relative 'attributor/dsl_compiler'
+  require_relative 'attributor/hash_dsl_compiler'
   require_relative 'attributor/attribute_resolver'
 
   require_relative 'attributor/example_mixin'
