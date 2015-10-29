@@ -2,6 +2,8 @@
 
 ## next
 
+## 4.2.0
+
 * Added an "anonymous" DSL for base `Attributor::Type` which is reported in its `.describe` call.
   * This is a simple documentation bit, that might help the clients to document the type properly (i.e. treat it as if the type was anonymously defined whenever is used, rather than reachable by id/name from anywhere)
 
