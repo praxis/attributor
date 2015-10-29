@@ -5,12 +5,16 @@ module Attributor
 
   class HashDSLCompiler < DSLCompiler
 
+    # A class that encapsulates the definition of a requirement for Hash attributes
+    # It implements the validation against incoming values and it describes its format for documentation purposes
     class Requirement
       attr_reader :type
       attr_reader :number
       attr_reader :attr_names
+      attr_reader :description
 
       def initialize(spec)
+        @description = spec.delete(:description)
         @type = spec.keys.first
         case type
         when :all
@@ -65,57 +69,70 @@ module Attributor
       def describe(shallow=false, example: nil)
         hash = {type: type, attributes: attr_names}
         hash[:count] = number unless number.nil?
+        hash[:description] = description unless description.nil?
         hash
       end
     end
 
 
+    # A class that encapsulates the available DSL under the `requires` keyword.
+    # In particular it allows to define requirements like:
+    # requires.all :attr1, :attr2, :attr3
+    # requires.exclusive :attr1, :attr2, :attr3
+    # requires.at_most(2).of :attr1, :attr2, :attr3
+    # requires.at_least(2).of :attr1, :attr2, :attr3
+    # requires.exactly(2).of :attr1, :attr2, :attr3
+    # Note: all and exclusive can also use .of , it is equivalent
     class RequiresDSL
       attr_accessor :target
-      def initialize(target)
+      attr_accessor :options
+      def initialize(target, **opts)
         self.target = target
+        self.options = opts
       end
-      def all(*attr_names)
-        req = Requirement.new( all: attr_names )
+      def all(*attr_names, **opts)
+        req = Requirement.new( options.merge(opts).merge(all: attr_names) )
         target.add_requirement req
         req
       end
       def at_most(number)
-        req = Requirement.new( at_most: number )
+        req = Requirement.new(  options.merge(at_most: number) )
         target.add_requirement req
         req
       end
       def at_least(number)
-        req = Requirement.new( at_least: number )
+        req = Requirement.new(  options.merge(at_least: number) )
         target.add_requirement req
         req
       end
       def exactly(number)
-        req = Requirement.new( exactly: number )
+        req = Requirement.new(  options.merge(exactly: number) )
         target.add_requirement req
         req
       end
-      def exclusive(*attr_names)
-        req = Requirement.new( exclusive: attr_names )
+      def exclusive(*attr_names, **opts)
+        req = Requirement.new(  options.merge(opts).merge(exclusive: attr_names) )
         target.add_requirement req
         req
       end
-
     end
 
     def _requirements_dsl
       @requirements_dsl ||= RequiresDSL.new(@target)
     end
 
-    def requires(*spec,&block)
+    def requires(*spec,**opts,&block)
       if spec.empty?
+        unless opts.empty?
+          self._requirements_dsl.options.merge(opts)
+        end
         if block_given?
           self._requirements_dsl.instance_eval(&block)
         else
           self._requirements_dsl
         end
       else
-        self._requirements_dsl.all(*spec)
+        self._requirements_dsl.all(*spec,opts)
       end
     end
 

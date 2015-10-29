@@ -22,22 +22,23 @@ describe Attributor::HashDSLCompiler do
       end
     end
 
-    context 'with params only' do
+    context 'with params only (and some options)' do
       it 'takes then array to mean all attributes are required' do
         target.should_receive(:add_requirement)
-        requirement = subject.requires [:one, :two]
+        requirement = subject.requires :one, :two , description: "These are very required"
         requirement.should be_kind_of( Attributor::HashDSLCompiler::Requirement )
         requirement.type.should be(:all)
       end
     end
-    context 'with a block only' do
+    context 'with a block only (and some options)' do
       it 'evals it in the context of the Compiler' do
         proc = Proc.new {}
         dsl = dsl_compiler._requirements_dsl
         dsl.should_receive(:instance_eval)#.with(&proc) << Does rspec 2.99 support block args?
-        subject.requires &proc
+        subject.requires description: "These are very required", &proc
       end
     end
+
 
   end
 
@@ -102,6 +103,11 @@ describe Attributor::HashDSLCompiler do
         req_class.new(at_least: 3).number.should be(3)
         req_class.new(at_least: 3).type.should be(:at_least)
       end
+      it 'understands and saves a :description' do
+        req = req_class.new(exactly:  1, description: "Hello")
+        req.number.should be(1)
+        req.description.should eq("Hello")
+      end
     end
 
     context 'Requirement#validate' do
@@ -161,6 +167,10 @@ describe Attributor::HashDSLCompiler do
       it 'should work for :at_least n' do
         req = req_class.new(at_least: 1).of(*attr_names).describe
         req.should include( type: :at_least,  count: 1, attributes: [:one, :two, :tree] )
+      end
+      it 'should report a description' do
+        req = req_class.new(at_least: 1, description: "no more than 1").of(*attr_names).describe
+        req.should include( type: :at_least,  count: 1, attributes: [:one, :two, :tree], description: "no more than 1" )
       end
     end
   end
