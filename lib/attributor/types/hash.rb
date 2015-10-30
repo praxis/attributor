@@ -349,7 +349,7 @@ module Attributor
       end
 
 
-      raise AttributorException, "Unknown key received: #{key.inspect} for #{Attributor.humanize_context(context)}"
+      raise LoadError, "Unknown key received: #{key.inspect} for #{Attributor.humanize_context(context)}"
     end
 
 
@@ -384,7 +384,7 @@ module Attributor
         end
       end
 
-      raise AttributorException, "Unknown key received: #{key.inspect} while loading #{Attributor.humanize_context(context)}"
+      raise LoadError, "Unknown key received: #{key.inspect} while loading #{Attributor.humanize_context(context)}"
     end
 
     def self.from_hash(object,context, recurse: false)
