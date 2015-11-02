@@ -330,14 +330,29 @@ module Attributor
         end
       end
 
-      if self.class.options[:case_insensitive_load]
-        key = self.class.insensitive_map[key.downcase]
-        return self.get(key, context: context)
+      if self.class.options[:case_insensitive_load] && ( insensitive_key = self.class.insensitive_map[key.downcase] )
+        return self.get(insensitive_key, context: context)
       end
 
       if self.class.options[:allow_extra]
+        
         if self.class.extra_keys.nil?
-          return @contents[key] = self.class.value_attribute.load(value, context)
+          result = if value
+            @contents[key] = self.class.value_attribute.load(value, context)
+          elsif self.class.options[:case_insensitive_load] 
+            # find the value disregarding insensitivity
+            dkey = key.downcase
+            newkey = @contents.keys.find {|k| k.downcase == dkey  }
+            if newkey
+              value =  @contents.delete(newkey)
+              @contents[key] = self.class.value_attribute.load(value, context)
+            else
+              nil
+            end
+          else
+            nil
+          end
+          return result
         else
           extra_keys_key = self.class.extra_keys
 
@@ -364,9 +379,8 @@ module Attributor
         return self[key] = attribute.load(value, context, recurse: recurse)
       end
 
-      if self.class.options[:case_insensitive_load]
-        key = self.class.insensitive_map[key.downcase]
-        return self.set(key, value, context: context)
+      if self.class.options[:case_insensitive_load] && ( insensitive_key = self.class.insensitive_map[key.downcase] )
+        return self.set(insensitive_key, value, context: context)
       end
 
       if self.class.options[:allow_extra]

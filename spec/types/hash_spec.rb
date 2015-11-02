@@ -976,6 +976,24 @@ describe Attributor::Hash do
         type.insensitive_map.should be_nil
       end
     end
+
+    context 'together with :allow_extra' do
+      let(:type) { Attributor::Hash.of(key: String).construct(block, allow_extra: true, case_insensitive_load: case_insensitive) }
+      let(:input) { {'DOWNCASE' => 1, 'upcase' => 2, 'CamelCase' => 3, "UnKnoWn" => 4} }
+      it 'stores extra keys exactly how they were set' do
+        output['UnKnoWn'].should eq(4)
+      end
+
+      it 'changes the storage based on last .get (for performance) otherwise it means a search amongst the existing keys' do
+        output.get('UnKnoWn').should eq(4)
+        output['UnKnoWn'].should eq(4)
+        output.key?('UNKNOWN').should be(false)
+
+        output.get('UNKNOWN').should eq(4)
+        output['UNKNOWN'].should eq(4)
+        output.key?('UnKnoWn').should be(false)
+      end
+    end
   end
 
   context 'with allow_extra keys option' do
