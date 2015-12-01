@@ -2,6 +2,9 @@
 
 ## next
 
+* Changed `FieldSelector` sub-attribute selection to use `{}` instead of `()`.
+
+
 ## 4.2.0
 
 * Added an "anonymous" DSL for base `Attributor::Type` which is reported in its `.describe` call.

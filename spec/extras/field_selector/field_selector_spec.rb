@@ -14,8 +14,8 @@ describe Attributor::FieldSelector do
       '' => {},
       'one' => { one: true },
       'one,two,three' => { one: true, two: true, three: true },
-      'one,two(a,b),three' => { one: true, two: { a: true, b: true }, three: true },
-      'one,two(a,b,c(A,B)),three' => {
+      'one,two{a,b},three' => { one: true, two: { a: true, b: true }, three: true },
+      'one,two{a,b,c{A,B}},three' => {
         one: true,
         two: {
           a: true,
@@ -25,7 +25,7 @@ describe Attributor::FieldSelector do
         three: true
       }
     }
-    
+
     cases.each do |fields, result|
       it "loads #{fields.inspect}" do
         loaded = subject.load(fields)
