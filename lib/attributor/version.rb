@@ -1,3 +1,3 @@
 module Attributor
-  VERSION = "4.2.0"
+  VERSION = '5.0'
 end

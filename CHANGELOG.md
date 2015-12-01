@@ -2,6 +2,9 @@
 
 ## next
 
+
+## 5.0
+
 * Changed `FieldSelector` sub-attribute selection to use `{}` instead of `()`.
 
 
