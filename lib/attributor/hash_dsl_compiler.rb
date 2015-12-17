@@ -30,7 +30,7 @@ module Attributor
         self
       end
 
-      def validate( object,context=Attributor::DEFAULT_ROOT_CONTEXT,_attribute)
+      def validate( object,context=Attributor::DEFAULT_ROOT_CONTEXT,_attribute=nil)
         result = []
         case type
         when :all

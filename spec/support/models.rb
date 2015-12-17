@@ -83,6 +83,7 @@ class Address < Attributor::Model
     attribute :name, String, example: /\w+/
     attribute :state, String, values: %w{OR CA}
     attribute :person, Person, example: proc { |address, context| Person.example(context, address: address) }
+    requires :name
   end
 end
 
