@@ -590,11 +590,9 @@ module Attributor
           end
         end
       end
-      unless self.class.requirements.empty?
-        self.class.requirements.each_with_object(ret) do |req, errors|
-          validation_errors = req.validate( @contents , context)
-          errors.push *validation_errors unless validation_errors.empty?
-        end
+      self.class.requirements.each_with_object(ret) do |req, errors|
+        validation_errors = req.validate( @contents , context)
+        errors.push *validation_errors unless validation_errors.empty?
       end
       ret
     end
