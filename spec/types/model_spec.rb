@@ -246,7 +246,7 @@ describe Attributor::Model do
         context 'loading with default values' do
           let(:reference) { Post }
           let(:options) { {reference: reference} }
-          
+
           let(:attribute_definition) do
             proc do
               attribute :title
@@ -255,10 +255,10 @@ describe Attributor::Model do
           end
 
           let(:struct) { Attributor::Struct.construct(attribute_definition, options)}
-          
+
           let(:data) { {title: 'my post'} }
-          
-          subject(:loaded)  { struct.load(data) }    
+
+          subject(:loaded)  { struct.load(data) }
 
 
           it 'validates' do
@@ -372,6 +372,11 @@ describe Attributor::Model do
       end
     end
 
+    context 'for models using the "requires" DSL' do
+      subject(:address) { Address.load(state: 'CA') }
+      its(:validate) { should_not be_empty }
+      its(:validate) { should include "Key name is required for $." }
+    end
     context 'for models with circular sub-attributes' do
       context 'that are valid' do
         subject(:person) { Person.example }

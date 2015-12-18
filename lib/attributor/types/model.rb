@@ -131,7 +131,7 @@ module Attributor
 
       context = [context] if context.is_a? ::String
 
-      self.class.attributes.each_with_object(Array.new) do |(sub_attribute_name, sub_attribute), errors|
+      ret = self.class.attributes.each_with_object(Array.new) do |(sub_attribute_name, sub_attribute), errors|
         sub_context = self.class.generate_subcontext(context,sub_attribute_name)
 
         value = self.__send__(sub_attribute_name)
@@ -141,6 +141,11 @@ module Attributor
 
         errors.push *sub_attribute.validate(value, sub_context)
       end
+      self.class.requirements.each_with_object(ret) do |req, errors|
+        validation_errors = req.validate( @contents , context)
+        errors.push *validation_errors unless validation_errors.empty?
+      end
+      ret
     ensure
       @validating = false
     end
