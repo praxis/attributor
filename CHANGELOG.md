@@ -2,6 +2,9 @@
 
 ## next
 
+## 5.0.1
+
+* Fix bug that made Struct/Models skip validation of requirements using the `requires` DSL
 
 ## 5.0
 
