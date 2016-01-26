@@ -5,6 +5,10 @@ describe Attributor::Class do
 
   subject(:type) { Attributor::Class }
 
+  it 'it is not Dumpable' do
+    type.new.is_a?(Attributor::Dumpable).should_not be(true)
+  end
+
   its(:native_type) { should be(::Class) }
   its(:family) { should == 'string' }
 

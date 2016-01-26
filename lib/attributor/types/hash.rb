@@ -22,6 +22,7 @@ module Attributor
 
     include Container
     include Enumerable
+    include Dumpable
 
     class << self
       attr_reader :key_type, :value_type, :options

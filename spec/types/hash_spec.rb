@@ -439,6 +439,10 @@ describe Attributor::Hash do
     let(:value) { {one: 1, two: 2} }
     let(:opts) { {} }
 
+    it 'it is Dumpable' do
+      type.new.is_a?(Attributor::Dumpable).should be(true)
+    end
+
     context 'for a simple (untyped) hash' do
       it 'returns the untouched hash value' do
         type.dump(value, opts).should eq(value)

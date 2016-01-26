@@ -5,6 +5,7 @@ module Attributor
 
   class Collection < Array
     include Container
+    include Dumpable
 
     # @param type [Attributor::Type] optional, defines the type of all collection members
     # @return anonymous class with specified type of collection members
