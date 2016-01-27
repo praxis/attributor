@@ -7,6 +7,8 @@ require 'digest/sha1'
 
 module Attributor
 
+  require_relative 'attributor/dumpable'
+
   require_relative 'attributor/exceptions'
   require_relative 'attributor/attribute'
   require_relative 'attributor/type'

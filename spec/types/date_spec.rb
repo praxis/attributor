@@ -4,6 +4,10 @@ describe Attributor::Date do
 
   subject(:type) { Attributor::Date }
 
+  it 'it is not Dumpable' do
+    type.new.is_a?(Attributor::Dumpable).should_not be(true)
+  end
+
   context '.native_type' do
     its(:native_type) { should be(::Date) }
   end
@@ -20,7 +24,7 @@ describe Attributor::Date do
     end
     context 'nil values' do
       it 'should be nil' do
-        type.dump(nil).should be_nil 
+        type.dump(nil).should be_nil
       end
     end
   end
@@ -33,14 +37,14 @@ describe Attributor::Date do
     end
 
     context 'for incoming objects' do
-      
+
       it "returns correct Date for Time objects" do
         object = Time.now
         loaded = type.load(object)
         loaded.should be_a(::Date)
         loaded.to_date.should == object.to_date
       end
-     
+
       it "returns correct Date for DateTime objects" do
         object = DateTime.now
         loaded = type.load(object)
@@ -48,8 +52,8 @@ describe Attributor::Date do
         loaded.should be(object)
       end
 
-    end    
-    
+    end
+
     context 'for incoming strings' do
 
       [

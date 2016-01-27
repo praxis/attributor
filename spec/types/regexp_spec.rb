@@ -4,6 +4,10 @@ describe Attributor::Regexp do
 
   subject(:type) { Attributor::Regexp }
 
+  it 'it is not Dumpable' do
+    type.new.is_a?(Attributor::Dumpable).should_not be(true)
+  end
+
   its(:native_type) { should be(::Regexp) }
   its(:example) { should be_a(::String) }
   its(:family) { should == 'string' }

@@ -4,6 +4,10 @@ describe Attributor::Integer do
 
   subject(:type) { Attributor::Integer }
 
+  it 'it is not Dumpable' do
+    type.new.is_a?(Attributor::Dumpable).should_not be(true)
+  end
+
   context '.example' do
 
     context 'when :min and :max are unspecified' do

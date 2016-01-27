@@ -4,6 +4,10 @@ describe Attributor::String do
 
   subject(:type) { Attributor::String }
 
+  it 'it is not Dumpable' do
+    type.new.is_a?(Attributor::Dumpable).should_not be(true)
+  end
+
   context '.native_type' do
     it "returns String" do
       type.native_type.should be(::String)

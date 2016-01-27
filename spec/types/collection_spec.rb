@@ -341,6 +341,10 @@ describe Attributor::Collection do
   context 'dumping' do
     let(:type) { Attributor::Collection.of(Cormorant) }
 
+    it 'it is Dumpable' do
+      type.new.is_a?(Attributor::Dumpable).should be(true)
+    end
+
     subject(:example) { type.example }
     it 'dumps' do
       expect {

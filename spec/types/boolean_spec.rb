@@ -4,6 +4,10 @@ describe Attributor::Boolean do
 
   subject(:type) { Attributor::Boolean }
 
+  it 'it is not Dumpable' do
+    type.new.is_a?(Attributor::Dumpable).should_not be(true)
+  end
+
   context '.valid_type?' do
 
     context 'for incoming Boolean values' do

@@ -4,6 +4,10 @@ describe Attributor::Float do
 
   subject(:type) { Attributor::Float }
 
+  it 'it is not Dumpable' do
+    type.new.is_a?(Attributor::Dumpable).should_not be(true)
+  end
+
   context '.native_type' do
     its(:native_type) { should be(::Float) }
   end
