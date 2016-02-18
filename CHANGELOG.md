@@ -2,6 +2,8 @@
 
 ## next
 
+## 5.0.2
+
 * Introduce the `Dumpable` (empty) module as an interface to indicate that instances of types that include it
 will respond to the `.dump` method, as a way to convert their internal substructure to primitive Ruby objects.    * Currently the only two directly dumpable types are Collection and Hash (with the caveat that there are several others that derive from them..i.e., CSV, Model, etc...)
   * The rest of types have `native_types` that are already Ruby primitive Objects.
