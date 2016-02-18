@@ -25,40 +25,41 @@ module Attributor
           @number = spec[type]
         end
       end
-      def of( *args)
+
+      def of(*args)
         @attr_names = args
         self
       end
 
-      def validate( object,context=Attributor::DEFAULT_ROOT_CONTEXT,_attribute=nil)
+      def validate(keys,context=Attributor::DEFAULT_ROOT_CONTEXT,_attribute=nil)
         result = []
         case type
         when :all
-          rest = attr_names - object.keys
+          rest = attr_names - keys
           unless rest.empty?
             rest.each do |attr|
               result.push "Key #{attr} is required for #{Attributor.humanize_context(context)}."
             end
           end
         when :exactly
-          included = attr_names & object.keys
+          included = attr_names & keys
           unless included.size ==  number
             result.push "Exactly #{number} of the following keys #{attr_names} are required for #{Attributor.humanize_context(context)}. Found #{included.size} instead: #{included.inspect}"
           end
         when :at_most
-          rest = attr_names & object.keys
+          rest = attr_names & keys
           if rest.size > number
             found = rest.empty? ? "none" : rest.inspect
             result.push "At most #{number} keys out of #{attr_names} can be passed in for #{Attributor.humanize_context(context)}. Found #{found}"
           end
         when :at_least
-          rest = attr_names & object.keys
+          rest = attr_names & keys
           if rest.size < number
             found = rest.empty? ? "none" : rest.inspect
             result.push "At least #{number} keys out of #{attr_names} are required to be passed in for #{Attributor.humanize_context(context)}. Found #{found}"
           end
         when :exclusive
-          intersection = attr_names & object.keys
+          intersection = attr_names & keys
           if intersection.size > 1
             result.push "keys #{intersection.inspect} are mutually exclusive for #{Attributor.humanize_context(context)}."
           end

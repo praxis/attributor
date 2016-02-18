@@ -557,6 +557,7 @@ module Attributor
 
     def validate(context=Attributor::DEFAULT_ROOT_CONTEXT)
       context = [context] if context.is_a? ::String
+      errors = []
 
       if self.class.keys.any?
         extra_keys = @contents.keys - self.class.keys.keys
@@ -566,36 +567,41 @@ module Attributor
           end
         end
 
-        ret = self.class.keys.each_with_object(Array.new) do |(key, attribute), errors|
+        keys_with_values = Array.new
+
+        self.class.keys.each do |key, attribute|
           sub_context = self.class.generate_subcontext(context,key)
 
           value = @contents[key]
+          unless value.nil?
+            keys_with_values << key
+          end
 
           if value.respond_to?(:validating) # really, it's a thing with sub-attributes
             next if value.validating
           end
 
-          errors.push *attribute.validate(value, sub_context)
+          errors.push(*attribute.validate(value, sub_context))
+        end
+        self.class.requirements.each do |req|
+          validation_errors = req.validate(keys_with_values, context)
+          errors.push(*validation_errors) unless validation_errors.empty?
         end
       else
-        ret = @contents.each_with_object(Array.new) do |(key, value), errors|
+        @contents.each do |key, value|
           # FIXME: the sub contexts and error messages don't really make sense here
           unless key_type == Attributor::Object
             sub_context = context + ["key(#{key.inspect})"]
-            errors.push *key_attribute.validate(key, sub_context)
+            errors.push(*key_attribute.validate(key, sub_context))
           end
 
           unless value_type == Attributor::Object
             sub_context = context + ["value(#{value.inspect})"]
-            errors.push *value_attribute.validate(value, sub_context)
+            errors.push(*value_attribute.validate(value, sub_context))
           end
         end
       end
-      self.class.requirements.each_with_object(ret) do |req, errors|
-        validation_errors = req.validate( @contents , context)
-        errors.push *validation_errors unless validation_errors.empty?
-      end
-      ret
+      errors
     end
 
 
