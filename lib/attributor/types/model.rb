@@ -130,22 +130,29 @@ module Attributor
       @validating = true
 
       context = [context] if context.is_a? ::String
+      keys_with_values = []
+      errors = []
 
-      ret = self.class.attributes.each_with_object(Array.new) do |(sub_attribute_name, sub_attribute), errors|
+      self.class.attributes.each do |sub_attribute_name, sub_attribute|
         sub_context = self.class.generate_subcontext(context,sub_attribute_name)
 
         value = self.__send__(sub_attribute_name)
+        unless value.nil?
+          keys_with_values << sub_attribute_name
+        end
+
         if value.respond_to?(:validating) # really, it's a thing with sub-attributes
           next if value.validating
         end
 
-        errors.push *sub_attribute.validate(value, sub_context)
+        errors.push(*sub_attribute.validate(value, sub_context))
       end
-      self.class.requirements.each_with_object(ret) do |req, errors|
-        validation_errors = req.validate( @contents , context)
-        errors.push *validation_errors unless validation_errors.empty?
+      self.class.requirements.each do |req|
+        validation_errors = req.validate(keys_with_values, context)
+        errors.push(*validation_errors) unless validation_errors.empty?
       end
-      ret
+
+      errors
     ensure
       @validating = false
     end
