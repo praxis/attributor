@@ -1,7 +1,6 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper.rb')
 
 describe Attributor::DateTime do
-
   subject(:type) { Attributor::DateTime }
 
   it 'it is not Dumpable' do
@@ -17,7 +16,7 @@ describe Attributor::DateTime do
   end
 
   context '.dump' do
-    let(:example) { type.example}
+    let(:example) { type.example }
     subject(:value) { type.dump(example) }
     it 'is formatted correctly' do
       value.should match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[\+-]\d{2}:\d{2}/)
@@ -29,33 +28,28 @@ describe Attributor::DateTime do
     end
   end
 
-
   context '.load' do
-
     it 'returns nil for nil' do
       type.load(nil).should be(nil)
     end
 
     context 'for incoming objects' do
-
-      it "returns correct DateTime for Time objects" do
+      it 'returns correct DateTime for Time objects' do
         object = Time.now
         loaded = type.load(object)
         loaded.should be_a(::DateTime)
         loaded.to_time.should == object
       end
 
-      it "returns correct DateTime for DateTime objects" do
+      it 'returns correct DateTime for DateTime objects' do
         object = DateTime.now
         loaded = type.load(object)
         loaded.should be_a(::DateTime)
-        loaded.should be( object )
+        loaded.should be(object)
       end
-
     end
 
     context 'for incoming strings' do
-
       [
         '2001-02-03T04:05:06+07:00',
         'Sat, 03 Feb 2001 04:05:06 GMT',
@@ -67,11 +61,9 @@ describe Attributor::DateTime do
         '2007-10-19T04:11:33Z',
         '2001-02-03T04:05:06+07:00.123456', # custom format with microseconds
       ].each do |value|
-
         it "returns correct DateTime for #{value.inspect}" do
           type.load(value).should == DateTime.parse(value)
         end
-
       end
 
       [
@@ -80,13 +72,11 @@ describe Attributor::DateTime do
         '2007-10-33T04:11:33Z',
         '2001-02-33T04:05:06+07:00.123456', # custom format with microseconds
       ].each do |value|
-
         it "raises Attributor::AttributorException for #{value.inspect}" do
-          expect {
+          expect do
             type.load(value)
-          }.to raise_error(Attributor::DeserializationError, /Error deserializing a String using DateTime/)
+          end.to raise_error(Attributor::DeserializationError, /Error deserializing a String using DateTime/)
         end
-
       end
 
       [
@@ -94,19 +84,12 @@ describe Attributor::DateTime do
         'foobar',
         'Sat, 30 Feb 2001 04:05:06 FOOBAR', # No such date format exists
       ].each do |value|
-
         it "raises Attributor::AttributorException for #{value.inspect}" do
-          expect {
+          expect do
             type.load(value)
-          }.to raise_error(Attributor::DeserializationError, /Error deserializing a String using DateTime/)
+          end.to raise_error(Attributor::DeserializationError, /Error deserializing a String using DateTime/)
         end
-
       end
-
     end
-
   end
-
 end
-
-

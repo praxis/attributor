@@ -20,13 +20,11 @@ require 'pry'
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
 RSpec.configure do |config|
-
   config.around(:each) do |example|
     Attributor::AttributeResolver.current = Attributor::AttributeResolver.new
     example.run
     Attributor::AttributeResolver.current = nil
   end
-
 end
 
 RSpec::Matchers.define :be_in_family do |expected|

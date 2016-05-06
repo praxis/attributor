@@ -1,21 +1,18 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper.rb')
 
 describe Attributor::Struct do
-
   context '.definition for a Struct with no sub-attributes' do
     subject { Attributor::Struct }
     it 'raises an error' do
-      expect {
+      expect do
         subject.definition
-      }.to raise_error(Attributor::AttributorException,"Can not use a pure Struct without defining sub-attributes")
+      end.to raise_error(Attributor::AttributorException, 'Can not use a pure Struct without defining sub-attributes')
     end
-
   end
   context '.construct' do
-
     context 'empty struct' do
       let(:attribute_definition) do
-        Proc.new {}
+        proc {}
       end
 
       subject(:empty_struct) { Attributor::Struct.construct(attribute_definition) }
@@ -30,7 +27,7 @@ describe Attributor::Struct do
 
     context 'simple struct' do
       let(:attribute_definition) do
-        Proc.new do
+        proc do
           attribute :age, Attributor::Integer
         end
       end
@@ -47,7 +44,7 @@ describe Attributor::Struct do
 
     context 'less simple struct' do
       let(:attribute_definition) do
-        Proc.new do
+        proc do
           attribute :age, Attributor::Integer
           attribute :name, Attributor::String
           attribute :employed?, Attributor::Boolean
@@ -72,7 +69,7 @@ describe Attributor::Struct do
 
     context 'complex struct containing model' do
       let(:attribute_definition) do
-        Proc.new do
+        proc do
           attribute :pet, ::Chicken
         end
       end
@@ -89,7 +86,7 @@ describe Attributor::Struct do
 
     context 'complex struct containing named struct' do
       let(:attribute_definition) do
-        Proc.new do
+        proc do
           attribute :stats, Attributor::Struct do
             attribute :months, Attributor::Integer
             attribute :days, Attributor::Integer
@@ -113,7 +110,7 @@ describe Attributor::Struct do
 
     context 'complex struct containing multi-level recursive structs' do
       let(:attribute_definition) do
-        Proc.new do
+        proc do
           attribute :arthropods, Attributor::Struct do
             attribute :insects, Attributor::Struct do
               attribute :ants, Attributor::Struct do
@@ -153,37 +150,33 @@ describe Attributor::Struct do
         proc do
         end
       end
-      subject(:struct) { Attributor::Struct.construct(attribute_definition, options)}
+      subject(:struct) { Attributor::Struct.construct(attribute_definition, options) }
 
       context 'with new type-level options' do
-        let(:options) { {reference: reference} }
+        let(:options) { { reference: reference } }
         its(:options) { should have_key(:identity) }
         it 'inherits from the reference' do
           struct.options[:identity].should eq(reference.options[:identity])
         end
         it 'does not raise an error when used in an attribute' do
-          expect {
+          expect do
             Attributor::Attribute.new(struct)
-          }.to_not raise_error
+          end.to_not raise_error
         end
       end
 
       context 'with existing type-level options' do
-        let(:options) { {reference: reference, identity: :name} }
+        let(:options) { { reference: reference, identity: :name } }
         its(:options) { should have_key(:identity) }
         it 'does not override from the reference' do
           struct.options[:identity].should eq(:name)
         end
         it 'does not raise an error when used in an attribute' do
-          expect {
+          expect do
             Attributor::Attribute.new(struct)
-          }.to_not raise_error
+          end.to_not raise_error
         end
-
       end
     end
-
-
   end
-
 end

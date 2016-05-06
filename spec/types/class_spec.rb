@@ -2,7 +2,6 @@ require File.join(File.dirname(__FILE__), '..', 'spec_helper.rb')
 require 'backports'
 
 describe Attributor::Class do
-
   subject(:type) { Attributor::Class }
 
   it 'it is not Dumpable' do
@@ -50,7 +49,7 @@ describe Attributor::Class do
         type.load('Integer').should eq(Integer)
       end
 
-      it "returns specified class for nil" do
+      it 'returns specified class for nil' do
         type.load(nil).should be(klass)
       end
 
@@ -64,7 +63,7 @@ describe Attributor::Class do
     end
 
     it 'raises when given a non-String' do
-      expect {type.load(1)}.to raise_exception(Attributor::IncompatibleTypeError)
+      expect { type.load(1) }.to raise_exception(Attributor::IncompatibleTypeError)
     end
   end
 end

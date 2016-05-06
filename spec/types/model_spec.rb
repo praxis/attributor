@@ -17,40 +17,47 @@ describe Attributor::Model do
       end
 
       it 'throws original exception upon first run' do
-        lambda {
+        lambda do
           broken_model.attributes
-        }.should raise_error(RuntimeError, 'sorry :(')
+        end.should raise_error(RuntimeError, 'sorry :(')
       end
 
       it 'throws InvalidDefinition for subsequent access' do
-        broken_model.attributes rescue nil
-
-        lambda {
+        begin
           broken_model.attributes
-        }.should raise_error(Attributor::InvalidDefinition)
+        rescue
+          nil
+        end
+
+        lambda do
+          broken_model.attributes
+        end.should raise_error(Attributor::InvalidDefinition)
       end
 
       it 'throws for any attempts at using of an instance of it' do
-        broken_model.attributes rescue nil
+        begin
+          broken_model.attributes
+        rescue
+          nil
+        end
 
         instance = broken_model.new
-        lambda {
+        lambda do
           instance.name
-        }.should raise_error(Attributor::InvalidDefinition)
+        end.should raise_error(Attributor::InvalidDefinition)
       end
-
     end
   end
 
   context 'class methods' do
-    let(:context){ ["root","subattr"] }
+    let(:context) { %w(root subattr) }
 
     its(:native_type) { should eq(Chicken) }
 
     context '.example'  do
       subject(:chicken) { Chicken.example }
 
-      let(:age_opts) { {options: Chicken.attributes[:age].options } }
+      let(:age_opts) { { options: Chicken.attributes[:age].options } }
       let(:age) { /\d{2}/.gen.to_i }
 
       context 'for a simple model' do
@@ -74,9 +81,9 @@ describe Attributor::Model do
 
         context 'with given values' do
           let(:name) { 'Sir Clucksalot' }
-          subject(:example) { Chicken.example(name: name)}
+          subject(:example) { Chicken.example(name: name) }
 
-          its(:name) {should eq(name) }
+          its(:name) { should eq(name) }
         end
       end
 
@@ -92,14 +99,13 @@ describe Attributor::Model do
 
           its(:attributes) { should eq(some_chicken.attributes) }
         end
-
       end
 
       context 'with attributes that are also models' do
         subject(:turducken) { Turducken.example }
 
         its(:attributes) { should have_key(:chicken) }
-        its(:chicken) { should be_kind_of(Chicken)}
+        its(:chicken) { should be_kind_of(Chicken) }
       end
 
       context 'with infinitely-expanding sub-attributes' do
@@ -117,7 +123,7 @@ describe Attributor::Model do
 
         it 'terminates example generation at MAX_EXAMPLE_DEPTH' do
           # call .child on example MAX_EXAMPLE_DEPTH times
-          terminal_child = Attributor::Model::MAX_EXAMPLE_DEPTH.times.inject(example) do |object, i|
+          terminal_child = Attributor::Model::MAX_EXAMPLE_DEPTH.times.inject(example) do |object, _i|
             object.child
           end
           # after which .child will return nil
@@ -125,11 +131,8 @@ describe Attributor::Model do
           # but simple attributes will be generated
           terminal_child.name.should_not be(nil)
         end
-
-
       end
     end
-
 
     context '.definition' do
       subject(:definition) { Chicken.definition }
@@ -141,11 +144,10 @@ describe Attributor::Model do
       end
     end
 
-
     context '.load' do
       let(:age) { 1 }
-      let(:email) { "cluck@example.org" }
-      let(:hash) { {:age => age, :email => email} }
+      let(:email) { 'cluck@example.org' }
+      let(:hash) { { age: age, email: email } }
 
       subject(:model) { Chicken.load(hash) }
 
@@ -164,25 +166,24 @@ describe Attributor::Model do
           subject(:turducken) { Turducken.load(nil, [], recurse: true) }
 
           it 'loads with default values' do
-            turducken.name.should eq("Turkey McDucken")
+            turducken.name.should eq('Turkey McDucken')
             turducken.chicken.age.should be(1)
           end
-
         end
       end
 
       context 'with a JSON-serialized hash' do
-        let(:context){ ['root','subattr'] }
-        let(:expected_hash) { {"age" => age, "email" => email} }
+        let(:context) { %w(root subattr) }
+        let(:expected_hash) { { 'age' => age, 'email' => email } }
         let(:json) { hash.to_json }
         before do
-          Chicken.should_receive(:from_hash).
-            with(expected_hash,context, recurse: false)
+          Chicken.should_receive(:from_hash)
+                 .with(expected_hash, context, recurse: false)
           JSON.should_receive(:parse).with(json).and_call_original
         end
 
         it 'deserializes and calls from_hash' do
-          Chicken.load(json,context)
+          Chicken.load(json, context)
         end
       end
 
@@ -191,31 +192,30 @@ describe Attributor::Model do
 
         it 'catches the error and reports it correctly' do
           JSON.should_receive(:parse).with(json).and_call_original
-          expect {
-            Chicken.load(json,context)
-          }.to raise_error(Attributor::DeserializationError, /Error deserializing a String using JSON.*#{context.join('.')}/)
+          expect do
+            Chicken.load(json, context)
+          end.to raise_error(Attributor::DeserializationError, /Error deserializing a String using JSON.*#{context.join('.')}/)
         end
       end
 
-
       context 'with an invalid object type' do
         it 'raises some sort of error' do
-          expect {
+          expect do
             Chicken.load(Object.new, context)
-          }.to raise_error(Attributor::IncompatibleTypeError, /Type Chicken cannot load values of type Object.*#{context.join('.')}/)
+          end.to raise_error(Attributor::IncompatibleTypeError, /Type Chicken cannot load values of type Object.*#{context.join('.')}/)
         end
       end
 
       context 'with an instance of different model' do
         it 'raises some sort of error' do
-          expect {
+          expect do
             turducken = Turducken.example
-            chicken = Chicken.load(turducken,context)
-          }.to raise_error(Attributor::AttributorException, /Unknown key received/)
+            chicken = Chicken.load(turducken, context)
+          end.to raise_error(Attributor::AttributorException, /Unknown key received/)
         end
       end
 
-      context "with a hash" do
+      context 'with a hash' do
         context 'for a complete set of attributes' do
           it 'loads the given attributes' do
             model.age.should == age
@@ -228,50 +228,45 @@ describe Attributor::Model do
 
           it 'sets the defaults' do
             model.age.should == 1
-            model.email.should == nil
+            model.email.should.nil?
           end
         end
 
         context 'for a superset of attributes' do
-          let(:hash) { {"invalid_attribute" => "value"} }
+          let(:hash) { { 'invalid_attribute' => 'value' } }
 
           it 'raises an error' do
-            expect {
+            expect do
               Chicken.load(hash, context)
-            }.to raise_error(Attributor::AttributorException, /Unknown key received/)
-            #raise_error(Attributor::AttributorException, /Unknown attributes.*#{context.join('.')}/)
+            end.to raise_error(Attributor::AttributorException, /Unknown key received/)
+            # raise_error(Attributor::AttributorException, /Unknown attributes.*#{context.join('.')}/)
           end
         end
 
         context 'loading with default values' do
           let(:reference) { Post }
-          let(:options) { {reference: reference} }
+          let(:options) { { reference: reference } }
 
           let(:attribute_definition) do
             proc do
               attribute :title
-              attribute :tags, default: ['stuff', 'things']
+              attribute :tags, default: %w(stuff things)
             end
           end
 
-          let(:struct) { Attributor::Struct.construct(attribute_definition, options)}
+          let(:struct) { Attributor::Struct.construct(attribute_definition, options) }
 
-          let(:data) { {title: 'my post'} }
+          let(:data) { { title: 'my post' } }
 
-          subject(:loaded)  { struct.load(data) }
-
+          subject(:loaded) { struct.load(data) }
 
           it 'validates' do
             expect(loaded.validate).to be_empty
           end
-
         end
       end
-
     end
-
   end
-
 
   context 'instance methods' do
     subject(:chicken) { Chicken.new }
@@ -283,33 +278,32 @@ describe Attributor::Model do
     end
 
     context 'initialize' do
-
       subject(:chicken) { Chicken.new(attributes_data) }
       context 'supports passing an initial hash object for attribute values' do
-        let(:attributes_data){ {age: '1', email:'rooster@coup.com'} }
+        let(:attributes_data) { { age: '1', email: 'rooster@coup.com' } }
         it 'and sets them in loaded format onto the instance attributes' do
           Chicken.should_receive(:load).with(attributes_data).and_call_original
           attributes_data.keys.each do |attr_name|
-            Chicken.attributes[attr_name].should_receive(:load).with(attributes_data[attr_name],instance_of(Array), recurse: false).and_call_original
+            Chicken.attributes[attr_name].should_receive(:load).with(attributes_data[attr_name], instance_of(Array), recurse: false).and_call_original
           end
           subject.age.should be(1)
           subject.email.should be(attributes_data[:email])
         end
       end
       context 'supports passing a JSON encoded data object' do
-        let(:attributes_hash){ {age: 1, email:'rooster@coup.com'} }
-        let(:attributes_data){ JSON.dump(attributes_hash) }
+        let(:attributes_hash) { { age: 1, email: 'rooster@coup.com' } }
+        let(:attributes_data) { JSON.dump(attributes_hash) }
         it 'and sets them in loaded format onto the instance attributes' do
           Chicken.should_receive(:load).with(attributes_data).and_call_original
           attributes_hash.keys.each do |attr_name|
-            Chicken.attributes[attr_name].should_receive(:load).with(attributes_hash[attr_name],instance_of(Array), recurse: false).and_call_original
+            Chicken.attributes[attr_name].should_receive(:load).with(attributes_hash[attr_name], instance_of(Array), recurse: false).and_call_original
           end
           subject.age.should be(1)
           subject.email.should == attributes_hash[:email]
         end
       end
       context 'supports passing a native model for the data object' do
-        let(:attributes_data){ Chicken.example }
+        let(:attributes_data) { Chicken.example }
         it 'sets a new instance pointing to the exact same attributes (careful about modifications!)' do
           attributes_data.attributes.each do |attr_name, attr_value|
             subject.send(attr_name).should be(attr_value)
@@ -335,16 +329,15 @@ describe Attributor::Model do
 
         it 'sets the value to nil if there is no default' do
           chicken.email = nil
-          chicken.email.should == nil
+          chicken.email.should.nil?
         end
-
       end
 
       context 'for unknown attributes' do
         it 'raises an exception' do
-          expect {
-            chicken.invalid_attribute =  'value'
-          }.to raise_error(NoMethodError, /undefined method/)
+          expect do
+            chicken.invalid_attribute = 'value'
+          end.to raise_error(NoMethodError, /undefined method/)
         end
       end
 
@@ -356,15 +349,13 @@ describe Attributor::Model do
         end
       end
     end
-
   end
-
 
   context 'validation' do
     context 'for simple models' do
       context 'that are valid' do
-        subject(:chicken)  { Chicken.example }
-        its(:validate) { should be_empty}
+        subject(:chicken) { Chicken.example }
+        its(:validate) { should be_empty }
       end
       context 'that are invalid' do
         subject(:chicken) { Chicken.example(age: 150) }
@@ -375,17 +366,17 @@ describe Attributor::Model do
     context 'for models using the "requires" DSL' do
       subject(:address) { Address.load(state: 'CA') }
       its(:validate) { should_not be_empty }
-      its(:validate) { should include "Key name is required for $." }
+      its(:validate) { should include 'Key name is required for $.' }
     end
     context 'for models with circular sub-attributes' do
       context 'that are valid' do
         subject(:person) { Person.example }
-        its(:validate) { should be_empty}
+        its(:validate) { should be_empty }
       end
 
       context 'that are both invalid' do
-        subject(:person){ Person.load( name: 'Joe', title: 'dude', okay: true )}
-        let(:address){ Address.load( name: '1 Main St', state: 'ME' )}
+        subject(:person) { Person.load(name: 'Joe', title: 'dude', okay: true) }
+        let(:address) { Address.load(name: '1 Main St', state: 'ME') }
         before do
           person.address = address
           address.person = person
@@ -399,31 +390,25 @@ describe Attributor::Model do
           state_error.should =~ /^Attribute person\.address\.state:/
         end
       end
-
     end
   end
 
-
   context '#dump' do
-
-
     context 'with circular references' do
       subject(:person) { Person.example }
       let(:output) { person.dump }
 
       it 'terminates' do
-        expect {
+        expect do
           Person.example.dump
-        }.to_not raise_error
+        end.to_not raise_error
       end
 
       it 'outputs "..." for circular references' do
         person.address.person.should be(person)
         output[:address][:person].should eq(Attributor::Model::CIRCULAR_REFERENCE_MARKER)
       end
-
     end
-
   end
 
   context 'extending' do
@@ -448,7 +433,6 @@ describe Attributor::Model do
       it 'adds the attribute' do
         model.attributes.keys.should =~ [:id, :name, :timestamps]
       end
-
     end
 
     context 'adding to an inner-Struct' do
@@ -497,12 +481,8 @@ describe Attributor::Model do
         it 'updates the type properly' do
           model.attributes[:id].type.should be(Attributor::String)
         end
-
       end
-
-
     end
-
   end
 
   context 'with no defined attributes' do
@@ -520,7 +500,5 @@ describe Attributor::Model do
     it 'dumps as an empty hash' do
       example.dump.should eq({})
     end
-
   end
-
 end

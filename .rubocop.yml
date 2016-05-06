@@ -1,0 +1,18 @@
+AllCops:
+  TargetRubyVersion: 2.2
+Style/Documentation:
+  Enabled: false
+Metrics/MethodLength:
+  Enabled: false
+Metrics/ClassLength:
+  Enabled: false
+Metrics/LineLength:
+  Max: 120
+Style/RedundantSelf:
+  Enabled: false
+Style/ClassAndModuleChildren:
+  Enabled: false
+Lint/Debugger:
+  Enabled: false
+Metrics/AbcSize:
+  Enabled: false

@@ -7,14 +7,13 @@ require 'rspec/core/rake_task'
 require 'bundler/gem_tasks'
 require 'rake/notes/rake_task'
 
-
-desc "Run RSpec code examples with simplecov"
+desc 'Run RSpec code examples with simplecov'
 RSpec::Core::RakeTask.new do |spec|
-  spec.rspec_opts = ["-c"]
+  spec.rspec_opts = ['-c']
   spec.pattern = FileList['spec/**/*_spec.rb']
 end
 
-desc "console"
+desc 'console'
 task :console do
   require 'bundler'
   Bundler.require(:default, :development, :test)
@@ -22,7 +21,7 @@ task :console do
   pry
 end
 
-task :default => :spec
+task default: :spec
 
 require 'yard'
 YARD::Rake::YardocTask.new

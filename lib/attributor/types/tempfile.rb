@@ -5,10 +5,10 @@ module Attributor
     include Attributor::Type
 
     def self.native_type
-      return ::Tempfile
+      ::Tempfile
     end
 
-    def self.example(context=Attributor::DEFAULT_ROOT_CONTEXT, options:{})
+    def self.example(context = Attributor::DEFAULT_ROOT_CONTEXT, options:{})
       file = ::Tempfile.new(Attributor.humanize_context(context))
       file.write /[:sentence:]/.gen
       file.write '.'
@@ -16,11 +16,11 @@ module Attributor
       file
     end
 
-    def self.dump(value, **opts)
+    def self.dump(value, **_opts)
       value && value.read
     end
 
-    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
+    def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **options)
       # TODO: handle additional cases that make sense
       case value
       when ::String
@@ -38,6 +38,5 @@ module Attributor
     def self.family
       String.family
     end
-
   end
 end

@@ -1,7 +1,6 @@
 # Abstract type for the 'numeric' family
 
 module Attributor
-
   class Numeric
     include Type
 
@@ -12,6 +11,5 @@ module Attributor
     def self.family
       'numeric'
     end
-
   end
 end

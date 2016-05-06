@@ -1,7 +1,6 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper.rb')
 
 describe Attributor::CSV do
-
   subject!(:csv) { Attributor::CSV.of(Integer) }
 
   context '.load' do
@@ -30,7 +29,7 @@ describe Attributor::CSV do
 
   context '.dump' do
     let!(:int_vals) { [1, 2, 3] }
-    let!(:str_vals)  { (0..2).collect { /\w+/.gen} }
+    let!(:str_vals) { (0..2).collect { /\w+/.gen } }
 
     it 'dumps a String value' do
       csv.dump(int_vals).should be_a(String)
@@ -50,8 +49,8 @@ describe Attributor::CSV do
   end
 
   context '.describe' do
-    let(:example){ csv.example }
-    subject(:described){ csv.describe(example: example)}
+    let(:example) { csv.example }
+    subject(:described) { csv.describe(example: example) }
     it 'adds a string example if an example is passed' do
       described.should have_key(:example)
       described[:example].should eq(csv.dump(example))

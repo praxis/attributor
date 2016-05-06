@@ -1,17 +1,14 @@
 
 
 module Attributor
-
   class Integer < Numeric
-
-    EXAMPLE_RANGE = 1000.freeze
+    EXAMPLE_RANGE = 1000
 
     def self.native_type
-      return ::Integer
+      ::Integer
     end
 
-
-    def self.example(context=nil, options: {})
+    def self.example(_context = nil, options: {})
       validate_options(options)
 
       # Set default values
@@ -30,33 +27,31 @@ module Attributor
       end
 
       # Generate random number on interval [min,max]
-      rand(max-min+1) + min
+      rand(max - min + 1) + min
     end
 
-    def self.load(value, context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
+    def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **options)
       Integer(value)
     rescue TypeError
       super
     end
 
     def self.validate_options(options)
-      if options.has_key?(:min) && options.has_key?(:max)
+      if options.key?(:min) && options.key?(:max)
         # Both :max and :min must be integers
         raise AttributorException.new("Invalid range: [#{options[:min].inspect}, #{options[:max].inspect}]") if !options[:min].is_a?(::Integer) || !options[:max].is_a?(::Integer)
 
         # :max cannot be less than :min
         raise AttributorException.new("Invalid range: [#{options[:min].inspect}, #{options[:max].inspect}]") if options[:max] < options[:min]
-      elsif !options.has_key?(:min) && options.has_key?(:max)
+      elsif !options.key?(:min) && options.key?(:max)
         # :max must be an integer
-        raise AttributorException.new("Invalid range: [, #{options[:max].inspect}]") if !options[:max].is_a?(::Integer)
-      elsif options.has_key?(:min) && !options.has_key?(:max)
+        raise AttributorException.new("Invalid range: [, #{options[:max].inspect}]") unless options[:max].is_a?(::Integer)
+      elsif options.key?(:min) && !options.key?(:max)
         # :min must be an integer
-        raise AttributorException.new("Invalid range: [#{options[:min].inspect},]") if !options[:min].is_a?(::Integer)
-      else
+        raise AttributorException.new("Invalid range: [#{options[:min].inspect},]") unless options[:min].is_a?(::Integer)
         # Neither :min nor :max were given, noop
       end
       true
     end
-
   end
 end

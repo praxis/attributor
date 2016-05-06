@@ -19,17 +19,17 @@ module Attributor
     end
 
     def self.native_type
-      return ::URI::Generic
+      ::URI::Generic
     end
 
-    def self.example(context=nil, options={})
+    def self.example(_context = nil, _options = {})
       URI(/[:uri:]/.gen)
     end
 
-    def self.load(value, context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
+    def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **_options)
       return nil if value.nil?
       case value
-      when self.native_type
+      when native_type
         value
       when ::String
         URI(value)
@@ -38,11 +38,11 @@ module Attributor
       end
     end
 
-    def self.dump(value, **opts)
+    def self.dump(value, **_opts)
       value.to_s
     end
 
-    def self.validate(value,context=Attributor::DEFAULT_ROOT_CONTEXT,attribute)
+    def self.validate(value, context = Attributor::DEFAULT_ROOT_CONTEXT, attribute)
       errors = []
 
       if attribute && (definition = attribute.options[:path])
@@ -64,12 +64,11 @@ module Attributor
         :unknown
       end
     end
-
   end
 end
 
 class Randgen
   def self.uri
-    "http://example.com/#{word}/#{rand(10 ** 9)}"
+    "http://example.com/#{word}/#{rand(10**9)}"
   end
 end

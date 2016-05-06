@@ -1,8 +1,8 @@
 begin
   require 'parslet'
 rescue LoadError
-  warn "Attributor::FieldSelector requires the 'parslet' gem, which can not be found. " +
-    "Please make sure it's in your Gemfile or installed in your system."
+  warn "Attributor::FieldSelector requires the 'parslet' gem, which can not be found. " \
+       "Please make sure it's in your Gemfile or installed in your system."
 end
 
 module Attributor
@@ -24,7 +24,7 @@ module Attributor
 
     def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **_options)
       return nil if value.nil?
-      return value if self.valid_type? value
+      return value if valid_type? value
       return {} if value.empty?
 
       parsed = Parser.new.parse(value)

@@ -5,20 +5,18 @@ require_relative '../exceptions'
 require 'date'
 
 module Attributor
-
   class DateTime < Temporal
-
     def self.native_type
-      return ::DateTime
+      ::DateTime
     end
 
-    def self.example(context=nil, options: {})
-      return self.load(/[:date:]/.gen, context)
+    def self.example(context = nil, options: {})
+      load(/[:date:]/.gen, context)
     end
 
-    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
+    def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **_options)
       # We assume that if the value is already in the right type, we've decoded it already
-      return value if value.is_a?(self.native_type)
+      return value if value.is_a?(native_type)
       return value.to_datetime if value.respond_to?(:to_datetime)
       return nil unless value.is_a?(::String)
       # TODO: we should be able to convert not only from String but Time...etc
@@ -26,13 +24,8 @@ module Attributor
       begin
         return ::DateTime.parse(value)
       rescue ArgumentError => e
-        raise Attributor::DeserializationError, context: context, from: value.class, encoding: "DateTime" , value: value
+        raise Attributor::DeserializationError, context: context, from: value.class, encoding: 'DateTime', value: value
       end
     end
-
-    
-
-
   end
-
 end

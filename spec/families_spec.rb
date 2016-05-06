@@ -1,7 +1,6 @@
 require File.join(File.dirname(__FILE__), 'spec_helper.rb')
 
 describe 'Type families' do
-
   let(:types) { ObjectSpace.each_object(Class).select { |k| k < Attributor::Type } }
 
   it 'are set on all types' do
@@ -10,5 +9,4 @@ describe 'Type families' do
       type.should_not be_in_family('attributor')
     end
   end
-
 end

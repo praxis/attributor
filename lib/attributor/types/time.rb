@@ -1,20 +1,19 @@
 require 'date'
 
 module Attributor
-
   class Time < Temporal
     include Type
 
     def self.native_type
-      return ::Time
+      ::Time
     end
 
-    def self.example(context=nil, options: {})
-      return self.load(/[:time:]/.gen, context)
+    def self.example(context = nil, options: {})
+      load(/[:time:]/.gen, context)
     end
 
-    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
-      return value if value.is_a?(self.native_type)
+    def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **_options)
+      return value if value.is_a?(native_type)
       return nil if value.nil?
 
       return value.to_time if value.respond_to?(:to_time)
@@ -26,14 +25,11 @@ module Attributor
         begin
           return ::Time.parse(value)
         rescue ArgumentError => e
-          raise Attributor::DeserializationError, context: context, from: value.class, encoding: "Time" , value: value
+          raise Attributor::DeserializationError, context: context, from: value.class, encoding: 'Time', value: value
         end
       else
         raise CoercionError, context: context, from: value.class, to: self, value: value
       end
     end
-
-    
   end
-
 end

@@ -1,8 +1,6 @@
 require File.join(File.dirname(__FILE__), 'spec_helper.rb')
 
-
 describe Attributor::Type do
-
   subject(:test_type) do
     Class.new do
       include Attributor::Type
@@ -24,14 +22,13 @@ describe Attributor::Type do
   let(:attribute_attributes) { Hash.new }
 
   let(:attribute) do
-    double "attribute",
-      :options => attribute_options,
-      :attributes => attribute_attributes
+    double 'attribute',
+           options: attribute_options,
+           attributes: attribute_attributes
   end
 
-
   its(:native_type) { should be(::String) }
-  its(:id) { should eq('Testing')}
+  its(:id) { should eq('Testing') }
 
   context 'anonymous' do
     its(:anonymous?) { should be(false) }
@@ -39,13 +36,13 @@ describe Attributor::Type do
       klass = Class.new do
         include Attributor::Type
       end
-      expect( klass.anonymous? ).to be(true)
+      expect(klass.anonymous?).to be(true)
     end
     it 'can be set to true explicitly' do
       klass = Class.new(test_type) do
         anonymous_type
       end
-      expect( klass.anonymous? ).to be(true)
+      expect(klass.anonymous?).to be(true)
     end
   end
 
@@ -53,50 +50,44 @@ describe Attributor::Type do
     let(:value) { nil }
     let(:context) { nil }
 
-    context "when given a nil value" do
+    context 'when given a nil value' do
       it 'always successfully returns it (i.e., you can always load nil)' do
         test_type.load(value).should be(value)
       end
     end
 
-    context "when given a value that is of native_type" do
-      let(:value) { "one" }
+    context 'when given a value that is of native_type' do
+      let(:value) { 'one' }
       it 'returns the value' do
         test_type.load(value).should be(value)
       end
     end
 
-    context "when given a value that is not of native_type" do
+    context 'when given a value that is not of native_type' do
       let(:value) { 1 }
-      let(:context) { ['top','sub'] }
+      let(:context) { %w(top sub) }
 
       it 'raises an exception' do
-        expect { test_type.load(value,context) }.to raise_error( Attributor::IncompatibleTypeError, /cannot load values of type Fixnum.*while loading top.sub/)
+        expect { test_type.load(value, context) }.to raise_error(Attributor::IncompatibleTypeError, /cannot load values of type Fixnum.*while loading top.sub/)
       end
-
-
     end
-
   end
-
 
   context 'validate' do
     let(:context) { ['some_attribute'] }
 
     let(:attribute_options) { {} }
 
-      let(:attribute) { double("some_attribute", :options => attribute_options)}
-      subject(:errors) { test_type.validate(value, context, attribute) }
+    let(:attribute) { double('some_attribute', options: attribute_options) }
+    subject(:errors) { test_type.validate(value, context, attribute) }
 
     context 'min and max' do
       let(:min) { 10 }
-      let(:max) { 100}
+      let(:max) { 100 }
 
-      let(:attribute_options) { {:min => min, :max => max} }
+      let(:attribute_options) { { min: min, max: max } }
 
-
-
-      context "with a value <= min" do
+      context 'with a value <= min' do
         let(:value) { 1 }
 
         it { should_not be_empty }
@@ -105,28 +96,23 @@ describe Attributor::Type do
         end
       end
 
-      context "with a value >= max" do
+      context 'with a value >= max' do
         let(:value) { 1000 }
         it { should_not be_empty }
         it 'returns the correct error message' do
           errors.first.should =~ /value \(#{value}\) is larger than the allowed max/
         end
-
       end
 
       context 'with a value within the range' do
         let(:value) { 50 }
         it { should be_empty }
       end
-
-
     end
 
-
-
-     context 'regexp' do
+    context 'regexp' do
       let(:regexp) { /dog/ }
-      let(:attribute_options) { {:regexp => regexp} }
+      let(:attribute_options) { { regexp: regexp } }
 
       context 'with a value that matches' do
         let(:value) { 'bulldog' }
@@ -134,23 +120,17 @@ describe Attributor::Type do
         it { should be_empty }
       end
 
-
       context 'with a value that does not match' do
         let(:value) { 'chicken' }
-        it { should_not be_empty}
+        it { should_not be_empty }
         it 'returns the correct error message' do
           errors.first.should =~ /value \(#{value}\) does not match regexp/
         end
       end
-
-     end
-
-
+    end
   end
 
-
   context 'example' do
-
   end
 
   context 'id' do
@@ -165,7 +145,7 @@ describe Attributor::Type do
   end
 
   context 'describe' do
-    let(:example){ "Foo" }
+    let(:example) { 'Foo' }
     subject(:description) { test_type.describe }
     it 'outputs the type name' do
       description[:name].should eq(test_type.name)
@@ -183,7 +163,6 @@ describe Attributor::Type do
     end
 
     context 'when anonymous' do
-
       it 'reports true in the output when set (to true default)' do
         anon_type = Class.new(test_type) { anonymous_type }
         anon_type.describe.should have_key(:anonymous)
@@ -194,8 +173,6 @@ describe Attributor::Type do
         anon_type.describe.should have_key(:anonymous)
         anon_type.describe[:anonymous].should be(false)
       end
-
     end
   end
-
 end

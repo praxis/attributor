@@ -1,14 +1,13 @@
 module Attributor
   class FieldSelector
     class Transformer < Parslet::Transform
-
       rule(field: simple(:field_token), children: subtree(:children_tree)) do
         cs = if children_tree.empty?
-          true
-        else
-          children_tree.each_with_object({}) do |item, hash|
-            hash.merge! item
-          end
+               true
+             else
+               children_tree.each_with_object({}) do |item, hash|
+                 hash.merge! item
+               end
         end
         { field_token.to_sym => cs }
       end

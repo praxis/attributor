@@ -6,7 +6,6 @@ require 'hashie'
 require 'digest/sha1'
 
 module Attributor
-
   require_relative 'attributor/dumpable'
 
   require_relative 'attributor/exceptions'
@@ -20,27 +19,24 @@ module Attributor
 
   require_relative 'attributor/extensions/randexp'
 
-
   # hierarchical separator string for composing human readable attributes
   SEPARATOR = '.'.freeze
   DEFAULT_ROOT_CONTEXT = ['$'].freeze
 
   # @param type [Class] The class of the type to resolve
   #
-  def self.resolve_type(attr_type, options={}, constructor_block=nil)
+  def self.resolve_type(attr_type, options = {}, constructor_block = nil)
     if attr_type < Attributor::Type
       klass = attr_type
     else
-      name = attr_type.name.split("::").last # TOO EXPENSIVE?
+      name = attr_type.name.split('::').last # TOO EXPENSIVE?
 
       klass = const_get(name) if const_defined?(name)
       raise AttributorException.new("Could not find class with name #{name}") unless klass
-      raise AttributorException.new("Could not find attribute type for: #{name} [klass: #{klass.name}]")  unless  klass < Attributor::Type
+      raise AttributorException.new("Could not find attribute type for: #{name} [klass: #{klass.name}]") unless klass < Attributor::Type
     end
 
-    if klass.constructable?
-      return klass.construct(constructor_block, options)
-    end
+    return klass.construct(constructor_block, options) if klass.constructable?
 
     raise AttributorException.new("Type: #{attr_type} does not support anonymous generation") if constructor_block
 
@@ -48,17 +44,15 @@ module Attributor
   end
 
   def self.type_name(type)
-    return self.type_name(type.class) unless type.kind_of?(::Class)
+    return type_name(type.class) unless type.is_a?(::Class)
 
     type.ancestors.find { |k| k.name && !k.name.empty? }.name
   end
 
-  def self.humanize_context( context )
-    return "" unless context
+  def self.humanize_context(context)
+    return '' unless context
 
-    if context.kind_of? ::String
-      context = Array(context)
-    end
+    context = Array(context) if context.is_a? ::String
 
     unless context.is_a? Enumerable
       raise "INVALID CONTEXT!!! (got: #{context.inspect})"
@@ -71,13 +65,13 @@ module Attributor
     end
   end
 
-  def self.errorize_value( value )
-    inspection =value.inspect
-    inspection = inspection[0..500]+ "...[truncated]" if inspection.size>500
+  def self.errorize_value(value)
+    inspection = value.inspect
+    inspection = inspection[0..500] + '...[truncated]' if inspection.size > 500
     inspection
   end
 
-  MODULE_PREFIX       = "Attributor\:\:".freeze
+  MODULE_PREFIX       = 'Attributor::'.freeze
   MODULE_PREFIX_REGEX = ::Regexp.new(MODULE_PREFIX)
 
   require_relative 'attributor/families/numeric'
@@ -102,7 +96,6 @@ module Attributor
   require_relative 'attributor/types/struct'
   require_relative 'attributor/types/class'
 
-
   require_relative 'attributor/types/csv'
   require_relative 'attributor/types/ids'
 
@@ -110,5 +103,4 @@ module Attributor
   require_relative 'attributor/types/tempfile'
   require_relative 'attributor/types/file_upload'
   require_relative 'attributor/types/uri'
-
 end

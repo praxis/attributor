@@ -1,7 +1,6 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper.rb')
 
 describe Attributor::Float do
-
   subject(:type) { Attributor::Float }
 
   it 'it is not Dumpable' do
@@ -19,7 +18,7 @@ describe Attributor::Float do
       let(:min) { 1 }
       let(:max) { 2 }
 
-      subject(:examples) { (0..100).collect { type.example(options:{min:min, max:max})}}
+      subject(:examples) { (0..100).collect { type.example(options: { min: min, max: max }) } }
 
       its(:min) { should be > min }
       its(:max) { should be < max }
@@ -34,7 +33,6 @@ describe Attributor::Float do
     end
 
     context 'for incoming Float values' do
-
       it 'returns the incoming value' do
         [0.0, -1.0, 1.0, 1e-10].each do |value|
           type.load(value).should be(value)
@@ -43,7 +41,6 @@ describe Attributor::Float do
     end
 
     context 'for incoming Integer values' do
-
       context 'with an integer value' do
         let(:value) { 1 }
         it 'decodes it if the Integer represents a Float' do
@@ -53,7 +50,6 @@ describe Attributor::Float do
     end
 
     context 'for incoming String values' do
-
       context 'that are valid Floats' do
         ['0.0', '-1.0', '1.0', '1e-10'].each do |value|
           it 'decodes it if the String represents a Float' do
@@ -70,7 +66,6 @@ describe Attributor::Float do
       end
 
       context 'that are not valid Floats' do
-
         context 'with simple alphanumeric text' do
           let(:value) { 'not a Float' }
 
@@ -78,9 +73,7 @@ describe Attributor::Float do
             expect { type.load(value) }.to raise_error(/invalid value/)
           end
         end
-
       end
-
     end
   end
 end

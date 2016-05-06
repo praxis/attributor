@@ -6,6 +6,5 @@ module Attributor
     def dump
       raise NotImplementedError, 'Dumpable requires the implementation of #dump'
     end
-
   end
 end

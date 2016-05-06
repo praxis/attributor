@@ -1,27 +1,20 @@
 require 'bigdecimal'
 
 module Attributor
-
   class BigDecimal < Numeric
-
     def self.native_type
-      return ::BigDecimal
+      ::BigDecimal
     end
 
-    def self.example(context=nil, **options)
-      return ::BigDecimal.new("#{/\d{3}/.gen}.#{/\d{3}/.gen}")
+    def self.example(_context = nil, **_options)
+      ::BigDecimal.new("#{/\d{3}/.gen}.#{/\d{3}/.gen}")
     end
 
-    def self.load(value,context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
+    def self.load(value, _context = Attributor::DEFAULT_ROOT_CONTEXT, **_options)
       return nil if value.nil?
-      return value if value.is_a?(self.native_type)
-      if value.kind_of?(::Float)
-        return BigDecimal(value, 10)
-      end
-      return BigDecimal(value)
+      return value if value.is_a?(native_type)
+      return BigDecimal(value, 10) if value.is_a?(::Float)
+      BigDecimal(value)
     end
-
   end
-
 end
-

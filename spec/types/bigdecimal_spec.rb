@@ -25,11 +25,11 @@ describe Attributor::BigDecimal do
     end
 
     context 'for incoming Float values' do
-     it 'returns the incoming value' do
-       [0.0, -1.0, 1.0, 1e-10, 0.25135].each do |value|
-         type.load(value).should eq(value)
-       end
-     end
+      it 'returns the incoming value' do
+        [0.0, -1.0, 1.0, 1e-10, 0.25135].each do |value|
+          type.load(value).should eq(value)
+        end
+      end
     end
 
     context 'for incoming Integer values' do
@@ -47,6 +47,5 @@ describe Attributor::BigDecimal do
         type.load('0.1').should eq(0.1)
       end
     end
-
   end
 end
