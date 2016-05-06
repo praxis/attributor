@@ -51,7 +51,7 @@ describe Attributor::String do
   context 'for incoming Symbol values' do
     let(:value) { :something }
     it 'returns the stringified-value' do
-      type.load(value).should == value.to_s
+      type.load(value).should eq value.to_s
     end
   end
 

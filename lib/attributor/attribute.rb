@@ -29,11 +29,11 @@ module Attributor
       check_options!
     end
 
-    def ==(attribute)
-      raise ArgumentError, "can not compare Attribute with #{attribute.class.name}" unless attribute.is_a?(Attribute)
+    def ==(other)
+      raise ArgumentError, "can not compare Attribute with #{other.class.name}" unless other.is_a?(Attribute)
 
-      type == attribute.type &&
-        options == attribute.options
+      type == other.type &&
+        options == other.options
     end
 
     def parse(value, context = Attributor::DEFAULT_ROOT_CONTEXT)
@@ -61,7 +61,7 @@ module Attributor
                 end
               else
                 defined_val
-        end
+              end
         value = val # Need to load?
       end
 
@@ -138,7 +138,7 @@ module Attributor
                     nil
                   else
                     val
-      end
+                  end
       load(generated, context)
     end
 
@@ -156,17 +156,15 @@ module Attributor
         loaded = example_from_options(parent, context)
         errors = validate(loaded, context)
         raise AttributorException, "Error generating example for #{Attributor.humanize_context(context)}. Errors: #{errors.inspect}" if errors.any?
-        loaded
+        return loaded
+      end
+
+      return options[:values].pick if options.key? :values
+
+      if type.respond_to?(:attributes)
+        type.example(context, values)
       else
-        if (option_values = options[:values])
-          option_values.pick
-        else
-          if type.respond_to?(:attributes)
-            type.example(context, values)
-          else
-            type.example(context, options: options)
-          end
-        end
+        type.example(context, options: options)
       end
     end
 
@@ -220,7 +218,7 @@ module Attributor
         predicate = requirement.values.first
       else
         # should never get here if the option validation worked...
-        raise AttributorException.new("unknown type of dependency: #{requirement.inspect} for #{Attributor.humanize_context(context)}")
+        raise AttributorException, "unknown type of dependency: #{requirement.inspect} for #{Attributor.humanize_context(context)}"
       end
 
       # chop off the last part
@@ -252,7 +250,7 @@ module Attributor
       options.each do |option_name, option_value|
         next unless check_option!(option_name, option_value) == :unknown
         if type.check_option!(option_name, option_value) == :unknown
-          raise AttributorException.new("unsupported option: #{option_name} with value: #{option_value.inspect} for attribute: #{inspect}")
+          raise AttributorException, "unsupported option: #{option_name} with value: #{option_value.inspect} for attribute: #{inspect}"
         end
       end
 
@@ -263,24 +261,24 @@ module Attributor
     def check_option!(name, definition)
       case name
       when :values
-        raise AttributorException.new("Allowed set of values requires an array. Got (#{definition})") unless definition.is_a? ::Array
+        raise AttributorException, "Allowed set of values requires an array. Got (#{definition})" unless definition.is_a? ::Array
       when :default
-        raise AttributorException.new("Default value doesn't have the correct attribute type. Got (#{definition.inspect})") unless type.valid_type?(definition) || definition.is_a?(Proc)
+        raise AttributorException, "Default value doesn't have the correct attribute type. Got (#{definition.inspect})" unless type.valid_type?(definition) || definition.is_a?(Proc)
         options[:default] = load(definition) unless definition.is_a?(Proc)
       when :description
-        raise AttributorException.new("Description value must be a string. Got (#{definition})") unless definition.is_a? ::String
+        raise AttributorException, "Description value must be a string. Got (#{definition})" unless definition.is_a? ::String
       when :required
-        raise AttributorException.new('Required must be a boolean') unless !!definition == definition # Boolean check
-        raise AttributorException.new('Required cannot be enabled in combination with :default') if definition == true && options.key?(:default)
+        raise AttributorException, 'Required must be a boolean' unless definition == true || definition == false
+        raise AttributorException, 'Required cannot be enabled in combination with :default' if definition == true && options.key?(:default)
       when :required_if
-        raise AttributorException.new('Required_if must be a String, a Hash definition or a Proc') unless definition.is_a?(::String) || definition.is_a?(::Hash) || definition.is_a?(::Proc)
-        raise AttributorException.new('Required_if cannot be specified together with :required') if options[:required]
+        raise AttributorException, 'Required_if must be a String, a Hash definition or a Proc' unless definition.is_a?(::String) || definition.is_a?(::Hash) || definition.is_a?(::Proc)
+        raise AttributorException, 'Required_if cannot be specified together with :required' if options[:required]
       when :example
         unless definition.is_a?(::Regexp) || definition.is_a?(::String) || definition.is_a?(::Array) || definition.is_a?(::Proc) || definition.nil? || type.valid_type?(definition)
-          raise AttributorException.new("Invalid example type (got: #{definition.class.name}). It must always match the type of the attribute (except if passing Regex that is allowed for some types)")
+          raise AttributorException, "Invalid example type (got: #{definition.class.name}). It must always match the type of the attribute (except if passing Regex that is allowed for some types)"
         end
       when :custom_data
-        raise AttributorException.new("custom_data must be a Hash. Got (#{definition})") unless definition.is_a?(::Hash)
+        raise AttributorException, "custom_data must be a Hash. Got (#{definition})" unless definition.is_a?(::Hash)
       else
         return :unknown # unknown option
       end

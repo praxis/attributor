@@ -38,7 +38,7 @@ describe Attributor::Time do
         object = Time.now
         loaded = type.load(object)
         loaded.should be_a(::Time)
-        loaded.to_time.should == object
+        loaded.to_time.should eq object
       end
 
       it 'returns correct Time for DateTime objects' do
@@ -62,7 +62,7 @@ describe Attributor::Time do
         '2001-02-03T04:05:06+07:00.123456', # custom format with microseconds
       ].each do |value|
         it "returns correct Time for #{value.inspect}" do
-          type.load(value).should == Time.parse(value)
+          type.load(value).should eq Time.parse(value)
         end
       end
 

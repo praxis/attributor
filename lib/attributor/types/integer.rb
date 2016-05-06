@@ -39,16 +39,16 @@ module Attributor
     def self.validate_options(options)
       if options.key?(:min) && options.key?(:max)
         # Both :max and :min must be integers
-        raise AttributorException.new("Invalid range: [#{options[:min].inspect}, #{options[:max].inspect}]") if !options[:min].is_a?(::Integer) || !options[:max].is_a?(::Integer)
+        raise AttributorException, "Invalid range: [#{options[:min].inspect}, #{options[:max].inspect}]" if !options[:min].is_a?(::Integer) || !options[:max].is_a?(::Integer)
 
         # :max cannot be less than :min
-        raise AttributorException.new("Invalid range: [#{options[:min].inspect}, #{options[:max].inspect}]") if options[:max] < options[:min]
+        raise AttributorException, "Invalid range: [#{options[:min].inspect}, #{options[:max].inspect}]" if options[:max] < options[:min]
       elsif !options.key?(:min) && options.key?(:max)
         # :max must be an integer
-        raise AttributorException.new("Invalid range: [, #{options[:max].inspect}]") unless options[:max].is_a?(::Integer)
+        raise AttributorException, "Invalid range: [, #{options[:max].inspect}]" unless options[:max].is_a?(::Integer)
       elsif options.key?(:min) && !options.key?(:max)
         # :min must be an integer
-        raise AttributorException.new("Invalid range: [#{options[:min].inspect},]") unless options[:min].is_a?(::Integer)
+        raise AttributorException, "Invalid range: [#{options[:min].inspect},]" unless options[:min].is_a?(::Integer)
         # Neither :min nor :max were given, noop
       end
       true

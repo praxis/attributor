@@ -31,7 +31,7 @@ module Attributor
       result
     end
 
-    def self.example(_context = nil, options:{})
+    def self.example(_context = nil, **_options)
       @klass.nil? ? 'MyClass' : @klass.name
     end
 

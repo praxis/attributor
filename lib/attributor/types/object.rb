@@ -10,7 +10,7 @@ module Attributor
       ::BasicObject
     end
 
-    def self.example(_context = nil, options:{})
+    def self.example(_context = nil, **_options)
       'An Object'
     end
   end

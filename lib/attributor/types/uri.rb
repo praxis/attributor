@@ -23,7 +23,7 @@ module Attributor
     end
 
     def self.example(_context = nil, _options = {})
-      URI(/[:uri:]/.gen)
+      URI(Randgen.uri)
     end
 
     def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **_options)
@@ -57,7 +57,7 @@ module Attributor
       case name
       when :path
         unless definition.is_a? ::Regexp
-          raise AttributorException.new("Value for option :path is not a Regexp object. Got (#{definition.inspect})")
+          raise AttributorException, "Value for option :path is not a Regexp object. Got (#{definition.inspect})"
         end
         :ok
       else

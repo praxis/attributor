@@ -42,7 +42,7 @@ module Attributor
 
       # TODO: refactor this to take just the options instead of the full attribute?
       # TODO: delegate to subclass
-      def validate(value, context = Attributor::DEFAULT_ROOT_CONTEXT, attribute)
+      def validate(value, context = Attributor::DEFAULT_ROOT_CONTEXT, attribute) # rubocop:disable Style/OptionalArguments
         errors = []
         attribute.options.each do |option, opt_definition|
           case option
@@ -61,12 +61,12 @@ module Attributor
       def valid_type?(value)
         return value.is_a?(native_type) if respond_to?(:native_type)
 
-        raise AttributorException.new("#{self} must implement #valid_type? or #native_type")
+        raise AttributorException, "#{self} must implement #valid_type? or #native_type"
       end
 
       # Default, overridable example function
-      def example(_context = nil, options:{})
-        raise AttributorException.new("#{self} must implement #example")
+      def example(_context = nil, **_options)
+        raise AttributorException, "#{self} must implement #example"
       end
 
       # HELPER FUNCTIONS
@@ -74,12 +74,12 @@ module Attributor
       def check_option!(name, definition)
         case name
         when :min
-          raise AttributorException.new("Value for option :min does not implement '<='. Got: (#{definition.inspect})") unless definition.respond_to?(:<=)
+          raise AttributorException, "Value for option :min does not implement '<='. Got: (#{definition.inspect})" unless definition.respond_to?(:<=)
         when :max
-          raise AttributorException.new("Value for option :max does not implement '>='. Got(#{definition.inspect})") unless definition.respond_to?(:>=)
+          raise AttributorException, "Value for option :max does not implement '>='. Got(#{definition.inspect})" unless definition.respond_to?(:>=)
         when :regexp
           # could go for a respoind_to? :=~ here, but that seems overly... cute... and not useful.
-          raise AttributorException.new("Value for option :regexp is not a Regexp object. Got (#{definition.inspect})") unless definition.is_a? ::Regexp
+          raise AttributorException, "Value for option :regexp is not a Regexp object. Got (#{definition.inspect})" unless definition.is_a? ::Regexp
         else
           return :unknown
         end
@@ -97,7 +97,7 @@ module Attributor
 
       # By default, non complex types will not have a DSL subdefinition this handles such case
       def compile_dsl(options, block)
-        raise AttributorException.new('Basic structures cannot take extra block definitions') if block
+        raise AttributorException, 'Basic structures cannot take extra block definitions' if block
         # Simply create a DSL compiler to store the options, and not to parse any DSL
         sub_definition = dsl_compiler.new(options)
         sub_definition

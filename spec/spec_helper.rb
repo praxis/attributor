@@ -32,3 +32,9 @@ RSpec::Matchers.define :be_in_family do |expected|
     actual.family == expected
   end
 end
+
+RSpec::Matchers.define :be_subclass_of do |expected|
+  match do |actual|
+    actual < expected
+  end
+end

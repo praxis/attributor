@@ -64,7 +64,7 @@ module Attributor
         result
       end
 
-      def describe(_shallow = false, example: nil)
+      def describe(_shallow = false, _example: nil)
         hash = { type: type, attributes: attr_names }
         hash[:count] = number unless number.nil?
         hash[:description] = description unless description.nil?

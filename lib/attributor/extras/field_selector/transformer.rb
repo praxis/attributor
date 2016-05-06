@@ -8,7 +8,7 @@ module Attributor
                children_tree.each_with_object({}) do |item, hash|
                  hash.merge! item
                end
-        end
+             end
         { field_token.to_sym => cs }
       end
 

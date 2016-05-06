@@ -55,13 +55,13 @@ module Attributor
     #
     def query(key_path, path_prefix = ROOT_PREFIX)
       query!(key_path, path_prefix)
-    rescue NoMethodError => e
+    rescue NoMethodError
       nil
     end
 
     def register(key_path, value)
       if key_path.split(SEPARATOR).size > 1
-        raise AttributorException.new("can only register top-level attributes. got: #{key_path}")
+        raise AttributorException, "can only register top-level attributes. got: #{key_path}"
       end
 
       @data[key_path] = value
@@ -94,7 +94,7 @@ module Attributor
       when nil
         return !value.nil?
       else
-        raise AttributorException.new("predicate not supported: #{predicate.inspect}")
+        raise AttributorException, "predicate not supported: #{predicate.inspect}"
       end
     end
 
@@ -104,11 +104,8 @@ module Attributor
     end
 
     def self.current
-      if resolver = Thread.current[:_attributor_attribute_resolver]
-        return resolver
-      else
-        raise AttributorException, 'No AttributeResolver set.'
-      end
+      raise AttributorException, 'No AttributeResolver set.' unless Thread.current[:_attributor_attribute_resolver]
+      Thread.current[:_attributor_attribute_resolver]
     end
   end
 end

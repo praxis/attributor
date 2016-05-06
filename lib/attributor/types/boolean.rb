@@ -10,7 +10,7 @@ module Attributor
       value == true || value == false
     end
 
-    def self.example(_context = nil, options: {})
+    def self.example(_context = nil, **_options)
       [true, false].sample
     end
 

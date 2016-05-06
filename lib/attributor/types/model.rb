@@ -138,11 +138,11 @@ module Attributor
           next if value.validating
         end
 
-        errors.push *sub_attribute.validate(value, sub_context)
+        errors.push(*sub_attribute.validate(value, sub_context))
       end
       self.class.requirements.each_with_object(ret) do |req, errors|
         validation_errors = req.validate(@contents, context)
-        errors.push *validation_errors unless validation_errors.empty?
+        errors.push(*validation_errors) unless validation_errors.empty?
       end
       ret
     ensure

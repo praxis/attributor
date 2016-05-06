@@ -6,8 +6,8 @@ module Attributor
       ::Date
     end
 
-    def self.example(context = nil, options: {})
-      load(/[:date:]/.gen, context)
+    def self.example(context = nil, **_options)
+      load(Randgen.date, context)
     end
 
     def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **_options)
@@ -20,7 +20,7 @@ module Attributor
       when ::String
         begin
           return ::Date.parse(value)
-        rescue ArgumentError => e
+        rescue ArgumentError
           raise Attributor::DeserializationError, context: context, from: value.class, encoding: 'Date', value: value
         end
       else
@@ -28,4 +28,4 @@ module Attributor
       end
     end
   end
-  end
+end

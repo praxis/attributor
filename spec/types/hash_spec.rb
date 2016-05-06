@@ -14,7 +14,6 @@ describe Attributor::Hash do
         Class.new(Attributor::Model) do
           attributes do
             raise 'sorry :('
-            attribute :name, String
           end
         end
       end
@@ -73,7 +72,7 @@ describe Attributor::Hash do
 
       it 'returns a hash with keys and/or values of the right type' do
         example.should be_kind_of(Attributor::Hash)
-        example.keys.size.should > 0
+        example.keys.size.should be > 0
         example.values.all? { |v| v.is_a? Integer }.should be(true)
       end
     end
@@ -97,11 +96,11 @@ describe Attributor::Hash do
 
         it 'using set' do
           example.set :name, 'not bob'
-          example.get(:name).should == 'not bob'
+          example.get(:name).should eq 'not bob'
         end
         it 'using []=' do
           example[:name] = 'not bob'
-          example[:name].should == 'not bob'
+          example[:name].should eq 'not bob'
         end
       end
 
@@ -127,7 +126,7 @@ describe Attributor::Hash do
         pairs.should =~ [[:name, name], [:something, something]]
       end
 
-      its(:contents) { should eq ({ name: name, something: something }) }
+      its(:contents) { should eq(name: name, something: something) }
       it 'does not create methods for the keys' do
         example.should_not respond_to(:name)
         example.should_not respond_to(:something)
@@ -136,7 +135,10 @@ describe Attributor::Hash do
 
     context 'using a non array context' do
       it 'should work for hashes with key/value types' do
-        expect { Attributor::Hash.of(key: String, value: String).example('Not an Array') }.to_not raise_error
+        expect do
+          Attributor::Hash.of(key: String, value: String)
+                          .example('Not an Array')
+        end.to_not raise_error
       end
       it 'should work for hashes with keys defined' do
         block = proc { key 'a string', String }
@@ -277,7 +279,8 @@ describe Attributor::Hash do
           it 'complains about an unknown key' do
             expect do
               loader_hash.load(value)
-            end.to raise_error(Attributor::AttributorException, /Unknown key received: :weird_key/)
+            end.to raise_error(Attributor::AttributorException,
+                               /Unknown key received: :weird_key/)
           end
         end
       end
@@ -390,17 +393,18 @@ describe Attributor::Hash do
   context '.check_option!' do
     context ':case_insensitive_load' do
       it 'is valid when key_type is a string' do
-        Attributor::Hash.of(key: String).check_option!(:case_insensitive_load, true).should == :ok
+        Attributor::Hash.of(key: String).check_option!(:case_insensitive_load, true).should eq :ok
       end
 
       it 'is invalid when key_type is non-string' do
         expect do
           Attributor::Hash.of(key: Integer).check_option!(:case_insensitive_load, true)
-        end.to raise_error(Attributor::AttributorException, /:case_insensitive_load may not be used/)
+        end.to raise_error(Attributor::AttributorException,
+                           /:case_insensitive_load may not be used/)
       end
     end
     it 'rejects unknown options' do
-      subject.check_option!(:bad_option, Object).should == :unknown
+      subject.check_option!(:bad_option, Object).should eq :unknown
     end
   end
 
@@ -419,7 +423,8 @@ describe Attributor::Hash do
       it 'it complains loudly' do
         expect do
           HashWithStrings.add_requirement(req)
-        end.to raise_error('Invalid attribute name(s) found (invalid, notgood) when defining a requirement of type all for HashWithStrings .The only existing attributes are [:name, :something]')
+        end.to raise_error(
+          'Invalid attribute name(s) found (invalid, notgood) when defining a requirement of type all for HashWithStrings .The only existing attributes are [:name, :something]')
       end
     end
   end
@@ -460,8 +465,8 @@ describe Attributor::Hash do
         dumped_value.should be_kind_of(::Hash)
         dumped_value.keys.should =~ %w(id1 id2)
         dumped_value.values.should have(2).items
-        dumped_value['id1'].should == value1
-        dumped_value['id2'].should == value2
+        dumped_value['id1'].should eq value1
+        dumped_value['id2'].should eq value2
       end
 
       context 'that has nil attribute values' do
@@ -472,7 +477,7 @@ describe Attributor::Hash do
           dumped_value.should be_kind_of(::Hash)
           dumped_value.keys.should =~ %w(id1 id2)
           dumped_value['id1'].should.nil?
-          dumped_value['id2'].should == value2
+          dumped_value['id2'].should eq value2
         end
       end
     end

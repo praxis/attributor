@@ -11,7 +11,6 @@ describe Attributor::Model do
         Class.new(Attributor::Model) do
           attributes do
             raise 'sorry :('
-            attribute :name, String
           end
         end
       end
@@ -194,7 +193,8 @@ describe Attributor::Model do
           JSON.should_receive(:parse).with(json).and_call_original
           expect do
             Chicken.load(json, context)
-          end.to raise_error(Attributor::DeserializationError, /Error deserializing a String using JSON.*#{context.join('.')}/)
+          end.to raise_error(Attributor::DeserializationError,
+                             /Error deserializing a String using JSON.*#{context.join('.')}/)
         end
       end
 
@@ -202,7 +202,8 @@ describe Attributor::Model do
         it 'raises some sort of error' do
           expect do
             Chicken.load(Object.new, context)
-          end.to raise_error(Attributor::IncompatibleTypeError, /Type Chicken cannot load values of type Object.*#{context.join('.')}/)
+          end.to raise_error(Attributor::IncompatibleTypeError,
+                             /Type Chicken cannot load values of type Object.*#{context.join('.')}/)
         end
       end
 
@@ -210,7 +211,7 @@ describe Attributor::Model do
         it 'raises some sort of error' do
           expect do
             turducken = Turducken.example
-            chicken = Chicken.load(turducken, context)
+            Chicken.load(turducken, context)
           end.to raise_error(Attributor::AttributorException, /Unknown key received/)
         end
       end
@@ -218,8 +219,8 @@ describe Attributor::Model do
       context 'with a hash' do
         context 'for a complete set of attributes' do
           it 'loads the given attributes' do
-            model.age.should == age
-            model.email.should == email
+            model.age.should eq age
+            model.email.should eq email
           end
         end
 
@@ -227,7 +228,7 @@ describe Attributor::Model do
           let(:hash) { Hash.new }
 
           it 'sets the defaults' do
-            model.age.should == 1
+            model.age.should eq 1
             model.email.should.nil?
           end
         end
@@ -284,7 +285,9 @@ describe Attributor::Model do
         it 'and sets them in loaded format onto the instance attributes' do
           Chicken.should_receive(:load).with(attributes_data).and_call_original
           attributes_data.keys.each do |attr_name|
-            Chicken.attributes[attr_name].should_receive(:load).with(attributes_data[attr_name], instance_of(Array), recurse: false).and_call_original
+            Chicken.attributes[attr_name].should_receive(:load)
+                                         .with(attributes_data[attr_name], instance_of(Array), recurse: false)
+                                         .and_call_original
           end
           subject.age.should be(1)
           subject.email.should be(attributes_data[:email])
@@ -296,10 +299,12 @@ describe Attributor::Model do
         it 'and sets them in loaded format onto the instance attributes' do
           Chicken.should_receive(:load).with(attributes_data).and_call_original
           attributes_hash.keys.each do |attr_name|
-            Chicken.attributes[attr_name].should_receive(:load).with(attributes_hash[attr_name], instance_of(Array), recurse: false).and_call_original
+            Chicken.attributes[attr_name].should_receive(:load)
+                                         .with(attributes_hash[attr_name], instance_of(Array), recurse: false)
+                                         .and_call_original
           end
           subject.age.should be(1)
-          subject.email.should == attributes_hash[:email]
+          subject.email.should eq attributes_hash[:email]
         end
       end
       context 'supports passing a native model for the data object' do
@@ -317,14 +322,14 @@ describe Attributor::Model do
         let(:age) { 1 }
         it 'gets and sets attributes' do
           chicken.age = age
-          chicken.age.should == age
+          chicken.age.should eq age
         end
       end
 
       context 'setting nil' do
         it 'assigns the default value if there is one' do
           chicken.age = nil
-          chicken.age.should == 1
+          chicken.age.should eq 1
         end
 
         it 'sets the value to nil if there is no default' do

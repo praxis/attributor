@@ -24,7 +24,7 @@ describe Attributor::Attribute do
       end
 
       it 'generates the class' do
-        thing = Attributor::Attribute.new(Struct, attribute_options) do
+        Attributor::Attribute.new(Struct, attribute_options) do
           attribute :id, Integer
         end
       end
@@ -53,7 +53,7 @@ describe Attributor::Attribute do
       its(:describe) { should have_key(:example_definition) }
       its(:describe) { should_not have_key(:example) }
       it 'should have the example value in the :example_definition key' do
-        subject.describe[:example_definition].should == 'ex_def'
+        subject.describe[:example_definition].should eq 'ex_def'
       end
     end
 
@@ -63,7 +63,7 @@ describe Attributor::Attribute do
       its(:describe) { should have_key(:custom_data) }
 
       it 'keep the custom data attribute' do
-        subject.describe[:custom_data].should == custom_data
+        subject.describe[:custom_data].should eq custom_data
       end
     end
 
@@ -78,7 +78,7 @@ describe Attributor::Attribute do
       subject(:description) { attribute.describe }
 
       it 'uses the name of the first non-anonymous ancestor' do
-        description[:type][:name].should == 'Struct'
+        description[:type][:name].should eq 'Struct'
       end
 
       it 'includes sub-attributes' do
@@ -283,7 +283,7 @@ describe Attributor::Attribute do
         end
 
         it 'passes any given parent through to the example proc' do
-          example_result.should == 'ok'
+          example_result.should eq 'ok'
         end
       end
 
@@ -296,7 +296,7 @@ describe Attributor::Attribute do
         end
 
         it 'passes any given parent through to the example proc' do
-          example_result.should == "#{context} ok"
+          example_result.should eq "#{context} ok"
         end
       end
     end
@@ -365,7 +365,7 @@ describe Attributor::Attribute do
               old_verbose = $VERBOSE
               $VERBOSE = nil
               Kernel.should_receive(:warn).and_call_original
-              attribute.load(value, context).should == 'any parent method should spit out warning: []'
+              attribute.load(value, context).should eq 'any parent method should spit out warning: []'
             ensure
               $VERBOSE = old_verbose
             end
@@ -382,7 +382,7 @@ describe Attributor::Attribute do
             context 'with a nil value' do
               let(:value) { nil }
               it 'returns an error' do
-                attribute.validate(value, context).first.should == 'Attribute context is required'
+                attribute.validate(value, context).first.should eq 'Attribute context is required'
               end
             end
           end
@@ -498,31 +498,31 @@ describe Attributor::Attribute do
       subject(:attribute) { Attributor::Attribute.new(type, attribute_options) }
 
       it 'has attributes' do
-        attribute.attributes.should == type.attributes
+        attribute.attributes.should eq type.attributes
       end
 
       # it 'has compiled_definition' do
-      #  attribute.compiled_definition.should == type.definition
+      #  attribute.compiled_definition.should eq type.definition
       # end
 
       it 'merges its options with those of the compiled_definition' do
-        attribute.options.should == attribute_options.merge(type_options)
+        attribute.options.should eq attribute_options.merge(type_options)
       end
 
       it 'describe handles sub-attributes nicely' do
         describe = attribute.describe(false)
 
-        describe[:type][:name].should == type.name
+        describe[:type][:name].should eq type.name
         common_options = attribute_options.select { |k, _v| Attributor::Attribute.TOP_LEVEL_OPTIONS.include? k }
         special_options = attribute_options.reject { |k, _v| Attributor::Attribute.TOP_LEVEL_OPTIONS.include? k }
         common_options.each do |k, v|
-          describe[k].should == v
+          describe[k].should eq v
         end
         special_options.each do |k, v|
-          describe[:options][k].should == v
+          describe[:options][k].should eq v
         end
         type_options.each do |k, v|
-          describe[:options][k].should == v
+          describe[:options][k].should eq v
         end
 
         attribute.attributes.each do |name, _attr|

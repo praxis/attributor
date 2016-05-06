@@ -44,7 +44,7 @@ describe Attributor::Float do
       context 'with an integer value' do
         let(:value) { 1 }
         it 'decodes it if the Integer represents a Float' do
-          type.load(value).should == 1.0
+          type.load(value).should eq 1.0
         end
       end
     end
@@ -53,7 +53,7 @@ describe Attributor::Float do
       context 'that are valid Floats' do
         ['0.0', '-1.0', '1.0', '1e-10'].each do |value|
           it 'decodes it if the String represents a Float' do
-            type.load(value).should == Float(value)
+            type.load(value).should eq Float(value)
           end
         end
       end
@@ -61,7 +61,7 @@ describe Attributor::Float do
       context 'that are valid Integers' do
         let(:value) { '1' }
         it 'decodes it if the String represents an Integer' do
-          type.load(value).should == 1.0
+          type.load(value).should eq 1.0
         end
       end
 

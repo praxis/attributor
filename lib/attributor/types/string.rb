@@ -22,7 +22,7 @@ module Attributor
           # It may fail to generate an example, see bug #72.
           options[:regexp].gen
         rescue => e
-          'Failed to generate example for %s : %s' % [options[:regexp].inspect, e.message]
+          format('Failed to generate example for %s : %s', options[:regexp].inspect, e.message)
         end
       else
         /\w+/.gen

@@ -18,7 +18,7 @@ module Attributor
         type = values.class.name
         reason = 'Attributor::CSV only supports dumping values of type ' \
                  "Array or String, not #{values.class.name}."
-        raise DumpError.new(context: context, name: name, type: type, original_exception: reason)
+        raise DumpError, context: context, name: name, type: type, original_exception: reason
       end
     end
 

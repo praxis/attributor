@@ -27,7 +27,7 @@ describe Attributor::Class do
 
     context 'for incoming String values' do
       ['Object', '::Object', '::Hash', 'Attributor::Struct'].each do |value|
-        it "loads '#{value}' as #{eval(value)}" do
+        it "loads #{value.inspect}" do
           type.load(value).should eq(value.constantize)
         end
       end

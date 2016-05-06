@@ -18,7 +18,7 @@ module Attributor
       super
     end
 
-    def self.example(_context = nil, options:{})
+    def self.example(_context = nil, **_options)
       ::Regexp.new(/^pattern\d{0,3}$/).to_s
     end
 

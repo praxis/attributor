@@ -5,7 +5,7 @@ module Attributor
                     type.name
                   else
                     type.inspect
-      end
+                  end
 
       msg = "Structure definition for type #{type_name} is invalid. The following exception has occurred: #{cause.inspect}"
       super(msg)
@@ -161,7 +161,7 @@ module Attributor
       end
 
       if options[:case_insensitive_load] && !(key_type <= String)
-        raise Attributor::AttributorException.new(":case_insensitive_load may not be used with keys of type #{key_type.name}")
+        raise Attributor::AttributorException, ":case_insensitive_load may not be used with keys of type #{key_type.name}"
       end
 
       keys(options, &constructor_block)
@@ -219,7 +219,7 @@ module Attributor
     end
 
     def self.dump(value, **opts)
-      if loaded = load(value)
+      if (loaded = load(value))
         loaded.dump(**opts)
       end
     end
@@ -245,30 +245,35 @@ module Attributor
     def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, recurse: false, **_options)
       context = Array(context)
 
+      return value if value.is_a?(self)
+      return nil if value.nil? && !recurse
+
+      loaded_value = self.parse(value, context)
+
+      return from_hash(loaded_value, context, recurse: recurse) if keys.any?
+      load_generic(loaded_value, context)
+    end
+
+    def self.parse(value, context)
       if value.nil?
-        if recurse
-          loaded_value = {}
-        else
-          return nil
-        end
-      elsif value.is_a?(self)
-        return value
+        {}
       elsif value.is_a?(Attributor::Hash)
-        loaded_value = value.contents
+        value.contents
       elsif value.is_a?(::Hash)
-        loaded_value = value
+        value
       elsif value.is_a?(::String)
-        loaded_value = decode_json(value, context)
+        decode_json(value, context)
       elsif value.respond_to?(:to_hash)
-        loaded_value = value.to_hash
+        value.to_hash
       else
         raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self
       end
+    end
 
-      return from_hash(loaded_value, context, recurse: recurse) if keys.any?
-      return new(loaded_value) if key_type == Object && value_type == Object
+    def self.load_generic(value, context)
+      return new(value) if key_type == Object && value_type == Object
 
-      loaded_value.each_with_object(new) do |(k, v), obj|
+      value.each_with_object(new) do |(k, v), obj|
         obj[key_type.load(k, context)] = value_type.load(v, context)
       end
     end
@@ -284,32 +289,14 @@ module Attributor
     def get(key, context: generate_subcontext(Attributor::DEFAULT_ROOT_CONTEXT, key))
       key = self.class.key_attribute.load(key, context)
 
-      if self.class.keys.empty?
-        if @contents.key? key
-          value = @contents[key]
-          loaded_value = value_attribute.load(value, context)
-          return self[key] = loaded_value
-        else
-          if self.class.options[:case_insensitive_load]
-            key = key.downcase
-            @contents.each do |k, _v|
-              return get(key, context: context) if key == k.downcase
-            end
-          end
-        end
-        return nil
-      end
-
+      return self.get_generic(key, context) if self.class.keys.empty?
       value = @contents[key]
 
       # FIXME: getting an unset value here should not force it in the hash
       if (attribute = self.class.keys[key])
         loaded_value = attribute.load(value, context)
-        if loaded_value.nil?
-          return nil
-        else
-          return self[key] = loaded_value
-        end
+        return nil if loaded_value.nil?
+        return self[key] = loaded_value
       end
 
       if self.class.options[:case_insensitive_load]
@@ -318,19 +305,30 @@ module Attributor
       end
 
       if self.class.options[:allow_extra]
-        if self.class.extra_keys.nil?
-          return @contents[key] = self.class.value_attribute.load(value, context)
-        else
-          extra_keys_key = self.class.extra_keys
+        return @contents[key] = self.class.value_attribute.load(value, context) if self.class.extra_keys.nil?
+        extra_keys_key = self.class.extra_keys
 
-          if @contents.key? extra_keys_key
-            return @contents[extra_keys_key].get(key, context: context)
-          end
-
+        if @contents.key? extra_keys_key
+          return @contents[extra_keys_key].get(key, context: context)
         end
+
       end
 
       raise LoadError, "Unknown key received: #{key.inspect} for #{Attributor.humanize_context(context)}"
+    end
+
+    def get_generic(key, context)
+      if @contents.key? key
+        value = @contents[key]
+        loaded_value = value_attribute.load(value, context)
+        return self[key] = loaded_value
+      elsif self.class.options[:case_insensitive_load]
+        key = key.downcase
+        @contents.each do |k, _v|
+          return get(key, context: context) if key == k.downcase
+        end
+      end
+      nil
     end
 
     def set(key, value, context: generate_subcontext(Attributor::DEFAULT_ROOT_CONTEXT, key), recurse: false)
@@ -350,18 +348,17 @@ module Attributor
       end
 
       if self.class.options[:allow_extra]
-        if self.class.extra_keys.nil?
-          return self[key] = self.class.value_attribute.load(value, context)
-        else
-          extra_keys_key = self.class.extra_keys
+        return self[key] = self.class.value_attribute.load(value, context) if self.class.extra_keys.nil?
 
-          unless @contents.key? extra_keys_key
-            extra_keys_value = self.class.keys[extra_keys_key].load({})
-            @contents[extra_keys_key] = extra_keys_value
-          end
+        extra_keys_key = self.class.extra_keys
 
-          return self[extra_keys_key].set(key, value, context: context)
+        unless @contents.key? extra_keys_key
+          extra_keys_value = self.class.keys[extra_keys_key].load({})
+          @contents[extra_keys_key] = extra_keys_value
         end
+
+        return self[extra_keys_key].set(key, value, context: context)
+
       end
 
       raise LoadError, "Unknown key received: #{key.inspect} while loading #{Attributor.humanize_context(context)}"
@@ -534,43 +531,51 @@ module Attributor
       context = [context] if context.is_a? ::String
 
       if self.class.keys.any?
-        extra_keys = @contents.keys - self.class.keys.keys
-        if extra_keys.any? && !self.class.options[:allow_extra]
-          return extra_keys.collect do |k|
-            "#{Attributor.humanize_context(context)} can not have key: #{k.inspect}"
-          end
-        end
-
-        ret = self.class.keys.each_with_object([]) do |(key, attribute), errors|
-          sub_context = self.class.generate_subcontext(context, key)
-
-          value = @contents[key]
-
-          if value.respond_to?(:validating) # really, it's a thing with sub-attributes
-            next if value.validating
-          end
-
-          errors.push *attribute.validate(value, sub_context)
-        end
+        self.validate_keys(context)
       else
-        ret = @contents.each_with_object([]) do |(key, value), errors|
-          # FIXME: the sub contexts and error messages don't really make sense here
-          unless key_type == Attributor::Object
-            sub_context = context + ["key(#{key.inspect})"]
-            errors.push *key_attribute.validate(key, sub_context)
-          end
+        self.validate_generic(context)
+      end
+    end
 
-          unless value_type == Attributor::Object
-            sub_context = context + ["value(#{value.inspect})"]
-            errors.push *value_attribute.validate(value, sub_context)
-          end
+    def validate_keys(context)
+      extra_keys = @contents.keys - self.class.keys.keys
+      if extra_keys.any? && !self.class.options[:allow_extra]
+        return extra_keys.collect do |k|
+          "#{Attributor.humanize_context(context)} can not have key: #{k.inspect}"
         end
+      end
+
+      ret = self.class.keys.each_with_object([]) do |(key, attribute), errors|
+        sub_context = self.class.generate_subcontext(context, key)
+
+        value = @contents[key]
+
+        if value.respond_to?(:validating) # really, it's a thing with sub-attributes
+          next if value.validating
+        end
+
+        errors.push(*attribute.validate(value, sub_context))
       end
       self.class.requirements.each_with_object(ret) do |req, errors|
         validation_errors = req.validate(@contents, context)
-        errors.push *validation_errors unless validation_errors.empty?
+        errors.push(*validation_errors) unless validation_errors.empty?
       end
       ret
+    end
+
+    def validate_generic(context)
+      @contents.each_with_object([]) do |(key, value), errors|
+        # FIXME: the sub contexts and error messages don't really make sense here
+        unless key_type == Attributor::Object
+          sub_context = context + ["key(#{key.inspect})"]
+          errors.push(*key_attribute.validate(key, sub_context))
+        end
+
+        unless value_type == Attributor::Object
+          sub_context = context + ["value(#{value.inspect})"]
+          errors.push(*value_attribute.validate(value, sub_context))
+        end
+      end
     end
 
     def dump(**opts)

@@ -8,9 +8,9 @@ module Attributor
       ::Tempfile
     end
 
-    def self.example(context = Attributor::DEFAULT_ROOT_CONTEXT, options:{})
+    def self.example(context = Attributor::DEFAULT_ROOT_CONTEXT, _options:{})
       file = ::Tempfile.new(Attributor.humanize_context(context))
-      file.write /[:sentence:]/.gen
+      file.write Randgen.sentence
       file.write '.'
       file.rewind
       file

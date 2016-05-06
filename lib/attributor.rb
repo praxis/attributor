@@ -26,20 +26,21 @@ module Attributor
   # @param type [Class] The class of the type to resolve
   #
   def self.resolve_type(attr_type, options = {}, constructor_block = nil)
-    if attr_type < Attributor::Type
-      klass = attr_type
-    else
-      name = attr_type.name.split('::').last # TOO EXPENSIVE?
-
-      klass = const_get(name) if const_defined?(name)
-      raise AttributorException.new("Could not find class with name #{name}") unless klass
-      raise AttributorException.new("Could not find attribute type for: #{name} [klass: #{klass.name}]") unless klass < Attributor::Type
-    end
+    klass = self.find_type(attr_type)
 
     return klass.construct(constructor_block, options) if klass.constructable?
+    raise AttributorException, "Type: #{attr_type} does not support anonymous generation" if constructor_block
 
-    raise AttributorException.new("Type: #{attr_type} does not support anonymous generation") if constructor_block
+    klass
+  end
 
+  def self.find_type(attr_type)
+    return attr_type if attr_type < Attributor::Type
+    name = attr_type.name.split('::').last # TOO EXPENSIVE?
+
+    klass = const_get(name) if const_defined?(name)
+    raise AttributorException, "Could not find class with name #{name}" unless klass
+    raise AttributorException, "Could not find attribute type for: #{name} [klass: #{klass.name}]" unless klass < Attributor::Type
     klass
   end
 
@@ -60,7 +61,7 @@ module Attributor
 
     begin
       return context.join('.')
-    rescue Exception => e
+    rescue e
       raise "Error creating context string: #{e.message}"
     end
   end

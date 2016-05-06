@@ -8,7 +8,7 @@ describe Attributor::Collection do
       it "returns an anonymous class with correct member_attribute of type #{member_type}" do
         klass = type.of(member_type)
         klass.should be_a(::Class)
-        klass.member_type.should == member_type
+        klass.member_type.should eq member_type
       end
     end
 
@@ -19,7 +19,7 @@ describe Attributor::Collection do
       #::Object
     ].each do |member_type|
       it "raises when given invalid element type #{member_type}" do
-        expect { klass = type.of(member_type) }.to raise_error(Attributor::AttributorException)
+        expect { type.of(member_type) }.to raise_error(Attributor::AttributorException)
       end
     end
   end
@@ -68,7 +68,7 @@ describe Attributor::Collection do
         '["alpha", 2, 3.0]'
       ].each do |value|
         it "parses JSON string as array when incoming value is #{value.inspect}" do
-          type.decode_json(value).should == JSON.parse(value)
+          type.decode_json(value).should eq JSON.parse(value)
         end
       end
     end
@@ -122,7 +122,7 @@ describe Attributor::Collection do
         let(:context) { %w(root subattr) }
         [1, Object.new, false, true, 3.0].each do |value|
           it "raises error when incoming value is #{value.inspect} (propagating the context)" do
-            expect { type.load(value, context).should == value }.to raise_error(Attributor::IncompatibleTypeError, /#{context.join('.')}/)
+            expect { type.load(value, context).should eq value }.to raise_error(Attributor::IncompatibleTypeError, /#{context.join('.')}/)
           end
         end
       end
@@ -149,7 +149,7 @@ describe Attributor::Collection do
         let(:value) { [::Turducken.example] }
         it 'raises error when incoming value is not of member_type' do
           expect do
-            val = type.of(member_type).load(value)
+            type.of(member_type).load(value)
           end.to raise_error(Attributor::AttributorException, /Unknown key received/)
         end
       end
@@ -179,7 +179,7 @@ describe Attributor::Collection do
       #       it "returns value when incoming value is #{value.inspect}" do
       #         #pending
       #         expected_value = value.map {|v| empty_struct.load(v)}
-      #         type.of(Struct).load(value).should == expected_value
+      #         type.of(Struct).load(value).should eq expected_value
       #       end
       #     end
       #   end

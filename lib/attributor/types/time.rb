@@ -8,8 +8,8 @@ module Attributor
       ::Time
     end
 
-    def self.example(context = nil, options: {})
-      load(/[:time:]/.gen, context)
+    def self.example(context = nil, _options: {})
+      load(Randgen.time, context)
     end
 
     def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **_options)
@@ -18,13 +18,17 @@ module Attributor
 
       return value.to_time if value.respond_to?(:to_time)
 
+      self.parse(value, context)
+    end
+
+    def self.parse(value, context)
       case value
       when ::Integer
         return ::Time.at(value)
       when ::String
         begin
           return ::Time.parse(value)
-        rescue ArgumentError => e
+        rescue ArgumentError
           raise Attributor::DeserializationError, context: context, from: value.class, encoding: 'Time', value: value
         end
       else

@@ -13,9 +13,6 @@ describe Attributor::BigDecimal do
 
   context '.example' do
     its(:example) { should be_a(::BigDecimal) }
-    it do
-      ex = type.example
-    end
   end
 
   context '.load' do

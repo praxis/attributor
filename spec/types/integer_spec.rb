@@ -14,7 +14,7 @@ describe Attributor::Integer do
           20.times do
             value = type.example
             value.should be_a(::Integer)
-            value.should <= Attributor::Integer::EXAMPLE_RANGE
+            value.should be <= Attributor::Integer::EXAMPLE_RANGE
             value.should >= 0
           end
         end
@@ -28,8 +28,8 @@ describe Attributor::Integer do
             20.times do
               value = type.example(nil, options: { max: max })
               value.should be_a(::Integer)
-              value.should <= max
-              value.should >= max - Attributor::Integer::EXAMPLE_RANGE
+              value.should be <= max
+              value.should be >= max - Attributor::Integer::EXAMPLE_RANGE
             end
           end
         end
@@ -54,8 +54,8 @@ describe Attributor::Integer do
             20.times do
               value = type.example(nil, options: { min: min })
               value.should be_a(::Integer)
-              value.should <= min + Attributor::Integer::EXAMPLE_RANGE
-              value.should >= min
+              value.should be <= min + Attributor::Integer::EXAMPLE_RANGE
+              value.should be >= min
             end
           end
         end
@@ -85,8 +85,8 @@ describe Attributor::Integer do
           it "returns an Integer in the range [#{min.inspect},#{max.inspect}]" do
             20.times do
               value = type.example(nil, options: { max: max, min: min })
-              value.should <= max
-              value.should >= min
+              value.should be <= max
+              value.should be >= min
             end
           end
         end
@@ -124,7 +124,7 @@ describe Attributor::Integer do
       context 'that are valid integers' do
         let(:value) { '1024' }
         it 'decodes it if the string represents an integer' do
-          type.load(value).should == 1024
+          type.load(value).should eq 1024
         end
       end
 

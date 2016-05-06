@@ -38,7 +38,7 @@ describe Attributor::Date do
         object = Time.now
         loaded = type.load(object)
         loaded.should be_a(::Date)
-        loaded.to_date.should == object.to_date
+        loaded.to_date.should eq object.to_date
       end
 
       it 'returns correct Date for DateTime objects' do
@@ -62,7 +62,7 @@ describe Attributor::Date do
         '2001-02-03T04:05:06+07:00.123456', # custom format with microseconds
       ].each do |value|
         it "returns correct Date for #{value.inspect}" do
-          type.load(value).should == Date.parse(value)
+          type.load(value).should eq Date.parse(value)
         end
       end
 

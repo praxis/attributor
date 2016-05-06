@@ -18,7 +18,7 @@ describe Attributor::Struct do
       subject(:empty_struct) { Attributor::Struct.construct(attribute_definition) }
 
       it 'constructs a struct with no attributes' do
-        empty_struct.should < Attributor::Struct
+        empty_struct.should be_subclass_of Attributor::Struct
 
         attributes = empty_struct.attributes
         attributes.should be_empty
@@ -35,7 +35,7 @@ describe Attributor::Struct do
       subject(:simple_struct) { Attributor::Struct.construct(attribute_definition) }
 
       it 'constructs a struct with one attribute' do
-        simple_struct.should < Attributor::Struct
+        simple_struct.should be_subclass_of Attributor::Struct
 
         attributes = simple_struct.attributes
         attributes.should have_key :age
@@ -56,7 +56,7 @@ describe Attributor::Struct do
       subject(:large_struct) { Attributor::Struct.construct(attribute_definition) }
 
       it 'constructs a struct with five attributes' do
-        large_struct.should < Attributor::Struct
+        large_struct.should be_subclass_of Attributor::Struct
 
         attributes = large_struct.attributes
         attributes.should have_key :age
@@ -77,7 +77,7 @@ describe Attributor::Struct do
       subject(:struct_of_models) { Attributor::Struct.construct(attribute_definition) }
 
       it 'constructs a struct with a model attribute' do
-        struct_of_models.should < Attributor::Struct
+        struct_of_models.should be_subclass_of Attributor::Struct
 
         attributes = struct_of_models.attributes
         attributes.should have_key :pet
@@ -97,7 +97,7 @@ describe Attributor::Struct do
       subject(:struct_of_structs) { Attributor::Struct.construct(attribute_definition) }
 
       it 'constructs a struct with a named struct attribute' do
-        struct_of_structs.should < Attributor::Struct
+        struct_of_structs.should be_subclass_of Attributor::Struct
 
         attributes = struct_of_structs.attributes
         attributes.should have_key :stats
@@ -126,7 +126,7 @@ describe Attributor::Struct do
       subject(:multi_level_struct_of_structs) { Attributor::Struct.construct(attribute_definition) }
 
       it 'constructs a struct with multiple levels of named struct attributes' do
-        multi_level_struct_of_structs.should < Attributor::Struct
+        multi_level_struct_of_structs.should be_subclass_of Attributor::Struct
 
         root = multi_level_struct_of_structs.attributes
         root.should have_key :arthropods

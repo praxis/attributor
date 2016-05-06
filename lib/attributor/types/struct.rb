@@ -32,17 +32,15 @@ module Attributor
 
     def self.definition
       # Could probably do this better, but its use should be memoized in the enclosing Attribute
-      if self == Attributor::Struct
-        raise AttributorException, 'Can not use a pure Struct without defining sub-attributes'
-      else
-        super
-      end
+      raise AttributorException, 'Can not use a pure Struct without defining sub-attributes' if self == Attributor::Struct
+
+      super
     end
 
     # Two structs are equal if their attributes are equal
-    def ==(other_object)
-      return false if other_object.nil? || !other_object.respond_to?(:attributes)
-      attributes == other_object.attributes
+    def ==(other)
+      return false if other.nil? || !other.respond_to?(:attributes)
+      attributes == other.attributes
     end
   end
 end

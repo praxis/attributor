@@ -63,7 +63,7 @@ module Attributor
     #   @param [Hash] opts describe opts param
     #   @param [Block] block describe block param
     #   @example
-    #     attribute :email, String, example: /[:email:]/
+    #     attribute :email, String, example: Randgen.email
     # @overload define(name, opts, &block)
     #   Assume a type of Attributor::Struct
     #   @param [symbol] name describe name param
@@ -104,7 +104,7 @@ module Attributor
                         Attributor::Collection.of(Struct)
                       else
                         Attributor::Struct
-          end
+                      end
         elsif inherited_attribute
           attr_type = inherited_attribute.type
         else

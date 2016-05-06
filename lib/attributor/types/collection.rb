@@ -14,7 +14,7 @@ module Attributor
     def self.of(type)
       resolved_type = Attributor.resolve_type(type)
       unless resolved_type.ancestors.include?(Attributor::Type)
-        raise Attributor::AttributorException.new('Collections can only have members that are Attributor::Types')
+        raise Attributor::AttributorException, 'Collections can only have members that are Attributor::Types'
       end
       ::Class.new(self) do
         @member_type = resolved_type
@@ -82,9 +82,8 @@ module Attributor
     # The incoming value should be array-like here, so the only decoding that we need to do
     # is from the members (if there's an :member_type defined option).
     def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **_options)
-      if value.nil?
-        return nil
-      elsif value.is_a?(Enumerable)
+      return nil if value.nil?
+      if value.is_a?(Enumerable)
         loaded_value = value
       elsif value.is_a?(::String)
         loaded_value = decode_string(value, context)

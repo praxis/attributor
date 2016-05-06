@@ -64,7 +64,7 @@ describe Attributor::URI do
       end
 
       context 'when given a path option' do
-        let(:attribute) { Attributor::Attribute.new(type, path: /^\//) }
+        let(:attribute) { Attributor::Attribute.new(type, path: %r{^/}) }
 
         context 'given a URI that matches the path regex' do
           it 'does not return any errors' do

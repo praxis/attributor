@@ -23,15 +23,12 @@ module Attributor
 
         # attempt to parse as JSON
         parsed_value = JSON.parse(value)
-
-        if valid_type?(parsed_value)
-          value = parsed_value
-        else
+        unless valid_type?(parsed_value)
           raise Attributor::CoercionError, context: context, from: parsed_value.class, to: name, value: parsed_value
         end
-        return value
 
-      rescue JSON::JSONError => e
+        parsed_value
+      rescue JSON::JSONError
         raise Attributor::DeserializationError, context: context, from: value.class, encoding: 'JSON', value: value
       end
     end

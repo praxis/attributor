@@ -16,7 +16,7 @@ describe Attributor do
         Attributor::Struct => Attributor::Struct
       }.each do |type, expected_type|
         it "resolves #{type} as #{expected_type}" do
-          Attributor.resolve_type(type).should == expected_type
+          Attributor.resolve_type(type).should eq expected_type
         end
       end
     end
