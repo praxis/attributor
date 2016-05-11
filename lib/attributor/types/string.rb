@@ -16,7 +16,7 @@ module Attributor
       super
     end
 
-    def self.example(_context = nil, options:{})
+    def self.example(_context = nil, options: {})
       if options[:regexp]
         begin
           # It may fail to generate an example, see bug #72.

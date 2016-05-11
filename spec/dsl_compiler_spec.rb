@@ -29,12 +29,12 @@ describe Attributor::DSLCompiler do
         end
 
         it 'creates an attribute given a name and type' do
-          Attributor::Attribute.should_receive(:new).with(expected_type, expected_options)
+          expect(Attributor::Attribute).to receive(:new).with(expected_type, expected_options)
           dsl_compiler.attribute(attribute_name, type)
         end
 
         it 'creates an attribute given a name, type, and options' do
-          Attributor::Attribute.should_receive(:new).with(expected_type, expected_options)
+          expect(Attributor::Attribute).to receive(:new).with(expected_type, expected_options)
           dsl_compiler.attribute(attribute_name, type, attribute_options)
         end
       end
@@ -46,7 +46,7 @@ describe Attributor::DSLCompiler do
           let(:expected_options) { reference_attribute_options }
 
           it 'creates an attribute with the inherited type' do
-            Attributor::Attribute.should_receive(:new).with(expected_type, expected_options)
+            expect(Attributor::Attribute).to receive(:new).with(expected_type, expected_options)
             dsl_compiler.attribute(attribute_name)
           end
         end
@@ -56,7 +56,7 @@ describe Attributor::DSLCompiler do
           let(:expected_options) { reference_attribute_options.merge(attribute_options) }
 
           before do
-            Attributor::Attribute.should_receive(:new).with(expected_type, expected_options)
+            expect(Attributor::Attribute).to receive(:new).with(expected_type, expected_options)
           end
 
           it 'creates an attribute with the inherited type and merged options' do
@@ -74,7 +74,7 @@ describe Attributor::DSLCompiler do
           let(:expected_options) { reference_attribute_options.merge(attribute_options) }
 
           it 'creates an attribute with the inherited type' do
-            Attributor::Attribute.should_receive(:new).with(expected_type, expected_options)
+            expect(Attributor::Attribute).to receive(:new).with(expected_type, expected_options)
             dsl_compiler.attribute(attribute_name)
           end
         end
@@ -89,7 +89,7 @@ describe Attributor::DSLCompiler do
 
       context 'without a reference' do
         it 'defaults type to Struct' do
-          Attributor::Attribute.should_receive(:new).with(expected_type, expected_options)
+          expect(Attributor::Attribute).to receive(:new).with(expected_type, expected_options)
           dsl_compiler.attribute(attribute_name, &attribute_block)
         end
       end
@@ -101,13 +101,13 @@ describe Attributor::DSLCompiler do
         end
 
         it 'sets the type of the attribute to Struct' do
-          Attributor::Attribute.should_receive(:new)
+          expect(Attributor::Attribute).to receive(:new)
                                .with(expected_type, description: 'The turkey', reference: Turkey)
           dsl_compiler.attribute(attribute_name, attribute_options, &attribute_block)
         end
 
         it 'passes the correct reference to the created attribute' do
-          Attributor::Attribute.should_receive(:new).with(expected_type, expected_options)
+          expect(Attributor::Attribute).to receive(:new).with(expected_type, expected_options)
           dsl_compiler.attribute(attribute_name, type, attribute_options, &attribute_block)
         end
       end

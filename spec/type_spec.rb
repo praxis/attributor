@@ -52,14 +52,14 @@ describe Attributor::Type do
 
     context 'when given a nil value' do
       it 'always successfully returns it (i.e., you can always load nil)' do
-        test_type.load(value).should be(value)
+        expect(test_type.load(value)).to be(value)
       end
     end
 
     context 'when given a value that is of native_type' do
       let(:value) { 'one' }
       it 'returns the value' do
-        test_type.load(value).should be(value)
+        expect(test_type.load(value)).to be(value)
       end
     end
 
@@ -92,7 +92,7 @@ describe Attributor::Type do
 
         it { should_not be_empty }
         it 'returns the correct error message' do
-          errors.first.should =~ /value \(#{value}\) is smaller than the allowed min/
+          expect(errors.first).to match /value \(#{value}\) is smaller than the allowed min/
         end
       end
 
@@ -100,7 +100,7 @@ describe Attributor::Type do
         let(:value) { 1000 }
         it { should_not be_empty }
         it 'returns the correct error message' do
-          errors.first.should =~ /value \(#{value}\) is larger than the allowed max/
+          expect(errors.first).to match /value \(#{value}\) is larger than the allowed max/
         end
       end
 
@@ -124,7 +124,7 @@ describe Attributor::Type do
         let(:value) { 'chicken' }
         it { should_not be_empty }
         it 'returns the correct error message' do
-          errors.first.should =~ /value \(#{value}\) does not match regexp/
+          expect(errors.first).to match /value \(#{value}\) does not match regexp/
         end
       end
     end
@@ -135,12 +135,12 @@ describe Attributor::Type do
 
   context 'id' do
     it 'works for built-in types' do
-      Attributor::String.id.should eq('Attributor-String')
+      expect(Attributor::String.id).to eq('Attributor-String')
     end
 
     it 'returns nil for anonymous types' do
       type = Class.new(Attributor::Model)
-      type.id.should eq(nil)
+      expect(type.id).to eq(nil)
     end
   end
 
@@ -148,30 +148,30 @@ describe Attributor::Type do
     let(:example) { 'Foo' }
     subject(:description) { test_type.describe }
     it 'outputs the type name' do
-      description[:name].should eq(test_type.name)
+      expect(description[:name]).to eq(test_type.name)
     end
     it 'outputs the type id' do
-      description[:id].should eq(test_type.name)
+      expect(description[:id]).to eq(test_type.name)
     end
 
     context 'with an example' do
       subject(:description) { test_type.describe(example: example) }
       it 'includes it in the :example key' do
-        description.should have_key(:example)
-        description[:example].should be(example)
+        expect(description).to have_key(:example)
+        expect(description[:example]).to be(example)
       end
     end
 
     context 'when anonymous' do
       it 'reports true in the output when set (to true default)' do
         anon_type = Class.new(test_type) { anonymous_type }
-        anon_type.describe.should have_key(:anonymous)
-        anon_type.describe[:anonymous].should be(true)
+        expect(anon_type.describe).to have_key(:anonymous)
+        expect(anon_type.describe[:anonymous]).to be(true)
       end
       it 'reports false in the output when set false explicitly' do
         anon_type = Class.new(test_type) { anonymous_type false }
-        anon_type.describe.should have_key(:anonymous)
-        anon_type.describe[:anonymous].should be(false)
+        expect(anon_type.describe).to have_key(:anonymous)
+        expect(anon_type.describe[:anonymous]).to be(false)
       end
     end
   end

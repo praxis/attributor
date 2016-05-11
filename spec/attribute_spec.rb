@@ -14,13 +14,13 @@ describe Attributor::Attribute do
     its(:options) { should be attribute_options }
 
     it 'calls check_options!' do
-      Attributor::Attribute.any_instance.should_receive(:check_options!)
+      expect_any_instance_of(Attributor::Attribute).to receive(:check_options!)
       Attributor::Attribute.new(type, attribute_options)
     end
 
     context 'for anonymous types (aka Structs)' do
       before do
-        Attributor.should_receive(:resolve_type).once.with(Struct, attribute_options, anything).and_call_original
+        expect(Attributor).to receive(:resolve_type).once.with(Struct, attribute_options, anything).and_call_original
       end
 
       it 'generates the class' do
@@ -33,7 +33,7 @@ describe Attributor::Attribute do
 
   context '==' do
     let(:other_attribute) { Attributor::Attribute.new(type, attribute_options) }
-    it { should == other_attribute }
+    it { should eq other_attribute }
   end
 
   context 'describe' do
@@ -46,14 +46,14 @@ describe Attributor::Attribute do
       h
     end
 
-    its(:describe) { should == expected }
+    its(:describe) { should eq expected }
 
     context 'with example options' do
       let(:attribute_options) { { description: 'something', example: 'ex_def' } }
       its(:describe) { should have_key(:example_definition) }
       its(:describe) { should_not have_key(:example) }
       it 'should have the example value in the :example_definition key' do
-        subject.describe[:example_definition].should eq 'ex_def'
+        expect(subject.describe[:example_definition]).to eq 'ex_def'
       end
     end
 
@@ -63,7 +63,7 @@ describe Attributor::Attribute do
       its(:describe) { should have_key(:custom_data) }
 
       it 'keep the custom data attribute' do
-        subject.describe[:custom_data].should eq custom_data
+        expect(subject.describe[:custom_data]).to eq custom_data
       end
     end
 
@@ -78,11 +78,11 @@ describe Attributor::Attribute do
       subject(:description) { attribute.describe }
 
       it 'uses the name of the first non-anonymous ancestor' do
-        description[:type][:name].should eq 'Struct'
+        expect(description[:type][:name]).to eq 'Struct'
       end
 
       it 'includes sub-attributes' do
-        description[:type][:attributes].should have_key(:id)
+        expect(description[:type][:attributes]).to have_key(:id)
       end
     end
 
@@ -95,11 +95,11 @@ describe Attributor::Attribute do
         let(:type) { String }
         its(:keys) { should include(:example) }
         it 'should have the passed example value' do
-          described.should have_key(:example)
-          described[:example].should eq(example)
+          expect(described).to have_key(:example)
+          expect(described[:example]).to eq(example)
         end
         it 'should have removed the example from the :type' do
-          described[:type].should_not have_key(:example)
+          expect(described[:type]).not_to have_key(:example)
         end
       end
 
@@ -110,18 +110,18 @@ describe Attributor::Attribute do
         it 'Should see examples in the right places, depending on leaf/no-leaf types' do
           # String, a leaf attribute type: should have example
           name_attr =  described[:type][:attributes][:name]
-          name_attr.should include(:example)
-          name_attr[:type].should_not include(:example)
+          expect(name_attr).to include(:example)
+          expect(name_attr[:type]).not_to include(:example)
 
           # Struct, a non-leaf attribute type: shouldn't have example
           ts_attr = described[:type][:attributes][:timestamps]
-          ts_attr.should_not include(:example)
-          ts_attr[:type].should_not include(:example)
+          expect(ts_attr).not_to include(:example)
+          expect(ts_attr[:type]).not_to include(:example)
 
           # DateTime inside a Struct, a nested leaf attribute type: should have example
           born_attr = ts_attr[:type][:attributes][:born_at]
-          born_attr.should include(:example)
-          born_attr[:type].should_not include(:example)
+          expect(born_attr).to include(:example)
+          expect(born_attr[:type]).not_to include(:example)
         end
       end
     end
@@ -130,8 +130,8 @@ describe Attributor::Attribute do
   context 'parse' do
     let(:loaded_object) { double("I'm loaded") }
     it 'loads and validates' do
-      attribute.should_receive(:load).with(value, Attributor::DEFAULT_ROOT_CONTEXT).and_return(loaded_object)
-      attribute.should_receive(:validate).with(loaded_object, Attributor::DEFAULT_ROOT_CONTEXT).and_call_original
+      expect(attribute).to receive(:load).with(value, Attributor::DEFAULT_ROOT_CONTEXT).and_return(loaded_object)
+      expect(attribute).to receive(:validate).with(loaded_object, Attributor::DEFAULT_ROOT_CONTEXT).and_call_original
 
       attribute.parse(value)
     end
@@ -171,11 +171,11 @@ describe Attributor::Attribute do
     context 'with nothing specified' do
       let(:attribute_options) { {} }
       before do
-        type.should_receive(:example).and_return(example)
+        expect(type).to receive(:example).and_return(example)
       end
 
       it 'defers to the type' do
-        attribute.example.should be example
+        expect(attribute.example).to be example
       end
     end
 
@@ -183,7 +183,7 @@ describe Attributor::Attribute do
       let(:values) { %w(one two) }
       let(:attribute_options) { { values: values } }
       it 'picks a random value' do
-        values.should include subject.example
+        expect(values).to include subject.example
       end
     end
 
@@ -195,14 +195,14 @@ describe Attributor::Attribute do
         example_1 = subject.example(['context'])
         example_2 = subject.example(['context'])
 
-        example_1.should eq example_2
+        expect(example_1).to eq example_2
       end
 
       it 'can take a context to pre-seed the random number generator' do
         example_1 = subject.example(['context'])
         example_2 = subject.example(['different context'])
 
-        example_1.should_not eq example_2
+        expect(example_1).not_to eq example_2
       end
     end
 
@@ -210,7 +210,7 @@ describe Attributor::Attribute do
       let(:example) { 'Bob' }
       let(:attribute_options) { { example: example, regexp: /Bob/ } }
 
-      its(:example) { should == example }
+      its(:example) { should eq example }
 
       context 'that is not valid' do
         let(:example) { 'Frank' }
@@ -232,7 +232,7 @@ describe Attributor::Attribute do
 
     subject(:example_result) { attribute.example_from_options(parent, context) }
     before do
-      attribute.should_receive(:load).with(generated_example, an_instance_of(Array)).and_call_original
+      expect(attribute).to receive(:load).with(generated_example, an_instance_of(Array)).and_call_original
     end
 
     context 'with a string' do
@@ -252,9 +252,9 @@ describe Attributor::Attribute do
       let(:generated_example) { /\w+/.gen }
 
       it 'calls #gen on the regexp' do
-        example.should_receive(:gen).and_return(generated_example)
+        expect(example).to receive(:gen).and_return(generated_example)
 
-        example_result.should =~ example
+        expect(example_result).to match example
       end
 
       context 'for a type with a non-String native_type' do
@@ -263,10 +263,10 @@ describe Attributor::Attribute do
         let(:generated_example) { /\d{5}/.gen }
 
         it 'coerces the example value properly' do
-          example.should_receive(:gen).and_return(generated_example)
-          type.should_receive(:load).and_call_original
+          expect(example).to receive(:gen).and_return(generated_example)
+          expect(type).to receive(:load).and_call_original
 
-          example_result.should be_kind_of(type.native_type)
+          expect(example_result).to be_kind_of(type.native_type)
         end
       end
     end
@@ -279,11 +279,11 @@ describe Attributor::Attribute do
         let(:generated_example) { 'ok' }
 
         before do
-          example.should_receive(:call).with(parent).and_return(generated_example)
+          expect(example).to receive(:call).with(parent).and_return(generated_example)
         end
 
         it 'passes any given parent through to the example proc' do
-          example_result.should eq 'ok'
+          expect(example_result).to eq 'ok'
         end
       end
 
@@ -292,11 +292,11 @@ describe Attributor::Attribute do
         let(:generated_example) { "#{context} ok" }
         let(:context) { ['some_context'] }
         before do
-          example.should_receive(:call).with(parent, context).and_return(generated_example)
+          expect(example).to receive(:call).with(parent, context).and_return(generated_example)
         end
 
         it 'passes any given parent through to the example proc' do
-          example_result.should eq "#{context} ok"
+          expect(example_result).to eq "#{context} ok"
         end
       end
     end
@@ -304,7 +304,7 @@ describe Attributor::Attribute do
     context 'with an Collection (of Strings)' do
       let(:type) { Attributor::Collection.of(String) }
       let(:example) { ['one'] }
-      it { should == example }
+      it { should eq example }
     end
   end
 
@@ -313,12 +313,12 @@ describe Attributor::Attribute do
     let(:value) { '1' }
 
     it 'delegates to type.load' do
-      type.should_receive(:load).with(value, context, {})
+      expect(type).to receive(:load).with(value, context, {})
       attribute.load(value, context)
     end
 
     it 'passes options to type.load' do
-      type.should_receive(:load).with(value, context, foo: 'bar')
+      expect(type).to receive(:load).with(value, context, foo: 'bar')
       attribute.load(value, context, foo: 'bar')
     end
 
@@ -330,13 +330,13 @@ describe Attributor::Attribute do
       subject(:result) { attribute.load(value) }
 
       context 'for nil' do
-        it { should == default_value }
+        it { should eq default_value }
       end
 
       context 'for false' do
         let(:type) { Attributor::Boolean }
         let(:default_value) { false }
-        it { should == default_value }
+        it { should eq default_value }
       end
 
       context 'for a Proc-based default value' do
@@ -345,17 +345,17 @@ describe Attributor::Attribute do
 
         context 'with no arguments arguments' do
           let(:default_value) { proc { 'no_params' } }
-          it { should == default_value.call }
+          it { should eq default_value.call }
         end
 
         context 'with 1 argument (the parent)' do
           let(:default_value) { proc { |parent| "parent is fake: #{parent.class}" } }
-          it { should == 'parent is fake: Attributor::FakeParent' }
+          it { should eq 'parent is fake: Attributor::FakeParent' }
         end
 
         context 'with 2 argument (the parent and the contents)' do
           let(:default_value) { proc { |parent, context| "parent is fake: #{parent.class} and context is: #{context}" } }
-          it { should == 'parent is fake: Attributor::FakeParent and context is: ["$"]' }
+          it { should eq 'parent is fake: Attributor::FakeParent and context is: ["$"]' }
         end
 
         context 'which attempts to use the parent (which is not supported for the moment)' do
@@ -364,8 +364,8 @@ describe Attributor::Attribute do
             begin
               old_verbose = $VERBOSE
               $VERBOSE = nil
-              Kernel.should_receive(:warn).and_call_original
-              attribute.load(value, context).should eq 'any parent method should spit out warning: []'
+              expect(Kernel).to receive(:warn).and_call_original
+              expect(attribute.load(value, context)).to eq 'any parent method should spit out warning: []'
             ensure
               $VERBOSE = old_verbose
             end
@@ -382,7 +382,7 @@ describe Attributor::Attribute do
             context 'with a nil value' do
               let(:value) { nil }
               it 'returns an error' do
-                attribute.validate(value, context).first.should eq 'Attribute context is required'
+                expect(attribute.validate(value, context).first).to eq 'Attribute context is required'
               end
             end
           end
@@ -397,23 +397,23 @@ describe Attributor::Attribute do
             context 'with a value that is allowed' do
               let(:value) { 'one' }
               it 'returns no errors' do
-                errors.should be_empty
+                expect(errors).to be_empty
               end
             end
 
             context 'with a value that is not allowed' do
               let(:value) { 'three' }
               it 'returns an error indicating the problem' do
-                errors.first.should =~ /is not within the allowed values/
+                expect(errors.first).to match /is not within the allowed values/
               end
             end
           end
         end
 
         it 'calls the right validate_X methods?' do
-          attribute.should_receive(:validate_type).with(value, context).and_call_original
-          attribute.should_not_receive(:validate_dependency)
-          type.should_receive(:validate).and_call_original
+          expect(attribute).to receive(:validate_type).with(value, context).and_call_original
+          expect(attribute).not_to receive(:validate_dependency)
+          expect(type).to receive(:validate).and_call_original
           attribute.validate(value, context)
         end
       end
@@ -424,7 +424,7 @@ describe Attributor::Attribute do
         context 'with a value of the right type' do
           let(:value) { 'one' }
           it 'returns no errors' do
-            errors.should be_empty
+            expect(errors).to be_empty
           end
         end
 
@@ -432,8 +432,8 @@ describe Attributor::Attribute do
           let(:value) { 1 }
 
           it 'returns errors' do
-            errors.should_not be_empty
-            errors.first.should =~ /is of the wrong type/
+            expect(errors).not_to be_empty
+            expect(errors.first).to match /is of the wrong type/
           end
         end
       end
@@ -472,7 +472,7 @@ describe Attributor::Attribute do
 
             it { should_not be_empty }
 
-            its(:first) { should =~ /Attribute #{Regexp.quote(Attributor.humanize_context(attribute_context))} is required when #{Regexp.quote(key)} matches/ }
+            its(:first) { should match /Attribute #{Regexp.quote(Attributor.humanize_context(attribute_context))} is required when #{Regexp.quote(key)} matches/ }
           end
 
           context 'where the target attribute exists, but does not match the predicate' do
@@ -498,7 +498,7 @@ describe Attributor::Attribute do
       subject(:attribute) { Attributor::Attribute.new(type, attribute_options) }
 
       it 'has attributes' do
-        attribute.attributes.should eq type.attributes
+        expect(attribute.attributes).to eq type.attributes
       end
 
       # it 'has compiled_definition' do
@@ -506,27 +506,27 @@ describe Attributor::Attribute do
       # end
 
       it 'merges its options with those of the compiled_definition' do
-        attribute.options.should eq attribute_options.merge(type_options)
+        expect(attribute.options).to eq attribute_options.merge(type_options)
       end
 
       it 'describe handles sub-attributes nicely' do
         describe = attribute.describe(false)
 
-        describe[:type][:name].should eq type.name
+        expect(describe[:type][:name]).to eq type.name
         common_options = attribute_options.select { |k, _v| Attributor::Attribute.TOP_LEVEL_OPTIONS.include? k }
         special_options = attribute_options.reject { |k, _v| Attributor::Attribute.TOP_LEVEL_OPTIONS.include? k }
         common_options.each do |k, v|
-          describe[k].should eq v
+          expect(describe[k]).to eq v
         end
         special_options.each do |k, v|
-          describe[:options][k].should eq v
+          expect(describe[:options][k]).to eq v
         end
         type_options.each do |k, v|
-          describe[:options][k].should eq v
+          expect(describe[:options][k]).to eq v
         end
 
         attribute.attributes.each do |name, _attr|
-          describe[:type][:attributes].should have_key(name)
+          expect(describe[:type][:attributes]).to have_key(name)
         end
       end
 
@@ -534,7 +534,7 @@ describe Attributor::Attribute do
         example_1 = attribute.example(['Chicken context'])
         example_2 = attribute.example(['Chicken context'])
 
-        example_1.attributes.should eq(example_2.attributes)
+        expect(example_1.attributes).to eq(example_2.attributes)
       end
 
       context '#validate' do
@@ -543,7 +543,7 @@ describe Attributor::Attribute do
 
         it 'validates sub-attributes' do
           errors = attribute.validate(chicken)
-          errors.should be_empty
+          expect(errors).to be_empty
         end
 
         context 'with a failing validation' do
@@ -553,7 +553,7 @@ describe Attributor::Attribute do
 
           it 'collects sub-attribute validation errors' do
             errors = attribute.validate(chicken)
-            errors.should =~ (age_validation_response | email_validation_response)
+            expect(errors).to match_array(age_validation_response | email_validation_response)
           end
         end
       end
@@ -582,7 +582,7 @@ describe Attributor::Attribute do
 
           context 'where the target attribute exists, and matches the predicate' do
             it { should_not be_empty }
-            its(:first) { should == 'Attribute $.duck.email is required when name (for $.duck) is present.' }
+            its(:first) { should eq 'Attribute $.duck.email is required when name (for $.duck) is present.' }
           end
           context 'where the target attribute does not exist' do
             before do
@@ -604,7 +604,7 @@ describe Attributor::Attribute do
 
           context 'where the target attribute exists, and matches the predicate' do
             it { should_not be_empty }
-            its(:first) { should =~ /Attribute #{Regexp.quote('$.duck.age')} is required when name #{Regexp.quote('(for $.duck)')} matches/ }
+            its(:first) { should match /Attribute #{Regexp.quote('$.duck.age')} is required when name #{Regexp.quote('(for $.duck)')} matches/ }
           end
 
           context 'where the target attribute exists, and does not match the predicate' do
@@ -644,15 +644,15 @@ describe Attributor::Attribute do
         let(:values) { ['1', 2, 12] }
 
         it 'loads' do
-          attribute.load(values).should =~ [1, 2, 12]
+          expect(attribute.load(values)).to match_array [1, 2, 12]
         end
 
         it 'validates' do
           object = attribute.load(values)
           errors = attribute.validate(object)
 
-          errors.should have(1).item
-          errors[0].should =~ /value \(12\) is larger/
+          expect(errors).to have(1).item
+          expect(errors[0]).to match /value \(12\) is larger/
         end
       end
     end
@@ -672,8 +672,8 @@ describe Attributor::Attribute do
         its(:options) { should eq(member_options.merge(reference: Chicken, identity: :email)) }
         its(:attributes) { should have_key :angry }
         it 'inherited the type and options from the reference' do
-          member_attribute.attributes[:angry].type.should be(Chicken.attributes[:angry].type)
-          member_attribute.attributes[:angry].options.should eq(Chicken.attributes[:angry].options.merge(required: true))
+          expect(member_attribute.attributes[:angry].type).to be(Chicken.attributes[:angry].type)
+          expect(member_attribute.attributes[:angry].options).to eq(Chicken.attributes[:angry].options.merge(required: true))
         end
       end
     end

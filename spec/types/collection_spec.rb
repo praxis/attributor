@@ -7,8 +7,8 @@ describe Attributor::Collection do
     [Attributor::Integer, Attributor::Struct].each do |member_type|
       it "returns an anonymous class with correct member_attribute of type #{member_type}" do
         klass = type.of(member_type)
-        klass.should be_a(::Class)
-        klass.member_type.should eq member_type
+        expect(klass).to be_a(::Class)
+        expect(klass.member_type).to eq member_type
       end
     end
 
@@ -55,7 +55,7 @@ describe Attributor::Collection do
 
   context '.native_type' do
     it 'returns Array' do
-      type.native_type.should be(type)
+      expect(type.native_type).to be(type)
     end
   end
 
@@ -68,7 +68,7 @@ describe Attributor::Collection do
         '["alpha", 2, 3.0]'
       ].each do |value|
         it "parses JSON string as array when incoming value is #{value.inspect}" do
-          type.decode_json(value).should eq JSON.parse(value)
+          expect(type.decode_json(value)).to eq JSON.parse(value)
         end
       end
     end
@@ -95,14 +95,14 @@ describe Attributor::Collection do
       let(:values) { [1, 2, 3] }
       let(:value) { Set.new(values) }
       it 'loads properly' do
-        type.load(value).should =~ values
+        expect(type.load(value)).to match_array values
       end
     end
 
     context 'with unspecified element type' do
       context 'for nil values' do
         it 'returns nil' do
-          type.load(nil).should be nil
+          expect(type.load(nil)).to be nil
         end
       end
 
@@ -113,7 +113,7 @@ describe Attributor::Collection do
           [Object.new, [1, 2], nil, true]
         ].each do |value|
           it "returns value when incoming value is #{value.inspect}" do
-            type.load(value).should =~ value
+            expect(type.load(value)).to match_array value
           end
         end
       end
@@ -122,7 +122,7 @@ describe Attributor::Collection do
         let(:context) { %w(root subattr) }
         [1, Object.new, false, true, 3.0].each do |value|
           it "raises error when incoming value is #{value.inspect} (propagating the context)" do
-            expect { type.load(value, context).should eq value }.to raise_error(Attributor::IncompatibleTypeError, /#{context.join('.')}/)
+            expect { expect(type.load(value, context)).to eq value }.to raise_error(Attributor::IncompatibleTypeError, /#{context.join('.')}/)
           end
         end
       end
@@ -139,7 +139,7 @@ describe Attributor::Collection do
         }.each do |member_type, value|
           it "returns loaded value when member_type is #{member_type} and value is #{value.inspect}" do
             expected_result = value.map { |v| member_type.load(v) }
-            type.of(member_type).load(value).should =~ expected_result
+            expect(type.of(member_type).load(value)).to match_array expected_result
           end
         end
       end
@@ -215,7 +215,7 @@ describe Attributor::Collection do
           ].each do |value|
             it "returns value when incoming value is #{value.inspect}" do
               expected_value = value.map { |v| simple_struct.load(v.clone) }
-              type.of(simple_struct).load(value).should =~ expected_value
+              expect(type.of(simple_struct).load(value)).to match_array expected_value
             end
           end
         end
@@ -246,14 +246,14 @@ describe Attributor::Collection do
 
       before do
         collection_members.zip(expected_errors).each do |member, expected_error|
-          type.member_attribute.should_receive(:validate)
+          expect(type.member_attribute).to receive(:validate)
               .with(member, an_instance_of(Array)) # we don't care about the exact context here
               .and_return([expected_error])
         end
       end
 
       it 'validates members' do
-        type.validate(value).should =~ expected_errors
+        expect(type.validate(value)).to match_array expected_errors
       end
     end
     context 'invalid incoming types' do
@@ -269,7 +269,7 @@ describe Attributor::Collection do
   context '.example' do
     it 'returns an instance of the type' do
       value = type.example
-      value.should be_a(type)
+      expect(value).to be_a(type)
     end
 
     [
@@ -282,18 +282,18 @@ describe Attributor::Collection do
     ].each do |member_type|
       it "returns an Array of native types of #{member_type}" do
         value = Attributor::Collection.of(member_type).example
-        value.should_not be_empty
-        value.all? { |element| member_type.valid_type?(element) }.should be_true
+        expect(value).not_to be_empty
+        expect(value.all? { |element| member_type.valid_type?(element) }).to be_truthy
       end
     end
 
     it 'returns an Array with size specified' do
-      type.example(options: { size: 5 }).size.should eq(5)
+      expect(type.example(options: { size: 5 }).size).to eq(5)
     end
 
     it 'returns an Array with size within a range' do
       5.times do
-        type.example(options: { size: (2..4) }).size.should be_within(1).of(3)
+        expect(type.example(options: { size: (2..4) }).size).to be_within(1).of(3)
       end
     end
 
@@ -311,16 +311,16 @@ describe Attributor::Collection do
     let(:example) { nil }
     subject(:described) { type.describe(example: example) }
     it 'includes the member_attribute' do
-      described.should have_key(:member_attribute)
-      described[:member_attribute].should_not have_key(:example)
+      expect(described).to have_key(:member_attribute)
+      expect(described[:member_attribute]).not_to have_key(:example)
     end
 
     context 'with an example' do
       let(:example) { type.example }
       it 'includes the member_attribute with an example from the first member' do
-        described.should have_key(:member_attribute)
-        described[:member_attribute].should have_key(:example)
-        described[:member_attribute].should eq(type.member_attribute.describe(example: example.first))
+        expect(described).to have_key(:member_attribute)
+        expect(described[:member_attribute]).to have_key(:example)
+        expect(described[:member_attribute]).to eq(type.member_attribute.describe(example: example.first))
       end
     end
   end
@@ -329,7 +329,7 @@ describe Attributor::Collection do
     let(:type) { Attributor::Collection.of(Cormorant) }
 
     it 'it is Dumpable' do
-      type.new.is_a?(Attributor::Dumpable).should be(true)
+      expect(type.new.is_a?(Attributor::Dumpable)).to be(true)
     end
 
     subject(:example) { type.example }

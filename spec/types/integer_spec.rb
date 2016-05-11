@@ -4,7 +4,7 @@ describe Attributor::Integer do
   subject(:type) { Attributor::Integer }
 
   it 'it is not Dumpable' do
-    type.new.is_a?(Attributor::Dumpable).should_not be(true)
+    expect(type.new.is_a?(Attributor::Dumpable)).not_to be(true)
   end
 
   context '.example' do
@@ -13,9 +13,9 @@ describe Attributor::Integer do
         it "returns an Integer in the range [0,#{Attributor::Integer::EXAMPLE_RANGE}]" do
           20.times do
             value = type.example
-            value.should be_a(::Integer)
-            value.should be <= Attributor::Integer::EXAMPLE_RANGE
-            value.should >= 0
+            expect(value).to be_a(::Integer)
+            expect(value).to be <= Attributor::Integer::EXAMPLE_RANGE
+            expect(value).to be >= 0
           end
         end
       end
@@ -27,9 +27,9 @@ describe Attributor::Integer do
           it "returns an Integer in the range [,#{max.inspect}]" do
             20.times do
               value = type.example(nil, options: { max: max })
-              value.should be_a(::Integer)
-              value.should be <= max
-              value.should be >= max - Attributor::Integer::EXAMPLE_RANGE
+              expect(value).to be_a(::Integer)
+              expect(value).to be <= max
+              expect(value).to be >= max - Attributor::Integer::EXAMPLE_RANGE
             end
           end
         end
@@ -40,7 +40,7 @@ describe Attributor::Integer do
           it "raises for the invalid range [,#{max.inspect}]" do
             expect do
               value = type.example(nil, options: { max: max })
-              value.should be_a(::Integer)
+              expect(value).to be_a(::Integer)
             end.to raise_error(Attributor::AttributorException, "Invalid range: [, #{max.inspect}]")
           end
         end
@@ -53,9 +53,9 @@ describe Attributor::Integer do
           it "returns an Integer in the range [#{min.inspect},]" do
             20.times do
               value = type.example(nil, options: { min: min })
-              value.should be_a(::Integer)
-              value.should be <= min + Attributor::Integer::EXAMPLE_RANGE
-              value.should be >= min
+              expect(value).to be_a(::Integer)
+              expect(value).to be <= min + Attributor::Integer::EXAMPLE_RANGE
+              expect(value).to be >= min
             end
           end
         end
@@ -66,7 +66,7 @@ describe Attributor::Integer do
           it "raises for the invalid range [#{min.inspect},]" do
             expect do
               value = type.example(nil, options: { min: min })
-              value.should be_a(::Integer)
+              expect(value).to be_a(::Integer)
             end.to raise_error(Attributor::AttributorException, "Invalid range: [#{min.inspect},]")
           end
         end
@@ -85,8 +85,8 @@ describe Attributor::Integer do
           it "returns an Integer in the range [#{min.inspect},#{max.inspect}]" do
             20.times do
               value = type.example(nil, options: { max: max, min: min })
-              value.should be <= max
-              value.should be >= min
+              expect(value).to be <= max
+              expect(value).to be >= min
             end
           end
         end
@@ -109,14 +109,14 @@ describe Attributor::Integer do
     let(:value) { nil }
 
     it 'returns nil for nil' do
-      type.load(nil).should be(nil)
+      expect(type.load(nil)).to be(nil)
     end
 
     context 'for incoming integer values' do
       let(:value) { 1 }
 
       it 'returns the incoming value' do
-        type.load(value).should be(value)
+        expect(type.load(value)).to be(value)
       end
     end
 
@@ -124,7 +124,7 @@ describe Attributor::Integer do
       context 'that are valid integers' do
         let(:value) { '1024' }
         it 'decodes it if the string represents an integer' do
-          type.load(value).should eq 1024
+          expect(type.load(value)).to eq 1024
         end
       end
 

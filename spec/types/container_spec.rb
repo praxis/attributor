@@ -14,7 +14,7 @@ describe Attributor::Container do
       it 'parses JSON string into the native type' do
         a_hash = { 'a' => 1, 'b' => 2 }
         json_hash = JSON.dump(a_hash)
-        mock_type.decode_json(json_hash).should eq a_hash
+        expect(mock_type.decode_json(json_hash)).to eq a_hash
       end
       it 'complains when trying to decode a non-String value' do
         expect do

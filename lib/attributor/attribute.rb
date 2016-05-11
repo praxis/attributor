@@ -142,7 +142,7 @@ module Attributor
       load(generated, context)
     end
 
-    def example(context = nil, parent: nil, values:{})
+    def example(context = nil, parent: nil, values: {})
       raise ArgumentError, 'attribute example cannot take a context of type String' if context.is_a? ::String
       if context
         ctx = Attributor.humanize_context(context)

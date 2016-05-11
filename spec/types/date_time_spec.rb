@@ -4,7 +4,7 @@ describe Attributor::DateTime do
   subject(:type) { Attributor::DateTime }
 
   it 'it is not Dumpable' do
-    type.new.is_a?(Attributor::Dumpable).should_not be(true)
+    expect(type.new.is_a?(Attributor::Dumpable)).not_to be(true)
   end
 
   context '.native_type' do
@@ -19,33 +19,33 @@ describe Attributor::DateTime do
     let(:example) { type.example }
     subject(:value) { type.dump(example) }
     it 'is formatted correctly' do
-      value.should match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[\+-]\d{2}:\d{2}/)
+      expect(value).to match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[\+-]\d{2}:\d{2}/)
     end
     context 'nil values' do
       it 'should be nil' do
-        type.dump(nil).should be_nil
+        expect(type.dump(nil)).to be_nil
       end
     end
   end
 
   context '.load' do
     it 'returns nil for nil' do
-      type.load(nil).should be(nil)
+      expect(type.load(nil)).to be(nil)
     end
 
     context 'for incoming objects' do
       it 'returns correct DateTime for Time objects' do
         object = Time.now
         loaded = type.load(object)
-        loaded.should be_a(::DateTime)
-        loaded.to_time.should eq object
+        expect(loaded).to be_a(::DateTime)
+        expect(loaded.to_time).to eq object
       end
 
       it 'returns correct DateTime for DateTime objects' do
         object = DateTime.now
         loaded = type.load(object)
-        loaded.should be_a(::DateTime)
-        loaded.should be(object)
+        expect(loaded).to be_a(::DateTime)
+        expect(loaded).to be(object)
       end
     end
 
@@ -62,7 +62,7 @@ describe Attributor::DateTime do
         '2001-02-03T04:05:06+07:00.123456', # custom format with microseconds
       ].each do |value|
         it "returns correct DateTime for #{value.inspect}" do
-          type.load(value).should eq DateTime.parse(value)
+          expect(type.load(value)).to eq DateTime.parse(value)
         end
       end
 

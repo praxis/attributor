@@ -4,7 +4,7 @@ describe Attributor::Float do
   subject(:type) { Attributor::Float }
 
   it 'it is not Dumpable' do
-    type.new.is_a?(Attributor::Dumpable).should_not be(true)
+    expect(type.new.is_a?(Attributor::Dumpable)).not_to be(true)
   end
 
   context '.native_type' do
@@ -29,13 +29,13 @@ describe Attributor::Float do
     let(:value) { nil }
 
     it 'returns nil for nil' do
-      type.load(nil).should be(nil)
+      expect(type.load(nil)).to be(nil)
     end
 
     context 'for incoming Float values' do
       it 'returns the incoming value' do
         [0.0, -1.0, 1.0, 1e-10].each do |value|
-          type.load(value).should be(value)
+          expect(type.load(value)).to be(value)
         end
       end
     end
@@ -44,7 +44,7 @@ describe Attributor::Float do
       context 'with an integer value' do
         let(:value) { 1 }
         it 'decodes it if the Integer represents a Float' do
-          type.load(value).should eq 1.0
+          expect(type.load(value)).to eq 1.0
         end
       end
     end
@@ -53,7 +53,7 @@ describe Attributor::Float do
       context 'that are valid Floats' do
         ['0.0', '-1.0', '1.0', '1e-10'].each do |value|
           it 'decodes it if the String represents a Float' do
-            type.load(value).should eq Float(value)
+            expect(type.load(value)).to eq Float(value)
           end
         end
       end
@@ -61,7 +61,7 @@ describe Attributor::Float do
       context 'that are valid Integers' do
         let(:value) { '1' }
         it 'decodes it if the String represents an Integer' do
-          type.load(value).should eq 1.0
+          expect(type.load(value)).to eq 1.0
         end
       end
 

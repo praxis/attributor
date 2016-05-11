@@ -16,9 +16,9 @@ describe Attributor::Model do
       end
 
       it 'throws original exception upon first run' do
-        lambda do
+        expect do
           broken_model.attributes
-        end.should raise_error(RuntimeError, 'sorry :(')
+        end.to raise_error(RuntimeError, 'sorry :(')
       end
 
       it 'throws InvalidDefinition for subsequent access' do
@@ -28,9 +28,9 @@ describe Attributor::Model do
           nil
         end
 
-        lambda do
+        expect do
           broken_model.attributes
-        end.should raise_error(Attributor::InvalidDefinition)
+        end.to raise_error(Attributor::InvalidDefinition)
       end
 
       it 'throws for any attempts at using of an instance of it' do
@@ -41,9 +41,9 @@ describe Attributor::Model do
         end
 
         instance = broken_model.new
-        lambda do
+        expect do
           instance.name
-        end.should raise_error(Attributor::InvalidDefinition)
+        end.to raise_error(Attributor::InvalidDefinition)
       end
     end
   end
@@ -64,18 +64,18 @@ describe Attributor::Model do
 
         context 'and attribute without :example option' do
           before do
-            Attributor::Integer.should_receive(:example).with(kind_of(Array), age_opts).and_return(age)
+            expect(Attributor::Integer).to receive(:example).with(kind_of(Array), age_opts).and_return(age)
           end
 
-          its(:age) { should == age }
+          its(:age) { should eq age }
         end
 
         context 'and attribute with :example options' do
           before do
-            Attributor::Integer.should_not_receive(:example) # due to lazy-evaluation of examples
-            Attributor::String.should_not_receive(:example) # due to the :example option on the attribute
+            expect(Attributor::Integer).not_to receive(:example) # due to lazy-evaluation of examples
+            expect(Attributor::String).not_to receive(:example) # due to the :example option on the attribute
           end
-          its(:email) { should =~ /\w+@.*\.example\.org/ }
+          its(:email) { should match /\w+@.*\.example\.org/ }
         end
 
         context 'with given values' do
@@ -126,9 +126,9 @@ describe Attributor::Model do
             object.child
           end
           # after which .child will return nil
-          terminal_child.child.should be(nil)
+          expect(terminal_child.child).to be(nil)
           # but simple attributes will be generated
-          terminal_child.name.should_not be(nil)
+          expect(terminal_child.name).not_to be(nil)
         end
       end
     end
@@ -152,21 +152,21 @@ describe Attributor::Model do
 
       context 'with an instance of the model' do
         it 'returns the instance' do
-          Chicken.load(model).should be(model)
+          expect(Chicken.load(model)).to be(model)
         end
       end
 
       context 'with a nil value' do
         it 'returns nil' do
-          Chicken.load(nil).should be_nil
+          expect(Chicken.load(nil)).to be_nil
         end
 
         context 'with recurse: true' do
           subject(:turducken) { Turducken.load(nil, [], recurse: true) }
 
           it 'loads with default values' do
-            turducken.name.should eq('Turkey McDucken')
-            turducken.chicken.age.should be(1)
+            expect(turducken.name).to eq('Turkey McDucken')
+            expect(turducken.chicken.age).to be(1)
           end
         end
       end
@@ -176,9 +176,9 @@ describe Attributor::Model do
         let(:expected_hash) { { 'age' => age, 'email' => email } }
         let(:json) { hash.to_json }
         before do
-          Chicken.should_receive(:from_hash)
+          expect(Chicken).to receive(:from_hash)
                  .with(expected_hash, context, recurse: false)
-          JSON.should_receive(:parse).with(json).and_call_original
+          expect(JSON).to receive(:parse).with(json).and_call_original
         end
 
         it 'deserializes and calls from_hash' do
@@ -190,7 +190,7 @@ describe Attributor::Model do
         let(:json) { "{'invalid'}" }
 
         it 'catches the error and reports it correctly' do
-          JSON.should_receive(:parse).with(json).and_call_original
+          expect(JSON).to receive(:parse).with(json).and_call_original
           expect do
             Chicken.load(json, context)
           end.to raise_error(Attributor::DeserializationError,
@@ -219,8 +219,8 @@ describe Attributor::Model do
       context 'with a hash' do
         context 'for a complete set of attributes' do
           it 'loads the given attributes' do
-            model.age.should eq age
-            model.email.should eq email
+            expect(model.age).to eq age
+            expect(model.email).to eq email
           end
         end
 
@@ -228,8 +228,8 @@ describe Attributor::Model do
           let(:hash) { Hash.new }
 
           it 'sets the defaults' do
-            model.age.should eq 1
-            model.email.should.nil?
+            expect(model.age).to eq 1
+            expect(model.email).to.nil?
           end
         end
 
@@ -283,35 +283,35 @@ describe Attributor::Model do
       context 'supports passing an initial hash object for attribute values' do
         let(:attributes_data) { { age: '1', email: 'rooster@coup.com' } }
         it 'and sets them in loaded format onto the instance attributes' do
-          Chicken.should_receive(:load).with(attributes_data).and_call_original
+          expect(Chicken).to receive(:load).with(attributes_data).and_call_original
           attributes_data.keys.each do |attr_name|
-            Chicken.attributes[attr_name].should_receive(:load)
+            expect(Chicken.attributes[attr_name]).to receive(:load)
                                          .with(attributes_data[attr_name], instance_of(Array), recurse: false)
                                          .and_call_original
           end
-          subject.age.should be(1)
-          subject.email.should be(attributes_data[:email])
+          expect(subject.age).to be(1)
+          expect(subject.email).to be(attributes_data[:email])
         end
       end
       context 'supports passing a JSON encoded data object' do
         let(:attributes_hash) { { age: 1, email: 'rooster@coup.com' } }
         let(:attributes_data) { JSON.dump(attributes_hash) }
         it 'and sets them in loaded format onto the instance attributes' do
-          Chicken.should_receive(:load).with(attributes_data).and_call_original
+          expect(Chicken).to receive(:load).with(attributes_data).and_call_original
           attributes_hash.keys.each do |attr_name|
-            Chicken.attributes[attr_name].should_receive(:load)
+            expect(Chicken.attributes[attr_name]).to receive(:load)
                                          .with(attributes_hash[attr_name], instance_of(Array), recurse: false)
                                          .and_call_original
           end
-          subject.age.should be(1)
-          subject.email.should eq attributes_hash[:email]
+          expect(subject.age).to be(1)
+          expect(subject.email).to eq attributes_hash[:email]
         end
       end
       context 'supports passing a native model for the data object' do
         let(:attributes_data) { Chicken.example }
         it 'sets a new instance pointing to the exact same attributes (careful about modifications!)' do
           attributes_data.attributes.each do |attr_name, attr_value|
-            subject.send(attr_name).should be(attr_value)
+            expect(subject.send(attr_name)).to be(attr_value)
           end
         end
       end
@@ -322,19 +322,19 @@ describe Attributor::Model do
         let(:age) { 1 }
         it 'gets and sets attributes' do
           chicken.age = age
-          chicken.age.should eq age
+          expect(chicken.age).to eq age
         end
       end
 
       context 'setting nil' do
         it 'assigns the default value if there is one' do
           chicken.age = nil
-          chicken.age.should eq 1
+          expect(chicken.age).to eq 1
         end
 
         it 'sets the value to nil if there is no default' do
           chicken.email = nil
-          chicken.email.should.nil?
+          expect(chicken.email).to.nil?
         end
       end
 
@@ -349,8 +349,8 @@ describe Attributor::Model do
       context 'for false attributes' do
         subject(:person) { Person.example(okay: false) }
         it 'properly memoizes the value' do
-          person.okay.should be(false)
-          person.okay.should be(false) # second call to ensure we hit the memoized value
+          expect(person.okay).to be(false)
+          expect(person.okay).to be(false) # second call to ensure we hit the memoized value
         end
       end
     end
@@ -391,8 +391,8 @@ describe Attributor::Model do
 
         it 'recursively-validates sub-attributes with the right context' do
           title_error, state_error = person.validate('person')
-          title_error.should =~ /^Attribute person\.title:/
-          state_error.should =~ /^Attribute person\.address\.state:/
+          expect(title_error).to match /^Attribute person\.title:/
+          expect(state_error).to match /^Attribute person\.address\.state:/
         end
       end
     end
@@ -410,8 +410,8 @@ describe Attributor::Model do
       end
 
       it 'outputs "..." for circular references' do
-        person.address.person.should be(person)
-        output[:address][:person].should eq(Attributor::Model::CIRCULAR_REFERENCE_MARKER)
+        expect(person.address.person).to be(person)
+        expect(output[:address][:person]).to eq(Attributor::Model::CIRCULAR_REFERENCE_MARKER)
       end
     end
   end
@@ -436,7 +436,7 @@ describe Attributor::Model do
       end
 
       it 'adds the attribute' do
-        model.attributes.keys.should =~ [:id, :name, :timestamps]
+        expect(model.attributes.keys).to match_array [:id, :name, :timestamps]
       end
     end
 
@@ -450,7 +450,7 @@ describe Attributor::Model do
       end
 
       it 'merges with sub-attributes' do
-        model.attributes[:timestamps].attributes.keys.should =~ [:created_at, :updated_at]
+        expect(model.attributes[:timestamps].attributes.keys).to match_array [:created_at, :updated_at]
       end
     end
 
@@ -466,12 +466,12 @@ describe Attributor::Model do
       subject(:struct) { Attributor::Struct.construct(attributes_block, reference: Cormorant) }
 
       it 'supports defining sub-attributes using the proper reference' do
-        struct.attributes[:neighbors].options[:required].should be true
-        struct.attributes[:neighbors].type.member_attribute.type.attributes.keys.should =~ [:name, :age]
+        expect(struct.attributes[:neighbors].options[:required]).to be true
+        expect(struct.attributes[:neighbors].type.member_attribute.type.attributes.keys).to match_array [:name, :age]
 
         name_options = struct.attributes[:neighbors].type.member_attribute.type.attributes[:name].options
-        name_options[:required].should be true
-        name_options[:description].should eq 'Name of the Cormorant'
+        expect(name_options[:required]).to be true
+        expect(name_options[:description]).to eq 'Name of the Cormorant'
       end
     end
 
@@ -484,7 +484,7 @@ describe Attributor::Model do
         end
 
         it 'updates the type properly' do
-          model.attributes[:id].type.should be(Attributor::String)
+          expect(model.attributes[:id].type).to be(Attributor::String)
         end
       end
     end
@@ -503,7 +503,7 @@ describe Attributor::Model do
     its(:attributes) { should be_empty }
 
     it 'dumps as an empty hash' do
-      example.dump.should eq({})
+      expect(example.dump).to eq({})
     end
   end
 end

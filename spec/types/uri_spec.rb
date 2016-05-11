@@ -4,7 +4,7 @@ describe Attributor::URI do
   subject(:type) { Attributor::URI }
 
   it 'it is not Dumpable' do
-    type.new.is_a?(Attributor::Dumpable).should_not be(true)
+    expect(type.new.is_a?(Attributor::Dumpable)).not_to be(true)
   end
 
   its(:native_type) { should be ::URI::Generic }

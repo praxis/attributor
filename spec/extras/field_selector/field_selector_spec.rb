@@ -29,7 +29,7 @@ describe Attributor::FieldSelector do
     cases.each do |fields, result|
       it "loads #{fields.inspect}" do
         loaded = subject.load(fields)
-        loaded.should eq result
+        expect(loaded).to eq result
       end
     end
   end

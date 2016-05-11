@@ -5,11 +5,11 @@ describe Attributor::Class do
   subject(:type) { Attributor::Class }
 
   it 'it is not Dumpable' do
-    type.new.is_a?(Attributor::Dumpable).should_not be(true)
+    expect(type.new.is_a?(Attributor::Dumpable)).not_to be(true)
   end
 
   its(:native_type) { should be(::Class) }
-  its(:family) { should == 'string' }
+  its(:family) { should eq 'string' }
 
   context '.example' do
     its(:example) { should be_a(::String) }
@@ -28,7 +28,7 @@ describe Attributor::Class do
     context 'for incoming String values' do
       ['Object', '::Object', '::Hash', 'Attributor::Struct'].each do |value|
         it "loads #{value.inspect}" do
-          type.load(value).should eq(value.constantize)
+          expect(type.load(value)).to eq(value.constantize)
         end
       end
     end
@@ -36,7 +36,7 @@ describe Attributor::Class do
     context 'for incoming Class values' do
       [Object, ::Object, ::Hash, Attributor::Struct].each do |value|
         it "loads '#{value}' as #{value}" do
-          type.load(value).should eq(value)
+          expect(type.load(value)).to eq(value)
         end
       end
     end
@@ -46,11 +46,11 @@ describe Attributor::Class do
       subject(:type) { Attributor::Class.of(klass) }
 
       it "loads 'Integer' as Integer" do
-        type.load('Integer').should eq(Integer)
+        expect(type.load('Integer')).to eq(Integer)
       end
 
       it 'returns specified class for nil' do
-        type.load(nil).should be(klass)
+        expect(type.load(nil)).to be(klass)
       end
 
       it "raises when given a class that doesn't match specified class" do
@@ -59,7 +59,7 @@ describe Attributor::Class do
     end
 
     it 'returns nil for nil' do
-      type.load(nil).should be(nil)
+      expect(type.load(nil)).to be(nil)
     end
 
     it 'raises when given a non-String' do

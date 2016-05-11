@@ -8,7 +8,7 @@ describe Attributor::AttributeResolver do
     before { subject.register(name, value) }
 
     it 'works' do
-      subject.query(name).should be value
+      expect(subject.query(name)).to be value
     end
   end
 
@@ -18,7 +18,7 @@ describe Attributor::AttributeResolver do
     before { subject.register('one', one) }
 
     it 'works' do
-      subject.query(key).should be value
+      expect(subject.query(key)).to be value
     end
   end
 
@@ -30,9 +30,9 @@ describe Attributor::AttributeResolver do
     before { subject.register('instance', instance) }
 
     it 'works' do
-      subject.query('instance').should be instance
-      subject.query('instance.ssh_key').should be ssh_key
-      subject.query(key).should be value
+      expect(subject.query('instance')).to be instance
+      expect(subject.query('instance.ssh_key')).to be ssh_key
+      expect(subject.query(key)).to be value
     end
 
     context 'with a prefix' do
@@ -40,7 +40,7 @@ describe Attributor::AttributeResolver do
       let(:prefix) { '$.instance.ssh_key' }
       let(:value) { 'some_name' }
       it 'works' do
-        subject.query(key, prefix).should be(value)
+        expect(subject.query(key, prefix)).to be(value)
       end
     end
   end
@@ -49,13 +49,13 @@ describe Attributor::AttributeResolver do
     context 'for a straight key' do
       let(:key) { 'missing' }
       it 'returns nil' do
-        subject.query(key).should be_nil
+        expect(subject.query(key)).to be_nil
       end
     end
     context 'for a nested key' do
       let(:key) { 'nested.missing' }
       it 'returns nil' do
-        subject.query(key).should be_nil
+        expect(subject.query(key)).to be_nil
       end
     end
   end
@@ -71,14 +71,14 @@ describe Attributor::AttributeResolver do
     before { subject.register('instances', instances) }
 
     it 'resolves the index to the correct member of the collection' do
-      subject.query('instances').should be instances
-      subject.query('instances.at(1).ssh_key').should be ssh_key2
-      subject.query('instances.at(0).ssh_key.name').should be value
+      expect(subject.query('instances')).to be instances
+      expect(subject.query('instances.at(1).ssh_key')).to be ssh_key2
+      expect(subject.query('instances.at(0).ssh_key.name')).to be value
     end
 
     it 'returns nil for index out of range' do
-      subject.query('instances.at(2)').should be(nil)
-      subject.query('instances.at(-1)').should be(nil)
+      expect(subject.query('instances.at(2)')).to be(nil)
+      expect(subject.query('instances.at(-1)')).to be(nil)
     end
 
     context 'with a prefix' do
@@ -87,7 +87,7 @@ describe Attributor::AttributeResolver do
       let(:value) { 'some_name' }
 
       it 'resolves the index to the correct member of the collection' do
-        subject.query(key, prefix).should be(value)
+        expect(subject.query(key, prefix)).to be(value)
       end
     end
   end
@@ -107,10 +107,10 @@ describe Attributor::AttributeResolver do
 
     context 'with no condition' do
       let(:condition) { nil }
-      before { ssh_key.should_receive(:something_else).and_return(nil) }
+      before { expect(ssh_key).to receive(:something_else).and_return(nil) }
       it 'works' do
-        subject.check(context, present_key, condition).should be true
-        subject.check(context, missing_key, condition).should be false
+        expect(subject.check(context, present_key, condition)).to be true
+        expect(subject.check(context, missing_key, condition)).to be false
       end
     end
 
@@ -119,8 +119,8 @@ describe Attributor::AttributeResolver do
       let(:failing_condition) { /\w+/.gen }
 
       it 'works' do
-        subject.check(context, key, passing_condition).should be true
-        subject.check(context, key, failing_condition).should be false
+        expect(subject.check(context, key, passing_condition)).to be true
+        expect(subject.check(context, key, failing_condition)).to be false
       end
     end
 
@@ -129,8 +129,8 @@ describe Attributor::AttributeResolver do
       let(:failing_condition) { /\d+/ }
 
       it 'works' do
-        subject.check(context, key, passing_condition).should be true
-        subject.check(context, key, failing_condition).should be false
+        expect(subject.check(context, key, passing_condition)).to be true
+        expect(subject.check(context, key, failing_condition)).to be false
       end
     end
 
@@ -140,12 +140,12 @@ describe Attributor::AttributeResolver do
       let(:failing_condition) { /\w+/.gen }
 
       it 'works' do
-        subject.check(context, key, passing_condition).should be true
-        subject.check(context, key, failing_condition).should be false
+        expect(subject.check(context, key, passing_condition)).to be true
+        expect(subject.check(context, key, failing_condition)).to be false
       end
     end
 
-    pending 'with a hash condition' do
+    skip 'with a hash condition' do
     end
 
     context 'with a proc condition' do
@@ -169,7 +169,7 @@ describe Attributor::AttributeResolver do
       let(:ssh_key) { double('ssh_key', name: nil) }
       it 'can be done using the almighty Proc' do
         cond = proc { |value| !value.nil? }
-        subject.check(context, key, cond).should be false
+        expect(subject.check(context, key, cond)).to be false
       end
     end
 
@@ -178,7 +178,7 @@ describe Attributor::AttributeResolver do
       let(:key) { 'name' }
 
       it 'works' do
-        subject.check(context, key, value).should be true
+        expect(subject.check(context, key, value)).to be true
       end
     end
   end

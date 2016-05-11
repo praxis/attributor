@@ -16,7 +16,7 @@ describe Attributor do
         Attributor::Struct => Attributor::Struct
       }.each do |type, expected_type|
         it "resolves #{type} as #{expected_type}" do
-          Attributor.resolve_type(type).should eq expected_type
+          expect(Attributor.resolve_type(type)).to eq expected_type
         end
       end
     end
@@ -40,20 +40,20 @@ describe Attributor do
 
   context '.type_name' do
     it 'accepts arbtirary classes' do
-      Attributor.type_name(File).should eq 'File'
+      expect(Attributor.type_name(File)).to eq 'File'
     end
 
     it 'accepts instances' do
-      Attributor.type_name('a string').should eq 'String'
+      expect(Attributor.type_name('a string')).to eq 'String'
     end
 
     it 'accepts instances of anonymous types' do
       type = Class.new(Attributor::Struct)
-      Attributor.type_name(type).should eq 'Attributor::Struct'
+      expect(Attributor.type_name(type)).to eq 'Attributor::Struct'
     end
 
     it 'accepts Attributor types' do
-      Attributor.type_name(Attributor::String).should eq 'Attributor::String'
+      expect(Attributor.type_name(Attributor::String)).to eq 'Attributor::String'
     end
   end
 end
