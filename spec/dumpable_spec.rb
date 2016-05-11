@@ -23,7 +23,7 @@ describe 'Dumpable' do
     end
 
     it 'do not get the base exception' do
-      expect { type.new.dump }.to_not raise_exception
+      expect { type.new.dump }.to_not raise_error
     end
   end
 end

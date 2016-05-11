@@ -96,6 +96,7 @@ module Attributor
   require_relative 'attributor/types/model'
   require_relative 'attributor/types/struct'
   require_relative 'attributor/types/class'
+  require_relative 'attributor/types/polymorphic'
 
   require_relative 'attributor/types/csv'
   require_relative 'attributor/types/ids'

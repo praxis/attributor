@@ -5,6 +5,7 @@ class Chicken < Attributor::Model
     attribute :email, Attributor::String, example: Randgen.email, regexp: /@/, description: 'The email address of the chicken'
     attribute :angry, Attributor::Boolean, example: 'true', description: 'Angry bird?'
     attribute :weight, Attributor::Float, example: /\d{1,2}\.\d/, description: 'The weight of the chicken'
+    attribute :type, Attributor::Symbol, values: [:chicken]
   end
 end
 
@@ -15,6 +16,7 @@ class Duck < Attributor::Model
     attribute :email, Attributor::String, required_if: 'name'
     attribute :angry, Attributor::Boolean, default: true, example: /true|false/, description: 'Angry bird?'
     attribute :weight, Attributor::Float, example: /\d{1,2}\.\d/, description: 'The weight of the duck'
+    attribute :type, Attributor::Symbol, values: [:duck]
   end
 end
 
@@ -24,6 +26,7 @@ class Turkey < Attributor::Model
     attribute :name, String, description: 'name of the turkey', example: Randgen.name # , :default => "Providencia Zboncak"
     attribute :email, String, example: Randgen.email, regexp: /@/, description: 'The email address of the turkey'
     attribute :weight, Attributor::Float, example: /\d{1,2}\.\d/, max: 86.7, description: 'The weight of the turkey'
+    attribute :type, Attributor::Symbol, values: [:turkey]
   end
 end
 
