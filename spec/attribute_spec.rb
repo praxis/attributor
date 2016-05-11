@@ -404,7 +404,7 @@ describe Attributor::Attribute do
             context 'with a value that is not allowed' do
               let(:value) { 'three' }
               it 'returns an error indicating the problem' do
-                expect(errors.first).to match /is not within the allowed values/
+                expect(errors.first).to match(/is not within the allowed values/)
               end
             end
           end
@@ -433,7 +433,7 @@ describe Attributor::Attribute do
 
           it 'returns errors' do
             expect(errors).not_to be_empty
-            expect(errors.first).to match /is of the wrong type/
+            expect(errors.first).to match(/is of the wrong type/)
           end
         end
       end
@@ -472,7 +472,7 @@ describe Attributor::Attribute do
 
             it { should_not be_empty }
 
-            its(:first) { should match /Attribute #{Regexp.quote(Attributor.humanize_context(attribute_context))} is required when #{Regexp.quote(key)} matches/ }
+            its(:first) { should match(/Attribute #{Regexp.quote(Attributor.humanize_context(attribute_context))} is required when #{Regexp.quote(key)} matches/) }
           end
 
           context 'where the target attribute exists, but does not match the predicate' do
@@ -604,7 +604,7 @@ describe Attributor::Attribute do
 
           context 'where the target attribute exists, and matches the predicate' do
             it { should_not be_empty }
-            its(:first) { should match /Attribute #{Regexp.quote('$.duck.age')} is required when name #{Regexp.quote('(for $.duck)')} matches/ }
+            its(:first) { should match(/Attribute #{Regexp.quote('$.duck.age')} is required when name #{Regexp.quote('(for $.duck)')} matches/) }
           end
 
           context 'where the target attribute exists, and does not match the predicate' do
@@ -652,7 +652,7 @@ describe Attributor::Attribute do
           errors = attribute.validate(object)
 
           expect(errors).to have(1).item
-          expect(errors[0]).to match /value \(12\) is larger/
+          expect(errors[0]).to match(/value \(12\) is larger/)
         end
       end
     end

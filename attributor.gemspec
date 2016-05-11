@@ -23,7 +23,9 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency('randexp', ['~> 0'])
   spec.add_runtime_dependency('activesupport', ['>= 3'])
 
-  spec.add_development_dependency('rspec', ['< 2.99'])
+  spec.add_development_dependency('rspec', ['>= 2.99'])
+  spec.add_development_dependency 'rspec-its'
+  spec.add_development_dependency 'rspec-collection_matchers', '~> 1'
   spec.add_development_dependency('yard', ['~> 0.8.7'])
   spec.add_development_dependency('backports', ['~> 3'])
   spec.add_development_dependency('yardstick', ['~> 0'])
@@ -36,7 +38,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency('pry', ['~> 0'])
   spec.add_development_dependency('pry-byebug', ['~> 1'])
   spec.add_development_dependency('pry-stack_explorer', ['~> 0'])
-  spec.add_development_dependency('fuubar', ['~> 1'])
+  spec.add_development_dependency 'fuubar'
   spec.add_development_dependency 'rubocop'
   spec.add_development_dependency 'guard-rubocop'
 

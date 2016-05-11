@@ -477,7 +477,7 @@ describe Attributor::Hash do
           dumped_value = type.dump(value, opts)
           expect(dumped_value).to be_kind_of(::Hash)
           expect(dumped_value.keys).to match_array %w(id1 id2)
-          expect(dumped_value['id1']).to.nil?
+          expect(dumped_value['id1']).to be nil
           expect(dumped_value['id2']).to eq value2
         end
       end

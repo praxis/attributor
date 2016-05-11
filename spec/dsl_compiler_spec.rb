@@ -102,7 +102,7 @@ describe Attributor::DSLCompiler do
 
         it 'sets the type of the attribute to Struct' do
           expect(Attributor::Attribute).to receive(:new)
-                               .with(expected_type, description: 'The turkey', reference: Turkey)
+            .with(expected_type, description: 'The turkey', reference: Turkey)
           dsl_compiler.attribute(attribute_name, attribute_options, &attribute_block)
         end
 

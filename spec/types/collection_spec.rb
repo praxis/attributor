@@ -247,8 +247,8 @@ describe Attributor::Collection do
       before do
         collection_members.zip(expected_errors).each do |member, expected_error|
           expect(type.member_attribute).to receive(:validate)
-              .with(member, an_instance_of(Array)) # we don't care about the exact context here
-              .and_return([expected_error])
+            .with(member, an_instance_of(Array)) # we don't care about the exact context here
+            .and_return([expected_error])
         end
       end
 

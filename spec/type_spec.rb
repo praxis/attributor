@@ -92,7 +92,7 @@ describe Attributor::Type do
 
         it { should_not be_empty }
         it 'returns the correct error message' do
-          expect(errors.first).to match /value \(#{value}\) is smaller than the allowed min/
+          expect(errors.first).to match(/value \(#{value}\) is smaller than the allowed min/)
         end
       end
 
@@ -100,7 +100,7 @@ describe Attributor::Type do
         let(:value) { 1000 }
         it { should_not be_empty }
         it 'returns the correct error message' do
-          expect(errors.first).to match /value \(#{value}\) is larger than the allowed max/
+          expect(errors.first).to match(/value \(#{value}\) is larger than the allowed max/)
         end
       end
 
@@ -124,7 +124,7 @@ describe Attributor::Type do
         let(:value) { 'chicken' }
         it { should_not be_empty }
         it 'returns the correct error message' do
-          expect(errors.first).to match /value \(#{value}\) does not match regexp/
+          expect(errors.first).to match(/value \(#{value}\) does not match regexp/)
         end
       end
     end

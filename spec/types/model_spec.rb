@@ -75,7 +75,7 @@ describe Attributor::Model do
             expect(Attributor::Integer).not_to receive(:example) # due to lazy-evaluation of examples
             expect(Attributor::String).not_to receive(:example) # due to the :example option on the attribute
           end
-          its(:email) { should match /\w+@.*\.example\.org/ }
+          its(:email) { should match(/\w+@.*\.example\.org/) }
         end
 
         context 'with given values' do
@@ -177,7 +177,7 @@ describe Attributor::Model do
         let(:json) { hash.to_json }
         before do
           expect(Chicken).to receive(:from_hash)
-                 .with(expected_hash, context, recurse: false)
+            .with(expected_hash, context, recurse: false)
           expect(JSON).to receive(:parse).with(json).and_call_original
         end
 
@@ -229,7 +229,7 @@ describe Attributor::Model do
 
           it 'sets the defaults' do
             expect(model.age).to eq 1
-            expect(model.email).to.nil?
+            expect(model.email).to be nil
           end
         end
 
@@ -286,8 +286,8 @@ describe Attributor::Model do
           expect(Chicken).to receive(:load).with(attributes_data).and_call_original
           attributes_data.keys.each do |attr_name|
             expect(Chicken.attributes[attr_name]).to receive(:load)
-                                         .with(attributes_data[attr_name], instance_of(Array), recurse: false)
-                                         .and_call_original
+              .with(attributes_data[attr_name], instance_of(Array), recurse: false)
+              .and_call_original
           end
           expect(subject.age).to be(1)
           expect(subject.email).to be(attributes_data[:email])
@@ -300,8 +300,8 @@ describe Attributor::Model do
           expect(Chicken).to receive(:load).with(attributes_data).and_call_original
           attributes_hash.keys.each do |attr_name|
             expect(Chicken.attributes[attr_name]).to receive(:load)
-                                         .with(attributes_hash[attr_name], instance_of(Array), recurse: false)
-                                         .and_call_original
+              .with(attributes_hash[attr_name], instance_of(Array), recurse: false)
+              .and_call_original
           end
           expect(subject.age).to be(1)
           expect(subject.email).to eq attributes_hash[:email]
@@ -334,7 +334,7 @@ describe Attributor::Model do
 
         it 'sets the value to nil if there is no default' do
           chicken.email = nil
-          expect(chicken.email).to.nil?
+          expect(chicken.email).to be nil
         end
       end
 
@@ -391,8 +391,8 @@ describe Attributor::Model do
 
         it 'recursively-validates sub-attributes with the right context' do
           title_error, state_error = person.validate('person')
-          expect(title_error).to match /^Attribute person\.title:/
-          expect(state_error).to match /^Attribute person\.address\.state:/
+          expect(title_error).to match(/^Attribute person\.title:/)
+          expect(state_error).to match(/^Attribute person\.address\.state:/)
         end
       end
     end

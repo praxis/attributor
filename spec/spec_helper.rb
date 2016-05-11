@@ -11,8 +11,10 @@ Coveralls.wear! do
 end
 
 require 'rspec'
-require 'attributor'
+require 'rspec/its'
+require 'rspec/collection_matchers'
 
+require 'attributor'
 require 'pry'
 
 # Requires supporting files with custom matchers and macros, etc,

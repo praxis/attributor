@@ -161,7 +161,7 @@ describe Attributor::AttributeResolver do
     context 'with an unsupported condition type' do
       let(:condition) { double('weird condition type') }
       it 'raises an error' do
-        expect { subject.check(context, present_key, condition) }.to raise_error
+        expect { subject.check(context, present_key, condition) }.to raise_error(Attributor::AttributorException)
       end
     end
 
