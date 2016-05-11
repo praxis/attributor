@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency('randexp', ['~> 0'])
   spec.add_runtime_dependency('activesupport', ['>= 3'])
 
-  spec.add_development_dependency('rspec', ['>= 2.99'])
+  spec.add_development_dependency 'rspec', '~> 3'
   spec.add_development_dependency 'rspec-its'
   spec.add_development_dependency 'rspec-collection_matchers', '~> 1'
   spec.add_development_dependency('yard', ['~> 0.8.7'])
