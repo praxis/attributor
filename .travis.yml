@@ -3,7 +3,9 @@ language: ruby
 rvm:
   - 2.1.5
   - 2.2.2
-script: bundle exec rspec spec
+script:
+  - bundle exec rspec spec
+  - bundle exec rubocop --format=clang
 branches:
   only:
     - master
