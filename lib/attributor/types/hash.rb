@@ -545,10 +545,14 @@ module Attributor
         end
       end
 
-      ret = self.class.keys.each_with_object([]) do |(key, attribute), errors|
+      errors = []
+      keys_with_values = []
+
+      self.class.keys.each do |key, attribute|
         sub_context = self.class.generate_subcontext(context, key)
 
         value = @contents[key]
+        keys_with_values << key unless value.nil?
 
         if value.respond_to?(:validating) # really, it's a thing with sub-attributes
           next if value.validating
@@ -556,11 +560,11 @@ module Attributor
 
         errors.push(*attribute.validate(value, sub_context))
       end
-      self.class.requirements.each_with_object(ret) do |req, errors|
-        validation_errors = req.validate(@contents, context)
+      self.class.requirements.each do |requirement|
+        validation_errors = requirement.validate(keys_with_values, context)
         errors.push(*validation_errors) unless validation_errors.empty?
       end
-      ret
+      errors
     end
 
     def validate_generic(context)
