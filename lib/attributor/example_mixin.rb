@@ -2,11 +2,9 @@
 # primarily enables support for lazy values.
 
 module Attributor
-
   module ExampleMixin
-
     def self.extended(obj)
-      if obj.kind_of? Attributor::Model
+      if obj.is_a? Attributor::Model
         obj.class.attributes.each do |name, _|
           obj.define_singleton_method(name) do
             get(name)
@@ -32,7 +30,7 @@ module Attributor
       @contents[k]
     end
 
-    def []=(k,v)
+    def []=(k, v)
       lazy_attributes.delete k
       @contents[k] = v
     end
@@ -41,7 +39,7 @@ module Attributor
       contents.each(&block)
     end
 
-    alias_method :each_pair, :each
+    alias each_pair each
 
     def values
       contents.values
@@ -63,7 +61,7 @@ module Attributor
       @contents.key?(key) || lazy_attributes.key?(key)
     end
 
-    def get(key, context: self.generate_subcontext(Attributor::DEFAULT_ROOT_CONTEXT,key))
+    def get(key, context: generate_subcontext(Attributor::DEFAULT_ROOT_CONTEXT, key))
       key = self.class.key_attribute.load(key, context)
 
       unless @contents.key? key
@@ -78,7 +76,7 @@ module Attributor
 
     def attributes
       lazy_attributes.keys.each do |name|
-        self.__send__(name)
+        __send__(name)
       end
 
       super
@@ -93,5 +91,4 @@ module Attributor
       super
     end
   end
-
 end

@@ -5,11 +5,11 @@ module Attributor
     include Type
 
     def self.native_type
-      return ::Regexp
+      ::Regexp
     end
 
-    def self.load(value, context=Attributor::DEFAULT_ROOT_CONTEXT, **options)
-      unless value.kind_of?(::String) || value.nil?
+    def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **options)
+      unless value.is_a?(::String) || value.nil?
         raise IncompatibleTypeError,  context: context, value_type: value.class, type: self
       end
 
@@ -18,13 +18,12 @@ module Attributor
       super
     end
 
-    def self.example(context=nil, options:{})
+    def self.example(_context = nil, **_options)
       ::Regexp.new(/^pattern\d{0,3}$/).to_s
     end
 
     def self.family
       'string'
     end
-
   end
 end

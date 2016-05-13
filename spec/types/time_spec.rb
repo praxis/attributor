@@ -1,11 +1,10 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper.rb')
 
 describe Attributor::Time do
-
   subject(:type) { Attributor::Time }
 
   it 'it is not Dumpable' do
-    type.new.is_a?(Attributor::Dumpable).should_not be(true)
+    expect(type.new.is_a?(Attributor::Dumpable)).not_to be(true)
   end
 
   context '.native_type' do
@@ -17,45 +16,40 @@ describe Attributor::Time do
   end
 
   context '.dump' do
-    let(:example) { type.example}
+    let(:example) { type.example }
     subject(:value) { type.dump(example) }
     it 'is formatted correctly' do
-      value.should match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[\+-]\d{2}:\d{2}/)
+      expect(value).to match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[\+-]\d{2}:\d{2}/)
     end
     context 'nil values' do
       it 'should be nil' do
-        type.dump(nil).should be_nil
+        expect(type.dump(nil)).to be_nil
       end
     end
   end
 
-
   context '.load' do
-
     it 'returns nil for nil' do
-      type.load(nil).should be(nil)
+      expect(type.load(nil)).to be(nil)
     end
 
     context 'for incoming objects' do
-
-      it "returns correct Time for DateTime objects" do
+      it 'returns correct Time for DateTime objects' do
         object = Time.now
         loaded = type.load(object)
-        loaded.should be_a(::Time)
-        loaded.to_time.should == object
+        expect(loaded).to be_a(::Time)
+        expect(loaded.to_time).to eq object
       end
 
-      it "returns correct Time for DateTime objects" do
+      it 'returns correct Time for DateTime objects' do
         object = DateTime.now
         loaded = type.load(object)
-        loaded.should be_a(::Time)
-        loaded.should eq(object.to_time)
+        expect(loaded).to be_a(::Time)
+        expect(loaded).to eq(object.to_time)
       end
-
     end
 
     context 'for incoming strings' do
-
       [
         '2001-02-03T04:05:06+07:00',
         'Sat, 03 Feb 2001 04:05:06 GMT',
@@ -67,11 +61,9 @@ describe Attributor::Time do
         '2007-10-19T04:11:33Z',
         '2001-02-03T04:05:06+07:00.123456', # custom format with microseconds
       ].each do |value|
-
         it "returns correct Time for #{value.inspect}" do
-          type.load(value).should == Time.parse(value)
+          expect(type.load(value)).to eq Time.parse(value)
         end
-
       end
 
       [
@@ -79,31 +71,23 @@ describe Attributor::Time do
         '2007-10-33T04:11:33Z',
         '2001-02-33T04:05:06+07:00.123456', # custom format with microseconds
       ].each do |value|
-
         it "raises Attributor::AttributorException for #{value.inspect}" do
-          expect {
+          expect do
             type.load(value)
-          }.to raise_error(Attributor::DeserializationError, /Error deserializing a String using Time/)
+          end.to raise_error(Attributor::DeserializationError, /Error deserializing a String using Time/)
         end
-
       end
 
       [
         '',
         'foobar'
       ].each do |value|
-
         it "raises Attributor::AttributorException for #{value.inspect}" do
-          expect {
+          expect do
             type.load(value)
-          }.to raise_error(Attributor::DeserializationError, /Error deserializing a String using Time/)
+          end.to raise_error(Attributor::DeserializationError, /Error deserializing a String using Time/)
         end
-
       end
-
     end
-
   end
-
 end
-

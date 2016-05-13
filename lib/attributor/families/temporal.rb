@@ -1,7 +1,6 @@
 # Abstract type for the 'temporal' family
 
 module Attributor
-
   class Temporal
     include Type
 
@@ -13,10 +12,8 @@ module Attributor
       'temporal'
     end
 
-    def self.dump(value,**opts)
+    def self.dump(value, **_opts)
       value && value.iso8601
     end
-
-  
   end
 end

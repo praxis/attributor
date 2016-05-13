@@ -1,108 +1,102 @@
 require File.join(File.dirname(__FILE__), 'spec_helper.rb')
 
-
 describe Attributor::AttributeResolver do
   let(:value) { /\w+/.gen }
 
   context 'registering and querying simple values' do
-    let(:name) { "string_value" }
-    before { subject.register(name,value) }
+    let(:name) { 'string_value' }
+    before { subject.register(name, value) }
 
     it 'works' do
-      subject.query(name).should be value
+      expect(subject.query(name)).to be value
     end
   end
-
 
   context 'querying and registering nested values' do
-    let(:one) { double(:two => value) }
-    let(:key) { "one.two" }
-    before { subject.register("one", one) }
+    let(:one) { double(two: value) }
+    let(:key) { 'one.two' }
+    before { subject.register('one', one) }
 
     it 'works' do
-      subject.query(key).should be value
+      expect(subject.query(key)).to be value
     end
   end
 
-
   context 'querying nested values from models' do
-    let(:instance) { double("instance", :ssh_key => ssh_key) }
-    let(:ssh_key) { double("ssh_key", :name => value) }
-    let(:key) { "instance.ssh_key.name" }
+    let(:instance) { double('instance', ssh_key: ssh_key) }
+    let(:ssh_key) { double('ssh_key', name: value) }
+    let(:key) { 'instance.ssh_key.name' }
 
     before { subject.register('instance', instance) }
 
     it 'works' do
-      subject.query("instance").should be instance
-      subject.query("instance.ssh_key").should be ssh_key
-      subject.query(key).should be value
+      expect(subject.query('instance')).to be instance
+      expect(subject.query('instance.ssh_key')).to be ssh_key
+      expect(subject.query(key)).to be value
     end
-
 
     context 'with a prefix' do
-      let(:key) { "name" }
-      let(:prefix) { "$.instance.ssh_key"}
+      let(:key) { 'name' }
+      let(:prefix) { '$.instance.ssh_key' }
       let(:value) { 'some_name' }
       it 'works' do
-        subject.query(key,prefix).should be(value)
+        expect(subject.query(key, prefix)).to be(value)
       end
     end
-
   end
-
 
   context 'querying values that do not exist' do
     context 'for a straight key' do
-      let(:key) { "missing" }
+      let(:key) { 'missing' }
       it 'returns nil' do
-        subject.query(key).should be_nil
+        expect(subject.query(key)).to be_nil
       end
     end
     context 'for a nested key' do
-      let(:key) { "nested.missing" }
+      let(:key) { 'nested.missing' }
       it 'returns nil' do
-        subject.query(key).should be_nil
+        expect(subject.query(key)).to be_nil
       end
     end
   end
 
   context 'querying collection indices from models' do
     let(:instances) { [instance1, instance2] }
-    let(:instance1) { double('instance1', :ssh_key => ssh_key1) }
-    let(:instance2) { double('instance2', :ssh_key => ssh_key2) }
-    let(:ssh_key1) { double('ssh_key', :name => value) }
-    let(:ssh_key2) { double('ssh_key', :name => 'second') }
+    let(:instance1) { double('instance1', ssh_key: ssh_key1) }
+    let(:instance2) { double('instance2', ssh_key: ssh_key2) }
+    let(:ssh_key1) { double('ssh_key', name: value) }
+    let(:ssh_key2) { double('ssh_key', name: 'second') }
     let(:args) { [path, prefix].compact }
 
     before { subject.register('instances', instances) }
 
     it 'resolves the index to the correct member of the collection' do
-      subject.query('instances').should be instances
-      subject.query('instances.at(1).ssh_key').should be ssh_key2
-      subject.query('instances.at(0).ssh_key.name').should be value
+      expect(subject.query('instances')).to be instances
+      expect(subject.query('instances.at(1).ssh_key')).to be ssh_key2
+      expect(subject.query('instances.at(0).ssh_key.name')).to be value
     end
 
     it 'returns nil for index out of range' do
-      subject.query('instances.at(2)').should be(nil)
-      subject.query('instances.at(-1)').should be(nil)
+      expect(subject.query('instances.at(2)')).to be(nil)
+      expect(subject.query('instances.at(-1)')).to be(nil)
     end
 
     context 'with a prefix' do
       let(:key) { 'name' }
-      let(:prefix) { '$.instances.at(0).ssh_key'}
+      let(:prefix) { '$.instances.at(0).ssh_key' }
       let(:value) { 'some_name' }
 
       it 'resolves the index to the correct member of the collection' do
-        subject.query(key, prefix).should be(value)
+        expect(subject.query(key, prefix)).to be(value)
       end
     end
   end
 
   context 'checking attribute conditions' do
-    let(:key) { "instance.ssh_key.name" }
-    let(:ssh_key) { double("ssh_key", :name => value) }
+    let(:key) { 'instance.ssh_key.name' }
+    let(:ssh_key) { double('ssh_key', name: value) }
     let(:instance_id) { 123 }
-    let(:instance) { double("instance", ssh_key: ssh_key, id: instance_id) }
+    let(:instance) { double('instance', ssh_key: ssh_key, id: instance_id) }
 
     let(:context) { '$' }
 
@@ -113,88 +107,81 @@ describe Attributor::AttributeResolver do
 
     context 'with no condition' do
       let(:condition) { nil }
-      before { ssh_key.should_receive(:something_else).and_return(nil) }
+      before { expect(ssh_key).to receive(:something_else).and_return(nil) }
       it 'works' do
-        subject.check(context, present_key, condition).should be true
-        subject.check(context, missing_key, condition).should be false
+        expect(subject.check(context, present_key, condition)).to be true
+        expect(subject.check(context, missing_key, condition)).to be false
       end
     end
-
 
     context 'with a string condition' do
       let(:passing_condition) { value }
       let(:failing_condition) { /\w+/.gen }
 
       it 'works' do
-        subject.check(context, key, passing_condition).should be true
-        subject.check(context, key, failing_condition).should be false
+        expect(subject.check(context, key, passing_condition)).to be true
+        expect(subject.check(context, key, failing_condition)).to be false
       end
     end
-
 
     context 'with a regex condition' do
       let(:passing_condition) { /\w+/ }
       let(:failing_condition) { /\d+/ }
 
       it 'works' do
-        subject.check(context, key, passing_condition).should be true
-        subject.check(context, key, failing_condition).should be false
+        expect(subject.check(context, key, passing_condition)).to be true
+        expect(subject.check(context, key, failing_condition)).to be false
       end
-
     end
 
     context 'with an integer condition' do
-      let(:key) { "instance.id" }
+      let(:key) { 'instance.id' }
       let(:passing_condition) { instance_id }
       let(:failing_condition) { /\w+/.gen }
 
       it 'works' do
-        subject.check(context, key, passing_condition).should be true
-        subject.check(context, key, failing_condition).should be false
+        expect(subject.check(context, key, passing_condition)).to be true
+        expect(subject.check(context, key, failing_condition)).to be false
       end
     end
-    
-    pending 'with a hash condition' do
+
+    skip 'with a hash condition' do
     end
 
     context 'with a proc condition' do
-      let(:passing_condition) { Proc.new { |test_value| test_value == value } }
-      let(:failing_condition) { Proc.new { |test_value| test_value != value } }
+      let(:passing_condition) { proc { |test_value| test_value == value } }
+      let(:failing_condition) { proc { |test_value| test_value != value } }
 
       it 'works' do
         expect(subject.check(context, key, passing_condition)).to eq(true)
         expect(subject.check(context, key, failing_condition)).to eq(false)
       end
-
     end
 
     context 'with an unsupported condition type' do
-      let(:condition) { double("weird condition type") }
+      let(:condition) { double('weird condition type') }
       it 'raises an error' do
-        expect { subject.check(context, present_key, condition) }.to raise_error
+        expect { subject.check(context, present_key, condition) }.to raise_error(Attributor::AttributorException)
       end
     end
 
     context 'with a condition that asserts something IS nil' do
-      let(:ssh_key) { double("ssh_key", :name => nil) }
+      let(:ssh_key) { double('ssh_key', name: nil) }
       it 'can be done using the almighty Proc' do
-        cond = Proc.new { |value| !value.nil? }
-        subject.check(context, key, cond).should be false
+        cond = proc { |value| !value.nil? }
+        expect(subject.check(context, key, cond)).to be false
       end
     end
 
     context 'with a relative path' do
-      let(:context) { "$.instance.ssh_key"}
-      let(:key) { "name" }
+      let(:context) { '$.instance.ssh_key' }
+      let(:key) { 'name' }
 
       it 'works' do
-        subject.check(context, key, value).should be true
+        expect(subject.check(context, key, value)).to be true
       end
-
     end
-
   end
-
 
   # context 'with context stuff...' do
 
@@ -219,13 +206,11 @@ describe Attributor::AttributeResolver do
 
   # end
 
-
   # context 'integration with attributes that have sub-attributes' do
-  #when you start to parse... do you set the root in the resolver?
+  # when you start to parse... do you set the root in the resolver?
   # end
   #
   #  context 'actually using the thing' do
-
 
   #   # we'll always want to add... right? never really remove?
   #   # at least not remove for the duration of a given resolver...
@@ -246,13 +231,7 @@ describe Attributor::AttributeResolver do
 
   #     resolver.query '$.parsed_params.account_id'
 
-
   #   end
 
-
   # end
-
 end
-
-
-

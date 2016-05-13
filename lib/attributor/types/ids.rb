@@ -1,8 +1,5 @@
 module Attributor
-
   class Ids < CSV
-
-
     def self.for(type)
       identity_name = type.options.fetch(:identity) do
         raise AttributorException, "no identity found for #{type.name}"
@@ -16,11 +13,10 @@ module Attributor
         @member_attribute = identity_attribute
         @member_type = identity_attribute.type
       end
-
     end
 
-    def self.of(type)
-      raise "Invalid definition of Ids type. Defining Ids.of(type) is not allowed, you probably meant to do Ids.for(type) instead"
+    def self.of(_type)
+      raise 'Invalid definition of Ids type. Defining Ids.of(type) is not allowed, you probably meant to do Ids.for(type) instead'
     end
   end
 end

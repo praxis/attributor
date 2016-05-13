@@ -1,11 +1,9 @@
 require 'ostruct'
 
 module Attributor
-
-
   class AttributeResolver
     ROOT_PREFIX = '$'.freeze
-    COLLECTION_INDEX_KEY = /^at\((\d+)\)$/.freeze
+    COLLECTION_INDEX_KEY = /^at\((\d+)\)$/
 
     class Data < ::Hash
       include Hashie::Extensions::MethodReader
@@ -17,8 +15,7 @@ module Attributor
       @data = Data.new
     end
 
-
-    def query!(key_path, path_prefix=ROOT_PREFIX)
+    def query!(key_path, path_prefix = ROOT_PREFIX)
       # If the incoming key_path is not an absolute path, append the given prefix
       # NOTE: Need to index key_path by range here because Ruby 1.8 returns a
       # FixNum for the ASCII code, not the actual character, when indexing by a number.
@@ -49,7 +46,6 @@ module Attributor
       result
     end
 
-
     # Query for a certain key in the attribute hierarchy
     #
     # @param [String] key_path The name of the key to query and its path
@@ -57,20 +53,19 @@ module Attributor
     #
     # @return [String] The value of the specified attribute/key
     #
-    def query(key_path,path_prefix=ROOT_PREFIX)
-      query!(key_path,path_prefix)
-    rescue NoMethodError => e
+    def query(key_path, path_prefix = ROOT_PREFIX)
+      query!(key_path, path_prefix)
+    rescue NoMethodError
       nil
     end
 
     def register(key_path, value)
       if key_path.split(SEPARATOR).size > 1
-        raise AttributorException.new("can only register top-level attributes. got: #{key_path}")
+        raise AttributorException, "can only register top-level attributes. got: #{key_path}"
       end
 
       @data[key_path] = value
     end
-
 
     # Checks that the the condition is met. This means the attribute identified
     # by path_prefix and key_path satisfies the optional predicate, which when
@@ -84,13 +79,11 @@ module Attributor
     #
     # @raise [AttributorException] When an unsupported predicate is passed
     #
-    def check(path_prefix, key_path, predicate=nil)
-      value = self.query(key_path, path_prefix)
+    def check(path_prefix, key_path, predicate = nil)
+      value = query(key_path, path_prefix)
 
       # we have a value, any value, which is good enough given no predicate
-      if !value.nil? && predicate.nil?
-        return true
-      end
+      return true if !value.nil? && predicate.nil?
 
       case predicate
       when ::String, ::Regexp, ::Integer, ::Float, ::DateTime, true, false
@@ -101,9 +94,8 @@ module Attributor
       when nil
         return !value.nil?
       else
-        raise AttributorException.new("predicate not supported: #{predicate.inspect}")
+        raise AttributorException, "predicate not supported: #{predicate.inspect}"
       end
-
     end
 
     # TODO: kill this when we also kill Taylor's IdentityMap.current
@@ -111,15 +103,9 @@ module Attributor
       Thread.current[:_attributor_attribute_resolver] = resolver
     end
 
-
     def self.current
-      if resolver = Thread.current[:_attributor_attribute_resolver]
-        return resolver
-      else
-        raise AttributorException, "No AttributeResolver set."
-      end
+      raise AttributorException, 'No AttributeResolver set.' unless Thread.current[:_attributor_attribute_resolver]
+      Thread.current[:_attributor_attribute_resolver]
     end
-
   end
-
 end

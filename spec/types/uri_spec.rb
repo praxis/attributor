@@ -1,11 +1,10 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper.rb')
 
 describe Attributor::URI do
-
   subject(:type) { Attributor::URI }
 
   it 'it is not Dumpable' do
-    type.new.is_a?(Attributor::Dumpable).should_not be(true)
+    expect(type.new.is_a?(Attributor::Dumpable)).not_to be(true)
   end
 
   its(:native_type) { should be ::URI::Generic }
@@ -17,7 +16,7 @@ describe Attributor::URI do
   end
 
   context '.dump' do
-    let(:example){ type.example }
+    let(:example) { type.example }
     it 'uses the underlying URI to_s' do
       expect(type.dump(example)).to eq(example.to_s)
     end
@@ -65,7 +64,7 @@ describe Attributor::URI do
       end
 
       context 'when given a path option' do
-        let(:attribute) { Attributor::Attribute.new(type, path: /^\//) }
+        let(:attribute) { Attributor::Attribute.new(type, path: %r{^/}) }
 
         context 'given a URI that matches the path regex' do
           it 'does not return any errors' do
@@ -89,14 +88,14 @@ describe Attributor::URI do
 
     context 'for path option' do
       context 'given a regex definition' do
-        let(:options) { {path: Regexp.new('a-z')} }
+        let(:options) { { path: Regexp.new('a-z') } }
         it 'checks successfully' do
           expect(subject).to be_kind_of(Attributor::Attribute)
         end
       end
 
       context 'given any definition other than regex' do
-        let(:options) { {path: 1} }
+        let(:options) { { path: 1 } }
         it 'raises an exception' do
           expect { subject }.to raise_error(Attributor::AttributorException)
         end
@@ -104,7 +103,7 @@ describe Attributor::URI do
     end
 
     context 'for any other option' do
-      let(:options) { {something: 1} }
+      let(:options) { { something: 1 } }
       it 'raises an exception' do
         expect { subject }.to raise_error(Attributor::AttributorException)
       end

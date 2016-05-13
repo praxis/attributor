@@ -1,6 +1,5 @@
-#Container of options and structure definition
+# Container of options and structure definition
 module Attributor
-
   # RULES FOR ATTRIBUTES
   #   The type of an attribute is:
   #     the specified type
@@ -11,7 +10,6 @@ module Attributor
   #   The reference option for an attribute is passed if a block is given
 
   class DSLCompiler
-
     attr_accessor :options, :target
 
     def initialize(target, **options)
@@ -21,7 +19,7 @@ module Attributor
 
     def parse(*blocks)
       blocks.push(Proc.new) if block_given?
-      blocks.each { |block| self.instance_eval(&block) }
+      blocks.each { |block| instance_eval(&block) }
       self
     end
 
@@ -33,19 +31,19 @@ module Attributor
       end
     end
 
-    def attribute(name, attr_type=nil, **opts, &block)
-      raise AttributorException, "Attribute names must be symbols, got: #{name.inspect}" unless name.kind_of? ::Symbol
+    def attribute(name, attr_type = nil, **opts, &block)
+      raise AttributorException, "Attribute names must be symbols, got: #{name.inspect}" unless name.is_a? ::Symbol
       target.attributes[name] = define(name, attr_type, **opts, &block)
     end
 
-    def key(name, attr_type=nil, **opts, &block)
-      unless name.kind_of?(options.fetch(:key_type, Attributor::Object).native_type)
+    def key(name, attr_type = nil, **opts, &block)
+      unless name.is_a?(options.fetch(:key_type, Attributor::Object).native_type)
         raise "Invalid key: #{name.inspect}, must be instance of #{options[:key_type].native_type.name}"
       end
       target.keys[name] = define(name, attr_type, **opts, &block)
     end
 
-    def extra(name, attr_type=nil, **opts, &block)
+    def extra(name, attr_type = nil, **opts, &block)
       if attr_type.nil?
         attr_type = Attributor::Hash.of(key: target.key_type, value: target.value_type)
       end
@@ -65,7 +63,7 @@ module Attributor
     #   @param [Hash] opts describe opts param
     #   @param [Block] block describe block param
     #   @example
-    #     attribute :email, String, example: /[:email:]/
+    #     attribute :email, String, example: Randgen.email
     # @overload define(name, opts, &block)
     #   Assume a type of Attributor::Struct
     #   @param [symbol] name describe name param
@@ -79,7 +77,7 @@ module Attributor
     #       attribute :state, String
     #     end
     # @api semiprivate
-    def define(name, attr_type=nil, **opts, &block)
+    def define(name, attr_type = nil, **opts, &block)
       # add to existing attribute if present
       if (existing_attribute = attributes[name])
         if existing_attribute.attributes
@@ -89,8 +87,8 @@ module Attributor
       end
 
       # determine inherited attribute
-      inherited_attribute = nil      
-      if (reference = self.options[:reference])
+      inherited_attribute = nil
+      if (reference = options[:reference])
         if (inherited_attribute = reference.attributes[name])
           opts = inherited_attribute.options.merge(opts) unless attr_type
           opts[:reference] = inherited_attribute.type if block_given?
@@ -101,12 +99,12 @@ module Attributor
       if attr_type.nil?
         if block_given?
           attr_type = if inherited_attribute && inherited_attribute.type < Attributor::Collection
-            # override the reference to be the member_attribute's type for collections
-            opts[:reference] = inherited_attribute.type.member_attribute.type
-            Attributor::Collection.of(Struct)
-          else
-            Attributor::Struct
-          end
+                        # override the reference to be the member_attribute's type for collections
+                        opts[:reference] = inherited_attribute.type.member_attribute.type
+                        Attributor::Collection.of(Struct)
+                      else
+                        Attributor::Struct
+                      end
         elsif inherited_attribute
           attr_type = inherited_attribute.type
         else
@@ -116,7 +114,5 @@ module Attributor
 
       Attributor::Attribute.new(attr_type, opts, &block)
     end
-
-
   end
 end

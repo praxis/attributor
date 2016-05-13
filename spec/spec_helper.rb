@@ -11,8 +11,10 @@ Coveralls.wear! do
 end
 
 require 'rspec'
-require 'attributor'
+require 'rspec/its'
+require 'rspec/collection_matchers'
 
+require 'attributor'
 require 'pry'
 
 # Requires supporting files with custom matchers and macros, etc,
@@ -20,17 +22,21 @@ require 'pry'
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
 RSpec.configure do |config|
-
   config.around(:each) do |example|
     Attributor::AttributeResolver.current = Attributor::AttributeResolver.new
     example.run
     Attributor::AttributeResolver.current = nil
   end
-
 end
 
 RSpec::Matchers.define :be_in_family do |expected|
   match do |actual|
     actual.family == expected
+  end
+end
+
+RSpec::Matchers.define :be_subclass_of do |expected|
+  match do |actual|
+    actual < expected
   end
 end
