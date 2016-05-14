@@ -23,30 +23,43 @@ describe Attributor::Hash do
           broken_model.attributes
         end.to raise_error(RuntimeError, 'sorry :(')
       end
-
-      it 'throws InvalidDefinition for subsequent access' do
-        begin
-          broken_model.attributes
-        rescue
-          nil
+      context 'subsequent use' do
+        before do
+          expect do
+            broken_model.attributes
+          end.to raise_error(RuntimeError, 'sorry :(')
         end
 
-        expect do
-          broken_model.attributes
-        end.to raise_error(Attributor::InvalidDefinition)
-      end
-
-      it 'throws for any attempts at using of an instance of it' do
-        begin
-          broken_model.attributes
-        rescue
-          nil
+        it 'throws InvalidDefinition for subsequent access' do
+          expect do
+            broken_model.attributes
+          end.to raise_error(Attributor::InvalidDefinition)
         end
 
-        instance = broken_model.new
-        expect do
-          instance.name
-        end.to raise_error(Attributor::InvalidDefinition)
+        it 'throws for any attempts at using of an instance of it' do
+          instance = broken_model.new
+          expect do
+            instance.name
+          end.to raise_error(Attributor::InvalidDefinition)
+        end
+
+        context 'for a type with a name' do
+          subject(:broken_model) do
+            Class.new(Attributor::Model) do
+              def self.name
+                'BrokenModel'
+              end
+              attributes do
+                raise 'sorry :('
+              end
+            end
+          end
+          it 'includes the correct type.name if applicable' do
+            expect do
+              broken_model.attributes
+            end.to raise_error(Attributor::InvalidDefinition, /BrokenModel/)
+          end
+        end
       end
     end
   end
@@ -1101,5 +1114,8 @@ describe Attributor::Hash do
     it 'merges' do
       expect(merger.merge(good_mergee)).to eq(result)
     end
+  end
+
+  context Attributor::InvalidDefinition do
   end
 end
