@@ -59,7 +59,7 @@ module Attributor
       type = self.types.fetch(loaded_value[self.discriminator]) do
         raise "invalid value for discriminator: #{discriminator}"
       end
-      type.load(value)
+      type.load(loaded_value)
     end
 
     def self.parse(value, context)
