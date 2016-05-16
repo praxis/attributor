@@ -48,6 +48,22 @@ describe Attributor::Polymorphic do
     end
   end
 
+  context '.describe' do
+    let(:example) { nil }
+    subject(:description) { type.describe(example: example) }
+
+    its([:discriminator]) { should eq :type }
+    context 'types' do
+      subject(:types) { description[:types] }
+      its(:keys) { should eq type.types.keys }
+      it do
+        expect(types[:chicken]).to eq(Chicken.describe(true))
+        expect(types[:turkey]).to eq(Turkey.describe(true))
+        expect(types[:duck]).to eq(Duck.describe(true))
+      end
+    end
+  end
+
   context 'as an attribute in a model' do
     let(:model) { Sandwich }
     subject(:example) { model.example }

@@ -77,5 +77,18 @@ module Attributor
         raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self
       end
     end
+
+    def self.describe(shallow = false, example: nil)
+      super.merge(
+        discriminator: self.discriminator,
+        types: self.describe_types
+      )
+    end
+
+    def self.describe_types
+      self.types.each_with_object({}) do |(key, value), description|
+        description[key] = value.describe(true)
+      end
+    end
   end
 end

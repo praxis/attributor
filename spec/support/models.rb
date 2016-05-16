@@ -25,7 +25,7 @@ class Turkey < Attributor::Model
     attribute :age, Integer, default: 1, min: 0, max: 120, description: 'The age of the turkey'
     attribute :name, String, description: 'name of the turkey', example: Randgen.name # , :default => "Providencia Zboncak"
     attribute :email, String, example: Randgen.email, regexp: /@/, description: 'The email address of the turkey'
-    attribute :weight, Attributor::Float, example: /\d{1,2}\.\d/, max: 86.7, description: 'The weight of the turkey'
+    attribute :weight, Attributor::Float, example: /\d{1,2}\.\d/, max: 100.0, description: 'The weight of the turkey'
     attribute :type, Attributor::Symbol, values: [:turkey]
   end
 end
