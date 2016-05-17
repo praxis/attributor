@@ -8,7 +8,7 @@ module Attributor
       ::Time
     end
 
-    def self.example(context = nil, _options: {})
+    def self.example(context = nil, **_options)
       load(Randgen.time, context)
     end
 
