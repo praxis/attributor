@@ -45,6 +45,7 @@ module Attributor
 
     def self.construct(block, **_options)
       self.instance_eval(&block)
+      self
     end
 
     def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **_options)
