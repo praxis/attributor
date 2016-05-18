@@ -62,6 +62,20 @@ describe Attributor::Polymorphic do
         expect(types[:duck]).to eq(Duck.describe(true))
       end
     end
+
+    context 'in a Model' do
+      subject(:description) { Sandwich.describe[:attributes][:meat][:type] }
+      its([:discriminator]) { should eq :type }
+      context 'types' do
+        subject(:types) { description[:types] }
+        its(:keys) { should match_array [:chicken, :turkey, :duck] }
+        it do
+          expect(types[:chicken]).to eq(Chicken.describe(true))
+          expect(types[:turkey]).to eq(Turkey.describe(true))
+          expect(types[:duck]).to eq(Duck.describe(true))
+        end
+      end
+    end
   end
 
   context 'as an attribute in a model' do
@@ -69,6 +83,15 @@ describe Attributor::Polymorphic do
     subject(:example) { model.example }
     it 'generates an example properly' do
       expect([Chicken, Duck, Turkey]).to include(example.meat.class)
+    end
+
+    context 'loading' do
+      [Chicken, Duck, Turkey].each do |meat_class|
+        it "loads #{meat_class}" do
+          data = { meat: meat_class.example.dump }
+          expect(Sandwich.load(data).meat).to be_kind_of(meat_class)
+        end
+      end
     end
   end
 end
