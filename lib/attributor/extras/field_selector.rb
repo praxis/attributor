@@ -16,7 +16,7 @@ module Attributor
       ::Hash
     end
 
-    def self.example(_context = nil, _options = {})
+    def self.example(_context = nil, **_options)
       3.times.each_with_object([]) do |_i, array|
         array << /\w{5,8}/.gen
       end.join(',')
