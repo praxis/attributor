@@ -6,7 +6,7 @@ module Attributor
       ::BigDecimal
     end
 
-    def self.example(_context = nil, **_options)
+    def self.example(_context = nil, options: {})
       ::BigDecimal.new("#{/\d{3}/.gen}.#{/\d{3}/.gen}")
     end
 

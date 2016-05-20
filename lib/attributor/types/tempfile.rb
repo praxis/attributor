@@ -8,7 +8,7 @@ module Attributor
       ::Tempfile
     end
 
-    def self.example(context = Attributor::DEFAULT_ROOT_CONTEXT, _options: {})
+    def self.example(context = Attributor::DEFAULT_ROOT_CONTEXT, options: {})
       file = ::Tempfile.new(Attributor.humanize_context(context))
       file.write Randgen.sentence
       file.write '.'

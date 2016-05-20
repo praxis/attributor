@@ -22,7 +22,7 @@ module Attributor
       ::URI::Generic
     end
 
-    def self.example(_context = nil, _options = {})
+    def self.example(_context = nil, options: {})
       URI(Randgen.uri)
     end
 

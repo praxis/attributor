@@ -6,7 +6,7 @@ module Attributor
       ::Date
     end
 
-    def self.example(context = nil, **_options)
+    def self.example(context = nil, options: {})
       load(Randgen.date, context)
     end
 

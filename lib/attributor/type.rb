@@ -65,7 +65,7 @@ module Attributor
       end
 
       # Default, overridable example function
-      def example(_context = nil, **_options)
+      def example(_context = nil, options: {})
         raise AttributorException, "#{self} must implement #example"
       end
 
