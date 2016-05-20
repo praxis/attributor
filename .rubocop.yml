@@ -18,6 +18,8 @@ Metrics/AbcSize:
   Enabled: false
 Style/CaseEquality:
   Enabled: false
+Lint/UnusedMethodArgument:
+  AllowUnusedKeywordArguments: true
 
 # Offense count: 13
 Metrics/CyclomaticComplexity:
