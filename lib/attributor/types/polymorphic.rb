@@ -88,7 +88,7 @@ module Attributor
 
     def self.describe_types
       self.types.each_with_object({}) do |(key, value), description|
-        description[key] = value.describe(true)
+        description[key] = { type: value.describe(true) }
       end
     end
   end

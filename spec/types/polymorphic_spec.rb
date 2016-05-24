@@ -57,9 +57,9 @@ describe Attributor::Polymorphic do
       subject(:types) { description[:types] }
       its(:keys) { should eq type.types.keys }
       it do
-        expect(types[:chicken]).to eq(Chicken.describe(true))
-        expect(types[:turkey]).to eq(Turkey.describe(true))
-        expect(types[:duck]).to eq(Duck.describe(true))
+        expect(types[:chicken]).to eq(type: Chicken.describe(true))
+        expect(types[:turkey]).to eq(type: Turkey.describe(true))
+        expect(types[:duck]).to eq(type: Duck.describe(true))
       end
     end
 
@@ -70,9 +70,9 @@ describe Attributor::Polymorphic do
         subject(:types) { description[:types] }
         its(:keys) { should match_array [:chicken, :turkey, :duck] }
         it do
-          expect(types[:chicken]).to eq(Chicken.describe(true))
-          expect(types[:turkey]).to eq(Turkey.describe(true))
-          expect(types[:duck]).to eq(Duck.describe(true))
+          expect(types[:chicken]).to eq(type: Chicken.describe(true))
+          expect(types[:turkey]).to eq(type: Turkey.describe(true))
+          expect(types[:duck]).to eq(type: Duck.describe(true))
         end
       end
     end
