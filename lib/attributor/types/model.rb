@@ -1,9 +1,9 @@
 module Attributor
   class Model < Hash
     # FIXME: this is not the way to fix this. Really we should add finalize! to Models.
-    undef :timeout
-    undef :format
     begin
+      undef :timeout
+      undef :format
       undef :test
     rescue
       nil
