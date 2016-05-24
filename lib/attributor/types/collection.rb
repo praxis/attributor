@@ -108,7 +108,10 @@ module Attributor
     def self.describe(shallow = false, example: nil)
       hash = super(shallow)
       hash[:options] = {} unless hash[:options]
-      member_example = example.first if example
+      if example
+        hash[:example] = example
+        member_example = example.first
+      end
       hash[:member_attribute] = member_attribute.describe(true, example: member_example)
       hash
     end
