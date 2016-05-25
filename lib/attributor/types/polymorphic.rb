@@ -43,8 +43,10 @@ module Attributor
       self
     end
 
-    def self.construct(block, **_options)
-      self.instance_eval(&block)
+    def self.construct(constructor_block, **_options)
+      return self if constructor_block.nil?
+
+      self.instance_eval(&constructor_block)
       self
     end
 
