@@ -312,6 +312,7 @@ describe Attributor::Collection do
     subject(:described) { type.describe(example: example) }
     it 'includes the member_attribute' do
       expect(described).to have_key(:member_attribute)
+      expect(described).not_to have_key(:example)
       expect(described[:member_attribute]).not_to have_key(:example)
     end
 
@@ -321,6 +322,10 @@ describe Attributor::Collection do
         expect(described).to have_key(:member_attribute)
         expect(described[:member_attribute]).to have_key(:example)
         expect(described[:member_attribute]).to eq(type.member_attribute.describe(example: example.first))
+      end
+      it 'includes the incoming example for the whole collection as well' do
+        expect(described).to have_key(:example)
+        expect(described[:example]).to eq(example)
       end
     end
   end
