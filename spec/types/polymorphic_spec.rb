@@ -13,6 +13,7 @@ describe Attributor::Polymorphic do
 
   its(:discriminator) { should be :type }
   its(:types) { should eq(chicken: Chicken, duck: Duck, turkey: Turkey) }
+  its(:native_type) { should be type }
 
   context '.load' do
     let(:chicken) { Chicken.example }
@@ -25,9 +26,29 @@ describe Attributor::Polymorphic do
       expect(type.load(turkey.dump)).to be_kind_of(Turkey)
     end
 
-    it 'loads a hash with symbol keys' do
+    it 'loads a hash with string keys' do
       data = { 'type' => :chicken }
       expect(type.load(data)).to be_kind_of(Chicken)
+    end
+
+    it 'raises a LoadError if the discriminator value is unknown' do
+      data = { type: :turducken }
+      expect { type.load(data) }.to raise_error(Attributor::LoadError)
+    end
+
+    it 'raises a LoadError if the discriminator value is missing' do
+      data = { id: 1 }
+      expect { type.load(data) }.to raise_error(Attributor::LoadError)
+    end
+
+    context 'for a type with a string discriminator' do
+      subject(:string_type) do
+        Attributor::Polymorphic.on('type')
+      end
+      it 'loads a hash with symbol keys' do
+        data = { 'type' => :chicken }
+        expect(type.load(data)).to be_kind_of(Chicken)
+      end
     end
   end
 
