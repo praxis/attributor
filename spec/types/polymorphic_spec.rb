@@ -24,6 +24,22 @@ describe Attributor::Polymorphic do
       expect(type.load(duck.dump)).to be_kind_of(Duck)
       expect(type.load(turkey.dump)).to be_kind_of(Turkey)
     end
+
+    it 'loads a hash with symbol keys' do
+      data = { 'type' => :chicken }
+      expect(type.load(data)).to be_kind_of(Chicken)
+    end
+  end
+
+  context '.dump' do
+    context 'when used in a model' do
+      let(:example) { Sandwich.example}
+      subject(:dumped) { example.dump }
+
+      it 'properly dumps the attribute' do
+        expect(dumped[:meat]).to eq example.meat.dump
+      end
+    end
   end
 
   context '.valid_type?' do
