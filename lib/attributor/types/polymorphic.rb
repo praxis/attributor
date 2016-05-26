@@ -55,14 +55,35 @@ module Attributor
 
       return value if self.types.values.include?(value.class)
 
-      loaded_value = self.parse(value, context)
+      parsed_value = self.parse(value, context)
 
-      discriminator = loaded_value.fetch(self.discriminator)
+      discriminator_value = discriminator_value_for(parsed_value)
 
-      type = self.types.fetch(loaded_value[self.discriminator]) do
-        raise "invalid value for discriminator: #{discriminator}"
+      type = self.types.fetch(discriminator_value) do
+        raise LoadError, "invalid value for discriminator: #{discriminator_value}"
       end
-      type.load(loaded_value)
+      type.load(parsed_value)
+    end
+
+    def self.discriminator_value_for(parsed_value)
+      return parsed_value[self.discriminator] if parsed_value.key?(self.discriminator)
+
+      value = case self.discriminator
+              when ::String
+                parsed_value[self.discriminator.to_sym]
+              when ::Symbol
+                parsed_value[self.discriminator.to_s]
+              end
+
+      return value if value
+
+      raise LoadError, "can't find key #{self.discriminator.inspect} in #{parsed_value.inspect}"
+    end
+
+    def self.dump(value, **opts)
+      if (loaded = load(value))
+        loaded.dump(**opts)
+      end
     end
 
     def self.parse(value, context)
