@@ -33,7 +33,7 @@ describe Attributor::Polymorphic do
 
   context '.dump' do
     context 'when used in a model' do
-      let(:example) { Sandwich.example}
+      let(:example) { Sandwich.example }
       subject(:dumped) { example.dump }
 
       it 'properly dumps the attribute' do

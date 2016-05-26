@@ -69,11 +69,11 @@ module Attributor
       return parsed_value[self.discriminator] if parsed_value.key?(self.discriminator)
 
       value = case self.discriminator
-      when ::String
-        parsed_value[self.discriminator.to_sym]
-      when ::Symbol
-        parsed_value[self.discriminator.to_s]
-      end
+              when ::String
+                parsed_value[self.discriminator.to_sym]
+              when ::Symbol
+                parsed_value[self.discriminator.to_s]
+              end
 
       return value if value
 
