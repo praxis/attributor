@@ -2,6 +2,8 @@
 
 ## next
 
+## 5.1
+
 * Added `Polymorphic` type. See [polymorphics.rb](spec/support/polymorphics.rb) for example usage.
 
 ## 5.0.2

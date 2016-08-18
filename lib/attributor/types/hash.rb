@@ -558,11 +558,11 @@ module Attributor
           next if value.validating
         end
 
-        errors.push(*attribute.validate(value, sub_context))
+        errors.concat attribute.validate(value, sub_context)
       end
       self.class.requirements.each do |requirement|
         validation_errors = requirement.validate(keys_with_values, context)
-        errors.push(*validation_errors) unless validation_errors.empty?
+        errors.concat(validation_errors) unless validation_errors.empty?
       end
       errors
     end
@@ -572,12 +572,12 @@ module Attributor
         # FIXME: the sub contexts and error messages don't really make sense here
         unless key_type == Attributor::Object
           sub_context = context + ["key(#{key.inspect})"]
-          errors.push(*key_attribute.validate(key, sub_context))
+          errors.concat key_attribute.validate(key, sub_context)
         end
 
         unless value_type == Attributor::Object
           sub_context = context + ["value(#{value.inspect})"]
-          errors.push(*value_attribute.validate(value, sub_context))
+          errors.concat value_attribute.validate(value, sub_context)
         end
       end
     end

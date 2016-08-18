@@ -2,7 +2,11 @@
 
 module Attributor
   class FakeParent < ::BasicObject
-    def method_missing(name, *_args)
+    def respond_to_missing?(_method_name)
+      true
+    end
+
+    def method_missing(name, *_args) # rubocop:disable Style/MethodMissing
       ::Kernel.warn "Warning, you have tried to access the '#{name}' method of the 'parent' argument of a Proc-defined :default values." \
                     "Those Procs should completely ignore the 'parent' attribute for the moment as it will be set to an " \
                     'instance of a useless class (until the framework can provide such functionality)'

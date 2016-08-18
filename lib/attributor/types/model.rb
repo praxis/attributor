@@ -142,11 +142,11 @@ module Attributor
           next if value.validating
         end
 
-        errors.push(*sub_attribute.validate(value, sub_context))
+        errors.concat sub_attribute.validate(value, sub_context)
       end
       self.class.requirements.each do |req|
         validation_errors = req.validate(keys_with_values, context)
-        errors.push(*validation_errors) unless validation_errors.empty?
+        errors.concat(validation_errors) unless validation_errors.empty?
       end
 
       errors
