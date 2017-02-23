@@ -687,6 +687,13 @@ describe Attributor::Hash do
         expect(description[:name]).to eq('Hash')
         expect(description[:key]).to eq(type: { name: 'Object', id: 'Attributor-Object', family: 'any' })
         expect(description[:value]).to eq(type: { name: 'Object', id: 'Attributor-Object', family: 'any' })
+        expect(description).to_not have_key(:example)
+      end
+      context 'when there is a given example' do
+        let(:example) { { 'one' => 1, two: 2} }
+        it 'uses it, even though there are not individual keys' do
+          expect(description[:example]).to eq(example)
+        end
       end
     end
 
