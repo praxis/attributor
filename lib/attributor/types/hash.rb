@@ -436,6 +436,7 @@ module Attributor
         end
       else
         hash[:value] = { type: value_type.describe(true) }
+        hash[:example] = example if example
       end
 
       hash

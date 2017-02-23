@@ -2,6 +2,8 @@
 
 ## next
 
+* Fixed describing `Hash` with no keys defined, to still use a given example (no example outputted before this)
+
 ## 5.1
 
 * Added `Polymorphic` type. See [polymorphics.rb](spec/support/polymorphics.rb) for example usage.
