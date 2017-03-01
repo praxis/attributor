@@ -89,7 +89,8 @@ module Attributor
       # determine inherited attribute
       inherited_attribute = nil
       if (reference = options[:reference])
-        if (inherited_attribute = reference.attributes[name])
+        if reference.respond_to?(:attributes) && reference.attributes[name]
+          inherited_attribute = reference.attributes[name]
           opts = inherited_attribute.options.merge(opts) unless attr_type
           opts[:reference] = inherited_attribute.type if block_given?
         end

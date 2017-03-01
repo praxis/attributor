@@ -3,6 +3,7 @@
 ## next
 
 * Fixed describing `Hash` with no keys defined, to still use a given example (no example outputted before this)
+* Fix bug that would occur when defining an attribute carrying a reference object, for which the reference type didn't have `attributes` (for example a Collection).
 
 ## 5.1
 
