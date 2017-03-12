@@ -86,28 +86,30 @@ module Attributor
         end
       end
 
-      # determine inherited attribute
-      inherited_attribute = nil
-      if (reference = options[:reference])
-        if reference.respond_to?(:attributes) && reference.attributes[name]
+      # determine inherited type (giving preference to the direct attribute options)
+      inherited_type = opts[:reference]
+      unless inherited_type
+        reference = options[:reference]
+        if reference && reference.respond_to?(:attributes) && reference.attributes.key?(name)
           inherited_attribute = reference.attributes[name]
           opts = inherited_attribute.options.merge(opts) unless attr_type
-          opts[:reference] = inherited_attribute.type if block_given?
+          inherited_type = inherited_attribute.type
+          opts[:reference] = inherited_type if block_given?
         end
       end
 
       # determine attribute type to use
       if attr_type.nil?
         if block_given?
-          attr_type = if inherited_attribute && inherited_attribute.type < Attributor::Collection
+          attr_type = if inherited_type && inherited_type < Attributor::Collection
                         # override the reference to be the member_attribute's type for collections
-                        opts[:reference] = inherited_attribute.type.member_attribute.type
+                        opts[:reference] = inherited_type.member_attribute.type
                         Attributor::Collection.of(Struct)
                       else
                         Attributor::Struct
                       end
-        elsif inherited_attribute
-          attr_type = inherited_attribute.type
+        elsif inherited_type
+          attr_type = inherited_type
         else
           raise AttributorException, "type for attribute with name: #{name} could not be determined"
         end

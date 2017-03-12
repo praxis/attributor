@@ -4,6 +4,7 @@
 
 * Fixed describing `Hash` with no keys defined, to still use a given example (no example outputted before this)
 * Fix bug that would occur when defining an attribute carrying a reference object, for which the reference type didn't have `attributes` (for example a Collection).
+* Allows an attribute to override the reference object through its options of its parent (even when its containing object already has one defined).
 
 ## 5.1
 

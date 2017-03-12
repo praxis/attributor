@@ -66,6 +66,16 @@ describe Attributor::DSLCompiler do
           it 'accepts explicit nil type' do
             dsl_compiler.attribute(attribute_name, nil, attribute_options)
           end
+
+          context 'but with the attribute also specifying a reference' do
+            let(:attribute_options) { { reference: Attributor::CSV } }
+            let(:expected_type) { Attributor::CSV }
+            let(:expected_options) { attribute_options }
+            it 'attribute reference takes precedence over the compiler one (and merges no options)' do
+              expect(attribute_options[:reference]).to_not eq(dsl_compiler_options[:reference])
+              dsl_compiler.attribute(attribute_name, attribute_options)
+            end
+          end
         end
 
         context 'for a referenced Model attribute' do
