@@ -168,11 +168,23 @@ module Attributor
       self
     end
 
+
+
     def self.example_contents(context, parent, **values)
       hash = ::Hash.new
       example_depth = context.size
+      # Be smart about what attributes to use for the example: i.e. have into account complex requirements
+      # that might have been defined in the hash like at_most(1).of ..., exactly(2).of ...etc.
+      # But play it safe and default to the previous behavior in case there is any error processing them
+      # ( that is until the SmartAttributeSelector class isn't fully tested and ready for prime time)
+      begin
+        stack = SmartAttributeSelector.new( requirements.map(&:describe), keys.keys )
+        selected = stack.process
+      rescue => e
+        selected = keys.keys
+      end
 
-      keys.each do |sub_attribute_name, sub_attribute|
+      keys.select{|n,attr| selected.include? n}.each do |sub_attribute_name, sub_attribute|
         if sub_attribute.attributes
           # TODO: add option to raise an exception in this case?
           next if example_depth > MAX_EXAMPLE_DEPTH
