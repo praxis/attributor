@@ -1,13 +1,14 @@
 module Attributor
   class SmartAttributeSelector
     attr_accessor :reqs, :accepted, :banned, :remaining
-    attr_reader :reqs, :accepted, :banned, :remaining
+    attr_reader :reqs, :accepted, :banned, :remaining, :keys_with_values
 
-    def initialize( reqs , attributes)
+    def initialize( reqs , attributes, values)
       @reqs = reqs.dup
       @accepted = []
       @banned = []
       @remaining = Array.new(attributes.dup)
+      @keys_with_values = values.each_with_object([]){|(k,v),populated| populated.push(k) unless v == nil}
     end
 
     def process
@@ -57,7 +58,9 @@ module Attributor
 
      def process_exclusive_set( exclusive_set )
        feasible = exclusive_set - banned # available ones to pick (that are not banned)
-       pick = feasible.shift
+       # Try to favor attributes that come in with some values, otherwise get the first feasible one
+       preferred = feasible & keys_with_values
+       pick = (preferred.size == 0 ? feasible : preferred).shift
 
        if pick
          self.accepted.push( pick )
@@ -71,7 +74,14 @@ module Attributor
 
      def process_at_least_set( at_least_set, count)
        feasible = at_least_set - banned # available ones to pick (that are not banned)
-       pick = feasible[0,count]
+       preferred = (feasible & keys_with_values)[0,count]
+       # Add more if not enough
+       pick = if preferred.size < count
+         preferred + (feasible - preferred)[0,count-preferred.size]
+       else
+         preferred
+       end
+
        unless pick.size == count
          puts "Unfeasible!"
          return

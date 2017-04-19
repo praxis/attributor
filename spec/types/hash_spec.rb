@@ -688,6 +688,10 @@ describe Attributor::Hash do
           ex = type.example
           expect(ex.keys).to match([:req1, :req2, :exc3, :least1, :least2, :most1])
         end
+        it 'it favors picking attributes with data' do
+          ex = type.example(nil,{most2: "data"})
+          expect(ex.keys).to match([:req1, :req2, :exc3, :least1, :least2, :most2])
+        end
       end
     end
   end

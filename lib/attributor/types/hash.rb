@@ -178,7 +178,7 @@ module Attributor
       # But play it safe and default to the previous behavior in case there is any error processing them
       # ( that is until the SmartAttributeSelector class isn't fully tested and ready for prime time)
       begin
-        stack = SmartAttributeSelector.new( requirements.map(&:describe), keys.keys )
+        stack = SmartAttributeSelector.new( requirements.map(&:describe), keys.keys , values)
         selected = stack.process
       rescue => e
         selected = keys.keys
