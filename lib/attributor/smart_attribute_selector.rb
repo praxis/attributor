@@ -60,7 +60,7 @@ module Attributor
        feasible = exclusive_set - banned # available ones to pick (that are not banned)
        # Try to favor attributes that come in with some values, otherwise get the first feasible one
        preferred = feasible & keys_with_values
-       pick = (preferred.size == 0 ? feasible : preferred).shift
+       pick = (preferred.size == 0 ? feasible : preferred).first
 
        if pick
          self.accepted.push( pick )
@@ -68,7 +68,7 @@ module Attributor
          puts "Unfeasible!" unless exclusive_set.empty?
          return
        end
-       self.banned += feasible
+       self.banned += (feasible - [pick])
        self.remaining -= exclusive_set
      end
 
