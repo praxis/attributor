@@ -16,7 +16,7 @@ module Attributor
   end
 
   class Hash
-    MAX_EXAMPLE_DEPTH = 5
+    MAX_EXAMPLE_DEPTH = 10
     CIRCULAR_REFERENCE_MARKER = '...'.freeze
 
     include Container
