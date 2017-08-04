@@ -682,6 +682,7 @@ describe Attributor::Hash do
             requires.at_least(2).of :least1, :least2
             requires.exactly(1).of :exc3, :exact1, :exact2
             requires.at_most(1).of :most1, :most2
+            requires.at_least(1).of :exc4, :exc3
           end
         end
         it 'comes up with a reasonably good set' do
