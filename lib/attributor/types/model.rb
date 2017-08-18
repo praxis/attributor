@@ -1,13 +1,9 @@
 module Attributor
   class Model < Hash
     # FIXME: this is not the way to fix this. Really we should add finalize! to Models.
-    begin
-      undef :timeout
-      undef :format
-      undef :test
-    rescue
-      nil
-    end
+    undef :timeout if defined?(timeout) == 'method'
+    undef :format if defined?(format) == 'method'
+    undef :test  if defined?(test) == 'method'
 
     if RUBY_ENGINE =~ /^jruby/
       # We are "forced" to require it here (in case hasn't been yet) to make sure the added methods have been applied
