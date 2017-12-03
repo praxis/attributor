@@ -34,4 +34,9 @@ module Attributor
       super msg
     end
   end
+
+  # Thrown from SmartAttributeSelector when the requirements of attributes are certainly unfeasible
+  class UnfeasibleRequirementsError < AttributorException
+  end
+
 end

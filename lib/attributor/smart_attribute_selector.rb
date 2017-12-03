@@ -14,7 +14,9 @@ module Attributor
     def process
       process_required
       process_exclusive
+      process_exactly
       process_at_least
+      process_at_most
       # Just add the ones that haven't been explicitly rejected
       self.accepted += self.remaining
       self.remaining = []
@@ -52,7 +54,27 @@ module Attributor
            rest.push req
          end
        end
+     end
+
+     def process_at_most
+      self.reqs = reqs.each_with_object([]) do |req, rest|
+        if req[:type] == :at_most && req[:count] > 1 # count=1 is already handled in exclusive
+          process_at_most_set(Array.new(req[:attributes]), req[:count])
+        else
+          rest.push req
+        end
       end
+     end
+
+     def process_exactly
+      self.reqs = reqs.each_with_object([]) do |req, rest|
+        if req[:type] == :exactly && req[:count] > 1 # count=1 is already handled in exclusive
+          process_exactly_set(Array.new(req[:attributes]), req[:count])
+        else
+          rest.push req
+        end
+      end
+     end
 
      #################
 
@@ -65,8 +87,7 @@ module Attributor
        if pick
          self.accepted.push( pick )
        else
-         puts "Unfeasible!" unless exclusive_set.empty?
-         return
+         raise UnfeasibleRequirementsError unless exclusive_set.empty?
        end
        self.banned += (feasible - [pick])
        self.remaining -= exclusive_set
@@ -83,17 +104,45 @@ module Attributor
        end
 
        unless pick.size == count
-         puts "Unfeasible!"
-         return
+         raise UnfeasibleRequirementsError
        end
        self.accepted += pick
        self.remaining -= pick
      end
 
-     def print_status
-       puts "REMAINING: #{remaining.inspect}"
-       puts "ACCEPTED : #{accepted.inspect}"
-       puts "BANNED   : #{banned.inspect}"
+     def process_at_most_set( set, count)
+       ceil=(count+1)/2
+       feasible = set - banned # available ones to pick (that are not banned)
+       preferred = (feasible & keys_with_values)[0,ceil]
+
+       pick = if preferred.size < ceil
+         preferred + (feasible - preferred)[0,(ceil)-preferred.size]
+       else
+         preferred
+       end
+
+       self.accepted += pick
+       self.remaining -= pick
      end
+
+     def process_exactly_set( set, count)
+       feasible = set - banned # available ones to pick (that are not banned)
+       preferred = (feasible & keys_with_values)[0,count]
+
+       pick = if preferred.size < count
+         preferred + (feasible - preferred)[0,count-preferred.size]
+       else
+         preferred
+       end
+
+       unless pick.size == count
+         raise UnfeasibleRequirementsError
+       end
+
+       self.accepted += pick
+       self.remaining -= pick
+     end
+
+
   end
 end
