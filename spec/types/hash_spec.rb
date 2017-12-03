@@ -497,6 +497,22 @@ describe Attributor::Hash do
     end
   end
 
+  context '.requirements' do
+    let(:type) { Attributor::Hash.construct(block) }
+
+    context 'forces processing of lazy key initialization' do
+      let(:block) do
+        proc do
+          key 'name', String
+          requires 'name'
+        end
+      end
+
+      it 'lists the requirements' do
+        expect(type.requirements).to_not be_empty
+      end
+    end
+  end
   context '#validate' do
     context 'for a key and value typed hash' do
       let(:key_type) { Integer }

@@ -97,6 +97,13 @@ module Attributor
       @keys
     end
 
+    def self.requirements
+      if @saved_blocks.any?
+        definition
+      end
+      @requirements
+    end
+
     def self.definition
       opts = {
         key_type: @key_type,
