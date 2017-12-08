@@ -78,6 +78,8 @@ module Attributor
     #     end
     # @api semiprivate
     def define(name, attr_type = nil, **opts, &block)
+      example_given = opts.key? :example
+
       # add to existing attribute if present
       if (existing_attribute = attributes[name])
         if existing_attribute.attributes
@@ -101,6 +103,9 @@ module Attributor
       # determine attribute type to use
       if attr_type.nil?
         if block_given?
+          # Don't inherit explicit examples if we've redefined the structure 
+          # (but preserve the direct example if given here)
+          opts.delete :example unless  example_given
           attr_type = if inherited_type && inherited_type < Attributor::Collection
                         # override the reference to be the member_attribute's type for collections
                         opts[:reference] = inherited_type.member_attribute.type

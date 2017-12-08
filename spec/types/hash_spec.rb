@@ -497,6 +497,22 @@ describe Attributor::Hash do
     end
   end
 
+  context '.requirements' do
+    let(:type) { Attributor::Hash.construct(block) }
+
+    context 'forces processing of lazy key initialization' do
+      let(:block) do
+        proc do
+          key 'name', String
+          requires 'name'
+        end
+      end
+
+      it 'lists the requirements' do
+        expect(type.requirements).to_not be_empty
+      end
+    end
+  end
   context '#validate' do
     context 'for a key and value typed hash' do
       let(:key_type) { Integer }
@@ -651,7 +667,7 @@ describe Attributor::Hash do
               at_least(1).of 'consistency', 'availability', 'partitioning'
             end
             # Silly example, just to show that block and inline requires can be combined
-            requires.at_most(3).of 'consistency', 'availability', 'partitioning'
+            requires.at_most(1).of 'consistency', 'availability', 'partitioning'
           end
         end
 
@@ -661,6 +677,37 @@ describe Attributor::Hash do
           expect(errors).to include(
             'At least 1 keys out of ["consistency", "availability", "partitioning"] are required to be passed in for $. Found none'
           )
+        end
+      end
+      context 'using a combo of things to test example gen' do
+        let(:block) do
+          proc do
+            key :req1, String
+            key :req2, String
+            key :exc3, String
+            key :exc4, String
+            key :least1, String
+            key :least2, String
+            key :exact1, String
+            key :exact2, String
+            key :most1, String
+            key :most2, String
+
+            requires.all :req1, :req2
+            requires.exclusive :exc3, :exc4
+            requires.at_least(2).of :least1, :least2
+            requires.exactly(1).of :exc3, :exact1, :exact2
+            requires.at_most(1).of :most1, :most2
+            requires.at_least(1).of :exc4, :exc3
+          end
+        end
+        it 'comes up with a reasonably good set' do
+          ex = type.example
+          expect(ex.keys).to match([:req1, :req2, :exc3, :least1, :least2, :most1])
+        end
+        it 'it favors picking attributes with data' do
+          ex = type.example(nil,{most2: "data"})
+          expect(ex.keys).to match([:req1, :req2, :exc3, :least1, :least2, :most2])
         end
       end
     end

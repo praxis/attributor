@@ -59,6 +59,7 @@ module Attributor
 
     # generates an example Collection
     # @return An Array of native type objects conforming to the specified member_type
+    # TODO:  ALLOW to pass  "values" for the members?...as values: {id: 1, ...}
     def self.example(context = nil, options: {})
       result = []
       size = options[:size] || (rand(3) + 1)
