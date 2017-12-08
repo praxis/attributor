@@ -33,6 +33,11 @@ describe Attributor::SmartAttributeSelector do
   subject(:selector){ Attributor::SmartAttributeSelector.new( reqs, attributes , values) }
   let(:accepted_attrs){ [] }
 
+  after do
+    expect(subject.accepted).to contain_exactly(*accepted_attrs)
+    expect(subject.remaining).to contain_exactly(*remaining_attrs)
+  end
+
   context 'process' do
     let(:accepted_attrs){ [:req1, :req2, :exc3, :least1, :least2, :most1] }
     it 'aggregates results from the different requirements' do
@@ -263,9 +268,5 @@ describe Attributor::SmartAttributeSelector do
 
     end
 
-  end
-  after do
-    expect(subject.accepted).to contain_exactly(*accepted_attrs)
-    expect(subject.remaining).to contain_exactly(*remaining_attrs)
   end
 end

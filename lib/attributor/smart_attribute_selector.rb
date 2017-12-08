@@ -7,7 +7,7 @@ module Attributor
       @reqs = reqs.dup
       @accepted = []
       @banned = []
-      @remaining = Array.new(attributes.dup)
+      @remaining = attributes.dup
       @keys_with_values = values.each_with_object([]){|(k,v),populated| populated.push(k) unless v == nil}
     end
 
@@ -20,7 +20,8 @@ module Attributor
       # Just add the ones that haven't been explicitly rejected
       self.accepted += self.remaining
       self.remaining = []
-      self.accepted = self.accepted.uniq
+      self.accepted.uniq!
+      self.accepted
     end
 
     def process_required
