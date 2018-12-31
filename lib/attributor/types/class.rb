@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'active_support'
 
 require_relative '../exceptions'
@@ -15,9 +17,7 @@ module Attributor
       return @klass || nil if value.nil?
 
       # Must be given a String object or nil
-      unless value.is_a?(::String) || value.nil?
-        raise IncompatibleTypeError,  context: context, value_type: value.class, type: self
-      end
+      raise IncompatibleTypeError, context: context, value_type: value.class, type: self unless value.is_a?(::String) || value.nil?
 
       value = '::' + value if value[0..1] != '::'
       result = value.constantize

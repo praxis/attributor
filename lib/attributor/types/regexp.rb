@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative '../exceptions'
 
 module Attributor
@@ -9,12 +11,10 @@ module Attributor
     end
 
     def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **options)
-      unless value.is_a?(::String) || value.nil?
-        raise IncompatibleTypeError,  context: context, value_type: value.class, type: self
-      end
+      raise IncompatibleTypeError, context: context, value_type: value.class, type: self unless value.is_a?(::String) || value.nil?
 
       value && ::Regexp.new(value)
-    rescue
+    rescue StandardError
       super
     end
 

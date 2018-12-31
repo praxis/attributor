@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require File.join(File.dirname(__FILE__), '..', 'spec_helper.rb')
 
 describe Attributor::Boolean do
@@ -53,7 +55,7 @@ describe Attributor::Boolean do
     end
 
     context 'that are not valid Booleans' do
-      let(:context) { %w(root subattr) }
+      let(:context) { %w[root subattr] }
       ['string', 2, 1.0, Class, Object.new].each do |value|
         it "raises Attributor::CoercionError for #{value.inspect}" do
           expect do

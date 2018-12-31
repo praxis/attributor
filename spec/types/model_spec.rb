@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require File.join(File.dirname(__FILE__), '..', 'spec_helper.rb')
 
 describe Attributor::Model do
@@ -24,7 +26,7 @@ describe Attributor::Model do
       it 'throws InvalidDefinition for subsequent access' do
         begin
           broken_model.attributes
-        rescue
+        rescue StandardError
           nil
         end
 
@@ -36,7 +38,7 @@ describe Attributor::Model do
       it 'throws for any attempts at using of an instance of it' do
         begin
           broken_model.attributes
-        rescue
+        rescue StandardError
           nil
         end
 
@@ -49,7 +51,7 @@ describe Attributor::Model do
   end
 
   context 'class methods' do
-    let(:context) { %w(root subattr) }
+    let(:context) { %w[root subattr] }
 
     its(:native_type) { should eq(Chicken) }
 
@@ -172,7 +174,7 @@ describe Attributor::Model do
       end
 
       context 'with a JSON-serialized hash' do
-        let(:context) { %w(root subattr) }
+        let(:context) { %w[root subattr] }
         let(:expected_hash) { { 'age' => age, 'email' => email } }
         let(:json) { hash.to_json }
         before do
@@ -225,7 +227,7 @@ describe Attributor::Model do
         end
 
         context 'for a subset of attributes' do
-          let(:hash) { Hash.new }
+          let(:hash) { {} }
 
           it 'sets the defaults' do
             expect(model.age).to eq 1
@@ -251,7 +253,7 @@ describe Attributor::Model do
           let(:attribute_definition) do
             proc do
               attribute :title
-              attribute :tags, default: %w(stuff things)
+              attribute :tags, default: %w[stuff things]
             end
           end
 
@@ -273,7 +275,7 @@ describe Attributor::Model do
     subject(:chicken) { Chicken.new }
 
     context '#respond_to?' do
-      [:age, :email, :age=, :email=].each do |method|
+      %i[age email age= email=].each do |method|
         it { should respond_to(method) }
       end
     end
@@ -436,7 +438,7 @@ describe Attributor::Model do
       end
 
       it 'adds the attribute' do
-        expect(model.attributes.keys).to match_array [:id, :name, :timestamps]
+        expect(model.attributes.keys).to match_array %i[id name timestamps]
       end
     end
 
@@ -450,7 +452,7 @@ describe Attributor::Model do
       end
 
       it 'merges with sub-attributes' do
-        expect(model.attributes[:timestamps].attributes.keys).to match_array [:created_at, :updated_at]
+        expect(model.attributes[:timestamps].attributes.keys).to match_array %i[created_at updated_at]
       end
     end
 
@@ -467,7 +469,7 @@ describe Attributor::Model do
 
       it 'supports defining sub-attributes using the proper reference' do
         expect(struct.attributes[:neighbors].options[:required]).to be true
-        expect(struct.attributes[:neighbors].type.member_attribute.type.attributes.keys).to match_array [:name, :age]
+        expect(struct.attributes[:neighbors].type.member_attribute.type.attributes.keys).to match_array %i[name age]
 
         name_options = struct.attributes[:neighbors].type.member_attribute.type.attributes[:name].options
         expect(name_options[:required]).to be true

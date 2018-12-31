@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Abstract type for the 'temporal' family
 
 module Attributor
@@ -13,7 +15,7 @@ module Attributor
     end
 
     def self.dump(value, **_opts)
-      value && value.iso8601
+      value&.iso8601
     end
   end
 end

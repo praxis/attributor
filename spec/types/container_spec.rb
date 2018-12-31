@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require File.join(File.dirname(__FILE__), '../spec_helper.rb')
 
 describe Attributor::Container do
@@ -36,7 +38,7 @@ describe Attributor::Container do
 
       it 'uses the passed context in the output error' do
         expect do
-          mock_type.decode_json('{invalid_json}', %w(my_context attribute_name))
+          mock_type.decode_json('{invalid_json}', %w[my_context attribute_name])
         end.to raise_error(Attributor::DeserializationError,
                            /Error deserializing a String using JSON.* while loading my_context.attribute_name/)
       end

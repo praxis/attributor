@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Represents any Object
 
 require_relative '../exceptions'

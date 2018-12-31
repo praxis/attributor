@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'dsl_compiler'
 
 module Attributor
@@ -57,9 +59,7 @@ module Attributor
           end
         when :exclusive
           intersection = attr_names & keys
-          if intersection.size > 1
-            result.push "keys #{intersection.inspect} are mutually exclusive for #{Attributor.humanize_context(context)}."
-          end
+          result.push "keys #{intersection.inspect} are mutually exclusive for #{Attributor.humanize_context(context)}." if intersection.size > 1
         end
         result
       end

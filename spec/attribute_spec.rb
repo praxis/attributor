@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require File.join(File.dirname(__FILE__), 'spec_helper.rb')
 
 describe Attributor::Attribute do
-  let(:attribute_options) { Hash.new }
+  let(:attribute_options) { {} }
   let(:type) { Attributor::String }
 
   subject(:attribute) { Attributor::Attribute.new(type, attribute_options) }
@@ -68,7 +70,7 @@ describe Attributor::Attribute do
     end
 
     context 'for an anonymous type (aka: Struct)' do
-      let(:attribute_options) { Hash.new }
+      let(:attribute_options) { {} }
       let(:attribute) do
         Attributor::Attribute.new(Struct, attribute_options) do
           attribute :id, Integer
@@ -180,7 +182,7 @@ describe Attributor::Attribute do
     end
 
     context 'with an attribute that has the values option set' do
-      let(:values) { %w(one two) }
+      let(:values) { %w[one two] }
       let(:attribute_options) { { values: values } }
       it 'picks a random value' do
         expect(values).to include subject.example
@@ -388,7 +390,7 @@ describe Attributor::Attribute do
           end
 
           context ':values' do
-            let(:values) { %w(one two) }
+            let(:values) { %w[one two] }
             let(:attribute_options) { { values: values } }
             let(:value) { nil }
 

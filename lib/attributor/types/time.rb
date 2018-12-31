@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'date'
 require 'time'
 
@@ -25,7 +27,7 @@ module Attributor
     def self.parse(value, context)
       case value
       when ::Integer
-        return ::Time.at(value)
+        ::Time.at(value)
       when ::String
         begin
           return ::Time.parse(value)

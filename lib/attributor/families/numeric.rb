@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Abstract type for the 'numeric' family
 
 module Attributor

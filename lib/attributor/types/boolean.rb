@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Represents a plain old boolean type. TBD: can be nil?
 #
 require_relative '../exceptions'
@@ -20,6 +22,7 @@ module Attributor
       raise CoercionError, context: context, from: value.class, to: self, value: value if value.is_a?(::Float)
       return false if [false, 'false', 'FALSE', '0', 0, 'f', 'F'].include?(value)
       return true if [true, 'true', 'TRUE', '1', 1, 't', 'T'].include?(value)
+
       raise CoercionError, context: context, from: value.class, to: self
     end
 

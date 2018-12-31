@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require File.join(File.dirname(__FILE__), 'spec_helper.rb')
 
 describe Attributor::Type do
@@ -18,8 +20,8 @@ describe Attributor::Type do
     end
   end
 
-  let(:attribute_options) { Hash.new }
-  let(:attribute_attributes) { Hash.new }
+  let(:attribute_options) { {} }
+  let(:attribute_attributes) { {} }
 
   let(:attribute) do
     double 'attribute',
@@ -65,7 +67,7 @@ describe Attributor::Type do
 
     context 'when given a value that is not of native_type' do
       let(:value) { 1 }
-      let(:context) { %w(top sub) }
+      let(:context) { %w[top sub] }
 
       it 'raises an exception' do
         expect { test_type.load(value, context) }.to raise_error(Attributor::IncompatibleTypeError, /cannot load values of type .*while loading top.sub/)

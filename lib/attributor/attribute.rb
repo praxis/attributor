@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # TODO: profile keys for attributes, test as frozen strings
 
 module Attributor
@@ -6,7 +8,7 @@ module Attributor
       true
     end
 
-    def method_missing(name, *_args) # rubocop:disable Style/MethodMissing
+    def method_missing(name, *_args)
       ::Kernel.warn "Warning, you have tried to access the '#{name}' method of the 'parent' argument of a Proc-defined :default values." \
                     "Those Procs should completely ignore the 'parent' attribute for the moment as it will be set to an " \
                     'instance of a useless class (until the framework can provide such functionality)'
@@ -72,7 +74,7 @@ module Attributor
       value
     rescue AttributorException, NameError
       raise
-    rescue => e
+    rescue StandardError => e
       raise Attributor::LoadError, "Error loading attribute #{Attributor.humanize_context(context)} of type #{type.name} from value #{Attributor.errorize_value(value)}\n#{e.message}"
     end
 
@@ -91,8 +93,8 @@ module Attributor
       []
     end
 
-    TOP_LEVEL_OPTIONS = [:description, :values, :default, :example, :required, :required_if, :custom_data].freeze
-    INTERNAL_OPTIONS = [:dsl_compiler, :dsl_compiler_options].freeze # Options we don't want to expose when describing attributes
+    TOP_LEVEL_OPTIONS = %i[description values default example required required_if custom_data].freeze
+    INTERNAL_OPTIONS = %i[dsl_compiler dsl_compiler_options].freeze # Options we don't want to expose when describing attributes
 
     def describe(shallow = true, example: nil)
       description = {}
@@ -148,6 +150,7 @@ module Attributor
 
     def example(context = nil, parent: nil, values: {})
       raise ArgumentError, 'attribute example cannot take a context of type String' if context.is_a? ::String
+
       if context
         ctx = Attributor.humanize_context(context)
         seed, = Digest::SHA1.digest(ctx).unpack('QQ')
@@ -160,6 +163,7 @@ module Attributor
         loaded = example_from_options(parent, context)
         errors = validate(loaded, context)
         raise AttributorException, "Error generating example for #{Attributor.humanize_context(context)}. Errors: #{errors.inspect}" if errors.any?
+
         return loaded
       end
 
@@ -234,11 +238,9 @@ module Attributor
         message = "Attribute #{Attributor.humanize_context(context)} is required when #{key_path} "
 
         # give a hint about what the full path for a relative key_path would be
-        unless key_path[0..0] == Attributor::AttributeResolver::ROOT_PREFIX
-          message << "(for #{Attributor.humanize_context(requirement_context)}) "
-        end
+        message += "(for #{Attributor.humanize_context(requirement_context)}) " unless key_path[0..0] == Attributor::AttributeResolver::ROOT_PREFIX
 
-        message << if predicate
+        message += if predicate
                      "matches #{predicate.inspect}."
                    else
                      'is present.'
@@ -253,9 +255,7 @@ module Attributor
     def check_options!
       options.each do |option_name, option_value|
         next unless check_option!(option_name, option_value) == :unknown
-        if type.check_option!(option_name, option_value) == :unknown
-          raise AttributorException, "unsupported option: #{option_name} with value: #{option_value.inspect} for attribute: #{inspect}"
-        end
+        raise AttributorException, "unsupported option: #{option_name} with value: #{option_value.inspect} for attribute: #{inspect}" if type.check_option!(option_name, option_value) == :unknown
       end
 
       true
@@ -268,6 +268,7 @@ module Attributor
         raise AttributorException, "Allowed set of values requires an array. Got (#{definition})" unless definition.is_a? ::Array
       when :default
         raise AttributorException, "Default value doesn't have the correct attribute type. Got (#{definition.inspect})" unless type.valid_type?(definition) || definition.is_a?(Proc)
+
         options[:default] = load(definition) unless definition.is_a?(Proc)
       when :description
         raise AttributorException, "Description value must be a string. Got (#{definition})" unless definition.is_a? ::String

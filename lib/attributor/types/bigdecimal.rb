@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'bigdecimal'
 
 module Attributor
@@ -14,6 +16,7 @@ module Attributor
       return nil if value.nil?
       return value if value.is_a?(native_type)
       return BigDecimal(value, 10) if value.is_a?(::Float)
+
       BigDecimal(value)
     end
   end

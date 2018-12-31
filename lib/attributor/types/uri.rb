@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Represents a href type.
 require 'uri'
 
@@ -28,6 +30,7 @@ module Attributor
 
     def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **_options)
       return nil if value.nil?
+
       case value
       when native_type
         value
@@ -46,9 +49,7 @@ module Attributor
       errors = []
 
       if attribute && (definition = attribute.options[:path])
-        unless value.path =~ attribute.options[:path]
-          errors << "#{Attributor.humanize_context(context)} value (#{value}) does not match path (#{definition.inspect})"
-        end
+        errors << "#{Attributor.humanize_context(context)} value (#{value}) does not match path (#{definition.inspect})" unless value.path =~ attribute.options[:path]
       end
       errors
     end
@@ -56,9 +57,8 @@ module Attributor
     def self.check_option!(name, definition)
       case name
       when :path
-        unless definition.is_a? ::Regexp
-          raise AttributorException, "Value for option :path is not a Regexp object. Got (#{definition.inspect})"
-        end
+        raise AttributorException, "Value for option :path is not a Regexp object. Got (#{definition.inspect})" unless definition.is_a? ::Regexp
+
         :ok
       else
         :unknown

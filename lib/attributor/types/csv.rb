@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Attributor
   class CSV < Collection
     def self.decode_string(value, _context)

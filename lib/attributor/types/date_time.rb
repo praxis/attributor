@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Represents a plain old boolean type. TBD: can be nil?
 #
 require_relative '../exceptions'
@@ -19,6 +21,7 @@ module Attributor
       return value if value.is_a?(native_type)
       return value.to_datetime if value.respond_to?(:to_datetime)
       return nil unless value.is_a?(::String)
+
       # TODO: we should be able to convert not only from String but Time...etc
       # Else, we'll decode it from String.
       begin

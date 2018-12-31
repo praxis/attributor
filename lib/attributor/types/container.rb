@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Attributor
   module Container
     # Module for types that can contain subtypes. Collection.of(?) or Hash.of(?)
@@ -23,9 +25,7 @@ module Attributor
 
         # attempt to parse as JSON
         parsed_value = JSON.parse(value)
-        unless valid_type?(parsed_value)
-          raise Attributor::CoercionError, context: context, from: parsed_value.class, to: name, value: parsed_value
-        end
+        raise Attributor::CoercionError, context: context, from: parsed_value.class, to: name, value: parsed_value unless valid_type?(parsed_value)
 
         parsed_value
       rescue JSON::JSONError
