@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
 
   spec.homepage = 'https://github.com/rightscale/attributor'
   spec.license = 'MIT'
-  spec.required_ruby_version = '>=2.1'
+  spec.required_ruby_version = '>=2.3'
 
   spec.require_paths = ['lib']
   spec.files         = `git ls-files -z`.split("\x0")
