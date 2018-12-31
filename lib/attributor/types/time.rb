@@ -1,4 +1,5 @@
 require 'date'
+require 'time'
 
 module Attributor
   class Time < Temporal

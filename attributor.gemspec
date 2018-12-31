@@ -31,7 +31,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency('yardstick', ['~> 0'])
   spec.add_development_dependency('bundler', ['>= 0'])
   spec.add_development_dependency('rake-notes', ['~> 0'])
-  spec.add_development_dependency('coveralls')
   spec.add_development_dependency('guard', ['~> 2'])
   spec.add_development_dependency('guard-rspec', ['~> 4'])
   spec.add_development_dependency('pry', ['~> 0'])
