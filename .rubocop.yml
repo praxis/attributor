@@ -10,8 +10,6 @@ Metrics/LineLength:
   Max: 200
 Style/RedundantSelf:
   Enabled: false
-Style/ClassAndModuleChildren:
-  Enabled: false
 Lint/Debugger:
   Enabled: false
 Metrics/AbcSize:
@@ -21,20 +19,15 @@ Style/CaseEquality:
 Lint/UnusedMethodArgument:
   AllowUnusedKeywordArguments: true
 
-Naming/VariableNumber:
-  EnforcedStyle: snake_case
-
-# Offense count: 13
 Metrics/CyclomaticComplexity:
   Max: 28
-
-# Offense count: 11
 Metrics/PerceivedComplexity:
   Max: 23
 
+Naming/VariableNumber:
+  EnforcedStyle: snake_case
 Naming/UncommunicativeMethodParamName:
   AllowedNames: io, id, to, by, on, in, at, ip, db, k, v
-
 Metrics/BlockLength:
   Exclude:
     - spec/**/*
