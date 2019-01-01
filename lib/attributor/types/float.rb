@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Float objects represent inexact real numbers using the native architecture's double-precision floating point representation.
 # See: http://ruby-doc.org/core-2.1.0/Float.html
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Sandwich < Attributor::Model
   attributes do
     attribute :name, String

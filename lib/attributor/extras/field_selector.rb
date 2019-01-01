@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 begin
   require 'parslet'
 rescue LoadError
@@ -29,7 +31,7 @@ module Attributor
 
       parsed = Parser.new.parse(value)
       Transformer.new.apply(parsed)
-    rescue
+    rescue StandardError
       raise CoercionError, context: context, from: value.class, to: self, value: value
     end
 

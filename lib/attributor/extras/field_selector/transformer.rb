@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Attributor
   class FieldSelector
     class Transformer < Parslet::Transform

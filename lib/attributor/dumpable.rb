@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Attributor
   module Dumpable
     # Interface denoting that instances of such type respond to .dump as a way to properly

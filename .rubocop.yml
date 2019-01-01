@@ -1,5 +1,5 @@
 AllCops:
-  TargetRubyVersion: 2.2
+  TargetRubyVersion: 2.3
 Style/Documentation:
   Enabled: false
 Metrics/MethodLength:
@@ -10,8 +10,6 @@ Metrics/LineLength:
   Max: 200
 Style/RedundantSelf:
   Enabled: false
-Style/ClassAndModuleChildren:
-  Enabled: false
 Lint/Debugger:
   Enabled: false
 Metrics/AbcSize:
@@ -21,10 +19,16 @@ Style/CaseEquality:
 Lint/UnusedMethodArgument:
   AllowUnusedKeywordArguments: true
 
-# Offense count: 13
 Metrics/CyclomaticComplexity:
   Max: 28
-
-# Offense count: 11
 Metrics/PerceivedComplexity:
   Max: 23
+
+Naming/VariableNumber:
+  EnforcedStyle: snake_case
+Naming/UncommunicativeMethodParamName:
+  AllowedNames: io, id, to, by, on, in, at, ip, db, k, v
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/*
+    - attributor.gemspec

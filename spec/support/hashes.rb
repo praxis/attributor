@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class HashWithModel < Attributor::Hash
   keys do
     key :name, String, default: 'Turkey McDucken', description: 'Turducken name', example: Randgen.name

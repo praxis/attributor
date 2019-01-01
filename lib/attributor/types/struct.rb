@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 module Attributor
   class Struct < Attributor::Model
@@ -10,9 +11,7 @@ module Attributor
       # if we're in a subclass of Struct, but not attribute_definition is provided, we're
       # not REALLY trying to define a new struct. more than likely Collection is calling
       # construct on us.
-      unless self == Attributor::Struct || attribute_definition.nil?
-        raise AttributorException, 'can not construct from already-constructed Struct'
-      end
+      raise AttributorException, 'can not construct from already-constructed Struct' unless self == Attributor::Struct || attribute_definition.nil?
 
       # TODO: massage the options here to pull out only the relevant ones
 
@@ -40,6 +39,7 @@ module Attributor
     # Two structs are equal if their attributes are equal
     def ==(other)
       return false if other.nil? || !other.respond_to?(:attributes)
+
       attributes == other.attributes
     end
   end
