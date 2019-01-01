@@ -104,13 +104,10 @@ module Attributor
       context ||= ["#{name || 'Struct'}-#{rand(10_000_000)}"]
       context = Array(context)
 
+      result = new
       if keys.any?
-        result = new
         result.extend(ExampleMixin)
-
         result.lazy_attributes = example_contents(context, result, values)
-      else
-        result = new
       end
       result
     end

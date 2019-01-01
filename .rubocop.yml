@@ -23,6 +23,9 @@ Style/CaseEquality:
 Lint/UnusedMethodArgument:
   AllowUnusedKeywordArguments: true
 
+Naming/VariableNumber:
+  EnforcedStyle: snake_case
+
 # Offense count: 13
 Metrics/CyclomaticComplexity:
   Max: 28
@@ -37,3 +40,6 @@ Lint/BigDecimalNew:
 Lint/InheritException:
   Exclude:
     - "lib/attributor/exceptions.rb"
+
+Naming/UncommunicativeMethodParamName:
+  AllowedNames: io, id, to, by, on, in, at, ip, db, k, v

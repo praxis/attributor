@@ -8,7 +8,7 @@ module Attributor
       true
     end
 
-    def method_missing(name, *_args)
+    def method_missing(name, *_args) # rubocop:disable Style/MethodMissingSuper
       ::Kernel.warn "Warning, you have tried to access the '#{name}' method of the 'parent' argument of a Proc-defined :default values." \
                     "Those Procs should completely ignore the 'parent' attribute for the moment as it will be set to an " \
                     'instance of a useless class (until the framework can provide such functionality)'
@@ -273,7 +273,7 @@ module Attributor
       when :description
         raise AttributorException, "Description value must be a string. Got (#{definition})" unless definition.is_a? ::String
       when :required
-        raise AttributorException, 'Required must be a boolean' unless definition == true || definition == false
+        raise AttributorException, 'Required must be a boolean' unless [true, false].include? definition
         raise AttributorException, 'Required cannot be enabled in combination with :default' if definition == true && options.key?(:default)
       when :required_if
         raise AttributorException, 'Required_if must be a String, a Hash definition or a Proc' unless definition.is_a?(::String) || definition.is_a?(::Hash) || definition.is_a?(::Proc)

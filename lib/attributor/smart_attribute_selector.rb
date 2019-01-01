@@ -3,7 +3,7 @@
 module Attributor
   class SmartAttributeSelector
     attr_accessor :reqs, :accepted, :banned, :remaining
-    attr_reader :reqs, :accepted, :banned, :remaining, :keys_with_values
+    attr_reader :keys_with_values
 
     def initialize(reqs, attributes, values)
       @reqs = reqs.dup

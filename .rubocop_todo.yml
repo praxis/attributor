@@ -6,69 +6,8 @@
 # Note that changes in the inspected code, or installation of new
 # versions of RuboCop, may require this file to be generated again.
 
-# Offense count: 2
-Lint/DuplicateMethods:
-  Exclude:
-    - "lib/attributor/smart_attribute_selector.rb"
-    - "lib/attributor/types/hash.rb"
-
-# Offense count: 2
-Lint/EmptyWhen:
-  Exclude:
-    - "lib/attributor/types/collection.rb"
-
-# Offense count: 1
-Lint/UselessAssignment:
-  Exclude:
-    - "lib/attributor/types/hash.rb"
-
 # Offense count: 114
 # Configuration parameters: CountComments, ExcludedMethods.
 # ExcludedMethods: refine
 Metrics/BlockLength:
   Max: 1014
-
-# Offense count: 9
-# Configuration parameters: MinNameLength, AllowNamesEndingInNumbers, AllowedNames, ForbiddenNames.
-# AllowedNames: io, id, to, by, on, in, at, ip, db
-Naming/UncommunicativeMethodParamName:
-  Exclude:
-    - "lib/attributor/example_mixin.rb"
-    - "lib/attributor/types/hash.rb"
-
-# Offense count: 6
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: snake_case, normalcase, non_integer
-Naming/VariableNumber:
-  Exclude:
-    - "spec/attribute_spec.rb"
-
-# Offense count: 2
-# Configuration parameters: .
-# SupportedStyles: annotated, template, unannotated
-Style/FormatStringToken:
-  EnforcedStyle: unannotated
-
-# Offense count: 4
-# Configuration parameters: MinBodyLength.
-Style/GuardClause:
-  Exclude:
-    - "lib/attributor/example_mixin.rb"
-    - "lib/attributor/types/hash.rb"
-    - "lib/attributor/types/polymorphic.rb"
-
-# Offense count: 2
-Style/IdenticalConditionalBranches:
-  Exclude:
-    - "lib/attributor/types/model.rb"
-
-# Offense count: 1
-Style/MethodMissingSuper:
-  Exclude:
-    - "lib/attributor/attribute.rb"
-
-# Offense count: 2
-Style/MultipleComparison:
-  Exclude:
-    - "lib/attributor/attribute.rb"
-    - "lib/attributor/types/boolean.rb"

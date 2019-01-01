@@ -6,11 +6,11 @@
 module Attributor
   module ExampleMixin
     def self.extended(obj)
-      if obj.is_a? Attributor::Model
-        obj.class.attributes.each do |name, _|
-          obj.define_singleton_method(name) do
-            get(name)
-          end
+      return unless obj.is_a? Attributor::Model
+
+      obj.class.attributes.each do |name, _|
+        obj.define_singleton_method(name) do
+          get(name)
         end
       end
     end

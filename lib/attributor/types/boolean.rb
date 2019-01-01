@@ -9,7 +9,7 @@ module Attributor
     include Type
 
     def self.valid_type?(value)
-      value == true || value == false
+      [true, false].include? value
     end
 
     def self.example(_context = nil, options: {})

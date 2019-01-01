@@ -83,9 +83,8 @@ module Attributor
     end
 
     def self.dump(value, **opts)
-      if (loaded = load(value))
-        loaded.dump(**opts)
-      end
+      loaded = load(value)
+      loaded&.dump(**opts)
     end
 
     def self.parse(value, context)

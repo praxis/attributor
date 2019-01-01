@@ -27,7 +27,6 @@ module Attributor
       attr_reader :key_attribute
       attr_reader :insensitive_map
       attr_accessor :extra_keys
-      attr_reader :requirements
     end
 
     @key_type = Object
@@ -150,10 +149,11 @@ module Attributor
       return unless req.attr_names
 
       non_existing = req.attr_names - attributes.keys
-      unless non_existing.empty?
-        raise "Invalid attribute name(s) found (#{non_existing.join(', ')}) when defining a requirement of type #{req.type} for #{Attributor.type_name(self)} ." \
-              "The only existing attributes are #{attributes.keys}"
-      end
+
+      return if non_existing.empty?
+
+      raise "Invalid attribute name(s) found (#{non_existing.join(', ')}) when defining a requirement of type #{req.type} for #{Attributor.type_name(self)} ." \
+          "The only existing attributes are #{attributes.keys}"
     end
 
     def self.construct(constructor_block, **options)
@@ -180,7 +180,7 @@ module Attributor
       begin
         stack = SmartAttributeSelector.new(requirements.map(&:describe), keys.keys, values)
         selected = stack.process
-      rescue StandardError => e
+      rescue StandardError
         selected = keys.keys
       end
 
@@ -231,9 +231,8 @@ module Attributor
     end
 
     def self.dump(value, **opts)
-      if (loaded = load(value))
-        loaded.dump(**opts)
-      end
+      loaded = load(value)
+      loaded&.dump(**opts)
     end
 
     def self.check_option!(name, _definition)
@@ -492,14 +491,14 @@ module Attributor
     end
     alias has_key? key?
 
-    def merge(h)
-      case h
+    def merge(hash)
+      case hash
       when self.class
-        self.class.new(contents.merge(h.contents))
+        self.class.new(contents.merge(hash.contents))
       when Attributor::Hash
-        raise ArgumentError, 'cannot merge Attributor::Hash instances of different types' unless h.is_a?(self.class)
+        raise ArgumentError, 'cannot merge Attributor::Hash instances of different types' unless hash.is_a?(self.class)
       else
-        raise TypeError, "no implicit conversion of #{h.class} into Attributor::Hash"
+        raise TypeError, "no implicit conversion of #{hash.class} into Attributor::Hash"
       end
     end
 
