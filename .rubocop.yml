@@ -43,3 +43,8 @@ Lint/InheritException:
 
 Naming/UncommunicativeMethodParamName:
   AllowedNames: io, id, to, by, on, in, at, ip, db, k, v
+
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/*
+    - attributor.gemspec
