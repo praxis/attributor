@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Represents an unordered collection of attributes
 #
 
@@ -13,9 +15,8 @@ module Attributor
     #
     def self.of(type)
       resolved_type = Attributor.resolve_type(type)
-      unless resolved_type.ancestors.include?(Attributor::Type)
-        raise Attributor::AttributorException, 'Collections can only have members that are Attributor::Types'
-      end
+      raise Attributor::AttributorException, 'Collections can only have members that are Attributor::Types' unless resolved_type.ancestors.include?(Attributor::Type)
+
       ::Class.new(self) do
         @member_type = resolved_type
       end
@@ -62,7 +63,7 @@ module Attributor
     # TODO:  ALLOW to pass  "values" for the members?...as values: {id: 1, ...}
     def self.example(context = nil, options: {})
       result = []
-      size = options[:size] || (rand(3) + 1)
+      size = options[:size] || rand(1..3)
       size = [*size].sample if size.is_a?(Range)
 
       context ||= ["Collection-#{result.object_id}"]
@@ -84,6 +85,7 @@ module Attributor
     # is from the members (if there's an :member_type defined option).
     def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **_options)
       return nil if value.nil?
+
       if value.is_a?(Enumerable)
         loaded_value = value
       elsif value.is_a?(::String)
@@ -103,6 +105,7 @@ module Attributor
 
     def self.dump(values, **opts)
       return nil if values.nil?
+
       values.collect { |value| member_attribute.dump(value, opts) }
     end
 
@@ -123,9 +126,7 @@ module Attributor
 
     def self.construct(constructor_block, options)
       member_options = (options[:member_options] || {}).clone
-      if options.key?(:reference) && !member_options.key?(:reference)
-        member_options[:reference] = options[:reference]
-      end
+      member_options[:reference] = options[:reference] if options.key?(:reference) && !member_options.key?(:reference)
 
       # create the member_attribute, passing in our member_type and whatever constructor_block is.
       # that in turn will call construct on the type if applicable.
@@ -153,9 +154,7 @@ module Attributor
     def self.validate(object, context = Attributor::DEFAULT_ROOT_CONTEXT, _attribute = nil)
       context = [context] if context.is_a? ::String
 
-      unless object.is_a?(self)
-        raise ArgumentError, "#{name} can not validate object of type #{object.class.name} for #{Attributor.humanize_context(context)}."
-      end
+      raise ArgumentError, "#{name} can not validate object of type #{object.class.name} for #{Attributor.humanize_context(context)}." unless object.is_a?(self)
 
       object.validate(context)
     end

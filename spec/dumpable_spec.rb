@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require File.join(File.dirname(__FILE__), 'spec_helper.rb')
 
 describe 'Dumpable' do
@@ -17,8 +19,7 @@ describe 'Dumpable' do
     let(:type) do
       Class.new do
         include Attributor::Dumpable
-        def dump
-        end
+        def dump; end
       end
     end
 

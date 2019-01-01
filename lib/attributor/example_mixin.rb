@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # poorly-optimized, but handy, mixin for Hash and Model examples.
 # primarily enables support for lazy values.
 

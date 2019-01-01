@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require File.join(File.dirname(__FILE__), 'spec_helper.rb')
 
 describe Attributor::HashDSLCompiler do
@@ -45,7 +47,7 @@ describe Attributor::HashDSLCompiler do
 
     context 'has DSL methods' do
       let(:req) { double('requirement') }
-      let(:attr_names) { [:one, :two, :tree] }
+      let(:attr_names) { %i[one two tree] }
       let(:number) { 2 }
       let(:req_class) { Attributor::HashDSLCompiler::Requirement }
       before do
@@ -75,7 +77,7 @@ describe Attributor::HashDSLCompiler do
   end
 
   context 'Requirement' do
-    let(:attr_names) { [:one, :two, :tree] }
+    let(:attr_names) { %i[one two tree] }
     let(:req_class) { Attributor::HashDSLCompiler::Requirement }
 
     context 'initialization' do
@@ -96,7 +98,7 @@ describe Attributor::HashDSLCompiler do
         expect(req_class.new(at_least: 3).type).to be(:at_least)
       end
       it 'understands and saves a :description' do
-        req = req_class.new(exactly:  1, description: 'Hello')
+        req = req_class.new(exactly: 1, description: 'Hello')
         expect(req.number).to be(1)
         expect(req.description).to eq('Hello')
       end
@@ -107,14 +109,14 @@ describe Attributor::HashDSLCompiler do
       let(:subject) { requirement.validate(value, ['$'], nil) }
 
       context 'for :all' do
-        let(:arguments) { { all: [:one, :two, :three] } }
+        let(:arguments) { { all: %i[one two three] } }
         let(:value) { [:one] }
         let(:validation_error) { ['Key two is required for $.', 'Key three is required for $.'] }
         it { expect(subject).to include(*validation_error) }
       end
       context 'for :exactly' do
         let(:requirement) { req_class.new(exactly: 1).of(:one, :two) }
-        let(:value) { [:one, :two] }
+        let(:value) { %i[one two] }
         let(:validation_error) { 'Exactly 1 of the following keys [:one, :two] are required for $. Found 2 instead: [:one, :two]' }
         it { expect(subject).to include(validation_error) }
       end
@@ -126,13 +128,13 @@ describe Attributor::HashDSLCompiler do
       end
       context 'for :at_most' do
         let(:requirement) { req_class.new(at_most: 1).of(:one, :two, :three) }
-        let(:value) { [:one, :two] }
+        let(:value) { %i[one two] }
         let(:validation_error) { 'At most 1 keys out of [:one, :two, :three] can be passed in for $. Found [:one, :two]' }
         it { expect(subject).to include(validation_error) }
       end
       context 'for :exclusive' do
-        let(:arguments) { { exclusive: [:one, :two] } }
-        let(:value) { [:one, :two] }
+        let(:arguments) { { exclusive: %i[one two] } }
+        let(:value) { %i[one two] }
         let(:validation_error) { 'keys [:one, :two] are mutually exclusive for $.' }
         it { expect(subject).to include(validation_error) }
       end
@@ -141,27 +143,27 @@ describe Attributor::HashDSLCompiler do
     context 'Requirement#describe' do
       it 'should work for :all' do
         req = req_class.new(all: attr_names).describe
-        expect(req).to eq(type: :all, attributes: [:one, :two, :tree])
+        expect(req).to eq(type: :all, attributes: %i[one two tree])
       end
       it 'should work for :exclusive n' do
         req = req_class.new(exclusive: attr_names).describe
-        expect(req).to eq(type: :exclusive, attributes: [:one, :two, :tree])
+        expect(req).to eq(type: :exclusive, attributes: %i[one two tree])
       end
       it 'should work for :exactly' do
         req = req_class.new(exactly: 1).of(*attr_names).describe
-        expect(req).to include(type: :exactly, count: 1, attributes: [:one, :two, :tree])
+        expect(req).to include(type: :exactly, count: 1, attributes: %i[one two tree])
       end
       it 'should work for :at_most n' do
         req = req_class.new(at_most: 1).of(*attr_names).describe
-        expect(req).to include(type: :at_most, count: 1, attributes: [:one, :two, :tree])
+        expect(req).to include(type: :at_most, count: 1, attributes: %i[one two tree])
       end
       it 'should work for :at_least n' do
         req = req_class.new(at_least: 1).of(*attr_names).describe
-        expect(req).to include(type: :at_least, count: 1, attributes: [:one, :two, :tree])
+        expect(req).to include(type: :at_least, count: 1, attributes: %i[one two tree])
       end
       it 'should report a description' do
         req = req_class.new(at_least: 1, description: 'no more than 1').of(*attr_names).describe
-        expect(req).to include(type: :at_least, count: 1, attributes: [:one, :two, :tree], description: 'no more than 1')
+        expect(req).to include(type: :at_least, count: 1, attributes: %i[one two tree], description: 'no more than 1')
       end
     end
   end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'active_support'
 
 require_relative '../exceptions'
@@ -32,7 +34,7 @@ module Attributor
     end
 
     def self.valid_type?(value)
-      self.types.values.include?(value.class)
+      self.types.value?(value.class)
     end
 
     def self.constructable?
@@ -53,7 +55,7 @@ module Attributor
     def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **_options)
       return nil if value.nil?
 
-      return value if self.types.values.include?(value.class)
+      return value if self.types.value?(value.class)
 
       parsed_value = self.parse(value, context)
 

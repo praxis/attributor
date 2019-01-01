@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Attributor
   class Symbol
     include Type
@@ -8,7 +10,7 @@ module Attributor
 
     def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **options)
       value.to_sym
-    rescue
+    rescue StandardError
       super
     end
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Container of options and structure definition
 module Attributor
   # RULES FOR ATTRIBUTES
@@ -33,20 +35,18 @@ module Attributor
 
     def attribute(name, attr_type = nil, **opts, &block)
       raise AttributorException, "Attribute names must be symbols, got: #{name.inspect}" unless name.is_a? ::Symbol
+
       target.attributes[name] = define(name, attr_type, **opts, &block)
     end
 
     def key(name, attr_type = nil, **opts, &block)
-      unless name.is_a?(options.fetch(:key_type, Attributor::Object).native_type)
-        raise "Invalid key: #{name.inspect}, must be instance of #{options[:key_type].native_type.name}"
-      end
+      raise "Invalid key: #{name.inspect}, must be instance of #{options[:key_type].native_type.name}" unless name.is_a?(options.fetch(:key_type, Attributor::Object).native_type)
+
       target.keys[name] = define(name, attr_type, **opts, &block)
     end
 
     def extra(name, attr_type = nil, **opts, &block)
-      if attr_type.nil?
-        attr_type = Attributor::Hash.of(key: target.key_type, value: target.value_type)
-      end
+      attr_type = Attributor::Hash.of(key: target.key_type, value: target.value_type) if attr_type.nil?
       target.extra_keys = name
       target.options[:allow_extra] = true
       opts[:default] ||= {}
@@ -92,7 +92,7 @@ module Attributor
       inherited_type = opts[:reference]
       unless inherited_type
         reference = options[:reference]
-        if reference && reference.respond_to?(:attributes) && reference.attributes.key?(name)
+        if reference&.respond_to?(:attributes) && reference.attributes.key?(name)
           inherited_attribute = reference.attributes[name]
           opts = inherited_attribute.options.merge(opts) unless attr_type
           inherited_type = inherited_attribute.type
@@ -103,9 +103,9 @@ module Attributor
       # determine attribute type to use
       if attr_type.nil?
         if block_given?
-          # Don't inherit explicit examples if we've redefined the structure 
+          # Don't inherit explicit examples if we've redefined the structure
           # (but preserve the direct example if given here)
-          opts.delete :example unless  example_given
+          opts.delete :example unless example_given
           attr_type = if inherited_type && inherited_type < Attributor::Collection
                         # override the reference to be the member_attribute's type for collections
                         opts[:reference] = inherited_type.member_attribute.type

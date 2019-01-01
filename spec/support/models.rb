@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Chicken < Attributor::Model
   attributes(identity: :email) do
     attribute :name, Attributor::String, example: Randgen.first_name
@@ -68,7 +70,7 @@ end
 class Person < Attributor::Model
   attributes do
     attribute :name, String, example: Randgen.first_name
-    attribute :title, String, values: %w(Mr Mrs Ms Dr)
+    attribute :title, String, values: %w[Mr Mrs Ms Dr]
     attribute :okay, Attributor::Boolean, values: [true]
     attribute :address, Address, example: proc { |person, context| Address.example(context, person: person) }
   end
@@ -77,7 +79,7 @@ end
 class Address < Attributor::Model
   attributes do
     attribute :name, String, example: /\w+/
-    attribute :state, String, values: %w(OR CA)
+    attribute :state, String, values: %w[OR CA]
     attribute :person, Person, example: proc { |address, context| Person.example(context, address: address) }
     requires :name
   end

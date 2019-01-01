@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require File.join(File.dirname(__FILE__), '..', 'spec_helper.rb')
 
 describe Attributor::Collection do
@@ -119,7 +121,7 @@ describe Attributor::Collection do
       end
 
       context 'for invalid values' do
-        let(:context) { %w(root subattr) }
+        let(:context) { %w[root subattr] }
         [1, Object.new, false, true, 3.0].each do |value|
           it "raises error when incoming value is #{value.inspect} (propagating the context)" do
             expect { expect(type.load(value, context)).to eq value }.to raise_error(Attributor::IncompatibleTypeError, /#{context.join('.')}/)
@@ -131,11 +133,11 @@ describe Attributor::Collection do
     context 'with Attributor::Type element type' do
       context 'for valid values' do
         {
-          Attributor::String   => %w(foo bar),
-          Attributor::Integer  => [1, '2', 3],
-          Attributor::Float    => [1.0, '2.0', Math::PI, Math::E],
+          Attributor::String => %w[foo bar],
+          Attributor::Integer => [1, '2', 3],
+          Attributor::Float => [1.0, '2.0', Math::PI, Math::E],
           Attributor::DateTime => ['2001-02-03T04:05:06+07:00', 'Sat, 3 Feb 2001 04:05:06 +0700'],
-          ::Chicken            => [::Chicken.new, ::Chicken.new]
+          ::Chicken => [::Chicken.new, ::Chicken.new]
         }.each do |member_type, value|
           it "returns loaded value when member_type is #{member_type} and value is #{value.inspect}" do
             expected_result = value.map { |v| member_type.load(v) }

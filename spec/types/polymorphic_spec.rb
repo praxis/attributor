@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require File.join(File.dirname(__FILE__), '..', 'spec_helper.rb')
 
 describe Attributor::Polymorphic do
@@ -105,7 +107,7 @@ describe Attributor::Polymorphic do
       its([:discriminator]) { should eq :type }
       context 'types' do
         subject(:types) { description[:types] }
-        its(:keys) { should match_array [:chicken, :turkey, :duck] }
+        its(:keys) { should match_array %i[chicken turkey duck] }
         it do
           expect(types[:chicken]).to eq(type: Chicken.describe(true))
           expect(types[:turkey]).to eq(type: Turkey.describe(true))

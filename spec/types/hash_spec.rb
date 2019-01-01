@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require File.join(File.dirname(__FILE__), '..', 'spec_helper.rb')
 
 describe Attributor::Hash do
@@ -97,7 +99,7 @@ describe Attributor::Hash do
       subject(:example) { HashWithStrings.example(name: name, something: something) }
 
       context 'resolves a lazy attributes on demand' do
-        before { expect(example.lazy_attributes.keys).to eq [:name, :something] }
+        before { expect(example.lazy_attributes.keys).to eq %i[name something] }
         after { expect(example.lazy_attributes.keys).to eq [:something] }
 
         it 'using get' do
@@ -119,7 +121,7 @@ describe Attributor::Hash do
 
       its(:size) { should eq 2 }
       its(:values) { should match_array [name, something] }
-      its(:keys) { should match_array [:name, :something] }
+      its(:keys) { should match_array %i[name something] }
       it do
         should_not be_empty
       end
@@ -130,7 +132,7 @@ describe Attributor::Hash do
       end
 
       it 'enumerates the contents' do
-        expect(example.collect { |k, _v| k }).to eq [:name, :something]
+        expect(example.collect { |k, _v| k }).to eq %i[name something]
       end
 
       it 'enumerates the contents using each_pair' do
@@ -432,7 +434,7 @@ describe Attributor::Hash do
       end
     end
     context 'with attributes not defined in the class' do
-      let(:req_attributes) { [:name, :invalid, :notgood] }
+      let(:req_attributes) { %i[name invalid notgood] }
       it 'it complains loudly' do
         expect do
           HashWithStrings.add_requirement(req)
@@ -477,7 +479,7 @@ describe Attributor::Hash do
       it 'returns a hash with the dumped values and keys' do
         dumped_value = type.dump(value, opts)
         expect(dumped_value).to be_kind_of(::Hash)
-        expect(dumped_value.keys).to match_array %w(id1 id2)
+        expect(dumped_value.keys).to match_array %w[id1 id2]
         expect(dumped_value.values).to have(2).items
         expect(dumped_value['id1']).to eq value1
         expect(dumped_value['id2']).to eq value2
@@ -489,7 +491,7 @@ describe Attributor::Hash do
         it 'correctly returns nil rather than trying to dump their contents' do
           dumped_value = type.dump(value, opts)
           expect(dumped_value).to be_kind_of(::Hash)
-          expect(dumped_value.keys).to match_array %w(id1 id2)
+          expect(dumped_value.keys).to match_array %w[id1 id2]
           expect(dumped_value['id1']).to be nil
           expect(dumped_value['id2']).to eq value2
         end
@@ -569,7 +571,7 @@ describe Attributor::Hash do
         it 'complains not all the listed elements are set (false or true)' do
           errors = type.new('name' => 'CAP').validate
           expect(errors).to have(2).items
-          %w(consistency availability).each do |name|
+          %w[consistency availability].each do |name|
             expect(errors).to include("Key #{name} is required for $.")
           end
         end
@@ -703,11 +705,11 @@ describe Attributor::Hash do
         end
         it 'comes up with a reasonably good set' do
           ex = type.example
-          expect(ex.keys).to match([:req1, :req2, :exc3, :least1, :least2, :most1])
+          expect(ex.keys).to match(%i[req1 req2 exc3 least1 least2 most1])
         end
         it 'it favors picking attributes with data' do
-          ex = type.example(nil,{most2: "data"})
-          expect(ex.keys).to match([:req1, :req2, :exc3, :least1, :least2, :most2])
+          ex = type.example(nil, most2: 'data')
+          expect(ex.keys).to match(%i[req1 req2 exc3 least1 least2 most2])
         end
       end
     end
@@ -782,8 +784,8 @@ describe Attributor::Hash do
         reqs = description[:requirements]
         expect(reqs).to be_kind_of(Array)
         expect(reqs.size).to be(5)
-        expect(reqs).to include(type: :all, attributes: %w(1 some_date))
-        expect(reqs).to include(type: :exclusive, attributes: %w(some_date defaulted))
+        expect(reqs).to include(type: :all, attributes: %w[1 some_date])
+        expect(reqs).to include(type: :exclusive, attributes: %w[some_date defaulted])
         expect(reqs).to include(type: :at_least, attributes: ['a string', 'some_date'], count: 1)
         expect(reqs).to include(type: :at_most, attributes: ['a string', 'some_date'], count: 2)
         expect(reqs).to include(type: :exactly, attributes: ['a string', 'some_date'], count: 1)
@@ -952,7 +954,7 @@ describe Attributor::Hash do
       context 'properly sets them (and loads them) in the created instance' do
         let(:input) { { one: 'one', two: 2 } }
 
-        its(:keys) { should eq([:one, :two]) }
+        its(:keys) { should eq(%i[one two]) }
         its([:one]) { should eq('one') }
         its([:two]) { should eq('2') } # loaded as a string
       end
@@ -976,7 +978,7 @@ describe Attributor::Hash do
         let(:input) { { one: 'one', three: 'tres' } }
         subject(:output) { type.load(input) }
 
-        its(:keys) { should eq([:one, :three]) }
+        its(:keys) { should eq(%i[one three]) }
       end
       context 'inside an :other subkey' do
         let(:type) do
@@ -990,7 +992,7 @@ describe Attributor::Hash do
         let(:input) { { one: 'one', three: 'tres' } }
         subject(:output) { type.load(input) }
 
-        its(:keys) { should match_array [:one, :other] }
+        its(:keys) { should match_array %i[one other] }
         it 'has the key inside the :other hash' do
           expect(output[:other]).to eq(three: 'tres')
         end
@@ -1020,7 +1022,7 @@ describe Attributor::Hash do
       it 'has loaded the (internal) insensitive_map upon building the definition' do
         type.definition
         expect(type.insensitive_map).to be_kind_of(::Hash)
-        expect(type.insensitive_map.keys).to match_array %w(downcase upcase camelcase)
+        expect(type.insensitive_map.keys).to match_array %w[downcase upcase camelcase]
       end
     end
 
@@ -1050,7 +1052,7 @@ describe Attributor::Hash do
     subject(:output) { type.load(input) }
 
     context 'that should be saved at the top level' do
-      its(:keys) { should match_array [:one, :two, :three] }
+      its(:keys) { should match_array %i[one two three] }
 
       it 'loads the extra keys' do
         expect(output[:one]).to eq('one')
@@ -1068,7 +1070,7 @@ describe Attributor::Hash do
         end
       end
 
-      its(:keys) { should match_array [:one, :two, :options] }
+      its(:keys) { should match_array %i[one two options] }
       it 'loads the extra keys into :options sub-hash' do
         expect(output[:one]).to eq('one')
         expect(output[:two]).to eq('two')
@@ -1077,7 +1079,7 @@ describe Attributor::Hash do
       its(:validate) { should be_empty }
 
       context 'with an options value already provided' do
-        its(:keys) { should match_array [:one, :two, :options] }
+        its(:keys) { should match_array %i[one two options] }
         let(:input) { { one: 'one', three: 3, options: { four: 4 } } }
 
         it 'loads the extra keys into :options sub-hash' do

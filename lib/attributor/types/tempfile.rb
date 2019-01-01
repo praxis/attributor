@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'tempfile'
 
 module Attributor
@@ -17,7 +19,7 @@ module Attributor
     end
 
     def self.dump(value, **_opts)
-      value && value.read
+      value&.read
     end
 
     def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **options)

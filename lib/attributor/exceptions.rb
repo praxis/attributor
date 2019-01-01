@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Attributor
   class AttributorException < ::StandardError
   end
@@ -38,5 +40,4 @@ module Attributor
   # Thrown from SmartAttributeSelector when the requirements of attributes are certainly unfeasible
   class UnfeasibleRequirementsError < AttributorException
   end
-
 end

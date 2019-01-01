@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Attributor
   class String
     include Type
@@ -7,12 +9,10 @@ module Attributor
     end
 
     def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **options)
-      if value.is_a?(Enumerable)
-        raise IncompatibleTypeError, context: context, value_type: value.class, type: self
-      end
+      raise IncompatibleTypeError, context: context, value_type: value.class, type: self if value.is_a?(Enumerable)
 
       value && String(value)
-    rescue
+    rescue StandardError
       super
     end
 
@@ -21,7 +21,7 @@ module Attributor
         begin
           # It may fail to generate an example, see bug #72.
           options[:regexp].gen
-        rescue => e
+        rescue StandardError => e
           format('Failed to generate example for %s : %s', options[:regexp].inspect, e.message)
         end
       else
