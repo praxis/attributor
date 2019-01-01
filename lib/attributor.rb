@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'json'
 require 'randexp'
 
@@ -21,7 +23,7 @@ module Attributor
   require_relative 'attributor/extensions/randexp'
 
   # hierarchical separator string for composing human readable attributes
-  SEPARATOR = '.'.freeze
+  SEPARATOR = '.'
   DEFAULT_ROOT_CONTEXT = ['$'].freeze
 
   # @param type [Class] The class of the type to resolve
@@ -37,11 +39,13 @@ module Attributor
 
   def self.find_type(attr_type)
     return attr_type if attr_type < Attributor::Type
+
     name = attr_type.name.split('::').last # TOO EXPENSIVE?
 
     klass = const_get(name) if const_defined?(name)
     raise AttributorException, "Could not find class with name #{name}" unless klass
     raise AttributorException, "Could not find attribute type for: #{name} [klass: #{klass.name}]" unless klass < Attributor::Type
+
     klass
   end
 
@@ -56,9 +60,7 @@ module Attributor
 
     context = Array(context) if context.is_a? ::String
 
-    unless context.is_a? Enumerable
-      raise "INVALID CONTEXT!!! (got: #{context.inspect})"
-    end
+    raise "INVALID CONTEXT!!! (got: #{context.inspect})" unless context.is_a? Enumerable
 
     begin
       return context.join('.')
@@ -73,7 +75,7 @@ module Attributor
     inspection
   end
 
-  MODULE_PREFIX       = 'Attributor::'.freeze
+  MODULE_PREFIX       = 'Attributor::'
   MODULE_PREFIX_REGEX = ::Regexp.new(MODULE_PREFIX)
 
   require_relative 'attributor/families/numeric'

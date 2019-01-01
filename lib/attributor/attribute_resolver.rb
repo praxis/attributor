@@ -1,9 +1,11 @@
+# frozen_string_literal: true
+
 require 'ostruct'
 
 module Attributor
   class AttributeResolver
-    ROOT_PREFIX = '$'.freeze
-    COLLECTION_INDEX_KEY = /^at\((\d+)\)$/
+    ROOT_PREFIX = '$'
+    COLLECTION_INDEX_KEY = /^at\((\d+)\)$/.freeze
 
     class Data < ::Hash
       include Hashie::Extensions::MethodReader
@@ -37,6 +39,7 @@ module Attributor
       #
       result = path.inject(@data) do |hash, key|
         return nil if hash.nil?
+
         if (match = key.match(COLLECTION_INDEX_KEY))
           hash[match[1].to_i]
         else
@@ -60,9 +63,7 @@ module Attributor
     end
 
     def register(key_path, value)
-      if key_path.split(SEPARATOR).size > 1
-        raise AttributorException, "can only register top-level attributes. got: #{key_path}"
-      end
+      raise AttributorException, "can only register top-level attributes. got: #{key_path}" if key_path.split(SEPARATOR).size > 1
 
       @data[key_path] = value
     end
@@ -105,6 +106,7 @@ module Attributor
 
     def self.current
       raise AttributorException, 'No AttributeResolver set.' unless Thread.current[:_attributor_attribute_resolver]
+
       Thread.current[:_attributor_attribute_resolver]
     end
   end

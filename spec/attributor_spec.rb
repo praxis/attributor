@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require File.join(File.dirname(__FILE__), 'spec_helper.rb')
 
 describe Attributor do
@@ -33,7 +35,7 @@ describe Attributor do
     end
 
     context 'with array value' do
-      let(:context) { %w(a b) }
+      let(:context) { %w[a b] }
       it { should eq('a.b') }
     end
   end

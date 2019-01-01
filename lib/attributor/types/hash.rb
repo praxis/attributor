@@ -1,11 +1,9 @@
+# frozen_string_literal: true
+
 module Attributor
   class InvalidDefinition < StandardError
     def initialize(type, cause)
-      type_name = if type.name
-                    type.name
-                  else
-                    type.inspect
-                  end
+      type_name = type.name || type.inspect
 
       msg = "Structure definition for type #{type_name} is invalid. The following exception has occurred: #{cause.inspect}"
       super(msg)
@@ -17,7 +15,7 @@ module Attributor
 
   class Hash
     MAX_EXAMPLE_DEPTH = 10
-    CIRCULAR_REFERENCE_MARKER = '...'.freeze
+    CIRCULAR_REFERENCE_MARKER = '...'
 
     include Container
     include Enumerable
@@ -29,7 +27,6 @@ module Attributor
       attr_reader :key_attribute
       attr_reader :insensitive_map
       attr_accessor :extra_keys
-      attr_reader :requirements
     end
 
     @key_type = Object
@@ -98,9 +95,7 @@ module Attributor
     end
 
     def self.requirements
-      if @saved_blocks.any?
-        definition
-      end
+      definition if @saved_blocks.any?
       @requirements
     end
 
@@ -119,7 +114,7 @@ module Attributor
           map[k.downcase] = k
         end
       end
-    rescue => e
+    rescue StandardError => e
       @error = InvalidDefinition.new(self, e)
       raise
     end
@@ -152,11 +147,13 @@ module Attributor
     def self.add_requirement(req)
       @requirements << req
       return unless req.attr_names
+
       non_existing = req.attr_names - attributes.keys
-      unless non_existing.empty?
-        raise "Invalid attribute name(s) found (#{non_existing.join(', ')}) when defining a requirement of type #{req.type} for #{Attributor.type_name(self)} ." \
-              "The only existing attributes are #{attributes.keys}"
-      end
+
+      return if non_existing.empty?
+
+      raise "Invalid attribute name(s) found (#{non_existing.join(', ')}) when defining a requirement of type #{req.type} for #{Attributor.type_name(self)} ." \
+          "The only existing attributes are #{attributes.keys}"
     end
 
     def self.construct(constructor_block, **options)
@@ -167,15 +164,11 @@ module Attributor
                .construct(constructor_block, **options)
       end
 
-      if options[:case_insensitive_load] && !(key_type <= String)
-        raise Attributor::AttributorException, ":case_insensitive_load may not be used with keys of type #{key_type.name}"
-      end
+      raise Attributor::AttributorException, ":case_insensitive_load may not be used with keys of type #{key_type.name}" if options[:case_insensitive_load] && !(key_type <= String)
 
       keys(options, &constructor_block)
       self
     end
-
-
 
     def self.example_contents(context, parent, **values)
       hash = ::Hash.new
@@ -185,13 +178,13 @@ module Attributor
       # But play it safe and default to the previous behavior in case there is any error processing them
       # ( that is until the SmartAttributeSelector class isn't fully tested and ready for prime time)
       begin
-        stack = SmartAttributeSelector.new( requirements.map(&:describe), keys.keys , values)
+        stack = SmartAttributeSelector.new(requirements.map(&:describe), keys.keys, values)
         selected = stack.process
-      rescue => e
+      rescue StandardError
         selected = keys.keys
       end
 
-      keys.select{|n,attr| selected.include? n}.each do |sub_attribute_name, sub_attribute|
+      keys.select { |n, _attr| selected.include? n }.each do |sub_attribute_name, sub_attribute|
         if sub_attribute.attributes
           # TODO: add option to raise an exception in this case?
           next if example_depth > MAX_EXAMPLE_DEPTH
@@ -225,7 +218,7 @@ module Attributor
       else
         hash = ::Hash.new
 
-        (rand(3) + 1).times do |i|
+        rand(1..3).times do |i|
           example_key = key_type.example(context + ["at(#{i})"])
           subcontext = context + ["at(#{example_key})"]
           hash[example_key] = value_type.example(subcontext)
@@ -238,9 +231,8 @@ module Attributor
     end
 
     def self.dump(value, **opts)
-      if (loaded = load(value))
-        loaded.dump(**opts)
-      end
+      loaded = load(value)
+      loaded&.dump(**opts)
     end
 
     def self.check_option!(name, _definition)
@@ -250,9 +242,8 @@ module Attributor
       when :dsl_compiler
         :ok
       when :case_insensitive_load
-        unless key_type <= String
-          raise Attributor::AttributorException, ":case_insensitive_load may not be used with keys of type #{key_type.name}"
-        end
+        raise Attributor::AttributorException, ":case_insensitive_load may not be used with keys of type #{key_type.name}" unless key_type <= String
+
         :ok
       when :allow_extra
         :ok
@@ -270,6 +261,7 @@ module Attributor
       loaded_value = self.parse(value, context)
 
       return from_hash(loaded_value, context, recurse: recurse) if keys.any?
+
       load_generic(loaded_value, context)
     end
 
@@ -309,12 +301,14 @@ module Attributor
       key = self.class.key_attribute.load(key, context)
 
       return self.get_generic(key, context) if self.class.keys.empty?
+
       value = @contents[key]
 
       # FIXME: getting an unset value here should not force it in the hash
       if (attribute = self.class.keys[key])
         loaded_value = attribute.load(value, context)
         return nil if loaded_value.nil?
+
         return self[key] = loaded_value
       end
 
@@ -325,11 +319,10 @@ module Attributor
 
       if self.class.options[:allow_extra]
         return @contents[key] = self.class.value_attribute.load(value, context) if self.class.extra_keys.nil?
+
         extra_keys_key = self.class.extra_keys
 
-        if @contents.key? extra_keys_key
-          return @contents[extra_keys_key].get(key, context: context)
-        end
+        return @contents[extra_keys_key].get(key, context: context) if @contents.key? extra_keys_key
 
       end
 
@@ -353,9 +346,7 @@ module Attributor
     def set(key, value, context: generate_subcontext(Attributor::DEFAULT_ROOT_CONTEXT, key), recurse: false)
       key = self.class.key_attribute.load(key, context)
 
-      if self.class.keys.empty?
-        return self[key] = self.class.value_attribute.load(value, context)
-      end
+      return self[key] = self.class.value_attribute.load(value, context) if self.class.keys.empty?
 
       if (attribute = self.class.keys[key])
         return self[key] = attribute.load(value, context, recurse: recurse)
@@ -406,6 +397,7 @@ module Attributor
       # handle default values for missing keys
       keys.each do |key_name, attribute|
         next if hash.key?(key_name)
+
         sub_context = generate_subcontext(context, key_name)
         default = attribute.load(nil, sub_context, recurse: recurse)
         hash[key_name] = default unless default.nil?
@@ -417,9 +409,7 @@ module Attributor
     def self.validate(object, context = Attributor::DEFAULT_ROOT_CONTEXT, _attribute)
       context = [context] if context.is_a? ::String
 
-      unless object.is_a?(self)
-        raise ArgumentError, "#{name} can not validate object of type #{object.class.name} for #{Attributor.humanize_context(context)}."
-      end
+      raise ArgumentError, "#{name} can not validate object of type #{object.class.name} for #{Attributor.humanize_context(context)}." unless object.is_a?(self)
 
       object.validate(context)
     end
@@ -449,9 +439,7 @@ module Attributor
             list << described_req
           end
           # Make sure we create an :all requirement, if there wasn't one so we can add the required: true attributes
-          unless required_names.empty?
-            hash[:requirements] << { type: :all, attributes: required_names }
-          end
+          hash[:requirements] << { type: :all, attributes: required_names } unless required_names.empty?
         end
       else
         hash[:value] = { type: value_type.describe(true) }
@@ -503,14 +491,14 @@ module Attributor
     end
     alias has_key? key?
 
-    def merge(h)
-      case h
+    def merge(hash)
+      case hash
       when self.class
-        self.class.new(contents.merge(h.contents))
+        self.class.new(contents.merge(hash.contents))
       when Attributor::Hash
-        raise ArgumentError, 'cannot merge Attributor::Hash instances of different types' unless h.is_a?(self.class)
+        raise ArgumentError, 'cannot merge Attributor::Hash instances of different types' unless hash.is_a?(self.class)
       else
-        raise TypeError, "no implicit conversion of #{h.class} into Attributor::Hash"
+        raise TypeError, "no implicit conversion of #{hash.class} into Attributor::Hash"
       end
     end
 
@@ -604,6 +592,7 @@ module Attributor
 
     def dump(**opts)
       return CIRCULAR_REFERENCE_MARKER if @dumping
+
       @dumping = true
 
       contents.each_with_object({}) do |(k, v), hash|

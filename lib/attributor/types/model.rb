@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Attributor
   class Model < Hash
     # FIXME: this is not the way to fix this. Really we should add finalize! to Models.
@@ -5,7 +7,7 @@ module Attributor
       undef :timeout
       undef :format
       undef :test
-    rescue
+    rescue StandardError
       nil
     end
 
@@ -81,6 +83,7 @@ module Attributor
       case name
       when :identity
         raise AttributorException, "Invalid identity type #{value.inspect}" unless value.is_a?(::Symbol)
+
         :ok # FIXME: ... actually do something smart, that doesn't break lazy attribute creation
       when :reference
         :ok # FIXME: ... actually do something smart
@@ -101,13 +104,10 @@ module Attributor
       context ||= ["#{name || 'Struct'}-#{rand(10_000_000)}"]
       context = Array(context)
 
+      result = new
       if keys.any?
-        result = new
         result.extend(ExampleMixin)
-
         result.lazy_attributes = example_contents(context, result, values)
-      else
-        result = new
       end
       result
     end
@@ -126,6 +126,7 @@ module Attributor
     #       but with their respective contexts.
     def validate(context = Attributor::DEFAULT_ROOT_CONTEXT)
       raise AttributorException, 'validation conflict' if @validating
+
       @validating = true
 
       context = [context] if context.is_a? ::String
@@ -181,6 +182,7 @@ module Attributor
 
     def dump(context: Attributor::DEFAULT_ROOT_CONTEXT, **_opts)
       return CIRCULAR_REFERENCE_MARKER if @dumping
+
       @dumping = true
 
       attributes.each_with_object({}) do |(name, value), hash|

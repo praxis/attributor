@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Attributor
   class AttributorException < ::StandardError
   end
@@ -5,13 +7,13 @@ module Attributor
   class LoadError < AttributorException
   end
 
-  class IncompatibleTypeError < LoadError
+  class IncompatibleTypeError < Attributor::LoadError
     def initialize(type:, value_type:, context:)
       super "Type #{type} cannot load values of type #{value_type} while loading #{Attributor.humanize_context(context)}."
     end
   end
 
-  class CoercionError < LoadError
+  class CoercionError < Attributor::LoadError
     def initialize(context:, from:, to:, value: nil)
       msg = "Error coercing from #{from} to #{to} while loading #{Attributor.humanize_context(context)}."
       msg += " Received value #{Attributor.errorize_value(value)}" if value
@@ -19,7 +21,7 @@ module Attributor
     end
   end
 
-  class DeserializationError < LoadError
+  class DeserializationError < Attributor::LoadError
     def initialize(context:, from:, encoding:, value: nil)
       msg = "Error deserializing a #{from} using #{encoding} while loading #{Attributor.humanize_context(context)}."
       msg += " Received value #{Attributor.errorize_value(value)}" if value
@@ -38,5 +40,4 @@ module Attributor
   # Thrown from SmartAttributeSelector when the requirements of attributes are certainly unfeasible
   class UnfeasibleRequirementsError < AttributorException
   end
-
 end

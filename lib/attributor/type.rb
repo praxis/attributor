@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Attributor
   # It is the abstract base class to hold an attribute, both a leaf and a container (hash/Array...)
   # TODO: should this be a mixin since it is an abstract class?
@@ -28,9 +30,7 @@ module Attributor
       # Generic decoding and coercion of the attribute.
       def load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **_options)
         return nil if value.nil?
-        unless value.is_a?(native_type)
-          raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self
-        end
+        raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self unless value.is_a?(native_type)
 
         value
       end
@@ -98,6 +98,7 @@ module Attributor
       # By default, non complex types will not have a DSL subdefinition this handles such case
       def compile_dsl(options, block)
         raise AttributorException, 'Basic structures cannot take extra block definitions' if block
+
         # Simply create a DSL compiler to store the options, and not to parse any DSL
         sub_definition = dsl_compiler.new(options)
         sub_definition
@@ -118,7 +119,8 @@ module Attributor
 
       def id
         return nil if name.nil?
-        name.gsub('::'.freeze, '-'.freeze)
+
+        name.gsub('::', '-')
       end
 
       def family

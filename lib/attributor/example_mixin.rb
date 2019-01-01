@@ -1,14 +1,16 @@
+# frozen_string_literal: true
+
 # poorly-optimized, but handy, mixin for Hash and Model examples.
 # primarily enables support for lazy values.
 
 module Attributor
   module ExampleMixin
     def self.extended(obj)
-      if obj.is_a? Attributor::Model
-        obj.class.attributes.each do |name, _|
-          obj.define_singleton_method(name) do
-            get(name)
-          end
+      return unless obj.is_a? Attributor::Model
+
+      obj.class.attributes.each do |name, _|
+        obj.define_singleton_method(name) do
+          get(name)
         end
       end
     end
