@@ -32,13 +32,6 @@ Metrics/CyclomaticComplexity:
 Metrics/PerceivedComplexity:
   Max: 23
 
-Lint/BigDecimalNew:
-  Exclude:
-    - "lib/attributor/types/bigdecimal.rb"
-Lint/InheritException:
-  Exclude:
-    - "lib/attributor/exceptions.rb"
-
 Naming/UncommunicativeMethodParamName:
   AllowedNames: io, id, to, by, on, in, at, ip, db, k, v
 
