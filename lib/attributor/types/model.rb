@@ -192,7 +192,7 @@ module Attributor
           next
         end
 
-        hash[name.to_sym] = attribute.dump(value, context: context + [name])
+        hash[name.to_sym] = attribute.dump(value, context: context + [name], **_opts)
       end
     ensure
       @dumping = false

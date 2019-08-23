@@ -413,6 +413,17 @@ describe Attributor::Model do
         expect(person.address.person).to be(person)
         expect(output[:address][:person]).to eq(Attributor::Model::CIRCULAR_REFERENCE_MARKER)
       end
+
+      it 'passes kwargs' do
+        person.class.attributes.values.each do |attr|
+          expect(attr).to receive(:dump).with(
+            anything,
+            context: anything,
+            custom_arg: :custom_value
+          )
+        end
+        person.dump(custom_arg: :custom_value)
+      end
     end
   end
 
