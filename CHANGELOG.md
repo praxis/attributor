@@ -2,6 +2,10 @@
 
 ## next
 
+## 5.2.1 (25/082019)
+
+* Propertly pass options down when dumping an Model
+
 ## 5.2 (12/09/2017)
 
 * Fixed describing `Hash` with no keys defined, to still use a given example (no example outputted before this)
