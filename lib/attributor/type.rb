@@ -29,7 +29,7 @@ module Attributor
       def load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **_options)
         return nil if value.nil?
         unless value.is_a?(native_type)
-          raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self
+          raise Attributor::IncompatibleTypeError.new(context: context, value_type: value.class, type: self)
         end
 
         value

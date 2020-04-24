@@ -19,17 +19,17 @@ module Attributor
       # @return [Array] a normal Ruby Array
       #
       def decode_json(value, context = Attributor::DEFAULT_ROOT_CONTEXT)
-        raise Attributor::DeserializationError, context: context, from: value.class, encoding: 'JSON', value: value unless value.is_a? ::String
+        raise Attributor::DeserializationError.new(context: context, from: value.class, encoding: 'JSON', value: value) unless value.is_a? ::String
 
         # attempt to parse as JSON
         parsed_value = JSON.parse(value)
         unless valid_type?(parsed_value)
-          raise Attributor::CoercionError, context: context, from: parsed_value.class, to: name, value: parsed_value
+          raise Attributor::CoercionError.new(context: context, from: parsed_value.class, to: name, value: parsed_value)
         end
 
         parsed_value
       rescue JSON::JSONError
-        raise Attributor::DeserializationError, context: context, from: value.class, encoding: 'JSON', value: value
+        raise Attributor::DeserializationError.new(context: context, from: value.class, encoding: 'JSON', value: value)
       end
     end
   end

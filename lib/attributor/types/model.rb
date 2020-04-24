@@ -105,7 +105,7 @@ module Attributor
         result = new
         result.extend(ExampleMixin)
 
-        result.lazy_attributes = example_contents(context, result, values)
+        result.lazy_attributes = example_contents(context, result, **values)
       else
         result = new
       end

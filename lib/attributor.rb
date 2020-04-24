@@ -29,7 +29,7 @@ module Attributor
   def self.resolve_type(attr_type, options = {}, constructor_block = nil)
     klass = self.find_type(attr_type)
 
-    return klass.construct(constructor_block, options) if klass.constructable?
+    return klass.construct(constructor_block, **options) if klass.constructable?
     raise AttributorException, "Type: #{attr_type} does not support anonymous generation" if constructor_block
 
     klass

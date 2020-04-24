@@ -313,7 +313,11 @@ describe Attributor::Attribute do
     let(:value) { '1' }
 
     it 'delegates to type.load' do
-      expect(type).to receive(:load).with(value, context, {})
+      # Need to add the "anything" of the 3rd element, as in ruby < 2.7 it comes as an empty hash
+      expect(type).to receive(:load) do |v, c, _other|
+        expect(v).to eq(value)
+        expect(c).to eq(context)
+      end   
       attribute.load(value, context)
     end
 

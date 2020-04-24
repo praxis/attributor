@@ -9,7 +9,7 @@ module Attributor
       when ::String
         values
       when ::Array
-        values.collect { |value| member_attribute.dump(value, opts).to_s }.join(',')
+        values.collect { |value| member_attribute.dump(value, **opts).to_s }.join(',')
       when nil
         nil
       else

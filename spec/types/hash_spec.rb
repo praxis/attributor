@@ -359,7 +359,7 @@ describe Attributor::Hash do
       context 'with unknown keys in input' do
         it 'raises an error' do
           expect do
-            type.load('other_key' => :value)
+            type.load({'other_key' => :value})
           end.to raise_error(Attributor::AttributorException)
         end
       end
@@ -453,7 +453,7 @@ describe Attributor::Hash do
 
     context 'for a simple (untyped) hash' do
       it 'returns the untouched hash value' do
-        expect(type.dump(value, opts)).to eq(value)
+        expect(type.dump(value, **opts)).to eq(value)
       end
     end
 
@@ -475,7 +475,7 @@ describe Attributor::Hash do
       let(:type) { Attributor::Hash.of(key: String, value: subtype) }
 
       it 'returns a hash with the dumped values and keys' do
-        dumped_value = type.dump(value, opts)
+        dumped_value = type.dump(value, **opts)
         expect(dumped_value).to be_kind_of(::Hash)
         expect(dumped_value.keys).to match_array %w(id1 id2)
         expect(dumped_value.values).to have(2).items
@@ -487,7 +487,7 @@ describe Attributor::Hash do
         let(:value) { { id1: nil, id2: subtype.new(value2) } }
 
         it 'correctly returns nil rather than trying to dump their contents' do
-          dumped_value = type.dump(value, opts)
+          dumped_value = type.dump(value, **opts)
           expect(dumped_value).to be_kind_of(::Hash)
           expect(dumped_value.keys).to match_array %w(id1 id2)
           expect(dumped_value['id1']).to be nil
@@ -706,7 +706,7 @@ describe Attributor::Hash do
           expect(ex.keys).to match([:req1, :req2, :exc3, :least1, :least2, :most1])
         end
         it 'it favors picking attributes with data' do
-          ex = type.example(nil,{most2: "data"})
+          ex = type.example(nil,most2: "data")
           expect(ex.keys).to match([:req1, :req2, :exc3, :least1, :least2, :most2])
         end
       end
@@ -1150,10 +1150,10 @@ describe Attributor::Hash do
     let(:hash_of_strings) { Attributor::Hash.of(key: String) }
     let(:hash_of_symbols) { Attributor::Hash.of(key: Symbol) }
 
-    let(:merger) { hash_of_strings.load('a' => 1) }
-    let(:good_mergee) { hash_of_strings.load('b' => 2) }
-    let(:bad_mergee) { hash_of_symbols.load(c: 3) }
-    let(:result) { hash_of_strings.load('a' => 1, 'b' => 2) }
+    let(:merger) { hash_of_strings.load({'a' => 1},nil) }
+    let(:good_mergee) { hash_of_strings.load({'b' => 2},nil) }
+    let(:bad_mergee) { hash_of_symbols.load({c: 3}) }
+    let(:result) { hash_of_strings.load({'a' => 1, 'b' => 2},nil) }
 
     it 'validates that the mergee is of like type' do
       expect { merger.merge(bad_mergee) }.to raise_error(ArgumentError)

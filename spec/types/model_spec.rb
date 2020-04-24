@@ -369,7 +369,7 @@ describe Attributor::Model do
     end
 
     context 'for models using the "requires" DSL' do
-      subject(:address) { Address.load(state: 'CA') }
+      subject(:address) { Address.load({state: 'CA'}) }
       its(:validate) { should_not be_empty }
       its(:validate) { should include 'Key name is required for $.' }
     end
@@ -380,8 +380,8 @@ describe Attributor::Model do
       end
 
       context 'that are both invalid' do
-        subject(:person) { Person.load(name: 'Joe', title: 'dude', okay: true) }
-        let(:address) { Address.load(name: '1 Main St', state: 'ME') }
+        subject(:person) { Person.load({name: 'Joe', title: 'dude', okay: true}) }
+        let(:address) { Address.load({name: '1 Main St', state: 'ME'}) }
         before do
           person.address = address
           address.person = person

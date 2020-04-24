@@ -7,7 +7,7 @@ module Attributor
     end
 
     def self.example(_context = nil, options: {})
-      ::BigDecimal.new("#{/\d{3}/.gen}.#{/\d{3}/.gen}")
+      BigDecimal("#{/\d{3}/.gen}.#{/\d{3}/.gen}")
     end
 
     def self.load(value, _context = Attributor::DEFAULT_ROOT_CONTEXT, **_options)

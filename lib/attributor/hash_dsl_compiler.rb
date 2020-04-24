@@ -89,31 +89,31 @@ module Attributor
       end
 
       def all(*attr_names, **opts)
-        req = Requirement.new(options.merge(opts).merge(all: attr_names))
+        req = Requirement.new(**options.merge(opts).merge(all: attr_names))
         target.add_requirement req
         req
       end
 
       def at_most(number)
-        req = Requirement.new(options.merge(at_most: number))
+        req = Requirement.new(**options.merge(at_most: number))
         target.add_requirement req
         req
       end
 
       def at_least(number)
-        req = Requirement.new(options.merge(at_least: number))
+        req = Requirement.new(**options.merge(at_least: number))
         target.add_requirement req
         req
       end
 
       def exactly(number)
-        req = Requirement.new(options.merge(exactly: number))
+        req = Requirement.new(**options.merge(exactly: number))
         target.add_requirement req
         req
       end
 
       def exclusive(*attr_names, **opts)
-        req = Requirement.new(options.merge(opts).merge(exclusive: attr_names))
+        req = Requirement.new(**options.merge(opts).merge(exclusive: attr_names))
         target.add_requirement req
         req
       end
@@ -132,7 +132,7 @@ module Attributor
           _requirements_dsl
         end
       else
-        _requirements_dsl.all(*spec, opts)
+        _requirements_dsl.all(*spec, **opts)
       end
     end
   end

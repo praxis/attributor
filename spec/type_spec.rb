@@ -68,7 +68,7 @@ describe Attributor::Type do
       let(:context) { %w(top sub) }
 
       it 'raises an exception' do
-        expect { test_type.load(value, context) }.to raise_error(Attributor::IncompatibleTypeError, /cannot load values of type Fixnum.*while loading top.sub/)
+        expect { test_type.load(value, context) }.to raise_error(Attributor::IncompatibleTypeError, /cannot load values of type (Fixnum|Integer).*while loading top.sub/)
       end
     end
   end

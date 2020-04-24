@@ -24,7 +24,7 @@ module Attributor
       begin
         return ::DateTime.parse(value)
       rescue ArgumentError
-        raise Attributor::DeserializationError, context: context, from: value.class, encoding: 'DateTime', value: value
+        raise Attributor::DeserializationError.new(context: context, from: value.class, encoding: 'DateTime', value: value)
       end
     end
   end
