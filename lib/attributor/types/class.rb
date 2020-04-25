@@ -16,7 +16,7 @@ module Attributor
 
       # Must be given a String object or nil
       unless value.is_a?(::String) || value.nil?
-        raise IncompatibleTypeError,  context: context, value_type: value.class, type: self
+        raise IncompatibleTypeError.new(context: context, value_type: value.class, type: self)
       end
 
       value = '::' + value if value[0..1] != '::'

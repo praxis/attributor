@@ -4,7 +4,7 @@ describe Attributor::DSLCompiler do
   let(:target) { double('model', attributes: {}) }
 
   let(:dsl_compiler_options) { {} }
-  subject(:dsl_compiler) { Attributor::DSLCompiler.new(target, dsl_compiler_options) }
+  subject(:dsl_compiler) { Attributor::DSLCompiler.new(target, **dsl_compiler_options) }
 
   let(:attribute_name) { :name }
   let(:type) { Attributor::String }
@@ -35,7 +35,7 @@ describe Attributor::DSLCompiler do
 
         it 'creates an attribute given a name, type, and options' do
           expect(Attributor::Attribute).to receive(:new).with(expected_type, expected_options)
-          dsl_compiler.attribute(attribute_name, type, attribute_options)
+          dsl_compiler.attribute(attribute_name, type, **attribute_options)
         end
       end
 
@@ -60,11 +60,11 @@ describe Attributor::DSLCompiler do
           end
 
           it 'creates an attribute with the inherited type and merged options' do
-            dsl_compiler.attribute(attribute_name, attribute_options)
+            dsl_compiler.attribute(attribute_name, **attribute_options)
           end
 
           it 'accepts explicit nil type' do
-            dsl_compiler.attribute(attribute_name, nil, attribute_options)
+            dsl_compiler.attribute(attribute_name, nil, **attribute_options)
           end
 
           context 'but with the attribute also specifying a reference' do
@@ -73,7 +73,7 @@ describe Attributor::DSLCompiler do
             let(:expected_options) { attribute_options }
             it 'attribute reference takes precedence over the compiler one (and merges no options)' do
               expect(attribute_options[:reference]).to_not eq(dsl_compiler_options[:reference])
-              dsl_compiler.attribute(attribute_name, attribute_options)
+              dsl_compiler.attribute(attribute_name, **attribute_options)
             end
           end
         end
@@ -113,12 +113,12 @@ describe Attributor::DSLCompiler do
         it 'sets the type of the attribute to Struct' do
           expect(Attributor::Attribute).to receive(:new)
             .with(expected_type, description: 'The turkey', reference: Turkey)
-          dsl_compiler.attribute(attribute_name, attribute_options, &attribute_block)
+          dsl_compiler.attribute(attribute_name, **attribute_options, &attribute_block)
         end
 
         it 'passes the correct reference to the created attribute' do
           expect(Attributor::Attribute).to receive(:new).with(expected_type, expected_options)
-          dsl_compiler.attribute(attribute_name, type, attribute_options, &attribute_block)
+          dsl_compiler.attribute(attribute_name, type, **attribute_options, &attribute_block)
         end
       end
     end

@@ -166,7 +166,7 @@ module Attributor
       return options[:values].pick if options.key? :values
 
       if type.respond_to?(:attributes)
-        type.example(context, values)
+        type.example(context, **values)
       else
         type.example(context, options: options)
       end

@@ -8,7 +8,7 @@ module Attributor
 
     def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **options)
       if value.is_a?(Enumerable)
-        raise IncompatibleTypeError, context: context, value_type: value.class, type: self
+        raise IncompatibleTypeError.new(context: context, value_type: value.class, type: self)
       end
 
       value && String(value)

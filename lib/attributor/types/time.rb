@@ -29,7 +29,7 @@ module Attributor
         begin
           return ::Time.parse(value)
         rescue ArgumentError
-          raise Attributor::DeserializationError, context: context, from: value.class, encoding: 'Time', value: value
+          raise Attributor::DeserializationError.new(context: context, from: value.class, encoding: 'Time', value: value)
         end
       else
         raise CoercionError, context: context, from: value.class, to: self, value: value

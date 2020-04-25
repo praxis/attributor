@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency 'rspec', '~> 3'
   spec.add_development_dependency 'rspec-its'
-  spec.add_development_dependency 'rspec-collection_matchers', '~> 1'
+  spec.add_development_dependency 'rspec-collection_matchers'
   spec.add_development_dependency('yard')
   spec.add_development_dependency('backports', ['~> 3'])
   spec.add_development_dependency('yardstick', ['~> 0'])
@@ -34,10 +34,10 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency('coveralls')
   spec.add_development_dependency('guard', ['~> 2'])
   spec.add_development_dependency('guard-rspec', ['~> 4'])
-  spec.add_development_dependency('pry', ['~> 0'])
+  spec.add_development_dependency('pry')
   if RUBY_PLATFORM !~ /java/
-    spec.add_development_dependency('pry-byebug', ['~> 1'])
-    spec.add_development_dependency('pry-stack_explorer', ['~> 0'])
+    spec.add_development_dependency('pry-byebug')
+    spec.add_development_dependency('pry-stack_explorer')
   end
   spec.add_development_dependency 'fuubar'
   spec.add_development_dependency 'rubocop'

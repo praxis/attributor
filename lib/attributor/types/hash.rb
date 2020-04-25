@@ -82,7 +82,7 @@ module Attributor
     def self.attributes(**options, &key_spec)
       raise @error if @error
 
-      keys(options, &key_spec)
+      keys(**options, &key_spec)
     end
 
     def self.keys(**options, &key_spec)
@@ -111,7 +111,7 @@ module Attributor
       }.merge(@options)
 
       blocks = @saved_blocks.shift(@saved_blocks.size)
-      compiler = dsl_class.new(self, opts)
+      compiler = dsl_class.new(self, **opts)
       compiler.parse(*blocks)
 
       if opts[:case_insensitive_load] == true
@@ -171,7 +171,7 @@ module Attributor
         raise Attributor::AttributorException, ":case_insensitive_load may not be used with keys of type #{key_type.name}"
       end
 
-      keys(options, &constructor_block)
+      keys(**options, &constructor_block)
       self
     end
 
@@ -221,7 +221,7 @@ module Attributor
         result = new
         result.extend(ExampleMixin)
 
-        result.lazy_attributes = example_contents(context, result, values)
+        result.lazy_attributes = example_contents(context, result, **values)
       else
         hash = ::Hash.new
 
@@ -285,7 +285,7 @@ module Attributor
       elsif value.respond_to?(:to_hash)
         value.to_hash
       else
-        raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self
+        raise Attributor::IncompatibleTypeError.new(context: context, value_type: value.class, type: self)
       end
     end
 
@@ -607,12 +607,12 @@ module Attributor
       @dumping = true
 
       contents.each_with_object({}) do |(k, v), hash|
-        k = key_attribute.dump(k, opts)
+        k = key_attribute.dump(k, **opts)
 
         v = if (attribute_for_value = self.class.keys[k])
-              attribute_for_value.dump(v, opts)
+              attribute_for_value.dump(v, **opts)
             else
-              value_attribute.dump(v, opts)
+              value_attribute.dump(v, **opts)
             end
 
         hash[k] = v

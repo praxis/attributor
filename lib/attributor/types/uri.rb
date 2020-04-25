@@ -34,7 +34,7 @@ module Attributor
       when ::String
         URI(value)
       else
-        raise CoercionError, context: context, from: value.class, to: self, value: value
+        raise CoercionError.new(context: context, from: value.class, to: self, value: value)
       end
     end
 

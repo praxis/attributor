@@ -97,7 +97,7 @@ describe Attributor::Integer do
           it "raises for the invalid range [#{min.inspect}, #{max.inspect}]" do
             opts = { options: { max: max, min: min } }
             expect do
-              type.example(nil, opts)
+              type.example(nil, **opts)
             end.to raise_error(Attributor::AttributorException, "Invalid range: [#{min.inspect}, #{max.inspect}]")
           end
         end

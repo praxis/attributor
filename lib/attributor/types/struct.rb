@@ -26,7 +26,7 @@ module Attributor
       end
 
       ::Class.new(self) do
-        attributes options, &attribute_definition
+        attributes **options, &attribute_definition
       end
     end
 

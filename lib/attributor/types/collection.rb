@@ -51,7 +51,7 @@ module Attributor
 
     def self.member_attribute
       @member_attribute ||= begin
-        construct(nil, {})
+        construct(nil)
 
         @member_attribute
       end
@@ -91,7 +91,7 @@ module Attributor
       elsif value.respond_to?(:to_a)
         loaded_value = value.to_a
       else
-        raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self
+        raise Attributor::IncompatibleTypeError.new(context: context, value_type: value.class, type: self)
       end
 
       new(loaded_value.collect { |member| member_attribute.load(member, context) })
@@ -103,7 +103,7 @@ module Attributor
 
     def self.dump(values, **opts)
       return nil if values.nil?
-      values.collect { |value| member_attribute.dump(value, opts) }
+      values.collect { |value| member_attribute.dump(value, **opts) }
     end
 
     def self.describe(shallow = false, example: nil)
@@ -121,7 +121,7 @@ module Attributor
       true
     end
 
-    def self.construct(constructor_block, options)
+    def self.construct(constructor_block, **options)
       member_options = (options[:member_options] || {}).clone
       if options.key?(:reference) && !member_options.key?(:reference)
         member_options[:reference] = options[:reference]
@@ -173,7 +173,7 @@ module Attributor
     end
 
     def dump(**opts)
-      collect { |value| self.class.member_attribute.dump(value, opts) }
+      collect { |value| self.class.member_attribute.dump(value, **opts) }
     end
   end
 end

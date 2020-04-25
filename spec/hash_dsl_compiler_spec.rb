@@ -4,7 +4,7 @@ describe Attributor::HashDSLCompiler do
   let(:target) { double('model', attributes: {}) }
 
   let(:dsl_compiler_options) { {} }
-  subject(:dsl_compiler) { Attributor::HashDSLCompiler.new(target, dsl_compiler_options) }
+  subject(:dsl_compiler) { Attributor::HashDSLCompiler.new(target, **dsl_compiler_options) }
 
   it 'returns the requirements DSL attached to the right target' do
     req_dsl = dsl_compiler._requirements_dsl
@@ -103,7 +103,7 @@ describe Attributor::HashDSLCompiler do
     end
 
     context 'Requirement#validate' do
-      let(:requirement) { req_class.new(arguments) }
+      let(:requirement) { req_class.new(**arguments) }
       let(:subject) { requirement.validate(value, ['$'], nil) }
 
       context 'for :all' do

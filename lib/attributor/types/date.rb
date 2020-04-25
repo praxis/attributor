@@ -21,10 +21,10 @@ module Attributor
         begin
           return ::Date.parse(value)
         rescue ArgumentError
-          raise Attributor::DeserializationError, context: context, from: value.class, encoding: 'Date', value: value
+          raise Attributor::DeserializationError.new(context: context, from: value.class, encoding: 'Date', value: value)
         end
       else
-        raise CoercionError, context: context, from: value.class, to: self, value: value
+        raise CoercionError.new(context: context, from: value.class, to: self, value: value)
       end
     end
   end
