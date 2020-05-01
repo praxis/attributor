@@ -73,6 +73,20 @@ module Attributor
     inspection
   end
 
+  def self.recursive_to_h(val)
+    if val.is_a? Array
+      val.map { |v| recursive_to_h(v) }
+    elsif val.nil?
+      nil
+    elsif val.respond_to?(:to_h)
+      val.to_h.each_with_object({}) do |(name, inner_val), hash|
+        hash[name] = recursive_to_h(inner_val)
+      end
+    else
+      val
+    end
+  end  
+
   MODULE_PREFIX       = 'Attributor::'.freeze
   MODULE_PREFIX_REGEX = ::Regexp.new(MODULE_PREFIX)
 

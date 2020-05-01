@@ -282,7 +282,9 @@ module Attributor
         value
       elsif value.is_a?(::String)
         decode_json(value, context)
-      elsif value.respond_to?(:to_hash)
+      elsif value.respond_to?(:to_h)
+        value.to_h
+      elsif value.respond_to?(:to_hash) # Deprecate this in lieu of to_h only?
         value.to_hash
       else
         raise Attributor::IncompatibleTypeError.new(context: context, value_type: value.class, type: self)
@@ -299,6 +301,10 @@ module Attributor
 
     def self.generate_subcontext(context, key_name)
       context + ["key(#{key_name.inspect})"]
+    end
+
+    def to_h
+      Attributor.recursive_to_h(@contents)
     end
 
     def generate_subcontext(context, key_name)
