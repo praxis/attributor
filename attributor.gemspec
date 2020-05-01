@@ -27,7 +27,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec-its'
   spec.add_development_dependency 'rspec-collection_matchers'
   spec.add_development_dependency('yard')
-  spec.add_development_dependency('backports', ['~> 3'])
   spec.add_development_dependency('yardstick', ['~> 0'])
   spec.add_development_dependency('bundler', ['>= 0'])
   spec.add_development_dependency('rake-notes', ['~> 0'])

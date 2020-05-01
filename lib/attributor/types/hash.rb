@@ -262,11 +262,11 @@ module Attributor
     end
 
     def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, recurse: false, **_options)
-      context = Array(context)
 
       return value if value.is_a?(self)
       return nil if value.nil? && !recurse
 
+      context = Array(context)
       loaded_value = self.parse(value, context)
 
       return from_hash(loaded_value, context, recurse: recurse) if keys.any?
@@ -282,7 +282,9 @@ module Attributor
         value
       elsif value.is_a?(::String)
         decode_json(value, context)
-      elsif value.respond_to?(:to_hash)
+      elsif value.respond_to?(:to_h)
+        value.to_h
+      elsif value.respond_to?(:to_hash) # Deprecate this in lieu of to_h only?
         value.to_hash
       else
         raise Attributor::IncompatibleTypeError.new(context: context, value_type: value.class, type: self)
@@ -299,6 +301,10 @@ module Attributor
 
     def self.generate_subcontext(context, key_name)
       context + ["key(#{key_name.inspect})"]
+    end
+
+    def to_h
+      Attributor.recursive_to_h(@contents)
     end
 
     def generate_subcontext(context, key_name)
@@ -548,6 +554,7 @@ module Attributor
     end
 
     def validate(context = Attributor::DEFAULT_ROOT_CONTEXT)
+      @validating = true
       context = [context] if context.is_a? ::String
 
       if self.class.keys.any?
@@ -555,6 +562,8 @@ module Attributor
       else
         self.validate_generic(context)
       end
+    ensure
+      @validating = false      
     end
 
     def validate_keys(context)

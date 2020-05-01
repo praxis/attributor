@@ -1,5 +1,4 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper.rb')
-require 'backports'
 
 describe Attributor::Class do
   subject(:type) { Attributor::Class }

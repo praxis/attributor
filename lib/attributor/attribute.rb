@@ -158,7 +158,8 @@ module Attributor
 
       if options.key? :example
         loaded = example_from_options(parent, context)
-        errors = validate(loaded, context)
+        # Only validate the type, if the proc-generated example is "complex" (has attributes)
+        errors = loaded.class.respond_to?(:attributes) ? validate_type(loaded, context) : validate(loaded, context)
         raise AttributorException, "Error generating example for #{Attributor.humanize_context(context)}. Errors: #{errors.inspect}" if errors.any?
         return loaded
       end

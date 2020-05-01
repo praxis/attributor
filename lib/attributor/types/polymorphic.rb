@@ -95,7 +95,9 @@ module Attributor
         value
       elsif value.is_a?(::String)
         decode_json(value, context)
-      elsif value.respond_to?(:to_hash)
+      elsif value.respond_to?(:to_h)
+        value.to_h
+      elsif value.respond_to?(:to_hash) # Deprecate this in lieu of to_h only?
         value.to_hash
       else
         raise Attributor::IncompatibleTypeError, context: context, value_type: value.class, type: self
