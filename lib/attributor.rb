@@ -2,7 +2,7 @@ require 'json'
 require 'randexp'
 
 require 'hashie'
-require 'active_support'
+require 'active_support/concern'
 require 'digest/sha1'
 
 module Attributor
