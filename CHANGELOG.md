@@ -2,6 +2,10 @@
 
 ## next
 
+## 5.5 (21/08/2020)
+
+- JSON-schema support. Enhanced all of the types to suppport describing themselves as JSON-schema format (`.as_json_schema`). This description includes a few `x-*` extensions to capture some information that Attributor supports, that JSON-schema does not.
+
 ## 5.3 (24/04/2020)
 
 - Fixed deprecation warnings in Ruby 2.7
