@@ -2,9 +2,7 @@ module Attributor
   # It is the abstract base class to hold an attribute, both a leaf and a container (hash/Array...)
   # TODO: should this be a mixin since it is an abstract class?
   module Type
-    def self.included(klass)
-      klass.extend(ClassMethods)
-    end
+    extend ActiveSupport::Concern
 
     module ClassMethods
       # Does this type support the generation of subtypes?
@@ -124,6 +122,31 @@ module Attributor
       def family
         'any'
       end
+
+      # Default no format in case it's a string type
+      def json_schema_string_format
+        nil
+      end
+  
+      def as_json_schema( shallow: false, example: nil, attribute_options: {} )
+        type_name = self.ancestors.find { |k| k.name && !k.name.empty? }.name
+        hash = { type: json_schema_type, 'x-type_name': type_name.gsub( Attributor::MODULE_PREFIX_REGEX, '' )}
+        # Add a format, if the type has defined
+        if hash[:type] == :string && the_format = json_schema_string_format
+          hash[:format] = the_format
+        end
+        hash
+      end
+
+      def describe_option( option_name, option_value )
+        return case option_name
+        when :description
+          option_value
+        else
+          option_value  # By default, describing an option returns the hash with the specification
+        end
+      end
+
     end
   end
 end

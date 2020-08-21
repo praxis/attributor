@@ -19,5 +19,10 @@ module Attributor
     def self.family
       String.family
     end
+
+    def self.json_schema_type
+      :string
+    end
+
   end
 end

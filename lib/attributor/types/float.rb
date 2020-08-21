@@ -2,8 +2,9 @@
 # See: http://ruby-doc.org/core-2.1.0/Float.html
 
 module Attributor
+
   class Float
-    include Type
+    include Numeric
 
     def self.native_type
       ::Float
@@ -22,8 +23,8 @@ module Attributor
       super
     end
 
-    def self.family
-      'numeric'
+    def self.json_schema_type
+      :number
     end
   end
 end

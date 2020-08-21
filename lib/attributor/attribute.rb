@@ -93,12 +93,12 @@ module Attributor
 
     TOP_LEVEL_OPTIONS = [:description, :values, :default, :example, :required, :required_if, :custom_data].freeze
     INTERNAL_OPTIONS = [:dsl_compiler, :dsl_compiler_options].freeze # Options we don't want to expose when describing attributes
-
-    def describe(shallow = true, example: nil)
-      description = {}
+    JSON_SCHEMA_UNSUPPORTED_OPTIONS = [ :required, :required_if ].freeze
+    def describe(shallow=true, example: nil)
+      description = { }
       # Clone the common options
       TOP_LEVEL_OPTIONS.each do |option_name|
-        description[option_name] = options[option_name] if options.key? option_name
+        description[option_name] = self.describe_option(option_name) if self.options.has_key? option_name
       end
 
       # Make sure this option definition is not mistaken for the real generated example
@@ -109,7 +109,7 @@ module Attributor
       special_options = options.keys - TOP_LEVEL_OPTIONS - INTERNAL_OPTIONS
       description[:options] = {} unless special_options.empty?
       special_options.each do |opt_name|
-        description[:options][opt_name] = options[opt_name]
+        description[:options][opt_name] = self.describe_option(opt_name)
       end
       # Change the reference option to the actual class name.
       if (reference = options[:reference])
@@ -146,8 +146,37 @@ module Attributor
       load(generated, context)
     end
 
-    def example(context = nil, parent: nil, values: {})
-      raise ArgumentError, 'attribute example cannot take a context of type String' if context.is_a? ::String
+    def describe_option( option_name )
+      self.type.describe_option( option_name, self.options[option_name] )
+    end
+
+    # FiXME: pass and utilize the "shallow" parameter
+    #required
+    #options
+    #type
+    #example
+    # UTILIZE THIS SITE! http://jsonschema.net/#/
+    def as_json_schema(shallow: true, example: nil)
+      description = self.type.as_json_schema(shallow: shallow, example: example, attribute_options: self.options )
+
+      description[:description] = self.options[:description] if self.options[:description]
+      description[:enum] = self.options[:values] if self.options[:values]
+      description[:default] = self.options[:default] if self.options[:default]
+      #TODO      description[:title] = "TODO: do we want to use a title??..."
+
+      # Change the reference option to the actual class name.
+      if ( reference = self.options[:reference] )
+        description[:'x-reference'] = reference.name
+      end
+
+      # TODO: not sure if that's correct (we used to get it from the described hash...
+      description[:example] = self.dump(example) if example
+
+      description
+    end
+
+    def example(context=nil, parent: nil, values:{})
+      raise ArgumentError, "attribute example cannot take a context of type String" if (context.is_a? ::String )
       if context
         ctx = Attributor.humanize_context(context)
         seed, = Digest::SHA1.digest(ctx).unpack('QQ')

@@ -1,7 +1,8 @@
 require 'bigdecimal'
 
 module Attributor
-  class BigDecimal < Numeric
+  class BigDecimal 
+    include Numeric
     def self.native_type
       ::BigDecimal
     end
@@ -15,6 +16,10 @@ module Attributor
       return value if value.is_a?(native_type)
       return BigDecimal(value, 10) if value.is_a?(::Float)
       BigDecimal(value)
+    end
+
+    def self.json_schema_type
+      :number
     end
   end
 end

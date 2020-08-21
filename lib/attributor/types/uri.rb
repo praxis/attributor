@@ -22,6 +22,14 @@ module Attributor
       ::URI::Generic
     end
 
+    def self.json_schema_type
+      :string
+    end
+
+    def self.json_schema_string_format
+      :uri
+    end
+
     def self.example(_context = nil, options: {})
       URI(Randgen.uri)
     end

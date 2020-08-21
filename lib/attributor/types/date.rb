@@ -1,7 +1,9 @@
 require 'date'
 
 module Attributor
-  class Date < Temporal
+  class Date
+    include Temporal
+
     def self.native_type
       ::Date
     end
@@ -26,6 +28,10 @@ module Attributor
       else
         raise CoercionError.new(context: context, from: value.class, to: self, value: value)
       end
+    end
+
+    def self.json_schema_string_format
+      :date
     end
   end
 end

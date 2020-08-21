@@ -437,11 +437,11 @@ module Attributor
 
       if keys.any?
         # Spit keys if it's the root or if it's an anonymous structures
-        if !shallow || name.nil?
-          required_names = []
+        if ( !shallow || self.name == nil)
+          required_names_from_attr = []
           # FIXME: change to :keys when the praxis doc browser supports displaying those
-          hash[:attributes] = keys.each_with_object({}) do |(sub_name, sub_attribute), sub_attributes|
-            required_names << sub_name if sub_attribute.options[:required] == true
+          hash[:attributes] = self.keys.each_with_object({}) do |(sub_name, sub_attribute), sub_attributes|
+            required_names_from_attr << sub_name if sub_attribute.options[:required] == true
             sub_example = example.get(sub_name) if example
             sub_attributes[sub_name] = sub_attribute.describe(true, example: sub_example)
           end
@@ -449,14 +449,14 @@ module Attributor
             described_req = req.describe(shallow)
             if described_req[:type] == :all
               # Add the names of the attributes that have the required flag too
-              described_req[:attributes] |= required_names
-              required_names = []
+              described_req[:attributes] |= required_names_from_attr
+              required_names_from_attr = []
             end
             list << described_req
           end
           # Make sure we create an :all requirement, if there wasn't one so we can add the required: true attributes
-          unless required_names.empty?
-            hash[:requirements] << { type: :all, attributes: required_names }
+          unless required_names_from_attr.empty?
+            hash[:requirements] << {type: :all, attributes: required_names_from_attr }
           end
         end
       else
@@ -465,6 +465,61 @@ module Attributor
       end
 
       hash
+    end
+
+    def self.as_json_schema( shallow: false, example: nil, attribute_options: {} )
+      hash = super
+      opts = self.options.merge( attribute_options )
+
+      if key_type
+        hash[:'x-key_type'] = key_type.as_json_schema
+      end
+
+      if self.keys.any?
+        # Spit keys if it's the root or if it's an anonymous structures
+        if ( !shallow || self.name == nil)
+          required_names_from_attr = []
+          # FIXME: change to :keys when the praxis doc browser supports displaying those
+          hash[:properties] = self.keys.each_with_object({}) do |(sub_name, sub_attribute), sub_attributes|
+            required_names_from_attr << sub_name if sub_attribute.options[:required] == true
+            sub_example = example.get(sub_name) if example
+            sub_attributes[sub_name] = sub_attribute.as_json_schema(shallow: true, example: sub_example)
+          end
+
+          # Expose the more complex requirements to in the x-tended attribute
+          extended_requirements = self.requirements.each_with_object([]) do |req, list|
+            described_req = req.describe(shallow)
+            if described_req[:type] == :all
+              # Add the names of the attributes that have the required flag too
+              described_req[:attributes] |= required_names_from_attr
+              required_names_from_attr = []
+            end
+            list << described_req
+          end
+          all = extended_requirements.find{|r| r[:type] == :all }
+          if ( all && !all[:attributes].empty? )
+            hash[:required] = all[:attributes]
+          end
+          hash[:'x-requirements'] = extended_requirements unless extended_requirements.empty?
+        end
+      else
+        hash[:'x-value_type'] = value_type.as_json_schema(shallow:true)
+      end
+
+      if opts[:allow_extra]
+        hash[:additionalProperties] = if value_type == Attributor::Object
+          true
+        else
+          value_type.as_json_schema(shallow: true)
+        end
+      end
+      # TODO: minProperties and maxProperties and patternProperties
+      # TODO: map our required_if (and possible our above requirements 'at_least...' to json schema dependencies)
+      hash
+    end
+
+    def self.json_schema_type
+      :object
     end
 
     # TODO: Think about the format of the subcontexts to use: let's use .at(key.to_s)

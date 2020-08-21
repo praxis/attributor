@@ -109,4 +109,13 @@ describe Attributor::URI do
       end
     end
   end
+  context '.as_json_schema' do
+    subject(:js){ type.as_json_schema }
+    it 'adds the right attributes' do
+      expect(js.keys).to include(:type, :'x-type_name')
+      expect(js[:type]).to eq(:string)
+      expect(js[:format]).to eq(:uri)
+      expect(js[:'x-type_name']).to eq('URI')
+    end
+  end  
 end

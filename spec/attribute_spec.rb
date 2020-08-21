@@ -36,17 +36,48 @@ describe Attributor::Attribute do
     it { should eq other_attribute }
   end
 
+  context 'describe_json_schema' do
+    let(:type) { PositiveIntegerType }
+
+    let(:attribute_options) do
+      {
+        values: [1,20],
+        description: "something",
+        example: 20,
+        max: 1000,
+        default: 1
+      }
+    end
+
+    context 'reports all of the possible attributes' do
+      let(:js){ subject.as_json_schema(example: 20) }
+
+      it 'including the attribute-specific ones' do
+        expect(js[:enum]).to eq( [1,20])
+        expect(js[:description]).to eq( "something")
+        expect(js[:default]).to eq(1)
+        expect(js[:example]).to eq(20)
+      end
+
+      it 'as well as the type-specific ones' do
+        expect(js[:type]).to eq(:integer)
+      end
+    end
+
+  end
+
   context 'describe' do
-    let(:attribute_options) { { required: true, values: ['one'], description: 'something', min: 0 } }
+    let(:attribute_options) { {required: true, values: ['one'], description: "something", min: 0} }
     let(:expected) do
-      h = { type: { name: 'String', id: type.id, family: type.family } }
-      common = attribute_options.select { |k, _v| Attributor::Attribute::TOP_LEVEL_OPTIONS.include? k }
-      h.merge!(common)
-      h[:options] = { min: 0 }
+      h = {type: {name: 'String', id: type.id, family: type.family}}
+      common = attribute_options.select{|k,v| Attributor::Attribute::TOP_LEVEL_OPTIONS.include? k }
+      h.merge!( common )
+      h[:options] = {:min => 0 }
       h
     end
 
-    its(:describe) { should eq expected }
+    # It has both the type-included options (min) as well as the attribute options (max)
+    its(:describe) { should == expected }
 
     context 'with example options' do
       let(:attribute_options) { { description: 'something', example: 'ex_def' } }
