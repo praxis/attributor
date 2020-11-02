@@ -2,6 +2,10 @@
 
 ## next
 
+## 5.6 (11/02/2020)
+
+- Small fixes for dumping JSON-schema default values if they're Proc's or dumpable objects
+
 ## 5.5 (21/08/2020)
 
 - JSON-schema support. Enhanced all of the types to suppport describing themselves as JSON-schema format (`.as_json_schema`). This description includes a few `x-*` extensions to capture some information that Attributor supports, that JSON-schema does not.

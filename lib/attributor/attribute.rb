@@ -163,7 +163,7 @@ module Attributor
       description[:enum] = self.options[:values] if self.options[:values]
       if the_default = self.options[:default]
         the_object = the_default.is_a?(Proc) ? the_default.call : the_default
-        description[:default] = the_object.respond_to?(:dump) ? the_object.dump : the_object
+        description[:default] = the_object.is_a?(Attributor::Dumpable) ? the_object.dump : the_object
       end
       #TODO      description[:title] = "TODO: do we want to use a title??..."
 
