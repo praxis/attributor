@@ -125,7 +125,10 @@ module Attributor
       hash = super
       opts = self.options.merge( attribute_options )
       hash[:description] = opts[:description] if opts[:description]
-      hash[:default] = opts[:default] if opts[:default]
+      if the_default = opts[:default]
+        the_object = the_default.is_a?(Proc) ? the_default.call : the_default
+        hash[:description] = the_object.respond_to?(:dump) ? the_object.dump : the_object
+      end
 
       #hash[:examples] = [ example.dump ] if example
       member_example = example && example.first

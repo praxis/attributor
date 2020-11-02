@@ -161,7 +161,10 @@ module Attributor
 
       description[:description] = self.options[:description] if self.options[:description]
       description[:enum] = self.options[:values] if self.options[:values]
-      description[:default] = self.options[:default] if self.options[:default]
+      if the_default = self.options[:default]
+        the_object = the_default.is_a?(Proc) ? the_default.call : the_default
+        description[:default] = the_object.respond_to?(:dump) ? the_object.dump : the_object
+      end
       #TODO      description[:title] = "TODO: do we want to use a title??..."
 
       # Change the reference option to the actual class name.
