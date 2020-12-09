@@ -62,6 +62,7 @@ describe Attributor::Attribute do
       it 'as well as the type-specific ones' do
         expect(js[:type]).to eq(:integer)
       end
+
     end
 
   end
@@ -192,6 +193,49 @@ describe Attributor::Attribute do
         expect do
           Attributor::Attribute.new(Integer, custom_data: { loggable: true })
         end.not_to raise_error
+      end
+    end
+
+    context 'custom_options' do
+      let(:option_name) { :foo }
+      let(:custom_option_args) { [option_name, String] }
+
+      around do |example|
+        Attributor::Attribute.custom_option *custom_option_args
+        example.run
+        Attributor::Attribute.custom_options.delete option_name
+      end
+
+      it 'raises ArgumentError if given an existing option' do
+        expect {
+          Attributor::Attribute.custom_option :default, Object
+        }.to raise_error(ArgumentError)
+      end
+
+      it 'accepts custom options' do
+        expect do
+          Attributor::Attribute.new(Integer, foo: 'unvalidated')
+        end.not_to raise_error
+      end
+
+      context 'can validate the custom option value' do 
+        let(:custom_option_args) { [option_name, String, values: ['valid']] }
+        it 'does not raise with a valid option value' do
+          expect do
+            Attributor::Attribute.new(Integer, foo: 'valid')
+          end.not_to raise_error
+        end
+        it 'raises with an invalid option value' do
+          expect do
+            Attributor::Attribute.new(Integer, foo: 'invalid')
+          end.to raise_error(Attributor::AttributorException)
+        end
+      end
+
+      it 'appear in as_json_schema' do
+        attribute = Attributor::Attribute.new(Integer, foo: 'valid')
+        json_schema = attribute.as_json_schema
+        expect(json_schema[:'x-foo']).to eq 'valid'
       end
     end
   end

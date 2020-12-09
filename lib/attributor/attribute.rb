@@ -17,10 +17,24 @@ module Attributor
       FakeParent
     end
   end
+
   # It is the abstract base class to hold an attribute, both a leaf and a container (hash/Array...)
   # TODO: should this be a mixin since it is an abstract class?
   class Attribute
     attr_reader :type, :options
+
+    @custom_options = {}
+
+    class << self
+      attr_accessor :custom_options
+    end    
+
+    def self.custom_option(name, attr_type, options = {}, &block)
+      if TOP_LEVEL_OPTIONS.include?(name) || INTERNAL_OPTIONS.include?(name)
+        raise ArgumentError, "can not define custom_option with name #{name.inspect}, it is reserved by Attributor"
+      end
+      self.custom_options[name] = Attributor::Attribute.new(attr_type, options, &block)
+    end
 
     # @options: metadata about the attribute
     # @block: code definition for struct attributes (nil for predefined types or leaf/simple types)
@@ -175,6 +189,11 @@ module Attributor
       # TODO: not sure if that's correct (we used to get it from the described hash...
       description[:example] = self.dump(example) if example
 
+      # add custom options as x-optionname
+      self.class.custom_options.each do |name, _|
+        description["x-#{name}".to_sym] = self.options[name] if self.options.key?(name)
+      end
+
       description
     end
 
@@ -296,6 +315,8 @@ module Attributor
 
     # TODO: override in type subclass
     def check_option!(name, definition)
+      return check_custom_option(name, definition) if self.class.custom_options.include? name
+
       case name
       when :values
         raise AttributorException, "Allowed set of values requires an array. Got (#{definition})" unless definition.is_a? ::Array
@@ -321,6 +342,15 @@ module Attributor
       end
 
       :ok # passes
+    end
+
+    def check_custom_option(name, definition) 
+      attribute = self.class.custom_options.fetch(name) 
+
+      errors = attribute.validate(definition)
+      raise AttributorException, "Custom option #{name.inspect} is invalid: #{errors.inspect}" if errors.any?
+
+      :ok
     end
   end
 end
