@@ -1,6 +1,6 @@
 # Attributor Changelog
 
-## next
+## 5.7 (1/7/2021)
 
 - added `custom_option` to Attributor::Attribute class, accepting a name and Attribute arguments that will be used to validate the option value(s) provided.
 
