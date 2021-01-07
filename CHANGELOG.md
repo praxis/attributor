@@ -2,6 +2,8 @@
 
 ## next
 
+- added `custom_option` to Attributor::Attribute class, accepting a name and Attribute arguments that will be used to validate the option value(s) provided.
+
 ## 5.6 (11/02/2020)
 
 - Small fixes for dumping JSON-schema default values if they're Proc's or dumpable objects
