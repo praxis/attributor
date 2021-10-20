@@ -514,7 +514,6 @@ module Attributor
         end
       end
       # TODO: minProperties and maxProperties and patternProperties
-      # TODO: map our required_if (and possible our above requirements 'at_least...' to json schema dependencies)
       hash
     end
 
@@ -630,22 +629,33 @@ module Attributor
       end
 
       errors = []
-      keys_with_values = []
+      keys_provided = []
 
       self.class.keys.each do |key, attribute|
         sub_context = self.class.generate_subcontext(context, key)
 
         value = @contents[key]
-        keys_with_values << key unless value.nil?
+        keys_provided << key if @contents.key?(key)
 
         if value.respond_to?(:validating) # really, it's a thing with sub-attributes
           next if value.validating
         end
-
-        errors.concat attribute.validate(value, sub_context)
+        # Isn't this handled by the requirements validation? NO! we might want to combine
+        if attribute.options[:required] && !@contents.key?(key)
+          errors.concat ["Attribute #{Attributor.humanize_context(sub_context)} is required."]
+        end
+        if @contents[key].nil?
+          if attribute.options[:null] == false && @contents.key?(key)
+            errors.concat ["Attribute #{Attributor.humanize_context(sub_context)} is not nullable."]
+          end
+          # No need to validate the attribute further if the key wasn't passed...(or we would get nullable errors etc..cause the attribute has no
+          # context if its containing key was even passed (and there might not be a containing key for a top level attribute anyways))
+        else
+          errors.concat attribute.validate(value, sub_context)
+        end
       end
       self.class.requirements.each do |requirement|
-        validation_errors = requirement.validate(keys_with_values, context)
+        validation_errors = requirement.validate(keys_provided, context)
         errors.concat(validation_errors) unless validation_errors.empty?
       end
       errors

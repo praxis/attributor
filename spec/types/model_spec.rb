@@ -371,7 +371,7 @@ describe Attributor::Model do
     context 'for models using the "requires" DSL' do
       subject(:address) { Address.load({state: 'CA'}) }
       its(:validate) { should_not be_empty }
-      its(:validate) { should include 'Key name is required for $.' }
+      its(:validate) { should include 'Attribute $.key(:name) is required.' }
     end
     context 'for models with circular sub-attributes' do
       context 'that are valid' do
