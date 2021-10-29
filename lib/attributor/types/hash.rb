@@ -441,7 +441,7 @@ module Attributor
           required_names_from_attr = []
           # FIXME: change to :keys when the praxis doc browser supports displaying those
           hash[:attributes] = self.keys.each_with_object({}) do |(sub_name, sub_attribute), sub_attributes|
-            required_names_from_attr << sub_name if sub_attribute.options[:required] == true
+            required_names_from_attr << sub_name if sub_attribute.options[:present] == true
             sub_example = example.get(sub_name) if example
             sub_attributes[sub_name] = sub_attribute.describe(true, example: sub_example)
           end
@@ -481,7 +481,7 @@ module Attributor
           required_names_from_attr = []
           # FIXME: change to :keys when the praxis doc browser supports displaying those
           hash[:properties] = self.keys.each_with_object({}) do |(sub_name, sub_attribute), sub_attributes|
-            required_names_from_attr << sub_name if sub_attribute.options[:required] == true
+            required_names_from_attr << sub_name if sub_attribute.options[:present] == true
             sub_example = example.get(sub_name) if example
             sub_attributes[sub_name] = sub_attribute.as_json_schema(shallow: true, example: sub_example)
           end
@@ -641,7 +641,7 @@ module Attributor
           next if value.validating
         end
         # Isn't this handled by the requirements validation? NO! we might want to combine
-        if attribute.options[:required] && !@contents.key?(key)
+        if attribute.options[:present] && !@contents.key?(key)
           errors.concat ["Attribute #{Attributor.humanize_context(sub_context)} is required."]
         end
         if @contents[key].nil?

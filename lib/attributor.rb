@@ -22,7 +22,8 @@ module Attributor
 
   # hierarchical separator string for composing human readable attributes
   SEPARATOR = '.'.freeze
-  DEFAULT_ROOT_CONTEXT = ['$'].freeze
+  ROOT_PREFIX = '$'.freeze
+  DEFAULT_ROOT_CONTEXT = [ROOT_PREFIX].freeze
 
   # @param type [Class] The class of the type to resolve
   #

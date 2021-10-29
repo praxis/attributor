@@ -534,10 +534,10 @@ describe Attributor::Hash do
     context 'for a hash with defined keys' do
       let(:block) do
         proc do
-          key 'integer', Integer, null: false
+          key 'integer', Integer, null: false # non-nullable, but not required
           key 'datetime', DateTime
-          key 'not-optional', String, required: true
-          key 'required-but-nullable', String, required: true, null: true
+          key 'not-optional', String, required: true # Means: present: true, null: false
+          key 'required-but-nullable', String, present: true, null: true
         end
       end
 
@@ -818,7 +818,7 @@ describe Attributor::Hash do
       context 'merging requires.all with attribute required: true' do
         let(:block) do
           proc do
-            key 'required string', String, required: true
+            key 'required string', String, present: true
             key '1', Integer
             key 'some_date', DateTime
             requires do
@@ -826,7 +826,7 @@ describe Attributor::Hash do
             end
           end
         end
-        it 'includes attributes with required: true into the :all requirements' do
+        it 'includes attributes with present: true into the :all requirements' do
           req_all = description[:requirements].select { |r| r[:type] == :all }.first
           expect(req_all[:attributes]).to include('required string', 'some_date')
         end
@@ -835,11 +835,11 @@ describe Attributor::Hash do
       context 'creates the :all requirement when any attribute has required: true' do
         let(:block) do
           proc do
-            key 'required string', String, required: true
-            key 'required integer', Integer, required: true
+            key 'required string', String, required: true # alias for present: true and null: false
+            key 'required integer', Integer, present: true
           end
         end
-        it 'includes attributes with required: true into the :all requirements' do
+        it 'includes attributes with present: true into the :all requirements' do
           req_all = description[:requirements].select { |r| r[:type] == :all }.first
           expect(req_all).not_to be(nil)
           expect(req_all[:attributes]).to include('required string', 'required integer')
@@ -1289,7 +1289,7 @@ describe Attributor::Hash do
             end
           end
         end
-        it 'includes attributes with required: true into :required' do
+        it 'includes attributes with present: true into :required' do
           expect(description[:required].size).to eq(2)
           expect(description[:required]).to include( 'required string','some_date' )
         end

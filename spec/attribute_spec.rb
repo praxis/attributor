@@ -71,8 +71,8 @@ describe Attributor::Attribute do
     let(:attribute_options) { {required: true, values: ['one'], description: "something", min: 0} }
     let(:expected) do
       h = {type: {name: 'String', id: type.id, family: type.family}}
-      common = attribute_options.select{|k,v| Attributor::Attribute::TOP_LEVEL_OPTIONS.include? k }
-      h.merge!( common )
+      common = attribute_options.slice(:description, :values).merge(present: true, null: false)
+      h.merge!(common)
       h[:options] = {:min => 0 }
       h
     end
@@ -458,6 +458,16 @@ describe Attributor::Attribute do
         context 'applying attribute options' do
           context ':required' do
             let(:attribute_options) { { required: true } }
+            context 'is an alias for' do
+              let(:value) { nil }
+              it 'present and not null' do
+                expect(attribute.options).to include( present: true, null: false)
+                expect(attribute.options.keys).to_not include(:required)
+              end
+            end
+          end
+          context ':present' do
+            let(:attribute_options) { { present: true } }
             context 'has no effect on a bare attribute' do
               let(:value) { nil }
               it 'it does not error, as we do not know if the parent attribute key was passed in (done at the Hash level)' do
@@ -525,61 +535,6 @@ describe Attributor::Attribute do
           end
         end
       end
-
-      # context '#validate_missing_value' do
-      #   let(:value) { /\w+/.gen }
-
-      #   let(:attribute_options) { { required: true } }
-
-      #   let(:ssh_key) { double('ssh_key', name: value) }
-      #   let(:instance) { double('instance', ssh_key: ssh_key) }
-
-      #   let(:attribute_context) { ['$', 'params', 'key_material'] }
-      #   subject(:errors) { attribute.validate_missing_value(attribute_context) }
-
-      #   it 'works' do
-      #     require 'pry'
-      #     binding.pry
-      #     subject
-      #     puts "asdf"
-      #   end
-      #   context 'for a simple dependency without a predicate' do
-      #     context 'that is satisfied' do
-      #       it { should_not be_empty }
-      #     end
-
-      #     context 'that is missing' do
-      #       let(:value) { nil }
-      #       it { should be_empty }
-      #     end
-      #   end
-
-      #   # context 'with a dependency that has a predicate' do
-      #   #   let(:value) { 'default_ssh_key_name' }
-      #   #   # subject(:errors) { attribute.validate_missing_value('') }
-
-      #   #   context 'where the target attribute exists, and matches the predicate' do
-      #   #     let(:attribute_options) { { required_if: { key => /default/ } } }
-
-      #   #     it { should_not be_empty }
-
-      #   #     its(:first) { should match(/Attribute #{Regexp.quote(Attributor.humanize_context(attribute_context))} is required when #{Regexp.quote(key)} matches/) }
-      #   #   end
-
-      #   #   context 'where the target attribute exists, but does not match the predicate' do
-      #   #     let(:attribute_options) { { required_if: { key => /other/ } } }
-
-      #   #     it { should be_empty }
-      #   #   end
-
-      #   #   context 'where the target attribute does not exist' do
-      #   #     let(:attribute_options) { { required_if: { key => /default/ } } }
-      #   #     let(:ssh_key) { double('ssh_key', name: nil) }
-
-      #   #     it { should be_empty }
-      #   #   end
-      #   # end
-      # end
     end
 
     context 'for an attribute for a subclass of Model' do
@@ -648,67 +603,6 @@ describe Attributor::Attribute do
           end
         end
       end
-
-      # context '#validate_missing_value' do
-      #   let(:type) { Duck }
-      #   let(:attribute_name) { nil }
-      #   let(:attribute) { Duck.attributes[attribute_name] }
-
-      #   let(:attribute_context) { ['$', 'duck', attribute_name.to_s] }
-      #   subject(:errors) { attribute.validate_missing_value(attribute_context) }
-
-      #   context 'for a dependency with no predicate' do
-      #     let(:attribute_name) { :email }
-
-      #     let(:duck) do
-      #       d = Duck.new
-      #       d.age = 1
-      #       d.name = 'Donald'
-      #       d
-      #     end
-
-      #     context 'where the target attribute exists, and matches the predicate' do
-      #       it { should_not be_empty }
-      #       its(:first) { should eq 'Attribute $.duck.email is required when name (for $.duck) is present.' }
-      #     end
-      #     context 'where the target attribute does not exist' do
-      #       before do
-      #         duck.name = nil
-      #       end
-      #       it { should be_empty }
-      #     end
-      #   end
-
-      #   context 'for a dependency with a predicate' do
-      #     let(:attribute_name) { :age }
-
-      #     let(:duck) do
-      #       d = Duck.new
-      #       d.name = 'Daffy'
-      #       d.email = 'daffy@darkwing.uoregon.edu' # he's a duck,get it?
-      #       d
-      #     end
-
-      #     context 'where the target attribute exists, and matches the predicate' do
-      #       it { should_not be_empty }
-      #       its(:first) { should match(/Attribute #{Regexp.quote('$.duck.age')} is required when name #{Regexp.quote('(for $.duck)')} matches/) }
-      #     end
-
-      #     context 'where the target attribute exists, and does not match the predicate' do
-      #       before do
-      #         duck.name = 'Donald'
-      #       end
-      #       it { should be_empty }
-      #     end
-
-      #     context 'where the target attribute does not exist' do
-      #       before do
-      #         duck.name = nil
-      #       end
-      #       it { should be_empty }
-      #     end
-      #   end
-      # end
     end
   end
 
@@ -760,7 +654,7 @@ describe Attributor::Attribute do
         its(:attributes) { should have_key :angry }
         it 'inherited the type and options from the reference' do
           expect(member_attribute.attributes[:angry].type).to be(Chicken.attributes[:angry].type)
-          expect(member_attribute.attributes[:angry].options).to eq(Chicken.attributes[:angry].options.merge(required: true))
+          expect(member_attribute.attributes[:angry].options).to eq(Chicken.attributes[:angry].options.merge(present: true, null: false))
         end
       end
     end
