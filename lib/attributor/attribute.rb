@@ -239,18 +239,18 @@ module Attributor
       raise "INVALID CONTEXT!! #{context}" unless context
       # Validate any requirements, absolute or conditional, and return.
 
-      errors = \
-        if object.nil? && options[:null] == false
-            ["Attribute #{Attributor.humanize_context(context)} is not nullable"]
-        else
-          validate_type(object, context)
+      errors = []
+      if object.nil? && options[:null] == false
+        errors << "Attribute #{Attributor.humanize_context(context)} is not nullable"
+      else
+        errors.push *validate_type(object, context)
+
+        if options[:values] && !options[:values].include?(object)
+          errors << "Attribute #{Attributor.humanize_context(context)}: #{Attributor.errorize_value(object)} is not within the allowed values=#{options[:values].inspect} "
         end
+      end
 
       return errors if errors.any?
-
-      if options[:values] && !options[:values].include?(object)
-        errors << "Attribute #{Attributor.humanize_context(context)}: #{Attributor.errorize_value(object)} is not within the allowed values=#{options[:values].inspect} "
-      end
       
       object.nil? ? errors : errors + type.validate(object, context, self)
     end
