@@ -40,18 +40,17 @@ module Attributor
     # @block: code definition for struct attributes (nil for predefined types or leaf/simple types)
     def initialize(type, options = {}, &block)
       @type = Attributor.resolve_type(type, options, block)
-      
-      # Alias the :required option to be present and non-null
-      if options[:required] == true
-        o = options.dup
-        o.delete(:required)
-        @options = o.merge(present: true, null: false)
-      else
-        @options = options  
-      end
-
+    
+      @options = options.dup
       @options = @type.options.merge(@options) if @type.respond_to?(:options)
 
+      # Alias the :required option to be present and non-null (if true), if false, simply turn off present
+      required_alias = @options.delete(:required)
+      if required_alias == true
+        @options = {present: true, null: false}.merge(@options)
+      elsif required_alias == false
+        @options = {present: false}.merge(@options)
+      end
       check_options!
     end
 

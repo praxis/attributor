@@ -11,7 +11,23 @@ describe Attributor::Attribute do
 
   context 'initialize' do
     its(:type) { should be type }
-    its(:options) { should be attribute_options }
+    its(:options) { should eq attribute_options }
+
+    context 'aliases required: true' do
+      let(:attribute_options) { { required: true} }
+      it 'by adding present: true and null: false' do
+        expect(attribute.options[:present]).to eq true
+        expect(attribute.options[:null]).to eq false
+      end
+    end
+
+    context 'changes presence with required: false' do
+      let(:attribute_options) { { required: false} }
+      it 'by adding present: false' do
+        expect(attribute.options[:present]).to eq false
+        expect(attribute.options.keys).not_to include(:null)
+      end
+    end
 
     it 'calls check_options!' do
       expect_any_instance_of(Attributor::Attribute).to receive(:check_options!)
