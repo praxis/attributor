@@ -245,7 +245,10 @@ module Attributor
       else
         errors.push *validate_type(object, context)
 
-        if options[:values] && !options[:values].include?(object)
+        # If the value is null we skip value validation:
+        # a) If null wasn't allowed, it would have failed above.
+        # b) If null was allowed, we always allow that as a valid value
+        if !object.nil? && options[:values] && !options[:values].include?(object)
           errors << "Attribute #{Attributor.humanize_context(context)}: #{Attributor.errorize_value(object)} is not within the allowed values=#{options[:values].inspect} "
         end
       end
