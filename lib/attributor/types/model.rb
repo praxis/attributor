@@ -129,40 +129,9 @@ module Attributor
       @validating = true
 
       context = [context] if context.is_a? ::String
-
-      errors = []
-      keys_provided = []
-      
-      self.class.attributes.each do |key, attribute|
-        sub_context = self.class.generate_subcontext(context, key)
-
-        value = __send__(key)
-        keys_provided << key if @contents.key?(key)
-
-        if value.respond_to?(:validating) # really, it's a thing with sub-attributes
-          next if value.validating
-        end
-
-        # Isn't this handled by the requirements validation? NO! we might want to combine
-        if attribute.options[:present] && !@contents.key?(key)
-          errors.concat ["Attribute #{Attributor.humanize_context(sub_context)} is required."]
-        end
-        if @contents[key].nil?
-          if attribute.options[:null] == false && @contents.key?(key)
-            errors.concat ["Attribute #{Attributor.humanize_context(sub_context)} is not nullable."]
-          end
-          # No need to validate the attribute further if the key wasn't passed...(or we would get nullable errors etc..cause the attribute has no
-          # context if its containing key was even passed (and there might not be a containing key for a top level attribute anyways))
-        else
-          errors.concat attribute.validate(value, sub_context)
-        end
-      end
-      self.class.requirements.each do |requirement|
-        validation_errors = requirement.validate(keys_provided, context)
-        errors.concat(validation_errors) unless validation_errors.empty?
-      end
-
-      errors
+      # Use the common, underlying attribute validation of the hash (which will use our _get_attr)
+      # to know how to retrieve a value from a model (instead of a hash)
+      validate_keys(context)
     ensure
       @validating = false
     end
@@ -211,4 +180,10 @@ module Attributor
       @dumping = false
     end
   end
+
+  # Override the generic way to get a value from an instance (models need to call the method)
+  def _get_attr(k)
+    __send__(k)
+  end    
+
 end

@@ -611,6 +611,12 @@ module Attributor
       context = [context] if context.is_a? ::String
 
       if self.class.keys.any?
+        extra_keys = @contents.keys - self.class.keys.keys
+        if extra_keys.any? && !self.class.options[:allow_extra]
+          return extra_keys.collect do |k|
+            "#{Attributor.humanize_context(context)} can not have key: #{k.inspect}"
+          end
+        end
         self.validate_keys(context)
       else
         self.validate_generic(context)
@@ -620,20 +626,13 @@ module Attributor
     end
 
     def validate_keys(context)
-      extra_keys = @contents.keys - self.class.keys.keys
-      if extra_keys.any? && !self.class.options[:allow_extra]
-        return extra_keys.collect do |k|
-          "#{Attributor.humanize_context(context)} can not have key: #{k.inspect}"
-        end
-      end
-
       errors = []
       keys_provided = []
 
       self.class.keys.each do |key, attribute|
         sub_context = self.class.generate_subcontext(context, key)
 
-        value = @contents[key]
+        value = _get_attr(key)
         keys_provided << key if @contents.key?(key)
 
         if value.respond_to?(:validating) # really, it's a thing with sub-attributes
