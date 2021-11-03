@@ -426,7 +426,6 @@ module Attributor
       unless object.is_a?(self)
         raise ArgumentError, "#{name} can not validate object of type #{object.class.name} for #{Attributor.humanize_context(context)}."
       end
-
       object.validate(context)
     end
 
@@ -671,7 +670,7 @@ module Attributor
 
         unless value_type == Attributor::Object
           sub_context = context + ["value(#{value.inspect})"]
-          errors.concat value_attribute.validate(value, sub_context)
+        errors.concat value_attribute.validate(value, sub_context)
         end
       end
     end

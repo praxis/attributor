@@ -57,10 +57,6 @@ module Attributor
 
     context = Array(context) if context.is_a? ::String
 
-    unless context.is_a? Enumerable
-      raise "INVALID CONTEXT!!! (got: #{context.inspect})"
-    end
-
     begin
       return context.join('.')
     rescue e

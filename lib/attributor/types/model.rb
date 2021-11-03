@@ -129,23 +129,36 @@ module Attributor
       @validating = true
 
       context = [context] if context.is_a? ::String
-      keys_with_values = []
+
       errors = []
+      keys_provided = []
+      
+      self.class.attributes.each do |key, attribute|
+        sub_context = self.class.generate_subcontext(context, key)
 
-      self.class.attributes.each do |sub_attribute_name, sub_attribute|
-        sub_context = self.class.generate_subcontext(context, sub_attribute_name)
-
-        value = __send__(sub_attribute_name)
-        keys_with_values << sub_attribute_name unless value.nil?
+        value = __send__(key)
+        keys_provided << key if @contents.key?(key)
 
         if value.respond_to?(:validating) # really, it's a thing with sub-attributes
           next if value.validating
         end
 
-        errors.concat sub_attribute.validate(value, sub_context)
+        # Isn't this handled by the requirements validation? NO! we might want to combine
+        if attribute.options[:present] && !@contents.key?(key)
+          errors.concat ["Attribute #{Attributor.humanize_context(sub_context)} is required."]
+        end
+        if @contents[key].nil?
+          if attribute.options[:null] == false && @contents.key?(key)
+            errors.concat ["Attribute #{Attributor.humanize_context(sub_context)} is not nullable."]
+          end
+          # No need to validate the attribute further if the key wasn't passed...(or we would get nullable errors etc..cause the attribute has no
+          # context if its containing key was even passed (and there might not be a containing key for a top level attribute anyways))
+        else
+          errors.concat attribute.validate(value, sub_context)
+        end
       end
-      self.class.requirements.each do |req|
-        validation_errors = req.validate(keys_with_values, context)
+      self.class.requirements.each do |requirement|
+        validation_errors = requirement.validate(keys_provided, context)
         errors.concat(validation_errors) unless validation_errors.empty?
       end
 
