@@ -643,7 +643,7 @@ module Attributor
           errors.concat ["Attribute #{Attributor.humanize_context(sub_context)} is required."]
         end
         if @contents[key].nil?
-          if !Attribute.nullable_attribute?(attribute.options) && @contents.key?(key) # It is only nullable if there's an explicite null: true (undefined defaults to false)
+          if !Attribute.nullable_attribute?(attribute.options) && @contents.key?(key)
             errors.concat ["Attribute #{Attributor.humanize_context(sub_context)} is not nullable."]
           end
           # No need to validate the attribute further if the key wasn't passed...(or we would get nullable errors etc..cause the attribute has no
