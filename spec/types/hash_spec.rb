@@ -580,21 +580,22 @@ describe Attributor::Hash do
     context 'with requirements defined' do
       let(:type) { Attributor::Hash.construct(block) }
 
-      context 'using requires' do
+      context 'using the requires DSL' do
         let(:block) do
           proc do
             key 'name', String
             key 'nevernull', String, null: false
             key 'consistency', Attributor::Boolean
-            key 'availability', Attributor::Boolean
-            key 'partitioning', Attributor::Boolean
+            key 'availability', Attributor::Boolean, null: true
+            key 'partitioning', Attributor::Boolean, null: true
+            # required DSL it mimics adding present: true in the key (but does not touch the null: option)
             requires 'consistency', 'availability'
-            requires.all 'name' # Just to show that it is equivalent to 'requires'
+            requires.all 'name'
           end
         end
 
         it 'complains not all the listed elements are set (false or true)' do
-          errors = type.new('name' => 'CAP', 'consistency' => nil, 'nevernull' => nil).validate
+          errors = type.new('name' => 'CAP', 'consistency' => true, 'nevernull' => nil).validate
           expect(errors).to have(2).items
           expect(errors).to include('Attribute $.key("nevernull") is not nullable.')
           expect(errors).to include('Attribute $.key("availability") is required.')

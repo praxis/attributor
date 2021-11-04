@@ -1,5 +1,9 @@
 # Attributor Changelog
 
+## next
+
+- removed required_if
+- split required: true into 2, and left it as an alias of ...
 ## 5.7 (1/7/2021)
 
 - added `custom_option` to Attributor::Attribute class, accepting a name and Attribute arguments that will be used to validate the option value(s) provided.

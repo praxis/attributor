@@ -240,7 +240,7 @@ module Attributor
       # Validate any requirements, absolute or conditional, and return.
 
       errors = []
-      if object.nil? && options[:null] == false
+      if object.nil? && options[:null] != true  # It is only nullable if there's an explicite null: true (undefined defaults to false)
         errors << "Attribute #{Attributor.humanize_context(context)} is not nullable"
       else
         errors.push *validate_type(object, context)

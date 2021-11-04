@@ -13,6 +13,12 @@ describe Attributor::Attribute do
     its(:type) { should be type }
     its(:options) { should eq attribute_options }
 
+    context 'merges the options after the alias' do
+      let(:attribute_options) { { required: true, present: false, null: true} }
+      its(:options) { should eq( present: false, null: true) }
+    end
+
+
     context 'aliases required: true' do
       let(:attribute_options) { { required: true} }
       it 'by adding present: true and null: false' do
@@ -23,9 +29,9 @@ describe Attributor::Attribute do
 
     context 'changes presence with required: false' do
       let(:attribute_options) { { required: false} }
-      it 'by adding present: false' do
+      it 'by adding present: false and null: true' do
         expect(attribute.options[:present]).to eq false
-        expect(attribute.options.keys).not_to include(:null)
+        expect(attribute.options).to_not have_key(:null)
       end
     end
 
@@ -485,14 +491,32 @@ describe Attributor::Attribute do
           context ':present' do
             let(:attribute_options) { { present: true } }
             context 'has no effect on a bare attribute' do
-              let(:value) { nil }
+              let(:value) { 'val' }
               it 'it does not error, as we do not know if the parent attribute key was passed in (done at the Hash level)' do
                 expect(attribute.validate(value, context)).to be_empty
               end
             end
           end
-          context ':null' do
+          context ':null false (non-nullable)' do
             let(:attribute_options) { { null: false } }
+            context 'with a nil value' do
+              let(:value) { nil }
+              it 'returns an error' do
+                expect(attribute.validate(value, context).first).to eq 'Attribute context is not nullable'
+              end
+            end
+          end
+          context ':null true (nullable)' do
+            let(:attribute_options) { { null: true } }
+            context 'with a nil value' do
+              let(:value) { nil }
+              it 'does not error' do
+                expect(attribute.validate(value, context)).to be_empty
+              end
+            end
+          end
+          context 'defaults to non-nullable if null not defined' do
+            let(:attribute_options) { { } }
             context 'with a nil value' do
               let(:value) { nil }
               it 'returns an error' do
