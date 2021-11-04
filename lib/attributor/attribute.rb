@@ -234,13 +234,26 @@ module Attributor
       type.attributes if @type_has_attributes ||= type.respond_to?(:attributes)
     end
 
+    def self.nullable_default
+      false
+    end
+
+    # It is only nullable if there is an explicit null: true (or if it's not passed/set, and the default is true)
+    def self.nullable_attribute?(options)
+      if !options.key?(:null) || options[:null].nil?
+        nullable_default
+      else
+        options[:null]
+      end
+    end
+
     # Validates stuff and checks dependencies
     def validate(object, context = Attributor::DEFAULT_ROOT_CONTEXT)
       raise "INVALID CONTEXT!! #{context}" unless context
       # Validate any requirements, absolute or conditional, and return.
 
       errors = []
-      if object.nil? && options[:null] != true  # It is only nullable if there's an explicite null: true (undefined defaults to false)
+      if object.nil? && !self.class.nullable_attribute?(options)
         errors << "Attribute #{Attributor.humanize_context(context)} is not nullable"
       else
         errors.push *validate_type(object, context)
