@@ -106,7 +106,6 @@ module Attributor
 
     TOP_LEVEL_OPTIONS = [:description, :values, :default, :example, :required, :null, :custom_data].freeze
     INTERNAL_OPTIONS = [:dsl_compiler, :dsl_compiler_options].freeze # Options we don't want to expose when describing attributes
-    JSON_SCHEMA_UNSUPPORTED_OPTIONS = [ :required ].freeze
     def describe(shallow=true, example: nil)
       description = { }
       # Clone the common options
