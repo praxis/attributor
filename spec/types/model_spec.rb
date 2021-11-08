@@ -469,7 +469,7 @@ describe Attributor::Model do
       let(:attributes_block) do
         proc do
           attribute :neighbors, required: true do
-            attribute :name, present: true
+            attribute :name, required: true
             attribute :age, Integer
           end
         end
@@ -477,12 +477,12 @@ describe Attributor::Model do
       subject(:struct) { Attributor::Struct.construct(attributes_block, reference: Cormorant) }
 
       it 'supports defining sub-attributes using the proper reference' do
-        expect(struct.attributes[:neighbors].options[:present]).to be true
+        expect(struct.attributes[:neighbors].options[:required]).to be true
         expect(struct.attributes[:neighbors].options[:null]).to be false
         expect(struct.attributes[:neighbors].type.member_attribute.type.attributes.keys).to match_array [:name, :age]
 
         name_options = struct.attributes[:neighbors].type.member_attribute.type.attributes[:name].options
-        expect(name_options[:present]).to be true
+        expect(name_options[:required]).to be true
         expect(name_options[:description]).to eq 'Name of the Cormorant'
       end
     end

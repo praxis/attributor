@@ -13,28 +13,6 @@ describe Attributor::Attribute do
     its(:type) { should be type }
     its(:options) { should eq attribute_options }
 
-    context 'merges the options after the alias' do
-      let(:attribute_options) { { required: true, present: false, null: true} }
-      its(:options) { should eq( present: false, null: true) }
-    end
-
-
-    context 'aliases required: true' do
-      let(:attribute_options) { { required: true} }
-      it 'by adding present: true and null: false' do
-        expect(attribute.options[:present]).to eq true
-        expect(attribute.options[:null]).to eq false
-      end
-    end
-
-    context 'changes presence with required: false' do
-      let(:attribute_options) { { required: false} }
-      it 'by adding present: false and null: true' do
-        expect(attribute.options[:present]).to eq false
-        expect(attribute.options).to_not have_key(:null)
-      end
-    end
-
     it 'calls check_options!' do
       expect_any_instance_of(Attributor::Attribute).to receive(:check_options!)
       Attributor::Attribute.new(type, attribute_options)
@@ -93,9 +71,9 @@ describe Attributor::Attribute do
     let(:attribute_options) { {required: true, values: ['one'], description: "something", min: 0} }
     let(:expected) do
       h = {type: {name: 'String', id: type.id, family: type.family}}
-      common = attribute_options.slice(:description, :values).merge(present: true, null: false)
+      common = attribute_options.slice(:description, :values).merge(required: true)
       h.merge!(common)
-      h[:options] = {:min => 0 }
+      h[:options] = {min: 0}
       h
     end
 
@@ -480,16 +458,6 @@ describe Attributor::Attribute do
         context 'applying attribute options' do
           context ':required' do
             let(:attribute_options) { { required: true } }
-            context 'is an alias for' do
-              let(:value) { nil }
-              it 'present and not null' do
-                expect(attribute.options).to include( present: true, null: false)
-                expect(attribute.options.keys).to_not include(:required)
-              end
-            end
-          end
-          context ':present' do
-            let(:attribute_options) { { present: true } }
             context 'has no effect on a bare attribute' do
               let(:value) { 'val' }
               it 'it does not error, as we do not know if the parent attribute key was passed in (done at the Hash level)' do
@@ -706,7 +674,7 @@ describe Attributor::Attribute do
         its(:attributes) { should have_key :angry }
         it 'inherited the type and options from the reference' do
           expect(member_attribute.attributes[:angry].type).to be(Chicken.attributes[:angry].type)
-          expect(member_attribute.attributes[:angry].options).to eq(Chicken.attributes[:angry].options.merge(present: true, null: false))
+          expect(member_attribute.attributes[:angry].options).to eq(Chicken.attributes[:angry].options.merge(required: true))
         end
       end
     end

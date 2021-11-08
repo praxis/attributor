@@ -3,8 +3,9 @@
 ## next
 
 - removed `required_if` support and all of the necessary code. 
-- changed the `required:` option really perform 2 underlying functions (presence and nullability). Hence, introduced a `present: true|false` option and a `null: true|false` option to control those 2 distinct aspects of validating an attribute. Left the `required:` option in place (for convenience only) but as an alias to `present: true, null: false` when set to true (or simply `present: false` when set to false).
-  * The default behavior for an attribute that does not have an explicit `null: true|false` is currently `null: false` (but it can be easily changed by overriding the `Attributor::Attribute.nullable_default` function to return `true`)
+- changed the semantics of the `required:` option in attributes, to really mean if the "key" is required to be passed in or not (i.e., check if the key is null, not if its value is null)
+- Introduced a new option`null: true|false` to allow for the value of an attribute to be nullable or not when the attribute is passed in.
+  * The default behavior for an attribute nullability currently `null: false` (but it can be easily changed by overriding the `Attributor::Attribute.nullable_default` function to return `true`)
 ## 5.7 (1/7/2021)
 
 - added `custom_option` to Attributor::Attribute class, accepting a name and Attribute arguments that will be used to validate the option value(s) provided.

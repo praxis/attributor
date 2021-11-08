@@ -44,13 +44,6 @@ module Attributor
       @options = options.dup
       @options = @type.options.merge(@options) if @type.respond_to?(:options)
 
-      # Alias the :required option to be present and non-null (if true), if false, simply turn off present
-      required_alias = @options.delete(:required)
-      if required_alias == true
-        @options = {present: true, null: false}.merge(@options)
-      elsif required_alias == false
-        @options = {present: false}.merge(@options)
-      end
       check_options!
     end
 
@@ -111,9 +104,9 @@ module Attributor
       [msg]
     end
 
-    TOP_LEVEL_OPTIONS = [:description, :values, :default, :example, :present, :null, :custom_data].freeze
+    TOP_LEVEL_OPTIONS = [:description, :values, :default, :example, :required, :null, :custom_data].freeze
     INTERNAL_OPTIONS = [:dsl_compiler, :dsl_compiler_options].freeze # Options we don't want to expose when describing attributes
-    JSON_SCHEMA_UNSUPPORTED_OPTIONS = [ :present ].freeze
+    JSON_SCHEMA_UNSUPPORTED_OPTIONS = [ :required ].freeze
     def describe(shallow=true, example: nil)
       description = { }
       # Clone the common options
@@ -294,9 +287,9 @@ module Attributor
         options[:default] = load(definition) unless definition.is_a?(Proc)
       when :description
         raise AttributorException, "Description value must be a string. Got (#{definition})" unless definition.is_a? ::String
-      when :present
-        raise AttributorException, 'Present must be a boolean' unless definition == true || definition == false
-        raise AttributorException, 'Present cannot be enabled in combination with :default' if definition == true && options.key?(:default)
+      when :required
+        raise AttributorException, 'Required must be a boolean' unless definition == true || definition == false
+        raise AttributorException, 'Required cannot be enabled in combination with :default' if definition == true && options.key?(:default)
       when :null
         raise AttributorException, 'Null must be a boolean' unless definition == true || definition == false        
       when :example
