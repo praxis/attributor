@@ -40,9 +40,7 @@ module Attributor
     # @block: code definition for struct attributes (nil for predefined types or leaf/simple types)
     def initialize(type, options = {}, &block)
       @type = Attributor.resolve_type(type, options, block)
-    
-      @options = options.dup
-      @options = @type.options.merge(@options) if @type.respond_to?(:options)
+      @options = @type.respond_to?(:options) ?  @type.options.merge(options) : options
 
       check_options!
     end

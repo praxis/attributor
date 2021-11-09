@@ -373,6 +373,11 @@ describe Attributor::Model do
       its(:validate) { should_not be_empty }
       its(:validate) { should include 'Attribute $.key(:name) is required.' }
     end
+    context 'for models with non-nullable attributes' do
+      subject(:address) { Address.load({name: nil, state: nil}) }
+      its(:validate) { should_not be_empty }
+      its(:validate) { should include 'Attribute $.state is not nullable.' } # name is nullable
+    end
     context 'for models with circular sub-attributes' do
       context 'that are valid' do
         subject(:person) { Person.example }

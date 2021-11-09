@@ -77,7 +77,7 @@ end
 class Address < Attributor::Model
   attributes do
     attribute :name, String, example: /\w+/, null: true
-    attribute :state, String, values: %w(OR CA)
+    attribute :state, String, values: %w(OR CA), null: false
     attribute :person, Person, example: proc { |address, context| Person.example(context, address: address) }
     requires :name
   end

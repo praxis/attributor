@@ -71,7 +71,7 @@ describe Attributor::Attribute do
     let(:attribute_options) { {required: true, values: ['one'], description: "something", min: 0} }
     let(:expected) do
       h = {type: {name: 'String', id: type.id, family: type.family}}
-      common = attribute_options.slice(:description, :values).merge(required: true)
+      common = attribute_options.select{|k,v| Attributor::Attribute::TOP_LEVEL_OPTIONS.include? k }
       h.merge!(common)
       h[:options] = {min: 0}
       h
@@ -546,6 +546,13 @@ describe Attributor::Attribute do
           end
         end
 
+        context 'with a nil value' do
+          let(:value) { nil }
+          it 'returns no errors' do
+            expect(errors).to be_empty
+          end
+        end
+
         context 'with a value of a value different than the native_type' do
           let(:value) { 1 }
 
@@ -677,6 +684,26 @@ describe Attributor::Attribute do
           expect(member_attribute.attributes[:angry].options).to eq(Chicken.attributes[:angry].options.merge(required: true))
         end
       end
+    end
+  end
+
+  context '.nullable_attribute?' do
+    subject { described_class.nullable_attribute?(options) }
+    context 'with null: true option' do
+      let(:options) { { null: true } }  
+      it { should be_truthy }
+    end
+    context 'with null: false option' do
+      let(:options) { { null: false } }  
+      it { should be_falsey }
+    end
+    context 'defaults to false without any null option' do
+      let(:options) { { } }  
+      it { should be_falsey }
+    end
+    context 'defaults to false if null: nil' do
+      let(:options) { { null: nil } }  
+      it { should be_falsey }
     end
   end
 end

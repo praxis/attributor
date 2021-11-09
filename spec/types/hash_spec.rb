@@ -514,6 +514,7 @@ describe Attributor::Hash do
       end
     end
   end
+
   context '#validate' do
     context 'for a key and value typed hash' do
       let(:key_type) { Integer }
@@ -536,7 +537,7 @@ describe Attributor::Hash do
         proc do
           key 'integer', Integer, null: false # non-nullable, but not required
           key 'datetime', DateTime
-          key 'not-optional', String, required: true
+          key 'not-optional', String, required: true, null: false # required AND non-nullable
           key 'required-but-nullable', String, required: true, null: true
         end
       end
@@ -560,7 +561,7 @@ describe Attributor::Hash do
         end
       end
       
-      context 'still validates nullable but required keys' do
+      context 'still validates requiredness even if values are nullable' do
         let(:values) { {} }
         it 'complains if not provided' do
           errors = hash.validate
@@ -568,6 +569,21 @@ describe Attributor::Hash do
           [
             'Attribute $.key("not-optional") is required',
             'Attribute $.key("required-but-nullable") is required'
+          ].each do |msg|
+            regexp = Regexp.new(Regexp.escape(msg))
+            expect(errors.any?{|err| err =~ regexp}).to be_truthy
+          end
+        end
+      end
+
+      context 'validates nullability regardless of requiredness' do
+        let(:values) { {'integer'  => nil, 'not-optional' => nil, 'required-but-nullable' => nil} }
+        it 'complains if null' do
+          errors = hash.validate
+          expect(errors).to have(2).items
+          [
+            'Attribute $.key("integer") is not nullable',
+            'Attribute $.key("not-optional") is not nullable',
           ].each do |msg|
             regexp = Regexp.new(Regexp.escape(msg))
             expect(errors.any?{|err| err =~ regexp}).to be_truthy
