@@ -488,7 +488,7 @@ describe Attributor::Attribute do
             context 'with a nil value' do
               let(:value) { nil }
               it 'returns an error' do
-                expect(Attributor::Attribute.nullable_default).to be(false)
+                expect(Attributor::Attribute.default_for_null).to be(false)
                 expect(attribute.validate(value, context).first).to eq 'Attribute context is not nullable'
               end
             end
@@ -499,7 +499,7 @@ describe Attributor::Attribute do
             context 'with a nil value' do
               let(:value) { nil }
               it 'suceeds' do
-                expect(Attributor::Attribute).to receive(:nullable_default).and_return(true)
+                expect(Attributor::Attribute).to receive(:default_for_null).and_return(true)
                 expect(attribute.validate(value, context)).to be_empty
               end
             end

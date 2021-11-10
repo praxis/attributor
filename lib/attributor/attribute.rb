@@ -224,17 +224,14 @@ module Attributor
       type.attributes if @type_has_attributes ||= type.respond_to?(:attributes)
     end
 
-    def self.nullable_default
+    # Default value for a non-specified null: option 
+    def self.default_for_null
       false
     end
 
     # It is only nullable if there is an explicit null: true (or if it's not passed/set, and the default is true)
     def self.nullable_attribute?(options)
-      if !options.key?(:null) || options[:null].nil?
-        nullable_default
-      else
-        options[:null]
-      end
+      !options.key?(:null) ? default_for_null : options[:null]
     end
 
     # Validates stuff and checks dependencies
