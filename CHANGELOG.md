@@ -2,6 +2,7 @@
 
 ## next
 
+## 6.0 (22/11/2021)
 - removed `required_if` support and all of the necessary code. 
 - changed the semantics of the `required:` option in attributes, to really mean if the "key" is required to be passed in or not (i.e., check if the key is null, not if its value is null)
 - Introduced a new option`null: true|false` to allow for the value of an attribute to be nullable or not when the attribute is passed in.
