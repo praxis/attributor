@@ -11,9 +11,9 @@ end
 
 class Duck < Attributor::Model
   attributes do
-    attribute :age, Attributor::Integer, required_if: { 'name' => 'Daffy' }
+    attribute :age, Attributor::Integer
     attribute :name, Attributor::String
-    attribute :email, Attributor::String, required_if: 'name'
+    attribute :email, Attributor::String
     attribute :angry, Attributor::Boolean, default: true, example: /true|false/, description: 'Angry bird?'
     attribute :weight, Attributor::Float, example: /\d{1,2}\.\d/, description: 'The weight of the duck'
     attribute :type, Attributor::Symbol, values: [:duck]
@@ -50,15 +50,15 @@ class Cormorant < Attributor::Model
     end
 
     # This will be a collection of arbitrary Ruby Objects
-    attribute :fish, Attributor::Collection, description: 'All kinds of fish for feeding the babies'
+    attribute :all_the_fish, Attributor::Collection, description: 'All kinds of fish for feeding the babies'
 
     # This will be a collection of Cormorants (note, this relationship is circular)
-    attribute :neighbors, Attributor::Collection.of(Cormorant), description: 'Neighbor cormorants'
+    attribute :neighbors, Attributor::Collection.of(Cormorant), member_options: {null: false}, description: 'Neighbor cormorants', null: false
 
     # This will be a collection of instances of an anonymous Struct class, each having two well-defined attributes
 
     attribute :babies, Attributor::Collection.of(Attributor::Struct), description: 'All the babies', member_options: { identity: :name } do
-      attribute :name, Attributor::String, example: /[:name]/, description: 'The name of the baby cormorant'
+      attribute :name, Attributor::String, example: /[:name]/, description: 'The name of the baby cormorant', required: true
       attribute :months, Attributor::Integer, default: 0, min: 0, description: 'The age in months of the baby cormorant'
       attribute :weight, Attributor::Float, example: /\d{1,2}\.\d{3}/, description: 'The weight in kg of the baby cormorant'
     end
@@ -76,8 +76,8 @@ end
 
 class Address < Attributor::Model
   attributes do
-    attribute :name, String, example: /\w+/
-    attribute :state, String, values: %w(OR CA)
+    attribute :name, String, example: /\w+/, null: true
+    attribute :state, String, values: %w(OR CA), null: false
     attribute :person, Person, example: proc { |address, context| Person.example(context, address: address) }
     requires :name
   end

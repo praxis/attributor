@@ -40,9 +40,7 @@ module Attributor
     # @block: code definition for struct attributes (nil for predefined types or leaf/simple types)
     def initialize(type, options = {}, &block)
       @type = Attributor.resolve_type(type, options, block)
-
-      @options = options
-      @options = @type.options.merge(@options) if @type.respond_to?(:options)
+      @options = @type.respond_to?(:options) ?  @type.options.merge(options) : options
 
       check_options!
     end
@@ -96,18 +94,16 @@ module Attributor
 
     def validate_type(value, context)
       # delegate check to type subclass if it exists
-      unless type.valid_type?(value)
-        msg = "Attribute #{Attributor.humanize_context(context)} received value: "
-        msg += "#{Attributor.errorize_value(value)} is of the wrong type "
-        msg += "(got: #{value.class.name}, expected: #{type.name})"
-        return [msg]
-      end
-      []
+      return [] if value.nil? || type.valid_type?(value)
+
+      msg = "Attribute #{Attributor.humanize_context(context)} received value: "
+      msg += "#{Attributor.errorize_value(value)} is of the wrong type "
+      msg += "(got: #{value.class.name}, expected: #{type.name})"
+      [msg]
     end
 
-    TOP_LEVEL_OPTIONS = [:description, :values, :default, :example, :required, :required_if, :custom_data].freeze
+    TOP_LEVEL_OPTIONS = [:description, :values, :default, :example, :required, :null, :custom_data].freeze
     INTERNAL_OPTIONS = [:dsl_compiler, :dsl_compiler_options].freeze # Options we don't want to expose when describing attributes
-    JSON_SCHEMA_UNSUPPORTED_OPTIONS = [ :required, :required_if ].freeze
     def describe(shallow=true, example: nil)
       description = { }
       # Clone the common options
@@ -228,78 +224,38 @@ module Attributor
       type.attributes if @type_has_attributes ||= type.respond_to?(:attributes)
     end
 
+    # Default value for a non-specified null: option 
+    def self.default_for_null
+      false
+    end
+
+    # It is only nullable if there is an explicit null: true (or if it's not passed/set, and the default is true)
+    def self.nullable_attribute?(options)
+      !options.key?(:null) ? default_for_null : options[:null]
+    end
+
     # Validates stuff and checks dependencies
     def validate(object, context = Attributor::DEFAULT_ROOT_CONTEXT)
       raise "INVALID CONTEXT!! #{context}" unless context
       # Validate any requirements, absolute or conditional, and return.
 
-      if object.nil? # == Attributor::UNSET
-        # With no value, we can only validate whether that is acceptable or not and return.
-        # Beyond that, no further validation should be done.
-        return validate_missing_value(context)
-      end
-
-      # TODO: support validation for other types of conditional dependencies based on values of other attributes
-
-      errors = validate_type(object, context)
-
-      # End validation if we don't even have the proper type to begin with
-      return errors if errors.any?
-
-      if options[:values] && !options[:values].include?(object)
-        errors << "Attribute #{Attributor.humanize_context(context)}: #{Attributor.errorize_value(object)} is not within the allowed values=#{options[:values].inspect} "
-      end
-
-      errors + type.validate(object, context, self)
-    end
-
-    def validate_missing_value(context)
-      raise "INVALID CONTEXT!!! (got: #{context.inspect})" unless context.is_a? Enumerable
-
-      # Missing attribute was required if :required option was set
-      return ["Attribute #{Attributor.humanize_context(context)} is required"] if options[:required]
-
-      # Missing attribute was not required if :required_if (and :required)
-      # option was NOT set
-      requirement = options[:required_if]
-      return [] unless requirement
-
-      case requirement
-      when ::String
-        key_path = requirement
-        predicate = nil
-      when ::Hash
-        # TODO: support multiple dependencies?
-        key_path = requirement.keys.first
-        predicate = requirement.values.first
+      errors = []
+      if object.nil? && !self.class.nullable_attribute?(options)
+        errors << "Attribute #{Attributor.humanize_context(context)} is not nullable"
       else
-        # should never get here if the option validation worked...
-        raise AttributorException, "unknown type of dependency: #{requirement.inspect} for #{Attributor.humanize_context(context)}"
-      end
+        errors.push *validate_type(object, context)
 
-      # chop off the last part
-      requirement_context = context[0..-2]
-      requirement_context_string = requirement_context.join(Attributor::SEPARATOR)
-
-      # FIXME: we're having to reconstruct a string context just to use the resolver...smell.
-      if AttributeResolver.current.check(requirement_context_string, key_path, predicate)
-        message = "Attribute #{Attributor.humanize_context(context)} is required when #{key_path} "
-
-        # give a hint about what the full path for a relative key_path would be
-        unless key_path[0..0] == Attributor::AttributeResolver::ROOT_PREFIX
-          message << "(for #{Attributor.humanize_context(requirement_context)}) "
+        # If the value is null we skip value validation:
+        # a) If null wasn't allowed, it would have failed above.
+        # b) If null was allowed, we always allow that as a valid value
+        if !object.nil? && options[:values] && !options[:values].include?(object)
+          errors << "Attribute #{Attributor.humanize_context(context)}: #{Attributor.errorize_value(object)} is not within the allowed values=#{options[:values].inspect} "
         end
-
-        message << if predicate
-                     "matches #{predicate.inspect}."
-                   else
-                     'is present.'
-                   end
-
-        [message]
-      else
-        []
       end
+
+      return errors if errors.any?
+      
+      object.nil? ? errors : errors + type.validate(object, context, self)
     end
 
     def check_options!
@@ -328,9 +284,8 @@ module Attributor
       when :required
         raise AttributorException, 'Required must be a boolean' unless definition == true || definition == false
         raise AttributorException, 'Required cannot be enabled in combination with :default' if definition == true && options.key?(:default)
-      when :required_if
-        raise AttributorException, 'Required_if must be a String, a Hash definition or a Proc' unless definition.is_a?(::String) || definition.is_a?(::Hash) || definition.is_a?(::Proc)
-        raise AttributorException, 'Required_if cannot be specified together with :required' if options[:required]
+      when :null
+        raise AttributorException, 'Null must be a boolean' unless definition == true || definition == false        
       when :example
         unless definition.is_a?(::Regexp) || definition.is_a?(::String) || definition.is_a?(::Array) || definition.is_a?(::Proc) || definition.nil? || type.valid_type?(definition)
           raise AttributorException, "Invalid example type (got: #{definition.class.name}). It must always match the type of the attribute (except if passing Regex that is allowed for some types)"

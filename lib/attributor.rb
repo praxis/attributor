@@ -13,7 +13,6 @@ module Attributor
   require_relative 'attributor/type'
   require_relative 'attributor/dsl_compiler'
   require_relative 'attributor/hash_dsl_compiler'
-  require_relative 'attributor/attribute_resolver'
   require_relative 'attributor/smart_attribute_selector'
 
   require_relative 'attributor/example_mixin'
@@ -22,7 +21,8 @@ module Attributor
 
   # hierarchical separator string for composing human readable attributes
   SEPARATOR = '.'.freeze
-  DEFAULT_ROOT_CONTEXT = ['$'].freeze
+  ROOT_PREFIX = '$'.freeze
+  DEFAULT_ROOT_CONTEXT = [ROOT_PREFIX].freeze
 
   # @param type [Class] The class of the type to resolve
   #
@@ -55,10 +55,6 @@ module Attributor
     return '' unless context
 
     context = Array(context) if context.is_a? ::String
-
-    unless context.is_a? Enumerable
-      raise "INVALID CONTEXT!!! (got: #{context.inspect})"
-    end
 
     begin
       return context.join('.')

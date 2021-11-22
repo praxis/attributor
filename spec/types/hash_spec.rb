@@ -514,6 +514,7 @@ describe Attributor::Hash do
       end
     end
   end
+
   context '#validate' do
     context 'for a key and value typed hash' do
       let(:key_type) { Integer }
@@ -534,45 +535,85 @@ describe Attributor::Hash do
     context 'for a hash with defined keys' do
       let(:block) do
         proc do
-          key 'integer', Integer
+          key 'integer', Integer, null: false # non-nullable, but not required
           key 'datetime', DateTime
-          key 'not-optional', String, required: true
+          key 'not-optional', String, required: true, null: false # required AND non-nullable
+          key 'required-but-nullable', String, required: true, null: true
         end
       end
 
       let(:type) { Attributor::Hash.construct(block) }
-
-      let(:values) { { 'integer' => 'one', 'datetime' => 'now' } }
       subject(:hash) { type.new(values) }
 
-      it 'validates the keys' do
-        errors = hash.validate
-        expect(errors).to have(3).items
-        expect(errors).to include('Attribute $.key("not-optional") is required')
+      context 'validates it all' do
+        let(:values) { { 'integer' => 'one', 'datetime' => 'now', 'required-but-nullable' => nil} }
+        it 'validates the keys' do
+          errors = hash.validate
+          expect(errors).to have(3).items
+          [
+            'Attribute $.key("integer") received value: "one" is of the wrong type (got: String, expected: Attributor::Integer)',
+            'Attribute $.key("datetime") received value: "now" is of the wrong type (got: String, expected: Attributor::DateTime)',
+            'Attribute $.key("not-optional") is required'
+          ].each do |msg|
+            regexp = Regexp.new(Regexp.escape(msg))
+            expect(errors.any?{|err| err =~ regexp}).to be_truthy
+          end
+        end
       end
+      
+      context 'still validates requiredness even if values are nullable' do
+        let(:values) { {} }
+        it 'complains if not provided' do
+          errors = hash.validate
+          expect(errors).to have(2).items
+          [
+            'Attribute $.key("not-optional") is required',
+            'Attribute $.key("required-but-nullable") is required'
+          ].each do |msg|
+            regexp = Regexp.new(Regexp.escape(msg))
+            expect(errors.any?{|err| err =~ regexp}).to be_truthy
+          end
+        end
+      end
+
+      context 'validates nullability regardless of requiredness' do
+        let(:values) { {'integer'  => nil, 'not-optional' => nil, 'required-but-nullable' => nil} }
+        it 'complains if null' do
+          errors = hash.validate
+          expect(errors).to have(2).items
+          [
+            'Attribute $.key("integer") is not nullable',
+            'Attribute $.key("not-optional") is not nullable',
+          ].each do |msg|
+            regexp = Regexp.new(Regexp.escape(msg))
+            expect(errors.any?{|err| err =~ regexp}).to be_truthy
+          end
+        end
+      end
+      
     end
 
     context 'with requirements defined' do
       let(:type) { Attributor::Hash.construct(block) }
 
-      context 'using requires' do
+      context 'using the requires DSL' do
         let(:block) do
           proc do
             key 'name', String
+            key 'nevernull', String, null: false
             key 'consistency', Attributor::Boolean
-            key 'availability', Attributor::Boolean
-            key 'partitioning', Attributor::Boolean
+            key 'availability', Attributor::Boolean, null: true
+            key 'partitioning', Attributor::Boolean, null: true
             requires 'consistency', 'availability'
-            requires.all 'name' # Just to show that it is equivalent to 'requires'
+            requires.all 'name'
           end
         end
 
         it 'complains not all the listed elements are set (false or true)' do
-          errors = type.new('name' => 'CAP').validate
+          errors = type.new('name' => 'CAP', 'consistency' => true, 'nevernull' => nil).validate
           expect(errors).to have(2).items
-          %w(consistency availability).each do |name|
-            expect(errors).to include("Key #{name} is required for $.")
-          end
+          expect(errors).to include('Attribute $.key("nevernull") is not nullable.')
+          expect(errors).to include('Attribute $.key("availability") is required.')
         end
       end
 
@@ -591,7 +632,7 @@ describe Attributor::Hash do
           errors = type.new('name' => 'CAP', 'consistency' => false).validate
           expect(errors).to have(1).items
           expect(errors).to include(
-            'At least 2 keys out of ["consistency", "availability", "partitioning"] are required to be passed in for $. Found ["consistency"]'
+            'At least 2 attributes out of ["consistency", "availability", "partitioning"] are required to be passed in for $. Found ["consistency"]'
           )
         end
       end
@@ -610,7 +651,7 @@ describe Attributor::Hash do
         it 'complains if more than 2 in the group are set (false or true)' do
           errors = type.new('name' => 'CAP', 'consistency' => false, 'availability' => true, 'partitioning' => false).validate
           expect(errors).to have(1).items
-          expect(errors).to include('At most 2 keys out of ["consistency", "availability", "partitioning"] can be passed in for $. Found ["consistency", "availability", "partitioning"]')
+          expect(errors).to include('At most 2 attributes out of ["consistency", "availability", "partitioning"] can be passed in for $. Found ["consistency", "availability", "partitioning"]')
         end
       end
 
@@ -628,12 +669,12 @@ describe Attributor::Hash do
         it 'complains if less than 1 in the group are set (false or true)' do
           errors = type.new('name' => 'CAP').validate
           expect(errors).to have(1).items
-          expect(errors).to include('Exactly 1 of the following keys ["consistency", "availability", "partitioning"] are required for $. Found 0 instead: []')
+          expect(errors).to include('Exactly 1 of the following attributes ["consistency", "availability", "partitioning"] are required for $. Found 0 instead: []')
         end
         it 'complains if more than 1 in the group are set (false or true)' do
           errors = type.new('name' => 'CAP', 'consistency' => false, 'availability' => true).validate
           expect(errors).to have(1).items
-          expect(errors).to include('Exactly 1 of the following keys ["consistency", "availability", "partitioning"] are required for $. Found 2 instead: ["consistency", "availability"]')
+          expect(errors).to include('Exactly 1 of the following attributes ["consistency", "availability", "partitioning"] are required for $. Found 2 instead: ["consistency", "availability"]')
         end
       end
 
@@ -651,7 +692,7 @@ describe Attributor::Hash do
         it 'complains if two or more in the group are set (false or true)' do
           errors = type.new('name' => 'CAP', 'consistency' => false, 'availability' => true).validate
           expect(errors).to have(1).items
-          expect(errors).to include('keys ["consistency", "availability"] are mutually exclusive for $.')
+          expect(errors).to include('Attributes ["consistency", "availability"] are mutually exclusive for $.')
         end
       end
 
@@ -676,7 +717,7 @@ describe Attributor::Hash do
           errors = type.new('name' => 'CAP').validate
           expect(errors).to have(1).items
           expect(errors).to include(
-            'At least 1 keys out of ["consistency", "availability", "partitioning"] are required to be passed in for $. Found none'
+            'At least 1 attributes out of ["consistency", "availability", "partitioning"] are required to be passed in for $. Found none'
           )
         end
       end

@@ -11,7 +11,7 @@ describe Attributor::Attribute do
 
   context 'initialize' do
     its(:type) { should be type }
-    its(:options) { should be attribute_options }
+    its(:options) { should eq attribute_options }
 
     it 'calls check_options!' do
       expect_any_instance_of(Attributor::Attribute).to receive(:check_options!)
@@ -72,8 +72,8 @@ describe Attributor::Attribute do
     let(:expected) do
       h = {type: {name: 'String', id: type.id, family: type.family}}
       common = attribute_options.select{|k,v| Attributor::Attribute::TOP_LEVEL_OPTIONS.include? k }
-      h.merge!( common )
-      h[:options] = {:min => 0 }
+      h.merge!(common)
+      h[:options] = {min: 0}
       h
     end
 
@@ -458,10 +458,49 @@ describe Attributor::Attribute do
         context 'applying attribute options' do
           context ':required' do
             let(:attribute_options) { { required: true } }
+            context 'has no effect on a bare attribute' do
+              let(:value) { 'val' }
+              it 'it does not error, as we do not know if the parent attribute key was passed in (done at the Hash level)' do
+                expect(attribute.validate(value, context)).to be_empty
+              end
+            end
+          end
+          context ':null false (non-nullable)' do
+            let(:attribute_options) { { null: false } }
             context 'with a nil value' do
               let(:value) { nil }
               it 'returns an error' do
-                expect(attribute.validate(value, context).first).to eq 'Attribute context is required'
+                expect(attribute.validate(value, context).first).to eq 'Attribute context is not nullable'
+              end
+            end
+          end
+          context ':null true (nullable)' do
+            let(:attribute_options) { { null: true } }
+            context 'with a nil value' do
+              let(:value) { nil }
+              it 'does not error' do
+                expect(attribute.validate(value, context)).to be_empty
+              end
+            end
+          end
+          context 'defaults to non-nullable if null not defined' do
+            let(:attribute_options) { { } }
+            context 'with a nil value' do
+              let(:value) { nil }
+              it 'returns an error' do
+                expect(Attributor::Attribute.default_for_null).to be(false)
+                expect(attribute.validate(value, context).first).to eq 'Attribute context is not nullable'
+              end
+            end
+          end
+
+          context 'default can be overrideable with true' do
+            let(:attribute_options) { { } }
+            context 'with a nil value' do
+              let(:value) { nil }
+              it 'suceeds' do
+                expect(Attributor::Attribute).to receive(:default_for_null).and_return(true)
+                expect(attribute.validate(value, context)).to be_empty
               end
             end
           end
@@ -507,64 +546,19 @@ describe Attributor::Attribute do
           end
         end
 
+        context 'with a nil value' do
+          let(:value) { nil }
+          it 'returns no errors' do
+            expect(errors).to be_empty
+          end
+        end
+
         context 'with a value of a value different than the native_type' do
           let(:value) { 1 }
 
           it 'returns errors' do
             expect(errors).not_to be_empty
             expect(errors.first).to match(/is of the wrong type/)
-          end
-        end
-      end
-
-      context '#validate_missing_value' do
-        let(:key) { '$.instance.ssh_key.name' }
-        let(:value) { /\w+/.gen }
-
-        let(:attribute_options) { { required_if: key } }
-
-        let(:ssh_key) { double('ssh_key', name: value) }
-        let(:instance) { double('instance', ssh_key: ssh_key) }
-
-        before { Attributor::AttributeResolver.current.register('instance', instance) }
-
-        let(:attribute_context) { ['$', 'params', 'key_material'] }
-        subject(:errors) { attribute.validate_missing_value(attribute_context) }
-
-        context 'for a simple dependency without a predicate' do
-          context 'that is satisfied' do
-            it { should_not be_empty }
-          end
-
-          context 'that is missing' do
-            let(:value) { nil }
-            it { should be_empty }
-          end
-        end
-
-        context 'with a dependency that has a predicate' do
-          let(:value) { 'default_ssh_key_name' }
-          # subject(:errors) { attribute.validate_missing_value('') }
-
-          context 'where the target attribute exists, and matches the predicate' do
-            let(:attribute_options) { { required_if: { key => /default/ } } }
-
-            it { should_not be_empty }
-
-            its(:first) { should match(/Attribute #{Regexp.quote(Attributor.humanize_context(attribute_context))} is required when #{Regexp.quote(key)} matches/) }
-          end
-
-          context 'where the target attribute exists, but does not match the predicate' do
-            let(:attribute_options) { { required_if: { key => /other/ } } }
-
-            it { should be_empty }
-          end
-
-          context 'where the target attribute does not exist' do
-            let(:attribute_options) { { required_if: { key => /default/ } } }
-            let(:ssh_key) { double('ssh_key', name: nil) }
-
-            it { should be_empty }
           end
         end
       end
@@ -636,71 +630,6 @@ describe Attributor::Attribute do
           end
         end
       end
-
-      context '#validate_missing_value' do
-        let(:type) { Duck }
-        let(:attribute_name) { nil }
-        let(:attribute) { Duck.attributes[attribute_name] }
-
-        let(:attribute_context) { ['$', 'duck', attribute_name.to_s] }
-        subject(:errors) { attribute.validate_missing_value(attribute_context) }
-
-        before do
-          Attributor::AttributeResolver.current.register('duck', duck)
-        end
-
-        context 'for a dependency with no predicate' do
-          let(:attribute_name) { :email }
-
-          let(:duck) do
-            d = Duck.new
-            d.age = 1
-            d.name = 'Donald'
-            d
-          end
-
-          context 'where the target attribute exists, and matches the predicate' do
-            it { should_not be_empty }
-            its(:first) { should eq 'Attribute $.duck.email is required when name (for $.duck) is present.' }
-          end
-          context 'where the target attribute does not exist' do
-            before do
-              duck.name = nil
-            end
-            it { should be_empty }
-          end
-        end
-
-        context 'for a dependency with a predicate' do
-          let(:attribute_name) { :age }
-
-          let(:duck) do
-            d = Duck.new
-            d.name = 'Daffy'
-            d.email = 'daffy@darkwing.uoregon.edu' # he's a duck,get it?
-            d
-          end
-
-          context 'where the target attribute exists, and matches the predicate' do
-            it { should_not be_empty }
-            its(:first) { should match(/Attribute #{Regexp.quote('$.duck.age')} is required when name #{Regexp.quote('(for $.duck)')} matches/) }
-          end
-
-          context 'where the target attribute exists, and does not match the predicate' do
-            before do
-              duck.name = 'Donald'
-            end
-            it { should be_empty }
-          end
-
-          context 'where the target attribute does not exist' do
-            before do
-              duck.name = nil
-            end
-            it { should be_empty }
-          end
-        end
-      end
     end
   end
 
@@ -755,6 +684,26 @@ describe Attributor::Attribute do
           expect(member_attribute.attributes[:angry].options).to eq(Chicken.attributes[:angry].options.merge(required: true))
         end
       end
+    end
+  end
+
+  context '.nullable_attribute?' do
+    subject { described_class.nullable_attribute?(options) }
+    context 'with null: true option' do
+      let(:options) { { null: true } }  
+      it { should be_truthy }
+    end
+    context 'with null: false option' do
+      let(:options) { { null: false } }  
+      it { should be_falsey }
+    end
+    context 'defaults to false without any null option' do
+      let(:options) { { } }  
+      it { should be_falsey }
+    end
+    context 'defaults to false if null: nil' do
+      let(:options) { { null: nil } }  
+      it { should be_falsey }
     end
   end
 end

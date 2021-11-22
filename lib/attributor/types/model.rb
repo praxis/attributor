@@ -129,27 +129,9 @@ module Attributor
       @validating = true
 
       context = [context] if context.is_a? ::String
-      keys_with_values = []
-      errors = []
-
-      self.class.attributes.each do |sub_attribute_name, sub_attribute|
-        sub_context = self.class.generate_subcontext(context, sub_attribute_name)
-
-        value = __send__(sub_attribute_name)
-        keys_with_values << sub_attribute_name unless value.nil?
-
-        if value.respond_to?(:validating) # really, it's a thing with sub-attributes
-          next if value.validating
-        end
-
-        errors.concat sub_attribute.validate(value, sub_context)
-      end
-      self.class.requirements.each do |req|
-        validation_errors = req.validate(keys_with_values, context)
-        errors.concat(validation_errors) unless validation_errors.empty?
-      end
-
-      errors
+      # Use the common, underlying attribute validation of the hash (which will use our _get_attr)
+      # to know how to retrieve a value from a model (instead of a hash)
+      validate_keys(context)
     ensure
       @validating = false
     end
@@ -198,4 +180,10 @@ module Attributor
       @dumping = false
     end
   end
+
+  # Override the generic way to get a value from an instance (models need to call the method)
+  def _get_attr(k)
+    __send__(k)
+  end    
+
 end

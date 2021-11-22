@@ -371,7 +371,12 @@ describe Attributor::Model do
     context 'for models using the "requires" DSL' do
       subject(:address) { Address.load({state: 'CA'}) }
       its(:validate) { should_not be_empty }
-      its(:validate) { should include 'Key name is required for $.' }
+      its(:validate) { should include 'Attribute $.key(:name) is required.' }
+    end
+    context 'for models with non-nullable attributes' do
+      subject(:address) { Address.load({name: nil, state: nil}) }
+      its(:validate) { should_not be_empty }
+      its(:validate) { should include 'Attribute $.state is not nullable.' } # name is nullable
     end
     context 'for models with circular sub-attributes' do
       context 'that are valid' do
@@ -478,6 +483,7 @@ describe Attributor::Model do
 
       it 'supports defining sub-attributes using the proper reference' do
         expect(struct.attributes[:neighbors].options[:required]).to be true
+        expect(struct.attributes[:neighbors].options[:null]).to be false
         expect(struct.attributes[:neighbors].type.member_attribute.type.attributes.keys).to match_array [:name, :age]
 
         name_options = struct.attributes[:neighbors].type.member_attribute.type.attributes[:name].options

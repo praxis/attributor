@@ -109,31 +109,31 @@ describe Attributor::HashDSLCompiler do
       context 'for :all' do
         let(:arguments) { { all: [:one, :two, :three] } }
         let(:value) { [:one] }
-        let(:validation_error) { ['Key two is required for $.', 'Key three is required for $.'] }
+        let(:validation_error) { ["Attribute $.key(:two) is required.", "Attribute $.key(:three) is required."] }
         it { expect(subject).to include(*validation_error) }
       end
       context 'for :exactly' do
         let(:requirement) { req_class.new(exactly: 1).of(:one, :two) }
         let(:value) { [:one, :two] }
-        let(:validation_error) { 'Exactly 1 of the following keys [:one, :two] are required for $. Found 2 instead: [:one, :two]' }
+        let(:validation_error) { 'Exactly 1 of the following attributes [:one, :two] are required for $. Found 2 instead: [:one, :two]' }
         it { expect(subject).to include(validation_error) }
       end
       context 'for :at_least' do
         let(:requirement) { req_class.new(at_least: 2).of(:one, :two, :three) }
         let(:value) { [:one] }
-        let(:validation_error) { 'At least 2 keys out of [:one, :two, :three] are required to be passed in for $. Found [:one]' }
+        let(:validation_error) { 'At least 2 attributes out of [:one, :two, :three] are required to be passed in for $. Found [:one]' }
         it { expect(subject).to include(validation_error) }
       end
       context 'for :at_most' do
         let(:requirement) { req_class.new(at_most: 1).of(:one, :two, :three) }
         let(:value) { [:one, :two] }
-        let(:validation_error) { 'At most 1 keys out of [:one, :two, :three] can be passed in for $. Found [:one, :two]' }
+        let(:validation_error) { 'At most 1 attributes out of [:one, :two, :three] can be passed in for $. Found [:one, :two]' }
         it { expect(subject).to include(validation_error) }
       end
       context 'for :exclusive' do
         let(:arguments) { { exclusive: [:one, :two] } }
         let(:value) { [:one, :two] }
-        let(:validation_error) { 'keys [:one, :two] are mutually exclusive for $.' }
+        let(:validation_error) { 'Attributes [:one, :two] are mutually exclusive for $.' }
         it { expect(subject).to include(validation_error) }
       end
     end
