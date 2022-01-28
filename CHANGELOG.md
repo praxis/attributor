@@ -1,6 +1,7 @@
 # Attributor Changelog
 
 ## next
+- added support for enum's out of values in json_schema generation
 
 ## 6.0 (22/11/2021)
 - removed `required_if` support and all of the necessary code. 

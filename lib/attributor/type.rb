@@ -135,6 +135,9 @@ module Attributor
         if hash[:type] == :string && the_format = json_schema_string_format
           hash[:format] = the_format
         end
+        # Common options
+        hash[:enum] = attribute_options[:values] if attribute_options[:values]
+  
         hash
       end
 
