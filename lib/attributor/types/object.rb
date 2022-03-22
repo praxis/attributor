@@ -13,10 +13,20 @@ module Attributor
     def self.example(_context = nil, options: {})
       'An Object'
     end
-        
+
+    # Not really used (we override as_json_schema to represent this as an Any Type),
+    # but if it _were_ used, this would be accurate.
     def self.json_schema_type
-      :object #FIXME: not sure this is the most appropriate, since an Attributor::Object can be anything
+      :object
     end
 
+    # Represents Object as an OpenAPI Any Type.
+    #
+    # @see https://swagger.io/docs/specification/data-models/data-types/#any
+    def self.as_json_schema(**kwargs)
+      schema = super(**kwargs)
+      schema.delete(:type)
+      schema
+    end
   end
 end
