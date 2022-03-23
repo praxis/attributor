@@ -130,10 +130,14 @@ module Attributor
   
       def as_json_schema( shallow: false, example: nil, attribute_options: {} )
         type_name = self.ancestors.find { |k| k.name && !k.name.empty? }.name
-        hash = { type: json_schema_type, 'x-type_name': type_name.gsub( Attributor::MODULE_PREFIX_REGEX, '' )}
-        # Add a format, if the type has defined
-        if hash[:type] == :string && the_format = json_schema_string_format
-          hash[:format] = the_format
+        hash = { 'x-type_name': type_name.gsub( Attributor::MODULE_PREFIX_REGEX, '' )}
+        if json_schema_type
+          # A type key does not exist for 'any' (i.e., a nil value for json_schema_type)
+          hash[:type] = json_schema_type   
+          # Add a format, if the type has defined
+          if hash[:type] == :string && the_format = json_schema_string_format
+            hash[:format] = the_format
+          end
         end
         # Common options
         hash[:enum] = attribute_options[:values] if attribute_options[:values]
