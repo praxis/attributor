@@ -1,7 +1,7 @@
 # Attributor Changelog
 
 ## next
-- added support for enum's out of values in json_schema generation
+- Correctly report an Object type as a schema without a :type in open api output
 
 ## 6.1 (1/7/2022)
 - added support for enum's out of values in json_schema generation
