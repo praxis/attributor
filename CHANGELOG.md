@@ -1,7 +1,7 @@
 # Attributor Changelog
 
 ## next
-- added support for enum's out of values in json_schema generation
+- Added .to_hash for Model/Struct, which returns a symbolized key hash (without recursing). This allows to splat instances of Model/Structs into functions that have keyword arguments.
 
 ## 6.1 (1/7/2022)
 - added support for enum's out of values in json_schema generation
