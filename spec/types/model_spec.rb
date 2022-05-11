@@ -523,4 +523,26 @@ describe Attributor::Model do
       expect(example.dump).to eq({})
     end
   end
+
+  context '#to_hash' do
+    let(:model_type) do
+      Class.new(Attributor::Model) do
+        attributes do
+          attribute :name, String
+          attribute :subkey do
+            attribute :id, Integer
+          end
+        end
+      end
+    end
+
+    subject { model_type.new(name: 'Praxis', subkey: { id: 1 }).to_hash }
+    it 'returns the top keys as a hash' do
+      expect(subject.keys).to eq([:name, :subkey])
+    end
+    it 'does not recurse down' do
+      expect(subject[:subkey]).to be_kind_of Attributor::Struct
+    end
+  end
+
 end

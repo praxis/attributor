@@ -179,6 +179,11 @@ module Attributor
     ensure
       @dumping = false
     end
+
+    # This allows the splatting of these instances into method calls (top level hash conversion only)
+    def to_hash
+      @contents
+    end
   end
 
   # Override the generic way to get a value from an instance (models need to call the method)
