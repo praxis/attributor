@@ -1,6 +1,8 @@
 # Attributor Changelog
 
 ## next
+
+## 6.2 (5/11/2022)
 - Added .to_hash for Model/Struct, which returns a symbolized key hash (without recursing). This allows to splat instances of Model/Structs into functions that have keyword arguments.
 
 ## 6.1 (1/7/2022)
