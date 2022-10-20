@@ -41,6 +41,13 @@ module Attributor
     @error = false
     @requirements = []
 
+    def self.slice!(*keys)
+      missing_keys = keys - @keys.keys
+      raise AttributorException, "Cannot slice! this type, because it does not contain one or more of the requested keys: #{missing_keys}" unless missing_keys.empty?
+      instance_variable_set(:@keys, @keys.slice(*keys))
+      self
+    end
+
     def self.key_type=(key_type)
       @key_type = Attributor.resolve_type(key_type)
       @key_attribute = Attribute.new(@key_type)
@@ -461,6 +468,7 @@ module Attributor
       else
         hash[:value] = { type: value_type.describe(true) }
         hash[:example] = example if example
+        hash[:attributes] = {}
       end
 
       hash
@@ -567,7 +575,15 @@ module Attributor
       when self.class
         self.class.new(contents.merge(h.contents))
       when Attributor::Hash
-        raise ArgumentError, 'cannot merge Attributor::Hash instances of different types' unless h.is_a?(self.class)
+        source_key_type = self.class.key_type
+        source_value_type = self.class.value_type
+        # Allow merging hashes, but we'll need to coerce keys and/or values if they aren't the same type
+        coerced_contents = h.contents.each_with_object({}) do |(key, val), object|
+          k = (source_key_type && !k.is_a?(source_key_type)) ? source_key_type.load(key) : key
+          v = (source_value_type && !k.is_a?(source_value_type)) ? source_value_type.load(val) : val
+          object[k] = v
+        end
+        self.class.new(contents.merge(coerced_contents))
       else
         raise TypeError, "no implicit conversion of #{h.class} into Attributor::Hash"
       end

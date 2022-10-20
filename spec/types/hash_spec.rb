@@ -1189,16 +1189,15 @@ describe Attributor::Hash do
   end
 
   context '#merge' do
-    let(:hash_of_strings) { Attributor::Hash.of(key: String) }
-    let(:hash_of_symbols) { Attributor::Hash.of(key: Symbol) }
+    let(:hash_of_strings) { Attributor::Hash.of(key: String, value: Integer) }
+    let(:hash_of_symbols_and_string_vals) { Attributor::Hash.of(key: Symbol) }
 
     let(:merger) { hash_of_strings.load({'a' => 1},nil) }
     let(:good_mergee) { hash_of_strings.load({'b' => 2},nil) }
-    let(:bad_mergee) { hash_of_symbols.load({c: 3}) }
+    let(:different_hash_mergee) { hash_of_symbols_and_string_vals.load({c: '3'}) }
     let(:result) { hash_of_strings.load({'a' => 1, 'b' => 2},nil) }
 
     it 'validates that the mergee is of like type' do
-      expect { merger.merge(bad_mergee) }.to raise_error(ArgumentError)
       expect { merger.merge({}) }.to raise_error(TypeError)
       expect { merger.merge(nil) }.to raise_error(TypeError)
     end
@@ -1209,6 +1208,14 @@ describe Attributor::Hash do
 
     it 'merges' do
       expect(merger.merge(good_mergee)).to eq(result)
+    end
+
+    it 'allows Hash merges, even if they come from different types, by coercing keys/values' do
+      merged = merger.merge(different_hash_mergee)
+      expect(merged).to be_a(hash_of_strings)
+      result = hash_of_strings.load({'a' => 1, 'c' => 3},nil)
+      # :c is coerced to 'c' and values are coerced to integers
+      expect(merged).to eq(result)
     end
   end
 
