@@ -45,6 +45,13 @@ module Attributor
       check_options!
     end
 
+    def duplicate(type: nil, options: nil)
+      clone.tap do |cloned|
+        cloned.instance_variable_set(:@type, type) if type
+        cloned.instance_variable_set(:@options, options) if options
+      end
+    end
+
     def ==(other)
       raise ArgumentError, "can not compare Attribute with #{other.class.name}" unless other.is_a?(Attribute)
 
