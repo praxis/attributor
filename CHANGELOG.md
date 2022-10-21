@@ -1,6 +1,10 @@
 # Attributor Changelog
 
 ## next
+- Added some small utility enhancements for dealing with attributes and types
+  * .duplicate an attribute, with a different inner type and/or options
+  * .slice a Hash/Model/Struct to reduce the number of keys that it holds
+  * .merge two Hash/Model/Struct keys into an existing one (even if the types differ)
 
 ## 6.2 (5/11/2022)
 - Added .to_hash for Model/Struct, which returns a symbolized key hash (without recursing). This allows to splat instances of Model/Structs into functions that have keyword arguments.
