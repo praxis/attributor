@@ -46,6 +46,7 @@ module Attributor
         @value_attribute = va
 
         @requirements = []
+        @cached_defaults = {}
         @error = false
       end
     end

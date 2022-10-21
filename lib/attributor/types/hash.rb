@@ -30,6 +30,7 @@ module Attributor
       attr_reader :insensitive_map
       attr_accessor :extra_keys
       attr_reader :requirements
+      attr_reader :cached_defaults
     end
 
     @key_type = Object
@@ -40,6 +41,7 @@ module Attributor
 
     @error = false
     @requirements = []
+    @cached_defaults = {}
 
     def self.slice!(*keys)
       missing_keys = keys - @keys.keys
@@ -81,7 +83,7 @@ module Attributor
         @key_attribute = Attribute.new(@key_type)
         @value_attribute = Attribute.new(@value_type)
         @requirements = []
-
+        @cached_defaults = {}
         @error = false
       end
     end
@@ -419,13 +421,20 @@ module Attributor
       # handle default values for missing keys
       keys.each do |key_name, attribute|
         next if hash.key?(key_name)
-        sub_context = generate_subcontext(context, key_name)
-        default = attribute.load(nil, sub_context, recurse: recurse)
+
+        # Cache default values to avoid a whole loading call for the attribute
+        default = if @cached_defaults.key?(key_name)
+          @cached_defaults[key_name]
+        else
+          sub_context = generate_subcontext(context, key_name)
+          @cached_defaults[key_name] = attribute.load(nil, sub_context, recurse: recurse)
+        end
         hash[key_name] = default unless default.nil?
       end
-
       hash
     end
+
+    
 
     def self.validate(object, context = Attributor::DEFAULT_ROOT_CONTEXT, _attribute)
       context = [context] if context.is_a? ::String
