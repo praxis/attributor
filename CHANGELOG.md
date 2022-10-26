@@ -1,6 +1,8 @@
 # Attributor Changelog
 
 ## next
+
+## 6.4 (10/26/2022)
 - Cache default values for a type, to speedup loading/coercing an object to it
 
 ## 6.3 (10/21/2022)

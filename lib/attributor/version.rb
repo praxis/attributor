@@ -1,3 +1,3 @@
 module Attributor
-  VERSION = '6.3'.freeze
+  VERSION = '6.4'.freeze
 end
