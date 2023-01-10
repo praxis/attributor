@@ -1,8 +1,9 @@
 require 'bigdecimal'
 
 module Attributor
-  class BigDecimal 
-    include Numeric
+  class BigDecimal
+    include Type
+
     def self.native_type
       ::BigDecimal
     end
