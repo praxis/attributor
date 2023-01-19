@@ -2,6 +2,9 @@
 
 ## next
 
+## 6.5 (1/19/2023)
+- Fix JSON schema reporting for BigDecimal types to be a string, with a format=bigdecimal
+
 ## 6.4 (10/26/2022)
 - Cache default values for a type, to speedup loading/coercing an object to it
 
