@@ -1,8 +1,9 @@
 require 'bigdecimal'
 
 module Attributor
-  class BigDecimal 
-    include Numeric
+  class BigDecimal
+    include Type
+
     def self.native_type
       ::BigDecimal
     end
@@ -19,7 +20,18 @@ module Attributor
     end
 
     def self.json_schema_type
-      :number
+      :string
+    end
+
+    # Bigdecimal numbers are too big to be represented as numbers in JSON schema
+    # The way to do so, is to represent them as strings, but add a 'format' specifying
+    # how to parse that (seemingly, there is a 'double' well known type that json API 
+    # claims we can use) ... not sure if this is the right one, as technically BigDecimal
+    # has very large precision that a double wouldn't be able to fit...
+    def self.as_json_schema( shallow: false, example: nil, attribute_options: {} )
+      hash = super
+      hash[:format] = 'bigdecimal'
+      hash
     end
   end
 end
