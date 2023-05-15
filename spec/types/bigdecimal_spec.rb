@@ -42,6 +42,11 @@ describe Attributor::BigDecimal do
         expect(type.load('0')).to eq(0)
         expect(type.load('100')).to eq(100)
         expect(type.load('0.1')).to eq(0.1)
+        expect(type.load('.2')).to eq(0.2)
+        expect(type.load('-.2')).to eq(-0.2)
+        expect(type.load('10.')).to eq(10.0)
+        expect(type.load('-10.')).to eq(-10.0)
+        expect(type.load('-0.')).to eq(-0.0)
       end
     end
   end
@@ -49,7 +54,7 @@ describe Attributor::BigDecimal do
     subject(:js){ type.as_json_schema }
     it 'adds the right attributes' do
       expect(js.keys).to include(:type, :'x-type_name')
-      expect(js[:type]).to eq(:number)
+      expect(js[:type]).to eq(:string)
       expect(js[:'x-type_name']).to eq('BigDecimal')
     end
   end
