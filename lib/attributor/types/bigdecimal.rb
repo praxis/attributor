@@ -16,6 +16,7 @@ module Attributor
       return nil if value.nil?
       return value if value.is_a?(native_type)
       return BigDecimal(value, 10) if value.is_a?(::Float)
+      return BigDecimal(value + '0') if value.is_a?(::String) && value.end_with?('.')
       BigDecimal(value)
     end
 

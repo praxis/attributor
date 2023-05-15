@@ -51,10 +51,18 @@ describe Attributor::Float do
 
     context 'for incoming String values' do
       context 'that are valid Floats' do
-        ['0.0', '-1.0', '1.0', '1e-10'].each do |value|
+        ['.2', '-.2', '0.0', '-1.0', '1.0', '1e-10'].each do |value|
           it 'decodes it if the String represents a Float' do
             expect(type.load(value)).to eq Float(value)
           end
+        end
+        it 'decodes it if the String represents a Float and ends in .' do
+          expect(type.load('10.')).to eq Float('10.0')
+          expect(type.load('0.')).to eq Float('0.0')
+        end
+        it 'decodes it if the String represents a negative Float and ends in .' do
+          expect(type.load('-10.')).to eq Float('-10.0')
+          expect(type.load('-0.')).to eq Float('-0.0')
         end
       end
 
