@@ -1,6 +1,7 @@
 # Attributor Changelog
 
 ## next
+- Support for loading "<digits>." strings in BigDecimal/Float types (These are formats supported by JS, Java ..)
 
 ## 6.5 (1/19/2023)
 - Fix JSON schema reporting for BigDecimal types to be a string, with a format=bigdecimal
