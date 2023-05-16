@@ -11,7 +11,10 @@ module Attributor
       # not REALLY trying to define a new struct. more than likely Collection is calling
       # construct on us.
       unless self == Attributor::Struct || attribute_definition.nil?
-        raise AttributorException, 'can not construct from already-constructed Struct'
+        raise AttributorException, "can not construct from already-constructed Struct: #{self}"
+        # TODO: give a good explanation of what this means (a full type cannot take a block to redefine)...and the fact
+        # that only a Struct (or collection of Struct) can do that...and the fact that this might be due to not having
+        # a type in the definition, and the fact that the full type might be inherited...so perhaps you forgot to add Struct/Collection(Struct) to it
       end
 
       # TODO: massage the options here to pull out only the relevant ones

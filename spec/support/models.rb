@@ -79,6 +79,11 @@ class Address < Attributor::Model
     attribute :name, String, example: /\w+/, null: true
     attribute :state, String, values: %w(OR CA), null: false
     attribute :person, Person, example: proc { |address, context| Person.example(context, address: address) }
+    attribute :substruct, reference: Address, null: false do
+      attribute :state, Struct do # redefine state as a Struct
+        attribute :foo, Integer, default: 1
+      end
+    end
     requires :name
   end
 end

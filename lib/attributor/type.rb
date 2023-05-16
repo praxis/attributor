@@ -149,7 +149,9 @@ module Attributor
           option_value  # By default, describing an option returns the hash with the specification
         end
       end
-
+      def options
+        {}
+      end
     end
   end
 end
