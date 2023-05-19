@@ -175,4 +175,16 @@ describe Attributor::Type do
       end
     end
   end
+
+  context 'collection sugar' do
+    [:BigDecimal, :Boolean, :Class, :DateTime, :Date, :FileUpload, :Float, :Hash, :Integer, 
+      :Model, :Object, :Regexp, :String, :Struct, :Symbol, :Tempfile, :Time, :URI].each do |type|
+      it "DSL is equivalent to Attributor::Collection.of(#{type})" do
+        collection = Attributor.const_get(type)[]
+        expect(collection).to be < Attributor::Collection
+        expect(collection.member_type).to be Attributor.const_get(type)
+      end
+      
+    end
+  end
 end

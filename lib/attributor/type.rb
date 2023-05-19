@@ -4,6 +4,11 @@ module Attributor
   module Type
     extend ActiveSupport::Concern
 
+    included do
+      def self.[]
+        ::Attributor::Collection.of(self)
+      end
+    end
     module ClassMethods
       # Does this type support the generation of subtypes?
       def constructable?
