@@ -115,11 +115,17 @@ module Attributor
       if ref
         if ref.respond_to?(:attributes) && ref.attributes.key?(name)
           type_from_ref = ref.attributes[name]&.type
-          unless type_from_ref == Attributor::Struct || type_from_ref == Attributor::Collection.of(Attributor::Struct)
-            good_explanation_about_redefining_already_defined_types(name, ref, type_from_ref, &block)
-          end
-          resolved_type = type_from_ref # Return the raw, and anonymous type Struct or Attributor::Collection.of(Attributor::Struct)
-          carried_options = ref.attributes[name].options # Somehow bring any options from the anonymous type 
+
+          resolved_type = type_from_ref < Attributor::Collection ? Attributor::Struct[] : Attributor::Struct
+
+          # unless type_from_ref == Attributor::Struct || type_from_ref == Attributor::Collection.of(Attributor::Struct)
+          #   good_explanation_about_redefining_already_defined_types(name, ref, type_from_ref, &block)
+          # end
+          # resolved_type = type_from_ref # Return the raw, and anonymous type Struct or Attributor::Collection.of(Attributor::Struct)
+
+          # TODO: We could default to Struct[] if we see the reference is a Collection ...
+          # resolved_type = Attributor::Struct
+          #carried_options = ref.attributes[name].options # Somehow bring any options from the type?
         else
           puts "WARNING: Type for attribute with name: #{name} could not be determined from reference: #{ref}...defaulting to Struct"
           resolved_type = Attributor::Struct

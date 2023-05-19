@@ -98,11 +98,13 @@ describe Attributor::DSLCompiler do
         before { expect(dsl_compiler_options[:reference].attributes).to have_key(attribute_name) }
         let(:dsl_compiler_options) { { reference: Turducken } }
         let(:expected_options) do
-          reference_attribute_options.merge(attribute_options).merge(reference: reference_type)
+          attribute_options.merge(reference: reference_type)
         end
 
-        it 'fails, since the inherited type is a fully defined struct, which cannot be redefined by a block' do
-          expect{dsl_compiler.attribute(attribute_name, **attribute_options, &attribute_block)}.to raise_error(/Invalid redefinition of attributes for an already existing type/)
+        it 'defaults still to Struct (or Struct[] if reference type is a collection)' do
+          expect(Attributor::Attribute).to receive(:new)
+            .with(expected_type, expected_options)
+          dsl_compiler.attribute(attribute_name, **attribute_options, &attribute_block)
         end
       end
 
@@ -135,7 +137,9 @@ describe Attributor::DSLCompiler do
     #          - Fail. Cannot determine type
     #   1.2) if it has a block
     #     1.2.1) with an reference with an attr with the same name
-    #          - Fail, as the reference would be a full type, and we cannot merge it with the block
+    #          - Assume you want to define your new Struct (or Struct[]), yet pass ONLY the reference to the matching attribute
+    #            as you might want to refine the reference attributes (or not, but if you want, you can do it more tersely)
+    #           - the picked type will be Struct[] (if the reference attribute is a collection), or Struct otherwise
     #     1.2.2) without a ref (or the ref does not have same attribute name)
     #          - defaulted to Struct (if you meant Collection.of(Struct) things would fail later somehow)
     #          - options are NOT inherited at all (This is something we should ponder more about)
@@ -195,39 +199,62 @@ describe Attributor::DSLCompiler do
       end
       context 'with block (if it is NOT a leaf)' do
         context 'that has a reference with an attribute with the same name' do
-          let(:myblock) { 
-            Proc.new do
-              attributes reference: Duck do
-                attribute :age do
-                  attribute :foobar, Integer
+
+          context 'which is not a Collection' do
+            let(:myblock) { 
+              Proc.new do
+                attributes reference: Duck do
+                  attribute :age, description: 'I am redefining'do
+                    attribute :foobar, Integer, min: 42
+                  end
                 end
               end
+            }
+            it 'defaults to Struct' do
+              expect(mytype.attributes).to have_key(:age)
+              age_attribute = mytype.attributes[:age]
+              # Resolves to Struct
+              expect(age_attribute.type).to be < Attributor::Struct
+              # does NOT brings any ref options 
+              expect(age_attribute.options).to include(description: 'I am redefining')
+              expect(age_attribute.options).to include(reference: Duck.attributes[:age].type)
+              # And the nested attribute is correctly resolved as well, and ensures options are there
+              expect(age_attribute.type.attributes[:foobar].type).to eq(Attributor::Integer)
+              expect(age_attribute.type.attributes[:foobar].options).to eq(min: 42)
             end
-          }
-          it 'fails resolving' do
-            expect{mytype.attributes}.to raise_error(/Invalid redefinition of attributes for an already existing type/)
           end
-          # context 'in the unlikely case that the reference type has an anonymous Struct (or collection of)' do
-          #   let(:myblock) { 
-          #     Proc.new do
-          #       attributes reference: PersonBlueprint do
-          #         attribute :funny_attribute, description: 'Funny business' do
-          #           attribute :foobar, Integer, min: 42
-          #         end
-          #       end
-          #     end
-          #   }
-          #   it 'correctly inherits it (same result as defaulting to Struct) and brings in the options' do
-          #     expect(mytype.attributes).to have_key(:funny_attribute)
-          #     # Resolves to Struct, and brings (and merges) the ref options with the attribute's
-          #     expect(mytype.attributes[:funny_attribute].type).to be < Attributor::Struct
-          #     merged_options = PersonBlueprint.attributes[:funny_attribute].options.merge(description: 'Funny business')
-          #     expect(mytype.attributes[:funny_attribute].options).to include(merged_options)
-          #     # And the nested attribute is correctly resolved as well, and ensures options are there
-          #     expect(mytype.attributes[:funny_attribute].type.attributes[:foobar].type).to eq(Attributor::Integer)
-          #     expect(mytype.attributes[:funny_attribute].type.attributes[:foobar].options).to eq(min: 42)
-          #   end
-          # end
+          context 'which is a Collection' do
+            let(:myblock) { 
+              Proc.new do
+                attributes reference: Cormorant do
+                  # Babies is defined as a collection of structs
+                  attribute :babies, description: 'I am redefining babies'do
+                    attribute :name
+                    attribute :height, Integer, max: 33
+                  end
+                end
+              end
+            }
+            it 'defaults to Struct[]' do
+              expect(mytype.attributes).to have_key(:babies)
+              babies_attribute = mytype.attributes[:babies]
+              # Resolves to Struct[]
+              expect(babies_attribute.type).to be < Attributor::Collection
+              expect(babies_attribute.type.member_type).to be < Attributor::Struct
+              # does NOT brings any ref options 
+              expect(babies_attribute.options).to include(description: 'I am redefining babies')
+              expect(babies_attribute.options).to include(reference: Cormorant.attributes[:babies].type.member_type)
+
+              expect(babies_attribute.type).to be < Attributor::Collection
+              babies_member_attribute = babies_attribute.type.member_attribute
+              # And the nested attribute is correctly resolved as well, and ensures options are there
+              expect(babies_member_attribute.type.attributes[:name].type).to eq(Cormorant.attributes[:babies].type.member_type.attributes[:name].type)
+              expect(babies_member_attribute.type.attributes[:name].options).to eq(Cormorant.attributes[:babies].type.member_type.attributes[:name].options)
+              # Can add new attributes
+              expect(babies_member_attribute.type.attributes[:height].type).to eq(Attributor::Integer)
+              expect(babies_member_attribute.type.attributes[:height].options).to eq(max: 33)
+            end
+          end
         end
         context 'with a reference, but that does not have a matching attribute name' do
           let(:myblock) { 
