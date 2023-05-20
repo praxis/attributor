@@ -12,13 +12,9 @@ module Attributor
     # @example Collection.of(Integer)
     #
     def self.of(type)
+      # Favor T[] since that even caches the non-construcable types
       resolved_type = Attributor.resolve_type(type)
-      unless resolved_type.ancestors.include?(Attributor::Type)
-        raise Attributor::AttributorException, 'Collections can only have members that are Attributor::Types'
-      end
-      ::Class.new(self) do
-        @member_type = resolved_type
-      end
+      resolved_type[]
     end
 
     @options = {}

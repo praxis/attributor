@@ -6,7 +6,26 @@ module Attributor
 
     included do
       def self.[]
-        ::Attributor::Collection.of(self)
+        return @collection_type_memo if @collection_type_memo
+
+        unless self.ancestors.include?(Attributor::Type)
+          raise Attributor::AttributorException, 'Collections can only have members that are Attributor::Types'
+        end
+
+        member_class = self
+        # Create and memoize it for non-constructable types here (like we do in Type[])
+        new_class = ::Class.new(Attributor::Collection) do
+          @member_type = member_class
+        end
+        if self.constructable?
+          new_class
+        else
+          # Cannot freeze the memoized class as it lazily sets the member_attribute inside
+          @collection_type_memo = new_class 
+        end
+        # return ::Attributor::Collection.of(self) if constructable?
+        # # cache generated type if it is non-constructable (e.g. a fully fledged, immutable type)
+        # @collection_type_memo ||= ::Attributor::Collection.of(self).freeze
       end
     end
     module ClassMethods
