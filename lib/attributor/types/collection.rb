@@ -14,7 +14,7 @@ module Attributor
     def self.of(type)
       # Favor T[] since that even caches the non-construcable types
       resolved_type = Attributor.resolve_type(type)
-      resolved_type[]
+      resolved_type[self]
     end
 
     @options = {}

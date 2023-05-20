@@ -4,28 +4,60 @@ module Attributor
   module Type
     extend ActiveSupport::Concern
 
+      # Memoized collection classes of specific type (by collection type)
+      # i.e., CSV is a Collection of String, which is different from a pure Collection (default)
+      # key = membertype class (i.e., String)
+      # value = Hash
+      #    key = concrete collection class: Attributor::Collection (default) or Attributor::CSV...
+      #   value = memoized constructed collection class of the given member type and collection type
+      # example: 
+      # String => { 
+      #   Attributor::Collection => Attributor::Collection.of(String), 
+      #   Attributor::CSV => Attributor::CSV.of(String)
+      # }
+      # It memoized them on in the base Type class, properly serializing access through a mutex
+      @_memoized_collection_classes = Hash.new do |h, k|
+        h[k] = {}
+      end
+      @_memoized_collection_classes_mutex = Mutex.new
+
+      class << self
+        attr_accessor :_memoized_collection_classes
+        def get_memoized_collection_class(member_class, collection_type=Attributor::Collection)
+          @_memoized_collection_classes_mutex.synchronize do
+            _memoized_collection_classes.dig(member_class,collection_type)
+          end
+        end
+        def set_memoized_collection_class(klass, member_class, collection_type=Attributor::Collection)
+          @_memoized_collection_classes_mutex.synchronize do
+            _memoized_collection_classes[member_class][collection_type] = klass
+          end
+        end
+      end
+
     included do
-      def self.[]
-        return @collection_type_memo if @collection_type_memo
+      # Creates a new type that is a collection of this member types
+      # By default, T[] is equivalent to Collection.of(T)
+      # But you can pass the collection class to use, e.g. T[CSV] is equivalent to CSV.of(T)
+      def self.[](collection_type=Attributor::Collection)
+        member_class = self
+        existing = Attributor::Type.get_memoized_collection_class(member_class,collection_type)
+        return existing if existing
 
         unless self.ancestors.include?(Attributor::Type)
           raise Attributor::AttributorException, 'Collections can only have members that are Attributor::Types'
         end
 
-        member_class = self
         # Create and memoize it for non-constructable types here (like we do in Type[])
-        new_class = ::Class.new(Attributor::Collection) do
+        new_class = ::Class.new(collection_type) do
           @member_type = member_class
         end
         if self.constructable?
           new_class
         else
-          # Cannot freeze the memoized class as it lazily sets the member_attribute inside
-          @collection_type_memo = new_class 
+          # Unfortunately we cannot freeze the memoized class as it lazily sets the member_attribute inside
+          Attributor::Type.set_memoized_collection_class(new_class, member_class, collection_type)
         end
-        # return ::Attributor::Collection.of(self) if constructable?
-        # # cache generated type if it is non-constructable (e.g. a fully fledged, immutable type)
-        # @collection_type_memo ||= ::Attributor::Collection.of(self).freeze
       end
     end
     module ClassMethods
