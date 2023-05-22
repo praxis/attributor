@@ -33,7 +33,16 @@ module Attributor
 
     def attribute(name, attr_type = nil, **opts, &block)
       raise AttributorException, "Attribute names must be symbols, got: #{name.inspect}" unless name.is_a? ::Symbol
-      raise AttributorException, ":reference option can only be used when defining blocks" if opts[:reference] && !block_given? 
+      if opts[:reference]
+        raise AttributorException, ":reference option can only be used when defining blocks"  unless block_given? 
+        if opts[:reference] < Attributor::Collection
+          err = ":reference option cannot be a collection. It must be a concrete type of Struct-like type where to look up the type"
+               "for the attribute #{name} you are defining"
+          location_file, location_line = block.source_location               
+          err += "The place where you are trying to define the attribute is here:\n#{location_file} line #{location_line}\n#{block.source}\n"
+          raise AttributorException, err
+        end
+      end
       target.attributes[name] = define(name, attr_type, **opts, &block)
     end
 

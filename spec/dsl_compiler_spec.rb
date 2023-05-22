@@ -245,7 +245,6 @@ describe Attributor::DSLCompiler do
               expect(babies_attribute.options).to include(description: 'I am redefining babies')
               expect(babies_attribute.options).to include(reference: Cormorant.attributes[:babies].type.member_type)
 
-              expect(babies_attribute.type).to be < Attributor::Collection
               babies_member_attribute = babies_attribute.type.member_attribute
               # And the nested attribute is correctly resolved as well, and ensures options are there
               expect(babies_member_attribute.type.attributes[:name].type).to eq(Cormorant.attributes[:babies].type.member_type.attributes[:name].type)
@@ -253,6 +252,50 @@ describe Attributor::DSLCompiler do
               # Can add new attributes
               expect(babies_member_attribute.type.attributes[:height].type).to eq(Attributor::Integer)
               expect(babies_member_attribute.type.attributes[:height].options).to eq(max: 33)
+            end
+          end
+
+          context 'explicitly passing Collections' do
+            context 'using the full collection as reference' do
+              let(:myblock) { 
+                Proc.new do
+                  attributes do
+                    # Babies is defined as a collection of structs
+                    attribute :babies, reference: Cormorant[], description: 'I am redefining babies' do
+                    
+                      attribute :name
+                      attribute :height, Integer, max: 33
+                    end
+                  end
+                end
+              }
+              it 'complains, as reference must not be a collection' do
+                expect{mytype.attributes}.to raise_error(/:reference option cannot be a collection/)
+              end
+            end
+
+            context 'overriding the reference for a redefinition of a collection' do
+              let(:myblock) { 
+                Proc.new do
+                  attributes reference: Cormorant do
+                    # Babies is defined as a collection of structs, but we're passing a full (compatible) cormorant reference
+                    attribute :babies, reference: Cormorant, description: 'I am redefining babies'do
+                      attribute :name
+                      attribute :height, Integer, max: 33
+                    end
+                  end
+                end
+              }
+              it 'still unrolls it, defaults to Struct[] and properly resolves into the member type' do
+                expect(mytype.attributes).to have_key(:babies)
+                babies_attribute = mytype.attributes[:babies]
+                # Resolves to Struct[]
+                expect(babies_attribute.type).to be < Attributor::Collection
+                expect(babies_attribute.type.member_type).to be < Attributor::Struct
+                # does NOT brings any ref options 
+                expect(babies_attribute.options).to include(description: 'I am redefining babies')
+                expect(babies_attribute.options).to include(reference: Cormorant)
+              end
             end
           end
         end
