@@ -2,6 +2,12 @@
 
 ## next
 - Support for loading "<digits>." strings in BigDecimal/Float types (These are formats supported by JS, Java ..)
+- Support for defining collections of types using a more terse DSL: T[]
+  - For example: Attributor::Integer[] is equivalent to Attributor::Collection.of(Attributor::Integer)
+  - It also caches these collection types when they are concrete (i.e., not constructable like Struct[], etc...)
+- Revamped the type and options inheritance (and :reference behavior) when defining attributes:
+  - The matrix of behavior is now fully defined, and all possible combinations of parameters are tested
+  - tightened up some error cases and messaging (i.e., cannot pass :reference unless there is a block, etc...)
 
 ## 6.5 (1/19/2023)
 - Fix JSON schema reporting for BigDecimal types to be a string, with a format=bigdecimal
