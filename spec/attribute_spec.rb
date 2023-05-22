@@ -323,7 +323,7 @@ describe Attributor::Attribute do
     end
 
     context 'with a regexp' do
-      let(:example) { /\w+/ }
+      let(:example) { Regexp.new(/\w+/) }
       let(:generated_example) { /\w+/.gen }
 
       it 'calls #gen on the regexp' do
@@ -334,7 +334,7 @@ describe Attributor::Attribute do
 
       context 'for a type with a non-String native_type' do
         let(:type) { Attributor::Integer }
-        let(:example) { /\d{5}/ }
+        let(:example) { Regexp.new(/\d{5}/) }
         let(:generated_example) { /\d{5}/.gen }
 
         it 'coerces the example value properly' do
