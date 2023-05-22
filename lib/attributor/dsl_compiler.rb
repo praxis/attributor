@@ -12,6 +12,7 @@ module Attributor
   class DSLCompiler
     attr_accessor :options, :target
 
+    include Attributor
     def initialize(target, **options)
       @target = target
       @options = options
@@ -36,8 +37,7 @@ module Attributor
       if opts[:reference]
         raise AttributorException, ":reference option can only be used when defining blocks"  unless block_given? 
         if opts[:reference] < Attributor::Collection
-          err = ":reference option cannot be a collection. It must be a concrete type of Struct-like type where to look up the type"
-               "for the attribute #{name} you are defining"
+          err = ":reference option cannot be a collection. It must be a concrete Struct-like type containing the attribute #{name} you are defining.\n"
           location_file, location_line = block.source_location               
           err += "The place where you are trying to define the attribute is here:\n#{location_file} line #{location_line}\n#{block.source}\n"
           raise AttributorException, err
@@ -99,9 +99,9 @@ module Attributor
     
       if attr_type.nil?
         if block_given?
-          final_type, carried_options = resolveTypeForBlock(name,  **opts, &block)
+          final_type, carried_options = resolve_type_for_block(name,  **opts, &block)
         else
-          final_type, carried_options = resolveTypeForNoBlock(name,  **opts)
+          final_type, carried_options = resolve_type_for_no_block(name,  **opts)
         end
       else
         final_type = attr_type
@@ -112,13 +112,13 @@ module Attributor
       final_opts.delete(:reference) 
       
       # Possibly add a reference for block definitions (No reference for leaves)
-      final_opts.merge!(addReferenceToBlock(name, opts)) if block_given?
+      final_opts.merge!(add_reference_to_block(name, opts)) if block_given?
       final_opts = carried_options.merge(final_opts)
       Attributor::Attribute.new(final_type, final_opts, &block)
     end
 
 
-    def resolveTypeForBlock(name,  **opts)
+    def resolve_type_for_block(name,  **opts)
       resolved_type = nil
       carried_options = {}
       ref = options[:reference]
@@ -132,7 +132,7 @@ module Attributor
       [resolved_type, carried_options]
     end
 
-    def resolveTypeForNoBlock(name,  **opts)
+    def resolve_type_for_no_block(name,  **opts)
       resolved_type = nil
       carried_options = {}
       ref = options[:reference]
@@ -153,7 +153,7 @@ module Attributor
       [resolved_type, carried_options]
     end
 
-    def addReferenceToBlock(name, opts)
+    def add_reference_to_block(name, opts)
       base_reference  = options[:reference]
       if opts[:reference] # Direct reference specified in the attribute, just pass it to the block
         {reference: opts[:reference]}
