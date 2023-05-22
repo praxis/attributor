@@ -80,7 +80,6 @@ module Attributor
     # @api semiprivate
     def define(name, attr_type = nil, **opts, &block)
       example_given = opts.key? :example
-
       # add to existing attribute if present
       if (existing_attribute = attributes[name])
         if existing_attribute.attributes
@@ -88,67 +87,39 @@ module Attributor
           return existing_attribute
         end
       end
+    
+      if attr_type.nil?
+        if block_given?
+          final_type, carried_options = resolveTypeForBlock(name,  **opts, &block)
+        else
+          final_type, carried_options = resolveTypeForNoBlock(name,  **opts)
+        end
+      else
+        final_type = attr_type
+        carried_options = {}
+      end
+
+      final_opts = opts.dup
+      final_opts.delete(:reference) 
       
-      res = origdefine(name, attr_type, **opts, &block)
-      # puts "DEFINED: #{name} (t: #{attr_type}) as #{res[0]} and options:\n#{res[1]}"
-      Attributor::Attribute.new(res[0], res[1], &block)
+      # Possibly add a reference for block definitions (No reference for leaves)
+      final_opts.merge!(addReferenceToBlock(name, opts)) if block_given?
+      final_opts = carried_options.merge(final_opts)
+      Attributor::Attribute.new(final_type, final_opts, &block)
     end
 
-    def good_explanation_about_redefining_already_defined_types(name, ref, type_from_ref, &block)
-      existing_type_name = type_from_ref < Attributor::Collection ? "Collection.of(#{type_from_ref.member_attribute.type})" : type_from_ref.to_s
-      location_file, location_line = block.source_location
-      message = "Invalid redefinition of attributes for an already existing type:\n"
-      message += "Existing type Type #{existing_type_name} cannot be further redefined with the block you are providing.\n"
-      message += "You are getting this because you are not specifying an explicit type for your '#{name}' attribute, and therefore"
-      message += "the framework is trying to inherit the type from the passed :reference option in the enclosing block. This :reference "
-      message += "is pointing to type: #{ref}, which also has an attribute named '#{name}' with type #{existing_type_name}, that matches"
-      message += "the name of the attribute you are trying to define in here:\n#{location_file} line #{location_line}\n#{block.source}\n"
-      message += "It is likely that you either want to explictly set the type to a Struct (or Collection.of(Struct)) and redefine that in your block"
-      message += "or perhaps you want to 'refine/change' the attributes of #{ref} within your block, in which case what you should do is to"
-      message += "explicitly set the type to a Struct (or Collection.of(Struct)) and then use the :reference option to point to #{ref}.\n"
-      raise message
-    end
-    def resolveTypeForBlock(name,  **opts, &block)
+
+    def resolveTypeForBlock(name,  **opts)
       resolved_type = nil
       carried_options = {}
       ref = options[:reference]
-      if ref
-        if ref.respond_to?(:attributes) && ref.attributes.key?(name)
-          type_from_ref = ref.attributes[name]&.type
-
-          resolved_type = type_from_ref < Attributor::Collection ? Attributor::Struct[] : Attributor::Struct
-
-          # unless type_from_ref == Attributor::Struct || type_from_ref == Attributor::Collection.of(Attributor::Struct)
-          #   good_explanation_about_redefining_already_defined_types(name, ref, type_from_ref, &block)
-          # end
-          # resolved_type = type_from_ref # Return the raw, and anonymous type Struct or Attributor::Collection.of(Attributor::Struct)
-
-          # TODO: We could default to Struct[] if we see the reference is a Collection ...
-          # resolved_type = Attributor::Struct
-          #carried_options = ref.attributes[name].options # Somehow bring any options from the type?
-        else
-          puts "WARNING: Type for attribute with name: #{name} could not be determined from reference: #{ref}...defaulting to Struct"
-          resolved_type = Attributor::Struct
-          
-          # message = "Type for attribute with name: #{name} could not be determined.\n"
-          # if ref
-          #   message += "You are defining '#{name}' without a type, and the passed in :reference type (#{ref}) does not have an attribute named '#{name}'.\n" \
-          # else
-          #   message += "You are defining '#{name}' without a type, and there is no :reference type to infer it from (Did you forget to add the type?).\n" \
-          # end
-          # location_file, location_line = block.source_location
-          # message += "\nIf you are omiting a type, thinking that would be inherited from the reference, make sure the right one is passed in," \
-          #   ",add the missing attribute to the reference type or simply add the right missing type in the attribute definition otherwise.\n"
-          #   "If you are omiting it to imply it is a Struct, please explicitly add it in the attribute definition (or add the right missing type otherwise)\n"
-          # message += "This is the definition block where the issue was found:\n#{location_file} line #{location_line}\n#{block.source}"
-          # require 'pry'
-          # binding.pry
-          # raise AttributorException, message
-        end
+      if ref && ref.respond_to?(:attributes) && ref.attributes.key?(name)
+        type_from_ref = ref.attributes[name]&.type
+        resolved_type = type_from_ref < Attributor::Collection ? Attributor::Struct[] : Attributor::Struct
       else
+        # Type for attribute with given name could not be determined from reference...or ther is not refrence: defaulting to Struct"
         resolved_type = Attributor::Struct
       end
-      # TODO: We could also default to Struct if there is a reference, but does not have the attribute ....
       [resolved_type, carried_options]
     end
 
@@ -160,19 +131,14 @@ module Attributor
         resolved_type = ref.attributes[name].type
         carried_options = ref.attributes[name].options
       else
-        # require 'pry'
-        # binding.pry
         message = "Type for attribute with name: #{name} could not be determined.\n"
-          # if ref
-          #   message += "You are defining '#{name}' without a type, and the passed in :reference type (#{ref}) does not have an attribute named '#{name}'.\n" \
-          # else
-          #   message += "You are defining '#{name}' without a type, and there is no :reference type to infer it from (Did you forget to add the type?).\n" \
-          # end
-          # location_file, location_line = block.source_location
-          # message += "\nIf you are omiting a type, thinking that would be inherited from the reference, make sure the right one is passed in," \
-          #   ",add the missing attribute to the reference type or simply add the right missing type in the attribute definition otherwise.\n"
-          #   "If you are omiting it to imply it is a Struct, please explicitly add it in the attribute definition (or add the right missing type otherwise)\n"
-          # message += "This is the definition block where the issue was found:\n#{location_file} line #{location_line}\n#{block.source}"
+        if ref
+          message += "You are defining '#{name}' without a type, and the passed in :reference type (#{ref}) does not have an attribute named '#{name}'.\n" \
+        else
+          message += "You are defining '#{name}' without a type, and there is no :reference type to infer it from (Did you forget to add the type?).\n" \
+        end
+        message += "\nIf you are omiting a type thinking that would be inherited from the reference, make sure the right one is passed in," \
+          ", which has a #{name} defined, otherwise simply specify the type of the attribute you want.\n"
         raise AttributorException, message
       end
       [resolved_type, carried_options]
@@ -189,210 +155,6 @@ module Attributor
       else
         {}
       end
-    end
-
-    def origdefine(name, attr_type = nil, **opts, &block)
-      example_given = opts.key? :example
-      # add to existing attribute if present
-      if (existing_attribute = attributes[name])
-        if existing_attribute.attributes
-          existing_attribute.type.attributes(&block)
-          return existing_attribute
-        end
-      end
-
-      if attr_type.nil?
-        if block_given?
-          # if(name == :neighbors)
-          #   require 'pry'
-          #   binding.pry
-          #   require 'pry'
-          #   binding.pry
-          # end
-          final_type, carried_options = resolveTypeForBlock(name,  **opts, &block)
-        else
-          final_type, carried_options = resolveTypeForNoBlock(name,  **opts)
-        end
-      else
-        final_type = attr_type
-        carried_options = {}
-      end
-
-      
-      final_opts = opts.dup
-      final_opts.delete(:reference) 
-      if block_given?
-        final_opts.merge!(addReferenceToBlock(name, opts))
-      else
-        # No reference for leaves
-      end
-      # TODO: Need to percolate incoming ops as well...
-      final_opts = carried_options.merge(final_opts)
-
-      # puts "DEFINING: #{name} with type #{attr_type} and opts #{opts} (DSL Opts: #{options})"
-      # puts "-----   : resolved to: #{final_type} and opts #{final_opts}"
-
-      return [final_type, final_opts]
-      ##############################
-      # determine inherited type (giving preference to the direct attribute options)
-      type_from_ref = opts[:reference]
-      unless type_from_ref
-        reference = options[:reference]
-        if reference && reference.respond_to?(:attributes) && reference.attributes.key?(name)
-          inherited_attribute = reference.attributes[name]
-          
-          if block_given?
-            type_from_ref = inherited_attribute.type
-            opts[:reference] = type_from_ref # We pass it down in case, but the block might completely redefine it
-          else
-            opts = inherited_attribute.options.merge(opts) unless attr_type #?? why unless?            
-          end
-        end
-      end
-
-      # determine attribute type to use
-      if attr_type.nil?
-        if block_given?
-          # Don't inherit explicit examples if we've redefined the structure 
-          # (but preserve the direct example if given here)
-          opts.delete :example unless  example_given
-          attr_type = if type_from_ref && type_from_ref < Attributor::Collection
-                        # override the reference to be the member_attribute's type for collections
-                        opts[:reference] = type_from_ref.member_attribute.type
-                        Attributor::Collection.of(Struct)
-                      else
-                        Attributor::Struct
-                      end
-        elsif type_from_ref
-          attr_type = type_from_ref
-        else
-          require 'pry'
-          binding.pry
-          raise AttributorException, "type for attribute with name: #{name} could not be determined!"
-        end
-      end
-      [attr_type, opts]
-    end
-    def newdefine(name,  attr_type = nil, **opts, &block)
-      ref = opts[:reference] || options[:reference]
-      # puts "DEFINING: #{name} with type #{attr_type} and opts #{opts} (DSL Opts: #{options})=> ref: #{ref}"
-
-      if attr_type.nil?
-        if block_given?
-          if ref
-            if ref.respond_to?(:attributes) && ref.attributes.key?(name)
-              inherited_attribute = ref.attributes[name]
-              inherited_type = inherited_attribute.type
-              final_type = inherited_type < Attributor::Collection ?  Attributor::Collection.of(Attributor::Struct) : Attributor::Struct
-              if inherited_type < Attributor::Collection
-                opts = inherited_attribute.options.merge(opts)
-                # override the reference to be the member_attribute's type for collections
-                inherited_type = inherited_type.member_attribute.type
-              elsif inherited_type < Attributor::Model # Allow it to be a model, not just a struct
-                opts = inherited_attribute.options.merge(opts) # Merge all options if reference is a Struct
-              end
-              opts[:reference] = inherited_type  if inherited_type # Pass reference if any
-            end
-          else
-            # No type and no reference, it's a 'blank' Struct by default (since there's a block given), best we can do
-            # Note: cannot try to define a Collection of Struct here, since we don't know the type of the collection
-            final_type = Attributor::Struct
-          end
-          # The reference is for the block attributes...if we don't have one (and don't have a type, we cannot really guess it)
-          # if ref.nil?
-          #   if ref && ref.respond_to?(:attributes) && ref.attributes.key?(name)
-          #     inherited_attribute = ref.attributes[name]
-          #     inherited_type = inherited_attribute.type
-          #     final_type = inherited_type < Attributor::Collection ?  Attributor::Collection.of(Attributor::Struct) : Attributor::Struct
-          #     if inherited_type && inherited_type < Attributor::Collection
-          #       opts = inherited_attribute.options.merge(opts)
-          #       # override the reference to be the member_attribute's type for collections
-          #       inherited_type = inherited_type.member_attribute.type
-          #     elsif inherited_type < Attributor::Model # Allow it to be a model, not just a struct
-          #       opts = inherited_attribute.options.merge(opts) # Merge all options if reference is a Struct
-          #     end
-          #     opts[:reference] = inherited_type  if inherited_type # Pass reference if any
-          #   else
-          #     opts[:reference] = ref # Could be rewriting the already existing one in ops, or use the one in options...
-          #   end
-          # end
-          opts[:reference] = ref # Could be rewriting the already existing one in ops, or use the one in options...
-          # If there's no type and no reference, it's a Struct by default (since there's a block given)
-          final_type = final_type || Attributor::Struct
-        else
-          # Do not pass reference even if there's one
-          if ref
-            resolved_ref =  ref < Attributor::Collection ? ref.member_attribute.type : ref
-            if resolved_ref.respond_to?(:attributes) && resolved_ref.attributes.key?(name)
-              inherited_attribute = resolved_ref.attributes[name]
-              final_type = inherited_attribute.type # Find the ref type
-              opts = inherited_attribute.options.merge(opts) # Merge all options
-            end
-          end
-        end
-      else
-        if block_given?
-          # if ref && ref.respond_to?(:attributes) && ref.attributes.key?(name)
-          #   inherited_attribute = ref.attributes[name]
-          #   inherited_type = inherited_attribute.type
-          #   if inherited_type && inherited_type < Attributor::Collection
-          #     # override the reference to be the member_attribute's type for collections
-          #     opts[:reference] = inherited_type.member_attribute.type
-          #   else
-          #     opts[:reference] = inherited_type
-          #   end  
-          #   opts = inherited_attribute.options.merge(opts) # Merge all options
-          # end
-          # NEED TO PASS A REFERENCE IF THERE's A TYPE? or should be look it up?
-          final_type = attr_type
-        else
-          if ref && ref.respond_to?(:attributes) && ref.attributes.key?(name)
-            inherited_attribute = ref.attributes[name]
-            opts = inherited_attribute.options.merge(opts) # Merge all options
-          end
-          final_type = attr_type
-        end
-      end
-      # # determine inherited type (giving preference to the direct attribute options)
-      # inherited_type = opts[:reference]
-      # unless inherited_type
-      #   reference = options[:reference]
-      #   if reference && reference.respond_to?(:attributes) && reference.attributes.key?(name)
-      #     inherited_attribute = reference.attributes[name]
-      #     unless attr_type
-      #       inherited_type = inherited_attribute.type
-      #       opts[:reference] = inherited_type if block_given?
-  
-      #       if inherited_type < Attributor::Collection || inherited_type < Attributor::Hash
-      #         opts = inherited_attribute.options.merge(opts) 
-      #       end
-      #     end
-      #   end
-      # end
-
-      # # determine attribute type to use
-      # if attr_type.nil?
-      #   if block_given?
-      #     # Don't inherit explicit examples if we've redefined the structure 
-      #     # (but preserve the direct example if given here)
-      #     opts.delete :example unless  example_given
-      #     attr_type = if inherited_type && inherited_type < Attributor::Collection
-      #                   # override the reference to be the member_attribute's type for collections
-      #                   opts[:reference] = inherited_type.member_attribute.type
-      #                   Attributor::Collection.of(Struct)
-      #                 else
-      #                   Attributor::Struct
-      #                 end
-      #   elsif inherited_type
-      #     attr_type = inherited_type
-      #   else
-      #     raise AttributorException, "type for attribute with name: #{name} could not be determined"
-      #   end
-      # end
-        
-      raise AttributorException, "type for attribute with name: #{name} could not be determined" unless final_type
-
-      [final_type, opts]
     end
   end
 end

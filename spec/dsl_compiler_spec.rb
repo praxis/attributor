@@ -38,7 +38,6 @@ describe Attributor::DSLCompiler do
           dsl_compiler.attribute(attribute_name, type, **attribute_options)
         end
       end
-
       context 'with a reference' do
         let(:dsl_compiler_options) { { reference: Turducken } }
 
@@ -126,6 +125,7 @@ describe Attributor::DSLCompiler do
       end
     end
   end
+
   context 'type resolution, option inheritance for attributes with and without references' do
     # Overall strategy
     # 1) When no type is specified:
@@ -340,13 +340,13 @@ describe Attributor::DSLCompiler do
       context 'always uses the type and options specified ignoring any reference if there is one' do
       end
     end
-    context 'no reference no type for leaf => error' do
+    context 'no reference no type for leaf' do
       let(:myblock) { Proc.new do
         attributes do
           attribute :name
         end
       end }
-      it 'works' do
+      it 'fails as it is not possible to resolve what type to use ' do
         expect{mytype.attributes}.to raise_error(/Type for attribute with name: name could not be determined./)
       end
     end

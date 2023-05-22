@@ -24,9 +24,8 @@ module Attributor
       class << self
         attr_accessor :_memoized_collection_classes
         def get_memoized_collection_class(member_class, collection_type=Attributor::Collection)
-          @_memoized_collection_classes_mutex.synchronize do
-            _memoized_collection_classes.dig(member_class,collection_type)
-          end
+          # No need to serialize on read, Ruby will ensure we can properly read what's there, even if it's being written
+          _memoized_collection_classes.dig(member_class,collection_type)
         end
         def set_memoized_collection_class(klass, member_class, collection_type=Attributor::Collection)
           @_memoized_collection_classes_mutex.synchronize do
