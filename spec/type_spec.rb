@@ -175,4 +175,35 @@ describe Attributor::Type do
       end
     end
   end
+
+  context 'collection sugar' do
+    context 'non-constructable types' do
+      [:BigDecimal, :Boolean, :Class, :DateTime, :Date, :Float, :Integer, 
+        :Object, :Regexp, :String,  :Symbol, :Tempfile, :Time, :URI]
+        .map{|sym| Attributor.const_get(sym)}
+        .each do |type|
+        before { expect(type.constructable?).to be(false) }
+        it "DSL is equivalent to Attributor::Collection.of(#{type})" do
+          collection = type[]
+          expect(collection).to be < Attributor::Collection
+          expect(collection.member_type).to be type
+        end
+        it "caches the collection type for #{type}" do
+          expect(type[]).to be(type[])
+        end
+      end
+    end
+    context 'constructable types' do
+      [:Hash, :Model, :Struct, :FileUpload]
+        .map{|sym| Attributor.const_get(sym)}
+        .each do |type|
+        before { expect(type.constructable?).to be(true) }
+        it "DSL is equivalent to Attributor::Collection.of(#{type})" do
+          collection = type[]
+          expect(collection).to be < Attributor::Collection
+          expect(collection.member_type).to be type
+        end
+      end
+    end
+  end
 end

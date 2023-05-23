@@ -3,8 +3,6 @@ require File.join(File.dirname(__FILE__), '..', 'spec_helper.rb')
 describe Attributor::Model do
   subject(:chicken) { Chicken }
 
-  # TODO: should move most of these specs to hash spec
-
   context 'attributes' do
     context 'with an exception from the definition block' do
       subject(:broken_model) do
@@ -44,6 +42,31 @@ describe Attributor::Model do
         expect do
           instance.name
         end.to raise_error(Attributor::InvalidDefinition)
+      end
+    end
+
+    context 'redefining an inheritable attribute name, with a different type' do
+      it 'is allowed' do      
+        aa = Address.attributes
+        # Substruct is a Struct with reference Address
+        expect(aa[:substruct].options).to include(:reference=>Address, null: false)
+        expect(aa[:substruct].type).to be <Attributor::Struct
+        expect(aa[:substruct].attributes.keys).to match([:state])
+        
+        state_attribute = aa[:substruct].attributes[:state]
+        # We expec the system to have percolated the inherited reference from Address.state ... but it won't be used
+        # as we're overriding it with a new Struct
+        expect(state_attribute.options).to include(:reference=>Attributor::String)
+        # We want to make sure no other options are set since we're starting a new structure from scratch (so it wouldn't
+        # major sense to inherit any other options? ) 
+        expect(state_attribute.options.keys).to_not include(:default, :values)
+        expect(state_attribute.type).to be < Attributor::Struct
+
+        # Foo gets its proper integer attribute as a leaf, and properly gets the default option as well
+        foo_attribute = state_attribute.attributes[:foo]
+        expect(foo_attribute.options).to include(default: 1)
+        expect(foo_attribute.attributes).to be_nil
+        expect(foo_attribute.type).to eq Attributor::Integer
       end
     end
   end
@@ -140,6 +163,18 @@ describe Attributor::Model do
         subject(:attributes) { Chicken.attributes }
         it { should have_key :age }
         it { should have_key :email }
+      end
+
+      context 'other' do
+        subject(:attributes) { Address.attributes }
+        it 'works' do
+          expect(subject).to have_key(:substruct)
+          expect(subject[:substruct].type).to be < Attributor::Struct
+          expect(subject[:substruct].attributes).to have_key(:state)
+          expect(subject[:substruct].attributes[:state].type).to be < Attributor::Struct
+          expect(subject[:substruct].attributes[:state].attributes).to have_key(:foo)
+          expect(subject[:substruct].attributes[:state].attributes[:foo].type).to eq Attributor::Integer
+        end
       end
     end
 
@@ -473,7 +508,7 @@ describe Attributor::Model do
     context 'for collections of models' do
       let(:attributes_block) do
         proc do
-          attribute :neighbors, required: true do
+          attribute :neighbors, Attributor::Collection.of(Attributor::Struct), required: true do
             attribute :name, required: true
             attribute :age, Integer
           end
@@ -482,8 +517,9 @@ describe Attributor::Model do
       subject(:struct) { Attributor::Struct.construct(attributes_block, reference: Cormorant) }
 
       it 'supports defining sub-attributes using the proper reference' do
+        # in construct, we're passing the reference, so it will use it to define the inner name/age attributes
         expect(struct.attributes[:neighbors].options[:required]).to be true
-        expect(struct.attributes[:neighbors].options[:null]).to be false
+        expect(struct.attributes[:neighbors].options).to_not have_key(:null) # Not inherited from reference
         expect(struct.attributes[:neighbors].type.member_attribute.type.attributes.keys).to match_array [:name, :age]
 
         name_options = struct.attributes[:neighbors].type.member_attribute.type.attributes[:name].options
