@@ -1,8 +1,11 @@
 # Attributor Changelog
 
 ## next
+
+## 7.1 (6/9/2023)
 - Enhance custom_option handling. The values provided for custom options are now loaded (and definition will fail if they aren't compatible). This was specially
   important for custom options that were collections, etc.
+- Fix Float type .load
 
 ## 7.0 (5/23/2023)
 - Support for loading "<digits>." strings in BigDecimal/Float types (These are formats supported by JS, Java ..)
