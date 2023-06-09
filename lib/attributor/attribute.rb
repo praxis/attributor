@@ -42,6 +42,17 @@ module Attributor
       @type = Attributor.resolve_type(type, options, block)
       @options = @type.respond_to?(:options) ?  @type.options.merge(options) : options
 
+      # We will give the values passed for options, a chance to be 'loaded' by its type, so we store native loaded values in the options
+      begin
+        current_option_name = nil # Use this to avoid having to wrap each loop with a begin/rescue block
+        (self.class.custom_options.keys & @options.keys).each do |custom_key|
+          current_option_name = custom_key
+          @options[custom_key] = self.class.custom_options[custom_key].load(@options[custom_key]) 
+        end
+      rescue => e
+        raise AttributorException,  "Error while loading value #{@options[current_option_name]} for custom option '#{current_option_name}': #{e.message}"
+      end
+
       check_options!
     end
 

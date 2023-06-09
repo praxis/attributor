@@ -232,6 +232,16 @@ describe Attributor::Attribute do
         end
       end
 
+      context 'validates the type of values' do 
+        let(:custom_option_args) { [option_name, String ] }
+        
+        it 'raises with an invalid option value' do
+          expect do
+            Attributor::Attribute.new(Integer, foo: {a:1})
+          end.to raise_error(Attributor::AttributorException,/Error while loading value {:a=>1} for custom option 'foo': Type Attributor::String cannot load values of type Hash/)
+        end
+      end
+
       it 'appear in as_json_schema' do
         attribute = Attributor::Attribute.new(Integer, foo: 'valid')
         json_schema = attribute.as_json_schema
