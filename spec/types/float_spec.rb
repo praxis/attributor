@@ -61,8 +61,10 @@ describe Attributor::Float do
           expect(type.load('0.')).to eq Float('0.0')
         end
         it 'decodes it if the String represents a negative Float and ends in .' do
-          expect(type.load('-10.')).to eq Float('-10.0')
-          expect(type.load('-0.')).to eq Float('-0.0')
+          expect(type.load('-10.')).to eq -10.0
+          expect(type.load('-10.').class).to eq Float
+          expect(type.load('-0.')).to eq -0.0
+          expect(type.load('-0.').class).to eq Float
         end
       end
 
