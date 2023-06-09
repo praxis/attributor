@@ -18,7 +18,7 @@ module Attributor
     end
 
     def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **options)
-      return BigDecimal(value + '0') if value.is_a?(::String) && value.end_with?('.')
+      return Float(value + '0') if value.is_a?(::String) && value.end_with?('.')
       Float(value)
     rescue TypeError
       super
