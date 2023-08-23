@@ -273,7 +273,7 @@ describe Attributor::Attribute do
     end
 
     context 'deterministic examples' do
-      let(:example) { /\w+/ }
+      let(:example) { proc { Faker::Lorem.word } }
       let(:attribute_options) { { example: example } }
 
       it 'can take a context to pre-seed the random number generator' do
@@ -330,30 +330,6 @@ describe Attributor::Attribute do
       let(:type) { Attributor::Integer }
       let(:example) { 5 }
       it { should be example }
-    end
-
-    context 'with a regexp' do
-      let(:example) { Regexp.new(/\w+/) }
-      let(:generated_example) { /\w+/.gen }
-
-      it 'calls #gen on the regexp' do
-        expect(example).to receive(:gen).and_return(generated_example)
-
-        expect(example_result).to match example
-      end
-
-      context 'for a type with a non-String native_type' do
-        let(:type) { Attributor::Integer }
-        let(:example) { Regexp.new(/\d{5}/) }
-        let(:generated_example) { /\d{5}/.gen }
-
-        it 'coerces the example value properly' do
-          expect(example).to receive(:gen).and_return(generated_example)
-          expect(type).to receive(:load).and_call_original
-
-          expect(example_result).to be_kind_of(type.native_type)
-        end
-      end
     end
 
     context 'with a proc' do

@@ -17,16 +17,7 @@ module Attributor
     end
 
     def self.example(_context = nil, options: {})
-      if options[:regexp]
-        begin
-          # It may fail to generate an example, see bug #72.
-          options[:regexp].gen
-        rescue => e
-          format('Failed to generate example for %s : %s', options[:regexp].inspect, e.message)
-        end
-      else
-        /\w+/.gen
-      end
+      Faker::Lorem.word
     end
 
     def self.family

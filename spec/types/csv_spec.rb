@@ -29,7 +29,7 @@ describe Attributor::CSV do
 
   context '.dump' do
     let!(:int_vals) { [1, 2, 3] }
-    let!(:str_vals) { (0..2).collect { /\w+/.gen } }
+    let!(:str_vals) { (0..2).collect { Faker::Lorem.word } }
 
     it 'dumps a String value' do
       expect(csv.dump(int_vals)).to be_a(String)

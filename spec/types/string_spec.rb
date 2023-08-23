@@ -22,14 +22,6 @@ describe Attributor::String do
       expect(type.example).to be_a(::String)
     end
 
-    it 'handles regexps that Randexp can not (#72)' do
-      regex = /\w+(,\w+)*/
-      expect do
-        val = Attributor::String.example(options: { regexp: regex })
-        expect(val).to be_a(::String)
-        expect(val).to match(/Failed to generate.+is too vague/)
-      end.to_not raise_error
-    end
   end
 
   context '.load' do

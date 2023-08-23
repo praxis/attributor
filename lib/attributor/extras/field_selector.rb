@@ -22,7 +22,7 @@ module Attributor
 
     def self.example(_context = nil, options: {})
       3.times.each_with_object([]) do |_i, array|
-        array << /\w{5,8}/.gen
+        array << Faker::Lordem.words(5)
       end.join(',')
     end
 

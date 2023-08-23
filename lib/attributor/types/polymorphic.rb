@@ -27,7 +27,7 @@ module Attributor
     end
 
     def self.example(context = nil, **values)
-      types.values.pick.example(context, **values)
+      types.values.sample.example(context, **values)
     end
 
     def self.valid_type?(value)

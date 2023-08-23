@@ -156,8 +156,6 @@ module Attributor
     def example_from_options(parent, context)
       val = options[:example]
       generated = case val
-                  when ::Regexp
-                    val.gen
                   when ::Proc
                     if val.arity == 2
                       val.call(parent, context)
@@ -211,8 +209,9 @@ module Attributor
       description
     end
 
-    def example(context=nil, parent: nil, values:{})
-      raise ArgumentError, "attribute example cannot take a context of type String" if (context.is_a? ::String )
+    def example(context = nil, parent: nil, values: {})
+      raise ArgumentError, 'attribute example cannot take a context of type String' if context.is_a? ::String
+
       if context
         ctx = Attributor.humanize_context(context)
         seed, = Digest::SHA1.digest(ctx).unpack('QQ')
@@ -226,10 +225,11 @@ module Attributor
         # Only validate the type, if the proc-generated example is "complex" (has attributes)
         errors = loaded.class.respond_to?(:attributes) ? validate_type(loaded, context) : validate(loaded, context)
         raise AttributorException, "Error generating example for #{Attributor.humanize_context(context)}. Errors: #{errors.inspect}" if errors.any?
+
         return loaded
       end
 
-      return options[:values].pick if options.key? :values
+      return options[:values].sample if options.key? :values
 
       if type.respond_to?(:attributes)
         type.example(context, **values)

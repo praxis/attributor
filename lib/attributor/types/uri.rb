@@ -31,7 +31,7 @@ module Attributor
     end
 
     def self.example(_context = nil, options: {})
-      URI(Randgen.uri)
+      URI("https://example.com/#{Attributor::String.example}")
     end
 
     def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **_options)
