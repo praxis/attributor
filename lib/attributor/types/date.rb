@@ -9,7 +9,7 @@ module Attributor
     end
 
     def self.example(context = nil, options: {})
-      load(Randgen.date, context)
+      load(Faker::Date.in_date_period, context)
     end
 
     def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **_options)
@@ -21,7 +21,7 @@ module Attributor
       case value
       when ::String
         begin
-          return ::Date.parse(value)
+          ::Date.parse(value)
         rescue ArgumentError
           raise Attributor::DeserializationError.new(context: context, from: value.class, encoding: 'Date', value: value)
         end

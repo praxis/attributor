@@ -10,7 +10,7 @@ module Attributor
 
     def self.example(context = Attributor::DEFAULT_ROOT_CONTEXT, options: {})
       file = ::Tempfile.new(Attributor.humanize_context(context))
-      file.write Randgen.sentence
+      file.write Faker::Lorem.paragraph
       file.write '.'
       file.rewind
       file

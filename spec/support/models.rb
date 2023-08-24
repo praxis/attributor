@@ -15,7 +15,7 @@ class Duck < Attributor::Model
     attribute :name, Attributor::String
     attribute :email, Attributor::String
     attribute :angry, Attributor::Boolean, default: true, example: proc { [true, false].sample }, description: 'Angry bird?'
-    attribute :weight, Attributor::Float, example: proc { Faker::Number.number(digits: 3).to_f } , description: 'The weight of the duck'
+    attribute :weight, Attributor::Float, example: proc { Faker::Number.number(digits: 3).to_f }, description: 'The weight of the duck'
     attribute :type, Attributor::Symbol, values: [:duck]
   end
 end
@@ -32,7 +32,7 @@ end
 
 class Turducken < Attributor::Model
   attributes do
-    attribute :name, String, default: 'Turkey McDucken', description: 'Turducken name', example: Randgen.name
+    attribute :name, String, default: 'Turkey McDucken', description: 'Turducken name', example: proc { Faker::Name.first_name }
     attribute :chicken, Chicken
     attribute :duck, Duck
     attribute :turkey, Turkey, description: 'The turkey'
@@ -58,7 +58,7 @@ class Cormorant < Attributor::Model
     # This will be a collection of instances of an anonymous Struct class, each having two well-defined attributes
 
     attribute :babies, Attributor::Collection.of(Attributor::Struct), description: 'All the babies', member_options: { identity: :name } do
-      attribute :name, Attributor::String, example:  proc { Faker::Name.name}, description: 'The name of the baby cormorant', required: true
+      attribute :name, Attributor::String, example: proc { Faker::Name.name }, description: 'The name of the baby cormorant', required: true
       attribute :months, Attributor::Integer, default: 0, min: 0, description: 'The age in months of the baby cormorant'
       attribute :weight, Attributor::Float, example:  proc { Faker::Number.number(digits: 2) }, description: 'The weight in kg of the baby cormorant'
     end

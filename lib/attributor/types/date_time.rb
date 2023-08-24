@@ -13,7 +13,7 @@ module Attributor
     end
 
     def self.example(context = nil, options: {})
-      load(Randgen.date, context)
+      load(Faker::Date.in_date_period, context)
     end
 
     def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **_options)
@@ -21,10 +21,11 @@ module Attributor
       return value if value.is_a?(native_type)
       return value.to_datetime if value.respond_to?(:to_datetime)
       return nil unless value.is_a?(::String)
+
       # TODO: we should be able to convert not only from String but Time...etc
       # Else, we'll decode it from String.
       begin
-        return ::DateTime.parse(value)
+        ::DateTime.parse(value)
       rescue ArgumentError
         raise Attributor::DeserializationError.new(context: context, from: value.class, encoding: 'DateTime', value: value)
       end

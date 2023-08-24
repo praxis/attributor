@@ -17,8 +17,6 @@ module Attributor
 
   require_relative 'attributor/example_mixin'
 
-  require_relative 'attributor/extensions/randexp'
-
   # hierarchical separator string for composing human readable attributes
   SEPARATOR = '.'.freeze
   ROOT_PREFIX = '$'.freeze
