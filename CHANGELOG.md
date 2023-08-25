@@ -1,6 +1,6 @@
 # Attributor Changelog
 
-## next
+## 8.0
 
 - Add support for Ruby 3.2.
 - Remove usage of Randexp for examples and replace with Faker.
