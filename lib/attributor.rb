@@ -1,5 +1,4 @@
 require 'json'
-require 'randexp'
 
 require 'hashie'
 require 'active_support/concern'
@@ -16,8 +15,6 @@ module Attributor
   require_relative 'attributor/smart_attribute_selector'
 
   require_relative 'attributor/example_mixin'
-
-  require_relative 'attributor/extensions/randexp'
 
   # hierarchical separator string for composing human readable attributes
   SEPARATOR = '.'.freeze
@@ -37,11 +34,13 @@ module Attributor
 
   def self.find_type(attr_type)
     return attr_type if attr_type < Attributor::Type
+
     name = attr_type.name.split('::').last # TOO EXPENSIVE?
 
     klass = const_get(name) if const_defined?(name)
     raise AttributorException, "Could not find class with name #{name}" unless klass
     raise AttributorException, "Could not find attribute type for: #{name} [klass: #{klass.name}]" unless klass < Attributor::Type
+
     klass
   end
 
@@ -57,7 +56,7 @@ module Attributor
     context = Array(context) if context.is_a? ::String
 
     begin
-      return context.join('.')
+      context.join('.')
     rescue e
       raise "Error creating context string: #{e.message}"
     end
@@ -81,7 +80,7 @@ module Attributor
     else
       val
     end
-  end  
+  end
 
   MODULE_PREFIX       = 'Attributor::'.freeze
   MODULE_PREFIX_REGEX = ::Regexp.new(MODULE_PREFIX)

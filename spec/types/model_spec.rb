@@ -80,7 +80,7 @@ describe Attributor::Model do
       subject(:chicken) { Chicken.example }
 
       let(:age_opts) { { options: Chicken.attributes[:age].options } }
-      let(:age) { /\d{2}/.gen.to_i }
+      let(:age) { Faker::Number.number(digits: 2) }
 
       context 'for a simple model' do
         it { should be_kind_of(Chicken) }

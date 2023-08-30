@@ -27,7 +27,7 @@ module Attributor
 
     class << self
       attr_accessor :custom_options
-    end    
+    end
 
     def self.custom_option(name, attr_type, options = {}, &block)
       if TOP_LEVEL_OPTIONS.include?(name) || INTERNAL_OPTIONS.include?(name)
@@ -47,7 +47,7 @@ module Attributor
         current_option_name = nil # Use this to avoid having to wrap each loop with a begin/rescue block
         (self.class.custom_options.keys & @options.keys).each do |custom_key|
           current_option_name = custom_key
-          @options[custom_key] = self.class.custom_options[custom_key].load(@options[custom_key]) 
+          @options[custom_key] = self.class.custom_options[custom_key].load(@options[custom_key])
         end
       rescue => e
         raise AttributorException,  "Error while loading value #{@options[current_option_name]} for custom option '#{current_option_name}': #{e.message}"
@@ -156,8 +156,6 @@ module Attributor
     def example_from_options(parent, context)
       val = options[:example]
       generated = case val
-                  when ::Regexp
-                    val.gen
                   when ::Proc
                     if val.arity == 2
                       val.call(parent, context)
@@ -211,8 +209,10 @@ module Attributor
       description
     end
 
-    def example(context=nil, parent: nil, values:{})
-      raise ArgumentError, "attribute example cannot take a context of type String" if (context.is_a? ::String )
+    def example(context = nil, parent: nil, values: {})
+      require 'faker'
+      raise ArgumentError, 'attribute example cannot take a context of type String' if context.is_a? ::String
+
       if context
         ctx = Attributor.humanize_context(context)
         seed, = Digest::SHA1.digest(ctx).unpack('QQ')
@@ -226,10 +226,11 @@ module Attributor
         # Only validate the type, if the proc-generated example is "complex" (has attributes)
         errors = loaded.class.respond_to?(:attributes) ? validate_type(loaded, context) : validate(loaded, context)
         raise AttributorException, "Error generating example for #{Attributor.humanize_context(context)}. Errors: #{errors.inspect}" if errors.any?
+
         return loaded
       end
 
-      return options[:values].pick if options.key? :values
+      return options[:values].sample if options.key? :values
 
       if type.respond_to?(:attributes)
         type.example(context, **values)
@@ -242,7 +243,7 @@ module Attributor
       type.attributes if @type_has_attributes ||= type.respond_to?(:attributes)
     end
 
-    # Default value for a non-specified null: option 
+    # Default value for a non-specified null: option
     def self.default_for_null
       false
     end
@@ -272,7 +273,7 @@ module Attributor
       end
 
       return errors if errors.any?
-      
+
       object.nil? ? errors : errors + type.validate(object, context, self)
     end
 
@@ -303,7 +304,7 @@ module Attributor
         raise AttributorException, 'Required must be a boolean' unless definition == true || definition == false
         raise AttributorException, 'Required cannot be enabled in combination with :default' if definition == true && options.key?(:default)
       when :null
-        raise AttributorException, 'Null must be a boolean' unless definition == true || definition == false        
+        raise AttributorException, 'Null must be a boolean' unless definition == true || definition == false
       when :example
         unless definition.is_a?(::Regexp) || definition.is_a?(::String) || definition.is_a?(::Array) || definition.is_a?(::Proc) || definition.nil? || type.valid_type?(definition)
           raise AttributorException, "Invalid example type (got: #{definition.class.name}). It must always match the type of the attribute (except if passing Regex that is allowed for some types)"
@@ -317,8 +318,8 @@ module Attributor
       :ok # passes
     end
 
-    def check_custom_option(name, definition) 
-      attribute = self.class.custom_options.fetch(name) 
+    def check_custom_option(name, definition)
+      attribute = self.class.custom_options.fetch(name)
 
       errors = attribute.validate(definition)
       raise AttributorException, "Custom option #{name.inspect} is invalid: #{errors.inspect}" if errors.any?

@@ -9,7 +9,7 @@ module Attributor
     end
 
     def self.example(_context = nil, options: {})
-      BigDecimal("#{/\d{3}/.gen}.#{/\d{3}/.gen}")
+      BigDecimal("#{Faker::Number.decimal(l_digits: 3, r_digits: 3)}")
     end
 
     def self.load(value, _context = Attributor::DEFAULT_ROOT_CONTEXT, **_options)

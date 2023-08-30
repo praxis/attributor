@@ -1,6 +1,10 @@
 # Attributor Changelog
 
-## next
+## 8.0
+
+- Add support for Ruby 3.2.
+- Remove usage of Randexp for examples and replace with Faker.
+- The above means this also removes support for generating examples using regular expressions.
 
 ## 7.1 (6/9/2023)
 - Enhance custom_option handling. The values provided for custom options are now loaded (and definition will fail if they aren't compatible). This was specially
@@ -37,7 +41,7 @@
 - added support for enum's out of values in json_schema generation
 
 ## 6.0 (22/11/2021)
-- removed `required_if` support and all of the necessary code. 
+- removed `required_if` support and all of the necessary code.
 - changed the semantics of the `required:` option in attributes, to really mean if the "key" is required to be passed in or not (i.e., check if the key is null, not if its value is null)
 - Introduced a new option`null: true|false` to allow for the value of an attribute to be nullable or not when the attribute is passed in.
   * The default behavior for an attribute nullability currently `null: false` (but it can be easily changed by overriding the `Attributor::Attribute.default_for_null` function to return `true`)

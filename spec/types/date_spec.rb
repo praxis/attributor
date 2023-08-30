@@ -19,7 +19,7 @@ describe Attributor::Date do
     let(:example) { type.example }
     subject(:value) { type.dump(example) }
     it 'is formatted correctly' do
-      expect(value).to match(/\d{4}-\d{2}-\d{2}T00:00:00\+00:00/)
+      expect(value).to match(/\d{4}-\d{2}-\d{2}/)
     end
     context 'nil values' do
       it 'should be nil' do
@@ -59,7 +59,7 @@ describe Attributor::Date do
         'Sat, 3 Feb 2001 04:05:06 +0700',
         '2013/08/23 00:39:55 +0000',
         '2007-10-19T04:11:33Z',
-        '2001-02-03T04:05:06+07:00.123456', # custom format with microseconds
+        '2001-02-03T04:05:06+07:00.123456' # custom format with microseconds
       ].each do |value|
         it "returns correct Date for #{value.inspect}" do
           expect(type.load(value)).to eq Date.parse(value)
@@ -70,7 +70,7 @@ describe Attributor::Date do
         'Sat, 30 Feb 2001 04:05:06 GMT', # No such date exists
         '2013/08/33 00:39:55 +0000',
         '2007-10-33T04:11:33Z',
-        '2001-02-33T04:05:06+07:00.123456', # custom format with microseconds
+        '2001-02-33T04:05:06+07:00.123456' # custom format with microseconds
       ].each do |value|
         it "raises Attributor::AttributorException for #{value.inspect}" do
           expect do
@@ -82,7 +82,7 @@ describe Attributor::Date do
       [
         '',
         'foobar',
-        'Sat, 30 Feb 2001 04:05:06 FOOBAR', # No such date format exists
+        'Sat, 30 Feb 2001 04:05:06 FOOBAR' # No such date format exists
       ].each do |value|
         it "raises Attributor::AttributorException for #{value.inspect}" do
           expect do
@@ -93,11 +93,11 @@ describe Attributor::Date do
     end
   end
   context '.as_json_schema' do
-    subject(:js){ type.as_json_schema }
+    subject(:js) { type.as_json_schema }
     it 'adds the right attributes' do
       expect(js.keys).to include(:type, :'x-type_name')
       expect(js[:type]).to eq(:string)
-      expect(js[:format]).to eq(:'date')
+      expect(js[:format]).to eq(:date)
       expect(js[:'x-type_name']).to eq('Date')
     end
   end

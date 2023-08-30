@@ -9,7 +9,7 @@ module Attributor
     end
 
     def self.example(context = nil, options: {})
-      load(Randgen.time, context)
+      load(Faker::Time.between(from: ::DateTime.now - 1, to: ::DateTime.now), context)
     end
 
     def self.load(value, context = Attributor::DEFAULT_ROOT_CONTEXT, **_options)
@@ -24,10 +24,10 @@ module Attributor
     def self.parse(value, context)
       case value
       when ::Integer
-        return ::Time.at(value)
+        ::Time.at(value)
       when ::String
         begin
-          return ::Time.parse(value)
+          ::Time.parse(value)
         rescue ArgumentError
           raise Attributor::DeserializationError.new(context: context, from: value.class, encoding: 'Time', value: value)
         end
