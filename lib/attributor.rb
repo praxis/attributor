@@ -1,5 +1,4 @@
 require 'json'
-require 'faker'
 
 require 'hashie'
 require 'active_support/concern'
