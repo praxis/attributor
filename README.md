@@ -1,7 +1,7 @@
 # Attributor [![TravisCI][travis-img-url]][travis-ci-url] [![Coverage Status][coveralls-img-url]][coveralls-url] [![Dependency Status][gemnasium-img-url]][gemnasium-url]
 
-[travis-img-url]: https://travis-ci.org/rightscale/attributor.svg?branch=master
-[travis-ci-url]:https://travis-ci.org/rightscale/attributor
+[travis-img-url]:https://travis-ci.org/rightscale/attributor.svg?branch=master
+[travis-ci-url]:https://app.travis-ci.com/github/praxis/attributor
 [coveralls-img-url]:https://coveralls.io/repos/rightscale/attributor/badge.svg?branch=master&service=github
 [coveralls-url]:https://coveralls.io/github/rightscale/attributor?branch=master
 [gemnasium-img-url]:https://gemnasium.com/rightscale/attributor.svg
