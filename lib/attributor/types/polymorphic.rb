@@ -115,5 +115,26 @@ module Attributor
         description[key] = { type: value.describe(true) }
       end
     end
+
+    def self.json_schema_type
+      :object
+    end
+
+    def self.as_json_schema(**opts)
+      base_schema = super(**opts)
+
+      {
+        **base_schema,
+        oneOf: types.map do |type_name, type_class|
+          schema = type_class.as_json_schema
+          schema[:title] = type_name
+          schema
+        end,
+        discriminator: {
+          propertyName: discriminator,
+          mapping: types.transform_values { |type_class| type_class.json_schema_type }
+        }
+      }
+    end
   end
 end

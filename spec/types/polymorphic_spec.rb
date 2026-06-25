@@ -131,4 +131,25 @@ describe Attributor::Polymorphic do
       end
     end
   end
+
+  context '.as_json_schema' do
+    let(:json_schema) { type.as_json_schema }
+
+    it 'includes oneOf with the correct type schemas' do
+      expect(json_schema[:oneOf].map { |s| s[:title].to_s }).to match_array(%w[chicken duck turkey])
+    end
+
+    it 'includes a discriminator with the correct propertyName' do
+      expect(json_schema[:discriminator][:propertyName]).to eq(:type)
+    end
+
+    it 'includes a mapping for the types' do
+      expected_mapping = {
+        chicken: Chicken.json_schema_type,
+        duck: Duck.json_schema_type,
+        turkey: Turkey.json_schema_type
+      }
+      expect(json_schema[:discriminator][:mapping]).to eq(expected_mapping)
+    end
+  end
 end
