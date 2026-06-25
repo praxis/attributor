@@ -1,5 +1,10 @@
 # Attributor Changelog
 
+## 8.0.1
+
+- Loosen hashie version constraint to allow 4.x and 5.x
+- Lazily-require faker in `Attribute#example`
+
 ## 8.0
 
 - Add support for Ruby 3.2.
